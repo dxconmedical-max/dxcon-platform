@@ -29,6 +29,9 @@ from app.api.contracts.routes import contracts_bp
 
 from app.api.contract_prices.routes import contract_prices_bp
 
+from app.models.invoice import Invoice
+
+from app.models.payment import Payment
 
 def create_app():
 

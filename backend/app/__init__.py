@@ -21,6 +21,8 @@ from app.api.contracts.routes import contracts_bp
 from app.api.contract_prices.routes import contract_prices_bp
 from app.api.seeds.routes import seeds_bp
 from app.api.order_items.routes import order_items_bp
+from app.api.invoices.routes import invoices_bp
+from app.api.payments.routes import payments_bp
 def create_app():
    
     app = Flask(__name__)
@@ -44,7 +46,8 @@ def create_app():
     app.register_blueprint(contract_prices_bp)
     app.register_blueprint(seeds_bp)
     app.register_blueprint(order_items_bp)
-
+    app.register_blueprint(invoices_bp)
+    app.register_blueprint(payments_bp)
     @app.route("/")
     def home():
         return {
