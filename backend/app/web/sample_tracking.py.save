@@ -1,0 +1,195 @@
+from flask import Blueprint, request, redirect, session
+
+from app.extensions.db import db
+from app.models.sample_tracking import SampleTracking
+from app.models.home_collection import HomeCollection
+from app.models.patient import Patient
+from app.utils.auth import role_required
+
+import uuid
+
+
+sample_tracking_web_bp = Blueprint(
+    "sample_tracking_web",
+    __name__
+)
+
+
+def generate_sample_code():
+
+    return "DX-SAMPLE-" + str(uuid.uuid4())[:8].upper()
+
+
+@sample_tracking_web_bp.route("/samples")
+@role_required("SUPER_ADMIN", "LAB_TECHNICIAN", "COLLECTOR")
+def samples_page():
+
+    samples = SampleTracking.query.all()
+
+    rows = ""
+
+    for sample in samples:
+
+        collection = HomeCollection.query.get(
+            sample.home_collection_id
+        ) if sample.home_collection_id else None
+
+        patient_name = ""
+
+        if collection:
+            patient = Patient.query.get(
+                collection.patient_id
+            )
+            patient_name = patient.full_name if patient else ""
+
+        rows += f"""
+        <tr>
+            <td>{sample.sample_code}</td>
+            <td>{patient_name}</td>
+            <td>{sample.status}</td>
+            <td>{sample.latitude or ""}</td>
+            <td>{sample.longitude or ""}</td>
+            <td>
+                <a target="_blank" href="https://maps.google.com/?q={sample.latitude},{sample.longitude}">
+       View Map
+    </a>
+</td>
+            <td>
+                <a href="/samples/status/{sample.id}/COLLECTED">Collected</a>
+                |
+                <a href="/samples/status/{sample.id}/IN_TRANSIT">In Transit</a>
+                |
+                <a href="/samples/status/{sample.id}/RECEIVED">Received</a>
+            </td>
+        </tr>
+        """
+
+    return f"""
+    <html>
+    <body style="font-family:Arial;background:#f1f5f9;padding:30px;">
+
+        <h1>Sample Tracking</h1>
+
+        <a href="/samples/new"
+           style="background:#0d6efd;color:white;padding:10px 15px;text-decoration:none;border-radius:6px;">
+           + New Sample Check-in
+        </a>
+
+        <br><br>
+
+        <table border="1" cellpadding="10" style="background:white;width:100%;">
+            <tr>
+                <th>Sample Code</th>
+                <th>Patient</th>
+                <th>Status</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Action</th>
+            </tr>
+
+            {rows}
+        </table>
+
+        <br>
+        <a href="/dashboard">Back to Dashboard</a>
+
+    </body>
+    </html>
+    """
+
+
+@sample_tracking_web_bp.route("/samples/new", methods=["GET", "POST"])
+@role_required("SUPER_ADMIN", "COLLECTOR")
+def new_sample():
+
+    collections = HomeCollection.query.all()
+
+    if request.method == "POST":
+
+        item = SampleTracking(
+            sample_code=generate_sample_code(),
+            home_collection_id=request.form.get("home_collection_id"),
+            collector_id=session.get("user_id"),
+            latitude=request.form.get("latitude"),
+            longitude=request.form.get("longitude"),
+            status="CHECKED_IN"
+        )
+
+        db.session.add(item)
+        db.session.commit()
+
+        return redirect("/samples")
+
+    collection_options = ""
+
+    for collection in collections:
+
+        patient = Patient.query.get(
+            collection.patient_id
+        )
+
+        patient_name = patient.full_name if patient else ""
+
+        collection_options += f"""
+        <option value="{collection.id}">
+            {patient_name} - {collection.address} - {collection.status}
+        </option>
+        """
+
+    return f"""
+    <html>
+    <body style="font-family:Arial;background:#f1f5f9;padding:30px;">
+
+        <h1>New Sample Check-in</h1>
+
+        <form method="POST">
+
+            <label>Home Collection</label><br>
+            <select name="home_collection_id">
+                {collection_options}
+            </select>
+
+            <br><br>
+
+            <label>Latitude</label><br>
+            <input name="latitude" placeholder="10.7769">
+
+            <br><br>
+
+            <label>Longitude</label><br>
+            <input name="longitude" placeholder="106.7009">
+
+            <br><br>
+
+            <button type="submit">
+                Check-in Sample
+            </button>
+
+        </form>
+
+        <br>
+        <a href="/samples">Back to Samples</a>
+
+    </body>
+    </html>
+    """
+
+
+@sample_tracking_web_bp.route(
+    "/samples/status/<sample_id>/<status>"
+)
+@role_required("SUPER_ADMIN", "LAB_TECHNICIAN", "COLLECTOR")
+def update_sample_status_web(sample_id, status):
+
+    sample = SampleTracking.query.get(
+        sample_id
+    )
+
+    if not sample:
+        return "Sample not found"
+
+    sample.status = status
+
+    db.session.commit()
+
+    return redirect("/samples")

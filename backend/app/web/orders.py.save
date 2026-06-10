@@ -1,0 +1,231 @@
+from flask import Blueprint, request, redirect
+from sqlalchemy.exc import IntegrityError
+import uuid
+
+from app.extensions.db import db
+from app.models.order import Order
+from app.models.patient import Patient
+from app.models.laboratory import Laboratory
+from app.models.invoice import Invoice
+from app.models.company import Company
+from app.models.contract import Contract
+
+orders_web_bp = Blueprint(
+    "orders_web",
+    __name__
+)
+
+
+@orders_web_bp.route("/orders/new", methods=["GET", "POST"])
+def orders_page():
+
+    orders = Order.query.all()
+
+    rows = ""
+
+    for order in orders:
+
+        patient = Patient.query.get(order.patient_id)
+
+        laboratory = None
+
+        if order.laboratory_id:
+            laboratory = Laboratory.query.get(
+                order.laboratory_id
+            )
+
+        patient_name = patient.full_name if patient else ""
+        lab_name = laboratory.name if laboratory else ""
+
+        rows += f"""
+        <tr>
+            <td>{order.order_code}</td>
+            <td>{patient_name}</td>
+            <td>{lab_name}</td>
+            <td>{order.status}</td>
+            <td>{order.total_amount:,.0f} VND</td>
+
+            <td>
+                <a href="/orders/{order.id}/items">Items</a>
+                |
+                <a href="/results/report/{order.id}">Report</a>
+                |
+                <a href="/orders/{order.id}/generate-invoice">Generate Invoice</a>
+            </td>
+        </tr>
+        """
+
+    return f"""
+    <html>
+    <body style="font-family:Arial;background:#f1f5f9;padding:30px;">
+
+        <h1>Orders Management</h1>
+
+        <a href="/orders/new"
+           style="background:#0d6efd;color:white;padding:10px 15px;text-decoration:none;border-radius:6px;">
+           + New Order
+        </a>
+
+        <br><br>
+
+        <table border="1" cellpadding="10" style="background:white;width:100%;">
+            <tr>
+                <th>Order Code</th>
+                <th>Patient</th>
+                <th>Laboratory</th>
+                <th>Status</th>
+                <th>Total Amount</th>
+                <th>Actions</th>
+            </tr>
+
+            {rows}
+
+        </table>
+
+        <br>
+
+        <a href="/dashboard">Back to Dashboard</a>
+
+    </body>
+    </html>
+    """
+
+
+@orders_web_bp.route("/orders/new", methods=["GET", "POST"])
+def new_order():
+
+    patients = Patient.query.all()
+    laboratories = Laboratory.query.all()
+    companies = Company.query.all()
+    contracts = Contract.query.all()
+    if request.method == "POST":
+
+        order = Order(
+            order = Order(
+            order_code=request.form.get("order_code"),
+            patient_id=request.form.get("patient_id"),
+            laboratory_id=request.form.get("laboratory_id"),
+            company_id=request.form.get("company_id"),
+            contract_id=request.form.get("contract_id"),
+            status="PENDING",
+            total_amount=0
+)
+
+        try:
+            db.session.add(order)
+            db.session.commit()
+
+            return redirect("/orders")
+
+        except IntegrityError:
+            db.session.rollback()
+
+            return """
+            <h2>Order code already exists</h2>
+            <p>Vui lòng dùng mã order khác, ví dụ ORD002.</p>
+            <a href="/orders/new">Back</a>
+            """
+
+    patient_options = ""
+
+    for patient in patients:
+
+        patient_options += f"""
+        <option value="{patient.id}">
+            {patient.full_name}
+        </option>
+        """
+
+    lab_options = ""
+
+    for lab in laboratories:
+
+        lab_options += f"""
+        <option value="{lab.id}">
+            {lab.name}
+        </option>
+        """
+    company_options = ""
+
+    for company in companies:
+        company_options += f"""
+        <option value="{company.id}">
+        {company.company_name}
+    </option>
+    """
+
+contract_options = ""
+
+for contract in contracts:
+    contract_options += f"""
+    <option value="{contract.id}">
+        {contract.contract_code} - {contract.title}
+    </option>
+    """
+    return f"""
+    <html>
+    <body style="font-family:Arial;background:#f1f5f9;padding:30px;">
+
+        <h1>New Order</h1>
+
+        <form method="POST">
+
+            <label>Order Code</label><br>
+            <input name="order_code" placeholder="ORD001" required>
+
+            <br><br>
+
+            <label>Patient</label><br>
+            <select name="patient_id">
+                {patient_options}
+            </select>
+
+            <br><br>
+
+            <label>Laboratory</label><br>
+            <select name="laboratory_id">
+                {lab_options}
+            </select>
+
+            <br><br>
+
+            <button type="submit">
+                Save Order
+            </button>
+
+        </form>
+
+        <br>
+
+        <a href="/orders">Back to Orders</a>
+
+    </body>
+    </html>
+    """
+
+
+@orders_web_bp.route("/orders/<order_id>/generate-invoice")
+def generate_invoice_web(order_id):
+
+    order = Order.query.get(order_id)
+
+    if not order:
+        return "Order not found"
+
+    company = Company.query.first()
+
+    if not company:
+        return "Company not found"
+
+    invoice = Invoice(
+        invoice_no=f"INV-{str(uuid.uuid4())[:8]}",
+        company_id=company.id,
+        order_id=order.id,
+        total_amount=order.total_amount or 0,
+        payment_status="UNPAID"
+    )
+
+    db.session.add(invoice)
+    db.session.commit()
+
+    return redirect("/invoices")

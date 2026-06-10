@@ -1,75 +1,34 @@
-from flask import Flask
+from app.models.user import User
 
-from app.core.config import Config
+from app.models.patient import Patient
 
-from app.extensions.db import db
-from app.extensions.jwt import jwt
+from app.models.laboratory import Laboratory
 
-from app.models import *
+from app.models.test_catalog import TestCatalog
 
-from app.api.auth.routes import auth_bp
-from app.api.admin.routes import admin_bp
+from app.models.order import Order
 
-from app.api.patients.routes import patients_bp
-from app.api.laboratories.routes import laboratories_bp
+from app.models.order_item import OrderItem
 
-from app.api.test_catalogs.routes import test_catalogs_bp
+from app.models.sample_collection import SampleCollection
 
-from app.api.orders.routes import orders_bp
+from app.models.test_result import TestResult
 
-from app.api.sample_collections.routes import sample_collections_bp
+from app.models.company import Company
 
-from app.api.test_results.routes import test_results_bp
+from app.models.contract import Contract
 
-from app.api.ai.routes import ai_bp
-
-from app.api.companies.routes import companies_bp
-
-from app.api.contracts.routes import contracts_bp
-
-from app.api.contract_prices.routes import contract_prices_bp
+from app.models.contract_price import ContractPrice
 
 from app.models.invoice import Invoice
 
 from app.models.payment import Payment
 
-def create_app():
+from app.models.home_collection import HomeCollection
 
-    app = Flask(__name__)
+from app.models.sample_tracking import SampleTracking
 
-    app.config.from_object(Config)
-
-    db.init_app(app)
-    jwt.init_app(app)
-
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(admin_bp)
-
-    app.register_blueprint(patients_bp)
-    app.register_blueprint(laboratories_bp)
-
-    app.register_blueprint(test_catalogs_bp)
-
-    app.register_blueprint(orders_bp)
-
-    app.register_blueprint(sample_collections_bp)
-
-    app.register_blueprint(test_results_bp)
-
-    app.register_blueprint(ai_bp)
-
-    app.register_blueprint(companies_bp)
-
-    app.register_blueprint(contracts_bp)
-
-    app.register_blueprint(contract_prices_bp)
-
-    @app.route("/")
-    def home():
-        return {
-            "project": "DxCon",
-            "status": "running",
-            "phase": "CONTRACT_PRICE_MODULE"
-        }
-
-    return app
+from app.models.result_file import ResultFile
+from app.models.transport_box import TransportBox
+from app.models.sample_event import SampleEvent
+from app.models.driver import Driver

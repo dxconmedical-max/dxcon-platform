@@ -28,6 +28,14 @@ class Order(db.Model):
         db.String(36)
     )
 
+    company_id = db.Column(
+        db.String(36)
+    )
+
+    contract_id = db.Column(
+        db.String(36)
+    )
+
     status = db.Column(
         db.String(50),
         default="PENDING"
@@ -49,6 +57,8 @@ class Order(db.Model):
             "order_code": self.order_code,
             "patient_id": self.patient_id,
             "laboratory_id": self.laboratory_id,
+            "company_id": self.company_id,
+            "contract_id": self.contract_id,
             "status": self.status,
             "total_amount": self.total_amount
         }
