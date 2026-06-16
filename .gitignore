@@ -1,0 +1,30 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Database
+*.db
+instance/
+
+# Backups
+*.tar.gz
+backups/
+
+# macOS
+.DS_Store
+
+# Environment
+.env
+
+# Flutter build
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.dart_tool/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
