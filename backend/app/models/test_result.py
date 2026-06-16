@@ -16,6 +16,12 @@ class TestResult(db.Model):
     flag = db.Column(db.String(20), default="NORMAL")
     interpretation = db.Column(db.Text)
     approval_status = db.Column(db.String(30), default="PENDING")
+
+    approved_by = db.Column(db.String(255))
+    approved_at = db.Column(db.String(100))
+    doctor_license = db.Column(db.String(100))
+    signature_id = db.Column(db.String(100))
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
@@ -28,5 +34,9 @@ class TestResult(db.Model):
             "reference_range": self.reference_range,
             "flag": self.flag,
             "interpretation": self.interpretation,
-            "approval_status": self.approval_status
+            "approval_status": self.approval_status,
+            "approved_by": self.approved_by,
+            "approved_at": self.approved_at,
+            "doctor_license": self.doctor_license,
+            "signature_id": self.signature_id
         }

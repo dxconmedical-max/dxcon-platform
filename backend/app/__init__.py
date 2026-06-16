@@ -1,4 +1,5 @@
 from flask import Flask, redirect
+from flask_cors import CORS
 
 from app.core.config import Config
 
@@ -16,7 +17,6 @@ from app.api.orders.routes import orders_bp
 from app.api.order_items.routes import order_items_bp
 from app.api.sample_collections.routes import sample_collections_bp
 from app.api.test_results.routes import test_results_bp
-from app.api.ai.routes import ai_bp
 from app.api.companies.routes import companies_bp
 from app.api.contracts.routes import contracts_bp
 from app.api.contract_prices.routes import contract_prices_bp
@@ -24,8 +24,10 @@ from app.api.invoices.routes import invoices_bp
 from app.api.payments.routes import payments_bp
 from app.api.dashboard.routes import dashboard_bp
 from app.api.seeds.routes import seeds_bp
+from app.api.mobile.routes import mobile_bp
 from app.api.home_collections.routes import home_collections_bp
 from app.api.sample_trackings.routes import sample_trackings_bp
+from app.api.incidents.routes import incidents_bp
 
 from app.web.auth import auth_web_bp
 from app.web.dashboard import dashboard_web_bp
@@ -50,9 +52,34 @@ from app.api.transport_boxes.routes import transport_boxes_bp
 from app.web.transport_boxes import transport_boxes_web_bp
 from app.web.drivers import drivers_web_bp
 from app.web.dispatch import dispatch_web_bp
+from app.web.dispatch_optimizer import dispatch_optimizer_web_bp
+from app.web.lab_worklist import lab_worklist_bp
+from app.web.result_verify import result_verify_web_bp
+from app.web.analytics import analytics_web_bp
+from app.api.ai.routes import ai_bp
+from app.api.ai.routes_v2 import ai_v2_bp
+from app.api.alerts.routes import alerts_bp
+from app.web.alerts import alerts_web_bp
+from app.web.operations_timeline import operations_timeline_web_bp
+from app.web.operations import operations_web_bp
+from app.web.collector_kpi import collector_kpi_web_bp
+from app.web.executive import executive_web_bp
+from app.web.executive_v8 import executive_v8_bp
+from app.web.incidents import incidents_web_bp
+from app.web.tat_kpi import tat_kpi_web_bp
+from app.api.alerts.routes import alerts_bp
+from app.web.alerts import alerts_web_bp
+from app.web.dispatch_performance import dispatch_performance_web_bp
+from app.api.patient_mobile.routes import patient_mobile_bp
+from app.web.doctor_kpi import doctor_kpi_web_bp
+from app.web.logistics import logistics_web_bp
+from app.web.crm import crm_web_bp
+from app.api.collector.routes import collector_bp
+from app.web.collector_console import collector_console_web_bp
 def create_app():
 
     app = Flask(__name__)
+    CORS(app)
     app.secret_key = "dxcon-secret-key"
     app.config.from_object(Config)
 
@@ -69,6 +96,7 @@ def create_app():
     app.register_blueprint(sample_collections_bp)
     app.register_blueprint(test_results_bp)
     app.register_blueprint(ai_bp)
+    app.register_blueprint(ai_v2_bp)
     app.register_blueprint(companies_bp)
     app.register_blueprint(contracts_bp)
     app.register_blueprint(contract_prices_bp)
@@ -76,8 +104,10 @@ def create_app():
     app.register_blueprint(payments_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(seeds_bp)
+    app.register_blueprint(mobile_bp)
     app.register_blueprint(home_collections_bp)
     app.register_blueprint(sample_trackings_bp)
+    app.register_blueprint(incidents_bp)
 
     app.register_blueprint(auth_web_bp)
     app.register_blueprint(dashboard_web_bp)
@@ -101,7 +131,26 @@ def create_app():
     app.register_blueprint(transport_boxes_web_bp)
     app.register_blueprint(drivers_web_bp)
     app.register_blueprint(dispatch_web_bp)
-    @app.route("/")
+    app.register_blueprint(dispatch_optimizer_web_bp)
+    app.register_blueprint(lab_worklist_bp)
+    app.register_blueprint(result_verify_web_bp)
+    app.register_blueprint(analytics_web_bp)
+    app.register_blueprint(alerts_bp)
+    app.register_blueprint(alerts_web_bp)
+    app.register_blueprint(operations_web_bp) 
+    app.register_blueprint(operations_timeline_web_bp)
+    app.register_blueprint(collector_kpi_web_bp)
+    app.register_blueprint(executive_web_bp)
+    app.register_blueprint(executive_v8_bp)
+    app.register_blueprint(incidents_web_bp)
+    app.register_blueprint(tat_kpi_web_bp)
+    app.register_blueprint(dispatch_performance_web_bp)
+    app.register_blueprint(patient_mobile_bp)
+    app.register_blueprint(doctor_kpi_web_bp)
+    app.register_blueprint(logistics_web_bp)
+    app.register_blueprint(crm_web_bp)
+    app.register_blueprint(collector_bp)
+    app.register_blueprint(collector_console_web_bp)
     def home():
         return redirect("/login")
 

@@ -4,6 +4,7 @@ from app.extensions.db import db
 from app.models.test_result import TestResult
 from app.models.order_item import OrderItem
 from app.models.test_catalog import TestCatalog
+from app.services.ai_interpretation import generate_interpretation
 
 
 test_results_web_bp = Blueprint("test_results_web", __name__)
@@ -13,7 +14,6 @@ test_results_web_bp = Blueprint("test_results_web", __name__)
 def results_page():
 
     results = TestResult.query.all()
-
     rows = ""
 
     for result in results:
@@ -23,7 +23,13 @@ def results_page():
             <td>{result.result_value}</td>
             <td>{result.unit or ""}</td>
             <td>{result.reference_range or ""}</td>
+            <td>{result.flag or ""}</td>
             <td>{result.interpretation or ""}</td>
+            <td>
+                <a href="/results/{result.id}/ai">
+                    Generate AI Comment
+                </a>
+            </td>
         </tr>
         """
 
@@ -46,7 +52,9 @@ def results_page():
                 <th>Result Value</th>
                 <th>Unit</th>
                 <th>Reference Range</th>
-                <th>Interpretation</th>
+                <th>Flag</th>
+                <th>AI Interpretation</th>
+                <th>Action</th>
             </tr>
             {rows}
         </table>
@@ -59,6 +67,26 @@ def results_page():
     """
 
 
+@test_results_web_bp.route("/results/<result_id>/ai")
+def generate_ai_comment(result_id):
+
+    result = TestResult.query.get(result_id)
+
+    if not result:
+        return "Result not found"
+
+    result.interpretation = generate_interpretation(
+        result.test_name,
+        result.result_value,
+        result.reference_range,
+        result.flag
+    )
+
+    db.session.commit()
+
+    return redirect("/results")
+
+
 @test_results_web_bp.route("/results/new", methods=["GET", "POST"])
 def new_result():
 
@@ -67,7 +95,6 @@ def new_result():
     if request.method == "POST":
 
         order_item_id = request.form.get("order_item_id")
-
         order_item = OrderItem.query.get(order_item_id)
         test_name = request.form.get("test_name")
 
@@ -82,6 +109,7 @@ def new_result():
             result_value=request.form.get("result_value"),
             unit=request.form.get("unit"),
             reference_range=request.form.get("reference_range"),
+            flag=request.form.get("flag") or "NORMAL",
             interpretation=request.form.get("interpretation")
         )
 
@@ -115,12 +143,16 @@ def new_result():
             </select><br><br>
 
             <input name="test_name" placeholder="Test Name fallback"><br><br>
-
             <input name="result_value" placeholder="Result Value"><br><br>
-
             <input name="unit" placeholder="Unit"><br><br>
-
             <input name="reference_range" placeholder="Reference Range"><br><br>
+
+            <label>Flag</label><br>
+            <select name="flag">
+                <option value="NORMAL">NORMAL</option>
+                <option value="HIGH">HIGH</option>
+                <option value="LOW">LOW</option>
+            </select><br><br>
 
             <textarea name="interpretation" placeholder="Interpretation"></textarea><br><br>
 

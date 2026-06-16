@@ -32,3 +32,11 @@ from app.models.result_file import ResultFile
 from app.models.transport_box import TransportBox
 from app.models.sample_event import SampleEvent
 from app.models.driver import Driver
+from app.models.dispatch_job import DispatchJob
+from app.models.dispatch_item import DispatchItem
+from app.models.audit_log import AuditLog
+from app.models.alert import Alert
+from app.models.incident import Incident
+from app.models.alert import Alert
+from app.models.clinical_summary import ClinicalSummary
+from app.models.crm_lead import CrmLead

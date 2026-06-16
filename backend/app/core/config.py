@@ -1,11 +1,28 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Config:
 
-    SECRET_KEY = "dxcon-secret"
+    SECRET_KEY = os.getenv(
+        "SECRET_KEY",
+        "dxcon-dev-secret"
+    )
 
-    JWT_SECRET_KEY = "dxcon-jwt"
+    JWT_SECRET_KEY = os.getenv(
+        "JWT_SECRET_KEY",
+        "dxcon-dev-jwt"
+    )
 
-    SQLALCHEMY_DATABASE_URI = "sqlite:///dxcon.db"
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL",
+        "sqlite:///dxcon.db"
+    )
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    APP_ENV = os.getenv(
+        "APP_ENV",
+        "development"
+    )

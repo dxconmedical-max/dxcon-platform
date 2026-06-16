@@ -2,6 +2,7 @@ from flask import Blueprint, request, redirect, session
 import bcrypt
 
 from app.models.user import User
+from app.models.patient import Patient
 
 
 auth_web_bp = Blueprint("auth_web", __name__)
@@ -24,6 +25,29 @@ def verify_password(stored_password, input_password):
         return False
 
 
+def attach_patient_to_session(user):
+
+    if user.role != "PATIENT":
+        return
+
+    patient = None
+
+    if user.phone:
+        patient = Patient.query.filter_by(
+            phone=user.phone
+        ).first()
+
+    if not patient:
+        patient = Patient.query.filter_by(
+            email=user.email
+        ).first()
+
+    if patient:
+        session["patient_id"] = patient.id
+        session["patient_code"] = patient.patient_code
+        session["patient_name"] = patient.full_name
+
+
 def redirect_by_role(role):
 
     if role == "DOCTOR":
@@ -36,7 +60,7 @@ def redirect_by_role(role):
         return redirect("/samples")
 
     if role == "PATIENT":
-        return redirect("/portal")
+        return redirect("/my-portal")
 
     return redirect("/dashboard")
 
@@ -67,6 +91,8 @@ def login_page():
             session["role"] = user.role
             session["email"] = user.email
 
+            attach_patient_to_session(user)
+
             return redirect_by_role(user.role)
 
     return f"""
@@ -88,7 +114,7 @@ def login_page():
         </form>
 
         <br>
-        <a href="/portal">Patient Portal</a>
+        <a href="/my-portal">My Patient Portal</a>
 
     </body>
     </html>
