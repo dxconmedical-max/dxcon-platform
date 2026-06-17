@@ -25,6 +25,7 @@ from app.api.payments.routes import payments_bp
 from app.api.dashboard.routes import dashboard_bp
 from app.api.seeds.routes import seeds_bp
 from app.api.mobile.routes import mobile_bp
+from app.api.workflow.routes import workflow_bp
 from app.api.home_collections.routes import home_collections_bp
 from app.api.sample_trackings.routes import sample_trackings_bp
 from app.api.incidents.routes import incidents_bp
@@ -105,6 +106,7 @@ def create_app():
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(seeds_bp)
     app.register_blueprint(mobile_bp)
+    app.register_blueprint(workflow_bp)
     app.register_blueprint(home_collections_bp)
     app.register_blueprint(sample_trackings_bp)
     app.register_blueprint(incidents_bp)
