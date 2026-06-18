@@ -1,3 +1,4 @@
+from app.api.ops.routes import ops_bp
 from app.web.home import home_web_bp
 from app.web.executive_v9 import executive_v9_bp
 from app.web.crm_v2 import crm_v2_web_bp
@@ -168,4 +169,5 @@ def create_app():
     app.register_blueprint(crm_v2_web_bp)
     app.register_blueprint(executive_v9_bp)
     app.register_blueprint(home_web_bp)
+    app.register_blueprint(ops_bp)
     return app
