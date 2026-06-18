@@ -75,6 +75,7 @@ from app.api.patient_mobile.routes import patient_mobile_bp
 from app.web.doctor_kpi import doctor_kpi_web_bp
 from app.web.logistics import logistics_web_bp
 from app.web.collector_mobile import collector_mobile_web_bp
+from app.web.sample_public import sample_public_web_bp
 from app.web.crm import crm_web_bp
 from app.api.collector.routes import collector_bp
 from app.web.collector_console import collector_console_web_bp
@@ -152,6 +153,7 @@ def create_app():
     app.register_blueprint(doctor_kpi_web_bp)
     app.register_blueprint(logistics_web_bp)
     app.register_blueprint(collector_mobile_web_bp)
+    app.register_blueprint(sample_public_web_bp)
     app.register_blueprint(crm_web_bp)
     app.register_blueprint(collector_bp)
     app.register_blueprint(collector_console_web_bp)
