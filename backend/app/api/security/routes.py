@@ -1,0 +1,112 @@
+from flask import Blueprint, request
+from app.extensions.db import db
+from app.models.user import User
+from app.core.roles import ALL_ROLES
+
+security_api_bp = Blueprint(
+    "security_api",
+    __name__,
+    url_prefix="/api/v1/security"
+)
+
+
+@security_api_bp.route("/roles")
+def roles():
+    return {
+        "roles": ALL_ROLES
+    }
+
+
+@security_api_bp.route("/users")
+def users():
+    items = User.query.all()
+
+    return {
+        "count": len(items),
+        "users": [
+            u.to_dict()
+            for u in items
+        ]
+    }
+
+
+@security_api_bp.route("/users", methods=["POST"])
+def create_user():
+
+    data = request.json or {}
+
+    email = data.get("email")
+    phone = data.get("phone")
+    password = data.get("password") or "123456"
+    role = data.get("role") or "PATIENT"
+
+    if not email:
+        return {"error": "email is required"}, 400
+
+    if role not in ALL_ROLES:
+        return {"error": "invalid role", "roles": ALL_ROLES}, 400
+
+    existing = User.query.filter_by(
+        email=email
+    ).first()
+
+    if existing:
+        return {"error": "user already exists"}, 409
+
+    user = User(
+        email=email,
+        phone=phone,
+        password_hash=password,
+        role=role,
+        is_active=True
+    )
+
+    db.session.add(user)
+    db.session.commit()
+
+    return {
+        "success": True,
+        "user": user.to_dict()
+    }, 201
+
+
+@security_api_bp.route("/users/<user_id>/role", methods=["POST"])
+def update_role(user_id):
+
+    data = request.json or {}
+
+    role = data.get("role")
+
+    if role not in ALL_ROLES:
+        return {"error": "invalid role", "roles": ALL_ROLES}, 400
+
+    user = User.query.get(user_id)
+
+    if not user:
+        return {"error": "user not found"}, 404
+
+    user.role = role
+
+    db.session.commit()
+
+    return {
+        "success": True,
+        "user": user.to_dict()
+    }
+
+
+@security_api_bp.route("/users/<user_id>/disable", methods=["POST", "GET"])
+def disable_user(user_id):
+
+    user = User.query.get(user_id)
+
+    if not user:
+        return {"error": "user not found"}, 404
+
+    user.is_active = False
+    db.session.commit()
+
+    return {
+        "success": True,
+        "user": user.to_dict()
+    }
