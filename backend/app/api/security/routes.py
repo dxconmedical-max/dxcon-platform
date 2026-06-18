@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from app.extensions.db import db
 from app.models.user import User
 from app.core.roles import ALL_ROLES
+from app.core.passwords import hash_password
 
 security_api_bp = Blueprint(
     "security_api",
@@ -56,7 +57,7 @@ def create_user():
     user = User(
         email=email,
         phone=phone,
-        password_hash=password,
+        password_hash=hash_password(password),
         role=role,
         is_active=True
     )

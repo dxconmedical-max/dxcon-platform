@@ -14,6 +14,7 @@ from app.models.test_result import TestResult
 from app.models.sample_tracking import SampleTracking
 from app.models.clinical_summary import ClinicalSummary
 from app.models.home_collection import HomeCollection
+from app.core.passwords import verify_password
 
 
 mobile_bp = Blueprint(
@@ -49,7 +50,7 @@ def mobile_login():
     if not user:
         return {"error": "Invalid account"}, 401
 
-    if user.password_hash != password:
+    if not verify_password(user.password_hash, password):
         return {"error": "Invalid password"}, 401
 
     patient = Patient.query.filter_by(
