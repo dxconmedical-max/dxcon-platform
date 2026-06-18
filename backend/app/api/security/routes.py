@@ -3,6 +3,7 @@ from app.extensions.db import db
 from app.models.user import User
 from app.core.roles import ALL_ROLES
 from app.core.passwords import hash_password
+from app.core.audit import write_audit
 
 security_api_bp = Blueprint(
     "security_api",
@@ -63,6 +64,13 @@ def create_user():
     )
 
     db.session.add(user)
+    write_audit(
+    action="CREATE_USER",
+    entity_type="USER",
+    entity_id=user.id,
+    actor="ADMIN",
+    details=f"Created user {user.email}"
+)
     db.session.commit()
 
     return {
@@ -87,7 +95,13 @@ def update_role(user_id):
         return {"error": "user not found"}, 404
 
     user.role = role
-
+    write_audit(
+    action="CHANGE_ROLE",
+    entity_type="USER",
+    entity_id=user.id,
+    actor="ADMIN",
+    details=f"Role changed to {role}"
+)
     db.session.commit()
 
     return {
