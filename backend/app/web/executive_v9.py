@@ -1,3 +1,4 @@
+
 from flask import Blueprint
 
 from app.models.patient import Patient
@@ -10,12 +11,17 @@ from app.models.invoice import Invoice
 from app.models.payment import Payment
 from app.models.contract import Contract
 from app.models.clinical_summary import ClinicalSummary
+from app.core.web_authz import web_roles_required
 
-
+@web_roles_required(
+    "SUPER_ADMIN",
+    "ADMIN"
+)
 executive_v9_bp = Blueprint("executive_v9", __name__)
 
 
 @executive_v9_bp.route("/executive-v9")
+@web_roles_required("SUPER_ADMIN", "ADMIN")
 def executive_v9():
 
     revenue = sum([(p.amount or 0) for p in Payment.query.all()])

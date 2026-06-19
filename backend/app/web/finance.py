@@ -1,3 +1,4 @@
+from app.core.web_authz import web_roles_required
 from flask import Blueprint
 
 from app.models.invoice import Invoice
@@ -7,8 +8,13 @@ from app.models.order import Order
 
 finance_web_bp = Blueprint("finance_web", __name__)
 
-
+@web_roles_required(
+    "SUPER_ADMIN",
+    "ADMIN",
+    "ACCOUNTING"
+)
 @finance_web_bp.route("/finance")
+@web_roles_required("SUPER_ADMIN", "ADMIN", "ACCOUNTING")
 def finance_dashboard():
 
     invoices = Invoice.query.all()
