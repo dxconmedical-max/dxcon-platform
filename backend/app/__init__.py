@@ -37,6 +37,7 @@ from app.api.workflow.routes import workflow_bp
 from app.api.home_collections.routes import home_collections_bp
 from app.api.sample_trackings.routes import sample_trackings_bp
 from app.api.incidents.routes import incidents_bp
+from app.api.admin_security.routes import admin_security_bp
 
 from app.web.auth import auth_web_bp
 from app.web.dashboard import dashboard_web_bp
@@ -178,4 +179,5 @@ def create_app():
     app.register_blueprint(security_api_bp)
     app.register_blueprint(ai_interpret_v2_bp)
     app.register_blueprint(audit_center_web_bp)
+    app.register_blueprint(admin_security_bp)
     return app
