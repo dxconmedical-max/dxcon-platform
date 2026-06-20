@@ -8,6 +8,7 @@ from app.models.home_collection import HomeCollection
 from app.models.sample_tracking import SampleTracking
 from app.models.sample_event import SampleEvent
 from app.models.clinical_summary import ClinicalSummary
+from app.models.result_file import ResultFile
 
 patient_portal_web_bp = Blueprint(
     "patient_portal_web",
@@ -238,6 +239,7 @@ def patient_portal(patient_id):
                     <th>Report</th>
                     <th>PDF</th>
                     <th>AI</th>
+                    <th>Uploaded Files</th>
                 </tr>
 
                 {order_rows}

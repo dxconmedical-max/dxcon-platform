@@ -170,3 +170,18 @@ def download_result_file(file_id):
         as_attachment=True,
         download_name=item.file_name
     )
+
+
+@result_upload_web_bp.route("/portal/result-files/download/<file_id>")
+def portal_download_result_file(file_id):
+
+    item = ResultFile.query.get(file_id)
+
+    if not item:
+        return "File not found", 404
+
+    return send_file(
+        item.file_path,
+        as_attachment=True,
+        download_name=item.file_name
+    )
