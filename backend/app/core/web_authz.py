@@ -1,8 +1,7 @@
 from functools import wraps
-from flask import session, redirect
+from flask import redirect, session
 
-
-def web_roles_required(*allowed_roles):
+def web_roles_required(*roles):
 
     def decorator(fn):
 
@@ -11,7 +10,7 @@ def web_roles_required(*allowed_roles):
 
             role = session.get("role")
 
-            if role not in allowed_roles:
+            if role not in roles:
                 return redirect("/login")
 
             return fn(*args, **kwargs)

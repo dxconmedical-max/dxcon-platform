@@ -89,6 +89,7 @@ from app.web.crm import crm_web_bp
 from app.api.collector.routes import collector_bp
 from app.web.collector_console import collector_console_web_bp
 from app.web.audit_center import audit_center_web_bp
+from app.api.ai_v2.batch import ai_batch_bp
 def create_app():
 
     app = Flask(__name__)
@@ -180,4 +181,5 @@ def create_app():
     app.register_blueprint(ai_interpret_v2_bp)
     app.register_blueprint(audit_center_web_bp)
     app.register_blueprint(admin_security_bp)
+    app.register_blueprint(ai_batch_bp)
     return app
