@@ -45,7 +45,13 @@ def patient_portal(patient_id):
                     PDF
                 </a>
             </td>
-        </tr>
+
+            <td>
+                <a href="/api/v1/ai-v2/order/{order.id}">
+                    Generate AI
+                </a>
+</td>
+      ></tr>
         """
 
     results_rows = ""
@@ -231,6 +237,7 @@ def patient_portal(patient_id):
                     <th>Amount</th>
                     <th>Report</th>
                     <th>PDF</th>
+                    <th>AI</th>
                 </tr>
 
                 {order_rows}
