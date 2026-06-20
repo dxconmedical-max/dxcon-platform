@@ -3,7 +3,7 @@ from flask import Blueprint, request, redirect
 from app.extensions.db import db
 from app.models.payment import Payment
 from app.models.invoice import Invoice
-
+from app.core.audit import write_audit
 
 payments_web_bp = Blueprint("payments_web", __name__)
 
@@ -93,6 +93,14 @@ def new_payment():
 
         db.session.commit()
 
+        write_audit(
+            action="CREATE_PAYMENT",
+            object_type="PAYMENT",
+            object_id=payment.id,
+            user_email="WEB"
+        )
+
+        db.session.commit()
         return redirect("/payments")
 
     invoice_options = ""

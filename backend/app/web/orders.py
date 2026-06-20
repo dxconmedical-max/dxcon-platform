@@ -9,6 +9,7 @@ from app.models.laboratory import Laboratory
 from app.models.invoice import Invoice
 from app.models.company import Company
 from app.models.contract import Contract
+from app.core.audit import write_audit
 
 orders_web_bp = Blueprint(
     "orders_web",
@@ -113,6 +114,15 @@ def new_order():
         try:
             db.session.add(order)
             db.session.commit()
+
+            write_audit(
+                action="CREATE_ORDER",
+                object_type="ORDER",
+                object_id=order.id,
+                user_email="WEB"
+            )
+
+            db.session.commit()            
 
             return redirect("/orders")
 
@@ -241,5 +251,13 @@ def generate_invoice_web(order_id):
 
     db.session.add(invoice)
     db.session.commit()
+    
+    write_audit(
+        action="GENERATE_INVOICE",
+        object_type="INVOICE",
+        object_id=invoice.id,
+        user_email="WEB"
+    )
 
+    db.session.commit()
     return redirect("/invoices")

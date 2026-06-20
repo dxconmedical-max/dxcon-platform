@@ -2,7 +2,7 @@ from flask import Blueprint, request, redirect
 
 from app.extensions.db import db
 from app.models.patient import Patient
-
+from app.core.audit import write_audit
 
 patients_web_bp = Blueprint("patients_web", __name__)
 
@@ -80,6 +80,14 @@ def new_patient():
         db.session.add(patient)
         db.session.commit()
 
+        write_audit(
+            action="CREATE_PATIENT",
+            object_type="PATIENT",
+            object_id=patient.id,
+            user_email="WEB"
+        )
+
+        db.session.commit()
         return redirect("/patients")
 
     return """
