@@ -53,3 +53,14 @@ def health():
         "service": "DxCon Production",
         "database": "PostgreSQL"
     }
+
+
+@system_bp.route("/backup-status")
+def backup_status():
+    return {
+        "database": "PostgreSQL",
+        "provider": "Render",
+        "backup_policy": "Enable daily backup in Render PostgreSQL dashboard",
+        "recommended_retention": "7-30 days",
+        "status": "MANUAL_CHECK_REQUIRED"
+    }
