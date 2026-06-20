@@ -13,10 +13,6 @@ from app.models.contract import Contract
 from app.models.clinical_summary import ClinicalSummary
 from app.core.web_authz import web_roles_required
 
-@web_roles_required(
-    "SUPER_ADMIN",
-    "ADMIN"
-)
 executive_v9_bp = Blueprint("executive_v9", __name__)
 
 

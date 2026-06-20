@@ -1,15 +1,14 @@
 from flask import Blueprint
 
 from app.models.user import User
-
 from app.core.web_authz import web_roles_required
 
-@security_web_bp.route("/security")
-@web_roles_required("SUPER_ADMIN")
+
 security_web_bp = Blueprint("security_web", __name__)
 
 
 @security_web_bp.route("/security")
+@web_roles_required("SUPER_ADMIN")
 def security_dashboard():
 
     users = User.query.all()
