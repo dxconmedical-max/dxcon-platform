@@ -1,5 +1,11 @@
 from flask import Blueprint
-
+from app.models.user import User
+from app.models.patient import Patient
+from app.models.order import Order
+from app.models.sample_tracking import SampleTracking
+from app.models.test_result import TestResult
+from app.models.invoice import Invoice
+from app.models.payment import Payment
 system_bp = Blueprint(
     "system",
     __name__,
@@ -26,4 +32,24 @@ def routes():
     return {
         "count": len(data),
         "routes": sorted(data, key=lambda x: x["route"])
+    }
+@system_bp.route("/stats")
+def stats():
+
+    return {
+        "users": User.query.count(),
+        "patients": Patient.query.count(),
+        "orders": Order.query.count(),
+        "samples": SampleTracking.query.count(),
+        "results": TestResult.query.count(),
+        "invoices": Invoice.query.count(),
+        "payments": Payment.query.count()
+    }
+@system_bp.route("/health")
+def health():
+
+    return {
+        "status": "OK",
+        "service": "DxCon Production",
+        "database": "PostgreSQL"
     }
