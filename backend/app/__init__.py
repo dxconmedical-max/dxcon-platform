@@ -1,3 +1,4 @@
+from app.api.system.routes import system_bp
 from app.api.ai_v2.routes import ai_interpret_v2_bp
 from app.api.security.routes import security_api_bp
 from app.web.security import security_web_bp
@@ -182,4 +183,5 @@ def create_app():
     app.register_blueprint(audit_center_web_bp)
     app.register_blueprint(admin_security_bp)
     app.register_blueprint(ai_batch_bp)
+    app.register_blueprint(system_bp)
     return app
