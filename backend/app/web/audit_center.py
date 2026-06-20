@@ -6,6 +6,7 @@ audit_center_web_bp = Blueprint(
     __name__
 )
 
+
 @audit_center_web_bp.route("/audit")
 def audit_center():
 
@@ -19,28 +20,28 @@ def audit_center():
         rows += f"""
         <tr>
             <td>{log.created_at}</td>
-            <td>{log.actor}</td>
-            <td>{log.action}</td>
-            <td>{log.entity_type}</td>
-            <td>{log.entity_id}</td>
-            <td>{log.details}</td>
+            <td>{log.user_email or ""}</td>
+            <td>{log.action or ""}</td>
+            <td>{log.object_type or ""}</td>
+            <td>{log.object_id or ""}</td>
+            <td>{log.ip_address or ""}</td>
         </tr>
         """
 
     return f"""
     <html>
-    <body style="font-family:Arial;padding:30px;">
+    <body style="font-family:Arial;padding:30px;background:#f1f5f9;">
         <h1>DxCon Audit Center</h1>
 
         <table border="1" cellpadding="8"
-               style="width:100%;border-collapse:collapse;">
+               style="background:white;width:100%;border-collapse:collapse;">
             <tr>
                 <th>Time</th>
-                <th>Actor</th>
+                <th>User</th>
                 <th>Action</th>
-                <th>Entity</th>
-                <th>ID</th>
-                <th>Details</th>
+                <th>Object Type</th>
+                <th>Object ID</th>
+                <th>IP</th>
             </tr>
 
             {rows}

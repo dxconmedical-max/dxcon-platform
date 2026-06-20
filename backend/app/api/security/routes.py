@@ -65,12 +65,11 @@ def create_user():
 
     db.session.add(user)
     write_audit(
-    action="CREATE_USER",
-    entity_type="USER",
-    entity_id=user.id,
-    actor="ADMIN",
-    details=f"Created user {user.email}"
-)
+        action="CREATE_USER",
+        object_type="USER",
+        object_id=user.id,
+        user_email="ADMIN"
+    )
     db.session.commit()
 
     return {
@@ -96,12 +95,11 @@ def update_role(user_id):
 
     user.role = role
     write_audit(
-    action="CHANGE_ROLE",
-    entity_type="USER",
-    entity_id=user.id,
-    actor="ADMIN",
-    details=f"Role changed to {role}"
-)
+        action="CHANGE_ROLE",
+        object_type="USER",
+        object_id=user.id,
+        user_email="ADMIN"
+    )
     db.session.commit()
 
     return {

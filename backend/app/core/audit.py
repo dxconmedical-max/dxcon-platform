@@ -9,7 +9,6 @@ def write_audit(
     user_email="SYSTEM",
     ip_address=""
 ):
-
     log = AuditLog(
         user_email=user_email,
         action=action,
@@ -19,5 +18,4 @@ def write_audit(
     )
 
     db.session.add(log)
-
     return log
