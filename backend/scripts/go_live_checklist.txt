@@ -1,0 +1,11 @@
+[ ] health_check.py
+[ ] check_db.py
+[ ] check_production.py
+[ ] git status clean
+[ ] git push main
+[ ] Render deploy success
+[ ] /monitor OK
+[ ] /audit OK
+[ ] /security OK
+[ ] /finance OK
+[ ] /executive-v9 OK
