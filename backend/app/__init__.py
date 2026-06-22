@@ -1,3 +1,4 @@
+from app.api.result_files.routes import result_files_bp
 from app.web.monitor import monitor_web_bp
 from app.api.system.routes import system_bp
 from app.api.ai_v2.routes import ai_interpret_v2_bp
@@ -186,4 +187,5 @@ def create_app():
     app.register_blueprint(ai_batch_bp)
     app.register_blueprint(system_bp)
     app.register_blueprint(monitor_web_bp)
+    app.register_blueprint(result_files_bp)
     return app
