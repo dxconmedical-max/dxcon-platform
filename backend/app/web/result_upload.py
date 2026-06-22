@@ -172,6 +172,15 @@ def download_result_file(file_id):
     )
 
 
+
+
+
+
+
+
+
+
+
 @result_upload_web_bp.route("/portal/result-files/download/<file_id>")
 def portal_download_result_file(file_id):
 
