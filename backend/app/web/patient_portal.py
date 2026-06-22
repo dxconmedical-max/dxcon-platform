@@ -31,16 +31,31 @@ def patient_portal(patient_id):
 
     for order in orders:
 
+        file_links = ""
+
+        files = ResultFile.query.filter_by(
+            order_id=order.id
+        ).all()
+
+        for f in files:
+            file_links += f"""
+            <a href="/portal/result-files/download/{f.id}">
+                {f.file_name}
+            </a><br>
+            """
+
         order_rows += f"""
         <tr>
             <td>{order.order_code}</td>
             <td>{order.status}</td>
             <td>{order.total_amount:,.0f}</td>
+
             <td>
                 <a href="/results/report/{order.id}">
                     View Report
                 </a>
             </td>
+
             <td>
                 <a href="/results/report/{order.id}/pdf">
                     PDF
@@ -51,8 +66,12 @@ def patient_portal(patient_id):
                 <a href="/api/v1/ai-v2/order/{order.id}">
                     Generate AI
                 </a>
-</td>
-      ></tr>
+            </td>
+
+            <td>
+                {file_links or "No file"}
+            </td>
+        </tr>
         """
 
     results_rows = ""
@@ -239,6 +258,7 @@ def patient_portal(patient_id):
                     <th>Report</th>
                     <th>PDF</th>
                     <th>AI</th>
+                    <th>Files</th>
                     <th>Uploaded Files</th>
                 </tr>
 
