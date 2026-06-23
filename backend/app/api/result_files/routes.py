@@ -10,7 +10,6 @@ result_files_bp = Blueprint(
 
 
 @result_files_bp.route("")
-@result_files_bp.route("/")
 def list_result_files():
 
     files = ResultFile.query.order_by(
