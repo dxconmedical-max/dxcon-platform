@@ -40,3 +40,5 @@ from app.models.incident import Incident
 from app.models.alert import Alert
 from app.models.clinical_summary import ClinicalSummary
 from app.models.crm_lead import CrmLead
+
+from app.models.shipment import Shipment
