@@ -4,7 +4,7 @@ from flask_jwt_extended import create_access_token
 from app.extensions.db import db
 from app.models.user import User
 
-from app.services.security import (
+from app.core.passwords import (
     hash_password,
     verify_password
 )
@@ -69,18 +69,26 @@ def login():
         }, 401
 
     if not verify_password(
-        password,
-        user.password_hash
+        user.password_hash,
+        password
     ):
         return {
             "error": "Invalid credentials"
         }, 401
 
     access_token = create_access_token(
-        identity=user.id
+        identity=user.id,
+        additional_claims={
+            "role": user.role,
+            "email": user.email
+        }
     )
 
     return {
+        "success": True,
+        "token": access_token,
         "access_token": access_token,
+        "email": user.email,
+        "role": user.role,
         "user": user.to_dict()
     }
