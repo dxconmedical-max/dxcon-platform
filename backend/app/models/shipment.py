@@ -4,7 +4,6 @@ import uuid
 
 
 class Shipment(db.Model):
-
     __tablename__ = "shipments"
 
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -15,8 +14,8 @@ class Shipment(db.Model):
     lab_name = db.Column(db.String(255))
 
     status = db.Column(db.String(50), default="CREATED")
-
     sample_count = db.Column(db.Integer, default=0)
+
     temperature = db.Column(db.String(50))
     gps_location = db.Column(db.String(255))
 
@@ -51,4 +50,5 @@ class Shipment(db.Model):
             "received_by": self.received_by,
             "receiver_note": self.receiver_note,
             "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }

@@ -18,8 +18,13 @@ def next_shipment_code():
     return f"DXCON-SHIP-{datetime.utcnow().strftime('%Y%m%d')}-{count:04d}"
 
 
+def find_shipment(shipment_id):
+    return Shipment.query.get(shipment_id) or Shipment.query.filter_by(
+        shipment_code=shipment_id
+    ).first()
+
+
 @shipments_bp.route("", methods=["GET"])
-@shipments_bp.route("/", methods=["GET"])
 def list_shipments():
     items = Shipment.query.order_by(
         Shipment.created_at.desc()
@@ -32,7 +37,6 @@ def list_shipments():
 
 
 @shipments_bp.route("", methods=["POST"])
-@shipments_bp.route("/", methods=["POST"])
 def create_shipment():
     data = request.json or {}
 
@@ -41,7 +45,7 @@ def create_shipment():
         collector_id=data.get("collector_id"),
         transport_box_id=data.get("transport_box_id"),
         lab_name=data.get("lab_name"),
-        sample_count=data.get("sample_count") or 0,
+        sample_count=int(data.get("sample_count") or 0),
         temperature=data.get("temperature"),
         gps_location=data.get("gps_location"),
         status="CREATED"
@@ -64,14 +68,9 @@ def create_shipment():
     }, 201
 
 
-@shipments_bp.route("/<shipment_id>")
+@shipments_bp.route("/<shipment_id>", methods=["GET"])
 def get_shipment(shipment_id):
-    item = Shipment.query.get(shipment_id)
-
-    if not item:
-        item = Shipment.query.filter_by(
-            shipment_code=shipment_id
-        ).first()
+    item = find_shipment(shipment_id)
 
     if not item:
         return {"error": "shipment not found"}, 404
@@ -81,9 +80,7 @@ def get_shipment(shipment_id):
 
 @shipments_bp.route("/<shipment_id>/start", methods=["POST", "GET"])
 def start_shipment(shipment_id):
-    item = Shipment.query.get(shipment_id) or Shipment.query.filter_by(
-        shipment_code=shipment_id
-    ).first()
+    item = find_shipment(shipment_id)
 
     if not item:
         return {"error": "shipment not found"}, 404
@@ -108,9 +105,7 @@ def start_shipment(shipment_id):
 
 @shipments_bp.route("/<shipment_id>/arrived", methods=["POST", "GET"])
 def arrived_shipment(shipment_id):
-    item = Shipment.query.get(shipment_id) or Shipment.query.filter_by(
-        shipment_code=shipment_id
-    ).first()
+    item = find_shipment(shipment_id)
 
     if not item:
         return {"error": "shipment not found"}, 404
@@ -137,9 +132,7 @@ def arrived_shipment(shipment_id):
 def receive_shipment(shipment_id):
     data = request.json or {}
 
-    item = Shipment.query.get(shipment_id) or Shipment.query.filter_by(
-        shipment_code=shipment_id
-    ).first()
+    item = find_shipment(shipment_id)
 
     if not item:
         return {"error": "shipment not found"}, 404
@@ -165,7 +158,7 @@ def receive_shipment(shipment_id):
     }
 
 
-@shipments_bp.route("/scan/<qr_payload>")
+@shipments_bp.route("/scan/<path:qr_payload>", methods=["GET"])
 def scan_qr(qr_payload):
     code = qr_payload.replace("DXCON:SHIPMENT:", "")
 
