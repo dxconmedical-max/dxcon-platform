@@ -4,6 +4,12 @@ from app.extensions.db import db
 from app.models.driver import Driver
 from app.models.home_collection import HomeCollection
 from app.models.sample_tracking import SampleTracking
+from app.models.shipment import Shipment
+from app.core.statuses import (
+    SHIPMENT_ACCEPTED,
+    SHIPMENT_CREATED,
+    VALID_COLLECTOR_SHIPMENT_STATUSES,
+)
 
 
 collector_mobile_web_bp = Blueprint(
@@ -85,6 +91,44 @@ def collector_mobile():
 
             {btn(f"/api/v1/workflow/checkin/{job.id}", "Check In", "#198754")}
             {btn(f"/api/v1/workflow/collected/{job.id}", "Collected", "#f97316")}
+        </div>
+        """
+
+    shipments = Shipment.query.filter(
+        Shipment.status.in_(VALID_COLLECTOR_SHIPMENT_STATUSES)
+    ).order_by(
+        Shipment.created_at.desc()
+    ).all()
+
+    shipment_rows = ""
+
+    for shipment in shipments:
+        actions = ""
+
+        if shipment.status == SHIPMENT_CREATED:
+            actions += btn(
+                f"/shipments/{shipment.id}/accept",
+                "Accept Shipment",
+                "#198754",
+            )
+
+        if shipment.status == SHIPMENT_ACCEPTED:
+            actions += btn(
+                f"/shipments/{shipment.id}/start-trip",
+                "Start Trip",
+                "#f97316",
+            )
+
+        shipment_rows += f"""
+        <div class="card">
+            <h2>{shipment.shipment_code}</h2>
+            <p><b>Status:</b> {shipment.status}</p>
+            <p><b>Lab:</b> {shipment.lab_name or ""}</p>
+            <p><b>Collector:</b> {shipment.collector_id or "Unassigned"}</p>
+            <p><b>Box:</b> {shipment.transport_box_id or ""}</p>
+            <p><b>GPS:</b> {shipment.gps_location or "0.0,0.0"}</p>
+            <div>{actions}</div>
+            {btn(f"/shipments/{shipment.id}", "View Detail", "#0a4b5c")}
         </div>
         """
 
@@ -180,6 +224,14 @@ def collector_mobile():
         {job_rows}
 
         <div class="card">
+            <h2>Shipments (FP-003)</h2>
+            <p>Total: {len(shipments)}</p>
+            <p>Accept assigned shipments, then start the trip to lab.</p>
+        </div>
+
+        {shipment_rows}
+
+        <div class="card">
             <h2>Samples</h2>
             <p>Total: {len(samples)}</p>
         </div>
@@ -187,6 +239,7 @@ def collector_mobile():
         {sample_rows}
 
         <br>
+        <a href="/shipments">Shipments</a> |
         <a href="/logistics">Logistics Dashboard</a>
     </body>
     </html>
