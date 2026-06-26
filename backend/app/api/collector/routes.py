@@ -7,6 +7,15 @@ from app.models.driver import Driver
 from app.models.home_collection import HomeCollection
 from app.models.sample_tracking import SampleTracking
 from app.models.sample_event import SampleEvent
+from app.models.shipment import Shipment
+from app.core.statuses import VALID_COLLECTOR_SHIPMENT_STATUSES
+from app.services.collector_workflow import (
+    CollectorWorkflowError,
+    accept_shipment,
+    find_shipment,
+    resolve_gps,
+    start_trip,
+)
 
 
 collector_bp = Blueprint(
@@ -238,4 +247,86 @@ def samples():
     return {
         "count": len(items),
         "samples": [item.to_dict() for item in items]
+    }
+
+
+def _workflow_payload():
+    data = request.json or {}
+    return {
+        "collector_id": data.get("collector_id"),
+        "gps_location": resolve_gps(data),
+        "actor": data.get("actor") or data.get("user_email") or "COLLECTOR",
+    }
+
+
+@collector_bp.route("/shipments", methods=["GET"])
+def list_collector_shipments():
+    collector_id = request.args.get("collector_id")
+    query = Shipment.query.filter(
+        Shipment.status.in_(VALID_COLLECTOR_SHIPMENT_STATUSES)
+    )
+
+    if collector_id:
+        query = query.filter(
+            db.or_(
+                Shipment.collector_id == collector_id,
+                Shipment.collector_id.is_(None),
+            )
+        )
+
+    items = query.order_by(Shipment.created_at.desc()).all()
+
+    return {
+        "count": len(items),
+        "shipments": [item.to_dict() for item in items],
+    }
+
+
+@collector_bp.route("/shipments/<shipment_id>/accept", methods=["POST"])
+def accept_collector_shipment(shipment_id):
+    shipment = find_shipment(shipment_id)
+
+    if not shipment:
+        return {"success": False, "error": "shipment not found"}, 404
+
+    payload = _workflow_payload()
+
+    try:
+        accept_shipment(
+            shipment,
+            collector_id=payload["collector_id"],
+            gps_location=payload["gps_location"],
+            actor=payload["actor"],
+        )
+    except CollectorWorkflowError as exc:
+        return {"success": False, "error": exc.message}, exc.status_code
+
+    return {
+        "success": True,
+        "shipment": shipment.to_dict(),
+    }
+
+
+@collector_bp.route("/shipments/<shipment_id>/start-trip", methods=["POST"])
+def start_collector_trip(shipment_id):
+    shipment = find_shipment(shipment_id)
+
+    if not shipment:
+        return {"success": False, "error": "shipment not found"}, 404
+
+    payload = _workflow_payload()
+
+    try:
+        start_trip(
+            shipment,
+            collector_id=payload["collector_id"],
+            gps_location=payload["gps_location"],
+            actor=payload["actor"],
+        )
+    except CollectorWorkflowError as exc:
+        return {"success": False, "error": exc.message}, exc.status_code
+
+    return {
+        "success": True,
+        "shipment": shipment.to_dict(),
     }

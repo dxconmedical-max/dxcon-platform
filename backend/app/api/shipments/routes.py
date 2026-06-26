@@ -5,6 +5,11 @@ from app.extensions.db import db
 from app.models.shipment import Shipment
 from app.models.transport_box import TransportBox
 from app.core.audit import write_audit
+from app.services.collector_workflow import (
+    CollectorWorkflowError,
+    legacy_start_shipment,
+    resolve_gps,
+)
 
 
 shipments_bp = Blueprint(
@@ -86,17 +91,17 @@ def start_shipment(shipment_id):
     if not item:
         return {"error": "shipment not found"}, 404
 
-    item.status = "IN_TRANSIT"
-    item.departed_at = datetime.utcnow()
+    data = request.json or {}
 
-    write_audit(
-        action="SHIPMENT_IN_TRANSIT",
-        object_type="SHIPMENT",
-        object_id=item.id,
-        user_email="COLLECTOR"
-    )
-
-    db.session.commit()
+    try:
+        legacy_start_shipment(
+            item,
+            actor=data.get("actor") or "COLLECTOR",
+            gps_location=resolve_gps(data),
+            collector_id=data.get("collector_id") or item.collector_id,
+        )
+    except CollectorWorkflowError as exc:
+        return {"success": False, "error": exc.message}, exc.status_code
 
     return {
         "success": True,
