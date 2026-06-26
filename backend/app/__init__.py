@@ -1,3 +1,5 @@
+from app.web.logistics_v2 import logistics_v2_web_bp
+from app.api.logistics_v2.routes import logistics_v2_bp
 from app.web.shipments import shipments_web_bp
 from app.api.shipments.routes import shipments_bp
 from app.api.result_files.routes import result_files_bp
@@ -192,4 +194,6 @@ def create_app():
     app.register_blueprint(result_files_bp)
     app.register_blueprint(shipments_bp)
     app.register_blueprint(shipments_web_bp)
+    app.register_blueprint(logistics_v2_bp)
+    app.register_blueprint(logistics_v2_web_bp)
     return app

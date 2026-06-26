@@ -42,3 +42,9 @@ from app.models.clinical_summary import ClinicalSummary
 from app.models.crm_lead import CrmLead
 
 from app.models.shipment import Shipment
+
+from app.models.shipment_item import ShipmentItem
+
+from app.models.shipment_timeline import ShipmentTimeline
+
+from app.models.event_log import EventLog
