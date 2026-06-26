@@ -1,0 +1,42 @@
+name: DxCon Backend CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-check:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Compile source
+        run: |
+          python -m py_compile run.py
+          python -m py_compile app/__init__.py
+
+      - name: Health check
+        run: |
+          python3 scripts/health_check.py
+
+      - name: Route check
+        run: |
+          python3 scripts/check_routes.py
