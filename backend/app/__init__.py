@@ -1,3 +1,5 @@
+from app.web.box_qr import box_qr_web_bp
+from app.api.box_qr.routes import box_qr_bp
 from app.web.logistics_v2 import logistics_v2_web_bp
 from app.api.logistics_v2.routes import logistics_v2_bp
 from app.web.shipments import shipments_web_bp
@@ -196,4 +198,6 @@ def create_app():
     app.register_blueprint(shipments_web_bp)
     app.register_blueprint(logistics_v2_bp)
     app.register_blueprint(logistics_v2_web_bp)
+    app.register_blueprint(box_qr_bp)
+    app.register_blueprint(box_qr_web_bp)
     return app
