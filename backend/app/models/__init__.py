@@ -81,3 +81,9 @@ from app.models.collector_handover import CollectorHandover
 from app.models.collector_proof import CollectorProof
 from app.models.collector_offline_sync import CollectorOfflineSync
 from app.models.collector_operation_timeline import CollectorOperationTimeline
+from app.models.medical_order import MedicalOrder
+from app.models.medical_order_event import MedicalOrderEvent
+from app.models.medical_sample import Sample
+from app.models.sample_label import SampleLabel
+from app.models.sample_incident import SampleIncident
+from app.models.recollect_request import RecollectRequest

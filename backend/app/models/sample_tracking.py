@@ -18,6 +18,16 @@ class SampleTracking(db.Model):
         db.ForeignKey("marketplace_bookings.id"),
     )
 
+    medical_order_id = db.Column(
+        db.String(36),
+        db.ForeignKey("medical_orders.id"),
+    )
+
+    medical_sample_id = db.Column(
+        db.String(36),
+        db.ForeignKey("medical_samples.id"),
+    )
+
     collector_id = db.Column(db.String(36))
 
     transport_box_id = db.Column(db.String(36))
@@ -49,6 +59,8 @@ class SampleTracking(db.Model):
             "sample_code": self.sample_code,
             "home_collection_id": self.home_collection_id,
             "marketplace_booking_id": self.marketplace_booking_id,
+            "medical_order_id": self.medical_order_id,
+            "medical_sample_id": self.medical_sample_id,
             "collector_id": self.collector_id,
             "transport_box_id": self.transport_box_id,
             "latitude": self.latitude,
