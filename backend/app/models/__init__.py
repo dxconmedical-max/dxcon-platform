@@ -72,3 +72,12 @@ from app.models.scheduling_slot import SchedulingSlot
 from app.models.partner_capacity import PartnerCapacity
 from app.models.collector_availability import CollectorAvailability
 from app.models.booking_assignment import BookingAssignment
+from app.models.collector_vehicle import CollectorVehicle
+from app.models.collector_route import CollectorRoute
+from app.models.collector_route_stop import CollectorRouteStop
+from app.models.collector_gps_ping import CollectorGpsPing
+from app.models.collector_check_event import CollectorCheckEvent
+from app.models.collector_handover import CollectorHandover
+from app.models.collector_proof import CollectorProof
+from app.models.collector_offline_sync import CollectorOfflineSync
+from app.models.collector_operation_timeline import CollectorOperationTimeline

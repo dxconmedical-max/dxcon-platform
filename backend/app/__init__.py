@@ -39,6 +39,7 @@ from app.api.marketplace.routes import marketplace_bp
 from app.api.partners.routes import partners_bp
 from app.api.scheduling.routes import scheduling_bp
 from app.api.order_lifecycle.routes import order_lifecycle_bp
+from app.api.collector_operations.routes import collector_operations_bp
 from app.api.contracts.routes import contracts_bp
 from app.api.contract_prices.routes import contract_prices_bp
 from app.api.invoices.routes import invoices_bp
@@ -60,6 +61,7 @@ from app.web.marketplace import marketplace_web_bp
 from app.web.partners import partners_web_bp
 from app.web.scheduling import scheduling_web_bp
 from app.web.order_lifecycle import order_lifecycle_web_bp
+from app.web.collector_operations import collector_operations_web_bp
 from app.web.contracts import contracts_web_bp
 from app.web.orders import orders_web_bp
 from app.web.invoices import invoices_web_bp
@@ -133,6 +135,7 @@ def create_app():
     app.register_blueprint(partners_bp)
     app.register_blueprint(scheduling_bp)
     app.register_blueprint(order_lifecycle_bp)
+    app.register_blueprint(collector_operations_bp)
     app.register_blueprint(contracts_bp)
     app.register_blueprint(contract_prices_bp)
     app.register_blueprint(invoices_bp)
@@ -153,6 +156,7 @@ def create_app():
     app.register_blueprint(partners_web_bp)
     app.register_blueprint(scheduling_web_bp)
     app.register_blueprint(order_lifecycle_web_bp)
+    app.register_blueprint(collector_operations_web_bp)
     app.register_blueprint(contracts_web_bp)
     app.register_blueprint(orders_web_bp)
     app.register_blueprint(invoices_web_bp)
