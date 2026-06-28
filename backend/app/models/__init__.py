@@ -48,3 +48,21 @@ from app.models.shipment_item import ShipmentItem
 from app.models.shipment_timeline import ShipmentTimeline
 
 from app.models.event_log import EventLog
+
+from app.models.partner import Partner
+from app.models.partner_branch import PartnerBranch
+from app.models.partner_service import PartnerService
+from app.models.partner_document import PartnerDocument
+from app.models.partner_coverage_area import PartnerCoverageArea
+from app.models.partner_user import PartnerUser
+from app.models.partner_verification_item import PartnerVerificationItem
+from app.models.partner_api_credential import PartnerApiCredential
+
+from app.models.diagnostic_category import DiagnosticCategory
+from app.models.diagnostic_service import DiagnosticService
+from app.models.service_package import ServicePackage
+from app.models.service_package_item import ServicePackageItem
+from app.models.partner_service_mapping import PartnerServiceMapping
+from app.models.marketplace_booking import MarketplaceBooking
+from app.models.marketplace_booking_timeline import MarketplaceBookingTimeline
+from app.models.partner_availability import PartnerAvailability
