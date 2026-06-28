@@ -81,6 +81,11 @@ class MarketplaceBooking(db.Model):
         db.ForeignKey("scheduling_slots.id"),
     )
 
+    order_id = db.Column(
+        db.String(36),
+        db.ForeignKey("orders.id"),
+    )
+
     status = db.Column(
         db.String(50),
         default="CREATED",
@@ -124,6 +129,7 @@ class MarketplaceBooking(db.Model):
             "requested_date": self.requested_date,
             "requested_time_slot": self.requested_time_slot,
             "scheduled_slot_id": self.scheduled_slot_id,
+            "order_id": self.order_id,
             "status": self.status,
             "note": self.note,
             "created_at": self.created_at.isoformat() if self.created_at else None,

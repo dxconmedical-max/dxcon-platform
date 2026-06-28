@@ -18,6 +18,19 @@ class SampleCollection(db.Model):
         nullable=False
     )
 
+    marketplace_booking_id = db.Column(
+        db.String(36),
+        db.ForeignKey("marketplace_bookings.id"),
+    )
+
+    collector_id = db.Column(
+        db.String(36),
+    )
+
+    sample_tracking_id = db.Column(
+        db.String(36),
+    )
+
     collector_name = db.Column(
         db.String(255)
     )
@@ -40,7 +53,11 @@ class SampleCollection(db.Model):
         return {
             "id": self.id,
             "order_id": self.order_id,
+            "marketplace_booking_id": self.marketplace_booking_id,
+            "collector_id": self.collector_id,
+            "sample_tracking_id": self.sample_tracking_id,
             "collector_name": self.collector_name,
             "status": self.status,
-            "collected_at": str(self.collected_at)
+            "collected_at": self.collected_at.isoformat() if self.collected_at else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
         }
