@@ -76,6 +76,11 @@ class MarketplaceBooking(db.Model):
         db.String(50),
     )
 
+    scheduled_slot_id = db.Column(
+        db.String(36),
+        db.ForeignKey("scheduling_slots.id"),
+    )
+
     status = db.Column(
         db.String(50),
         default="CREATED",
@@ -100,6 +105,7 @@ class MarketplaceBooking(db.Model):
     partner = db.relationship("Partner", backref=db.backref("marketplace_bookings", lazy=True))
     diagnostic_service = db.relationship("DiagnosticService")
     partner_service_mapping = db.relationship("PartnerServiceMapping")
+    scheduled_slot = db.relationship("SchedulingSlot")
 
     def to_dict(self):
         return {
@@ -117,6 +123,7 @@ class MarketplaceBooking(db.Model):
             "partner_service_mapping_id": self.partner_service_mapping_id,
             "requested_date": self.requested_date,
             "requested_time_slot": self.requested_time_slot,
+            "scheduled_slot_id": self.scheduled_slot_id,
             "status": self.status,
             "note": self.note,
             "created_at": self.created_at.isoformat() if self.created_at else None,

@@ -54,6 +54,7 @@ from app.models.partner_branch import PartnerBranch
 from app.models.partner_service import PartnerService
 from app.models.partner_document import PartnerDocument
 from app.models.partner_coverage_area import PartnerCoverageArea
+from app.models.partner_operating_hour import PartnerOperatingHour
 from app.models.partner_user import PartnerUser
 from app.models.partner_verification_item import PartnerVerificationItem
 from app.models.partner_api_credential import PartnerApiCredential
@@ -66,3 +67,8 @@ from app.models.partner_service_mapping import PartnerServiceMapping
 from app.models.marketplace_booking import MarketplaceBooking
 from app.models.marketplace_booking_timeline import MarketplaceBookingTimeline
 from app.models.partner_availability import PartnerAvailability
+from app.models.scheduling_calendar import SchedulingCalendar
+from app.models.scheduling_slot import SchedulingSlot
+from app.models.partner_capacity import PartnerCapacity
+from app.models.collector_availability import CollectorAvailability
+from app.models.booking_assignment import BookingAssignment

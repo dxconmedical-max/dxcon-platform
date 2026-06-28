@@ -7,6 +7,7 @@ from app.core.events import write_event
 from app.core.statuses import (
     BOOKING_EVENT_STATUS_MAP,
     BOOKING_TIMELINE_CREATED,
+    BOOKING_TIMELINE_SLOT_RESERVED,
     MAPPING_ACTIVE,
     MARKETPLACE_BOOKING_CREATED,
     MARKETPLACE_VISIBLE_PARTNER_STATUSES,
@@ -19,6 +20,7 @@ from app.models.marketplace_booking_timeline import MarketplaceBookingTimeline
 from app.models.partner import Partner
 from app.models.partner_service_mapping import PartnerServiceMapping
 from app.services.partner_availability import PartnerAvailabilityService
+from app.services.scheduling import SchedulingError, SchedulingService
 
 
 class MarketplaceBookingError(Exception):
@@ -159,6 +161,17 @@ class MarketplaceBookingService:
             raise MarketplaceBookingError("Partner is not available for booking", 409)
 
         requested_date = data.get("requested_date") or datetime.utcnow().strftime("%Y-%m-%d")
+        slot_id = data.get("slot_id")
+        scheduled_slot = None
+
+        if slot_id:
+            scheduled_slot = SchedulingService.validate_slot_for_booking(
+                partner.id,
+                slot_id,
+                requested_date=data.get("requested_date"),
+                requested_time_slot=data.get("requested_time_slot"),
+            )
+            requested_date = scheduled_slot.slot_date
 
         availability = PartnerAvailabilityService.get_or_create(partner.id, requested_date)
         if availability.available_slots <= 0:
@@ -180,7 +193,12 @@ class MarketplaceBookingService:
             diagnostic_service_id=mapping.diagnostic_service_id,
             partner_service_mapping_id=mapping.id,
             requested_date=requested_date,
-            requested_time_slot=data.get("requested_time_slot"),
+            requested_time_slot=(
+                f"{scheduled_slot.start_time}-{scheduled_slot.end_time}"
+                if scheduled_slot
+                else data.get("requested_time_slot")
+            ),
+            scheduled_slot_id=slot_id,
             status=data.get("status", MARKETPLACE_BOOKING_CREATED),
             note=data.get("note"),
         )
@@ -194,6 +212,21 @@ class MarketplaceBookingService:
             db.session.add(booking)
             db.session.flush()
             PartnerAvailabilityService.reserve_slot(partner.id, requested_date)
+            if slot_id:
+                SchedulingService.reserve_slot(
+                    slot_id,
+                    partner.id,
+                    booking_id=booking.id,
+                    service_type=scheduled_slot.slot_type,
+                )
+                MarketplaceBookingService.write_timeline_event(
+                    booking,
+                    BOOKING_TIMELINE_SLOT_RESERVED,
+                    message=f"Slot reserved for booking {booking.booking_code}",
+                    actor_email=actor_email,
+                    audit_action="BOOKING_SLOT_RESERVED",
+                    ip_address=ip_address,
+                )
             MarketplaceBookingService._write_timeline(
                 booking,
                 BOOKING_TIMELINE_CREATED,
@@ -217,6 +250,9 @@ class MarketplaceBookingService:
         except IntegrityError:
             db.session.rollback()
             raise MarketplaceBookingError("Could not create booking", 409)
+        except SchedulingError as exc:
+            db.session.rollback()
+            raise MarketplaceBookingError(exc.message, exc.status_code)
 
         return booking
 
