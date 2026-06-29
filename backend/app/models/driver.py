@@ -16,6 +16,16 @@ class Driver(db.Model):
 
     vehicle_no = db.Column(db.String(50))
 
+    email = db.Column(db.String(255))
+
+    license_number = db.Column(db.String(100))
+
+    home_city = db.Column(db.String(100))
+
+    active_vehicle_id = db.Column(db.String(36))
+
+    ops_status = db.Column(db.String(50), default="ACTIVE")
+
     status = db.Column(db.String(50), default="ACTIVE")
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -26,6 +36,12 @@ class Driver(db.Model):
             "driver_code": self.driver_code,
             "full_name": self.full_name,
             "phone": self.phone,
+            "email": self.email,
             "vehicle_no": self.vehicle_no,
-            "status": self.status
+            "license_number": self.license_number,
+            "home_city": self.home_city,
+            "active_vehicle_id": self.active_vehicle_id,
+            "ops_status": self.ops_status,
+            "status": self.status,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
         }

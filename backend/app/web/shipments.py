@@ -2,8 +2,20 @@ from flask import Blueprint, request, redirect
 from datetime import datetime
 
 from app.extensions.db import db
+from app.models.driver import Driver
 from app.models.shipment import Shipment
+from app.models.shipment_timeline import ShipmentTimeline
 from app.core.audit import write_audit
+from app.core.statuses import (
+    SHIPMENT_ACCEPTED,
+    SHIPMENT_CREATED,
+)
+from app.services.collector_workflow import (
+    CollectorWorkflowError,
+    accept_shipment,
+    find_shipment,
+    start_trip,
+)
 
 
 shipments_web_bp = Blueprint("shipments_web", __name__)
@@ -12,6 +24,26 @@ shipments_web_bp = Blueprint("shipments_web", __name__)
 def next_shipment_code():
     count = Shipment.query.count() + 1
     return f"DXCON-SHIP-{datetime.utcnow().strftime('%Y%m%d')}-{count:04d}"
+
+
+def _default_collector_id(shipment):
+    if shipment.collector_id:
+        return shipment.collector_id
+
+    collector = Driver.query.first()
+    return collector.id if collector else None
+
+
+def _workflow_error_page(message, back_url="/shipments"):
+    return f"""
+    <html>
+    <body style="font-family:Arial;background:#f1f5f9;padding:30px;">
+        <h1>Collector Workflow Error</h1>
+        <p style="color:#b91c1c;">{message}</p>
+        <a href="{back_url}">Back</a>
+    </body>
+    </html>
+    """, 400
 
 
 @shipments_web_bp.route("/shipments")
@@ -34,8 +66,10 @@ def shipments_page():
             <td>{s.received_at or ""}</td>
             <td>
                 <a href="/shipments/{s.id}">View</a> |
-                <a href="/shipments/{s.id}/qr">QR</a> |
-                <a href="/shipments/{s.id}/receive">Lab Receive</a>
+                <a href="/shipments/{s.id}/qr">QR</a>
+                {" | <a href='/shipments/" + s.id + "/accept'>Accept</a>" if s.status == SHIPMENT_CREATED else ""}
+                {" | <a href='/shipments/" + s.id + "/start-trip'>Start Trip</a>" if s.status == SHIPMENT_ACCEPTED else ""}
+                | <a href="/shipments/{s.id}/receive">Lab Receive</a>
             </td>
         </tr>
         """
@@ -67,6 +101,7 @@ def shipments_page():
         </table>
 
         <br>
+        <a href="/collector-mobile">Collector Mobile</a> |
         <a href="/monitor">Monitor</a> |
         <a href="/logistics">Logistics</a> |
         <a href="/audit">Audit</a>
@@ -141,10 +176,54 @@ def new_shipment():
 
 @shipments_web_bp.route("/shipments/<shipment_id>")
 def shipment_detail(shipment_id):
-    s = Shipment.query.get(shipment_id)
+    s = find_shipment(shipment_id)
 
     if not s:
         return "Shipment not found", 404
+
+    workflow_actions = ""
+
+    if s.status == SHIPMENT_CREATED:
+        workflow_actions += f"""
+        <a href="/shipments/{s.id}/accept"
+           style="background:#198754;color:white;padding:10px 14px;border-radius:6px;text-decoration:none;">
+           Accept Shipment
+        </a>
+        """
+
+    if s.status == SHIPMENT_ACCEPTED:
+        workflow_actions += f"""
+        <a href="/shipments/{s.id}/start-trip"
+           style="background:#f97316;color:white;padding:10px 14px;border-radius:6px;text-decoration:none;">
+           Start Trip
+        </a>
+        """
+
+    timeline_items = ShipmentTimeline.query.filter_by(
+        shipment_id=s.id
+    ).order_by(
+        ShipmentTimeline.created_at.asc()
+    ).all()
+
+    timeline_rows = ""
+
+    for item in timeline_items:
+        timeline_rows += f"""
+        <tr>
+            <td>{item.created_at}</td>
+            <td>{item.event_type}</td>
+            <td>{item.actor or ""}</td>
+            <td>{item.gps_location or ""}</td>
+            <td>{item.note or ""}</td>
+        </tr>
+        """
+
+    if not timeline_rows:
+        timeline_rows = """
+        <tr>
+            <td colspan="5">No timeline events yet.</td>
+        </tr>
+        """
 
     return f"""
     <html>
@@ -154,10 +233,13 @@ def shipment_detail(shipment_id):
         <div style="background:white;padding:20px;border-radius:12px;">
             <p><b>Code:</b> {s.shipment_code}</p>
             <p><b>Status:</b> {s.status}</p>
+            <p><b>Collector:</b> {s.collector_id or ""}</p>
+            <p><b>Transport Box:</b> {s.transport_box_id or ""}</p>
             <p><b>Lab:</b> {s.lab_name}</p>
             <p><b>Samples:</b> {s.sample_count}</p>
             <p><b>Temperature:</b> {s.temperature}</p>
-            <p><b>GPS:</b> {s.gps_location}</p>
+            <p><b>GPS:</b> {s.gps_location or ""}</p>
+            <p><b>Departed At:</b> {s.departed_at or ""}</p>
             <p><b>QR:</b> {s.qr_payload()}</p>
             <p><b>Received By:</b> {s.received_by or ""}</p>
             <p><b>Received At:</b> {s.received_at or ""}</p>
@@ -165,12 +247,68 @@ def shipment_detail(shipment_id):
         </div>
 
         <br>
+        {workflow_actions}
+        {"<br><br>" if workflow_actions else ""}
         <a href="/shipments/{s.id}/qr">Show QR</a> |
         <a href="/shipments/{s.id}/receive">Lab Receive</a> |
         <a href="/shipments">Back</a>
+
+        <br><br>
+
+        <div style="background:white;padding:20px;border-radius:12px;">
+            <h2>Shipment Timeline</h2>
+            <table border="1" cellpadding="8" style="width:100%;border-collapse:collapse;">
+                <tr>
+                    <th>Time</th>
+                    <th>Event</th>
+                    <th>Actor</th>
+                    <th>GPS</th>
+                    <th>Note</th>
+                </tr>
+                {timeline_rows}
+            </table>
+        </div>
     </body>
     </html>
     """
+
+
+@shipments_web_bp.route("/shipments/<shipment_id>/accept", methods=["GET", "POST"])
+def accept_shipment_web(shipment_id):
+    s = find_shipment(shipment_id)
+
+    if not s:
+        return "Shipment not found", 404
+
+    try:
+        accept_shipment(
+            s,
+            collector_id=_default_collector_id(s),
+            actor="WEB",
+        )
+    except CollectorWorkflowError as exc:
+        return _workflow_error_page(exc.message, f"/shipments/{s.id}")
+
+    return redirect(f"/shipments/{s.id}")
+
+
+@shipments_web_bp.route("/shipments/<shipment_id>/start-trip", methods=["GET", "POST"])
+def start_trip_web(shipment_id):
+    s = find_shipment(shipment_id)
+
+    if not s:
+        return "Shipment not found", 404
+
+    try:
+        start_trip(
+            s,
+            collector_id=_default_collector_id(s),
+            actor="WEB",
+        )
+    except CollectorWorkflowError as exc:
+        return _workflow_error_page(exc.message, f"/shipments/{s.id}")
+
+    return redirect(f"/shipments/{s.id}")
 
 
 @shipments_web_bp.route("/shipments/<shipment_id>/qr")

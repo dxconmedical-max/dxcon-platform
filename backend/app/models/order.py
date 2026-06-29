@@ -36,6 +36,13 @@ class Order(db.Model):
         db.String(36)
     )
 
+    marketplace_booking_id = db.Column(
+        db.String(36),
+        db.ForeignKey("marketplace_bookings.id"),
+        unique=True,
+        nullable=True,
+    )
+
     status = db.Column(
         db.String(50),
         default="PENDING"
@@ -59,6 +66,8 @@ class Order(db.Model):
             "laboratory_id": self.laboratory_id,
             "company_id": self.company_id,
             "contract_id": self.contract_id,
+            "marketplace_booking_id": self.marketplace_booking_id,
             "status": self.status,
-            "total_amount": self.total_amount
+            "total_amount": self.total_amount,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
         }
