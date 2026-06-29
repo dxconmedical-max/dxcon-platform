@@ -88,6 +88,8 @@ def logistics_dashboard():
 
         <br>
         <a href="/logistics/dispatch">Dispatch Center V6</a> |
+        <a href="/logistics/routes">Route Planner</a> |
+        <a href="/logistics/live-map">Live Map</a> |
         <a href="/iot-box">IoT Box V7</a> |
         <a href="/dashboard">Dashboard</a>
     </body>
@@ -168,7 +170,9 @@ def dispatch_center():
         </table>
 
         <br>
-        <a href="/logistics">Back Logistics</a>
+        <a href="/logistics">Back Logistics</a> |
+        <a href="/logistics/routes">Route Planner</a> |
+        <a href="/logistics/live-map">Live Map</a>
     </body>
     </html>
     """
@@ -244,7 +248,9 @@ def iot_box_dashboard():
         </table>
 
         <br>
-        <a href="/logistics">Back Logistics</a>
+        <a href="/logistics">Back Logistics</a> |
+        <a href="/logistics/routes">Route Planner</a> |
+        <a href="/logistics/live-map">Live Map</a>
     </body>
     </html>
     """
@@ -316,4 +322,100 @@ def simulate_normal(box_id):
     return """
     <h2>Box normalized</h2>
     <a href="/iot-box">Back IoT Box</a>
+    """
+
+
+@logistics_web_bp.route("/logistics/routes")
+def logistics_routes_page():
+    from app.models.logistics_route import RoutePlan, RouteStop
+
+    routes = RoutePlan.query.order_by(RoutePlan.created_at.desc()).limit(30).all()
+    rows = ""
+    for route in routes:
+        stop_count = RouteStop.query.filter_by(route_plan_id=route.id).count()
+        rows += f"""
+        <tr>
+            <td>{route.route_code}</td>
+            <td>{route.status}</td>
+            <td>{stop_count}</td>
+            <td>{route.total_distance_km}</td>
+            <td>{route.estimated_minutes}</td>
+            <td>{route.optimized_at or ""}</td>
+        </tr>
+        """
+
+    return f"""
+    <html>
+    <body style="font-family:Arial;background:#f1f5f9;padding:30px;">
+        <h1>Logistics Route Planner</h1>
+        <table border="1" cellpadding="10" style="background:white;width:100%;border-collapse:collapse;">
+            <tr>
+                <th>Route</th>
+                <th>Status</th>
+                <th>Stops</th>
+                <th>Distance (km)</th>
+                <th>ETA (min)</th>
+                <th>Optimized</th>
+            </tr>
+            {rows}
+        </table>
+        <br>
+        <a href="/logistics">Back Logistics</a> |
+        <a href="/logistics/dispatch">Dispatch</a> |
+        <a href="/logistics/live-map">Live Map</a>
+    </body>
+    </html>
+    """
+
+
+@logistics_web_bp.route("/logistics/live-map")
+def logistics_live_map():
+    from app.models.logistics_tracking import GPSPing
+    from app.models.logistics_driver import Vehicle
+
+    pings = GPSPing.query.order_by(GPSPing.recorded_at.desc()).limit(50).all()
+    vehicles = Vehicle.query.all()
+    ping_rows = ""
+    for ping in pings:
+        ping_rows += f"""
+        <tr>
+            <td>{ping.recorded_at}</td>
+            <td>{ping.latitude}</td>
+            <td>{ping.longitude}</td>
+            <td>{ping.speed}</td>
+            <td>{ping.driver_profile_id or ""}</td>
+        </tr>
+        """
+    vehicle_rows = ""
+    for vehicle in vehicles:
+        vehicle_rows += f"""
+        <tr>
+            <td>{vehicle.vehicle_code}</td>
+            <td>{vehicle.plate_number}</td>
+            <td>{vehicle.status}</td>
+            <td>{vehicle.latitude or ""}</td>
+            <td>{vehicle.longitude or ""}</td>
+        </tr>
+        """
+
+    return f"""
+    <html>
+    <body style="font-family:Arial;background:#f1f5f9;padding:30px;">
+        <h1>Logistics Live Map</h1>
+        <h2>Recent GPS Pings</h2>
+        <table border="1" cellpadding="10" style="background:white;width:100%;border-collapse:collapse;">
+            <tr><th>Time</th><th>Lat</th><th>Lng</th><th>Speed</th><th>Driver</th></tr>
+            {ping_rows}
+        </table>
+        <h2>Vehicles</h2>
+        <table border="1" cellpadding="10" style="background:white;width:100%;border-collapse:collapse;">
+            <tr><th>Code</th><th>Plate</th><th>Status</th><th>Lat</th><th>Lng</th></tr>
+            {vehicle_rows}
+        </table>
+        <br>
+        <a href="/logistics">Back Logistics</a> |
+        <a href="/logistics/routes">Routes</a> |
+        <a href="/logistics/dispatch">Dispatch</a>
+    </body>
+    </html>
     """

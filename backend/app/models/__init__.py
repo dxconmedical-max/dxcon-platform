@@ -57,6 +57,9 @@ from app.models.lab_operations import (
     ResultApproval,
     LabOperationResultRelease,
 )
+from app.models.logistics_driver import DriverProfile, Vehicle
+from app.models.logistics_route import RoutePlan, RouteStop, DispatchAssignment, ETAEstimate
+from app.models.logistics_tracking import GPSPing, DeliveryProof, ChainOfCustodyEvent
 
 from app.models.shipment import Shipment
 
