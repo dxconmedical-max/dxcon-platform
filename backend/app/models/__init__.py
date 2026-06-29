@@ -109,3 +109,8 @@ from app.models.interpretation_template import InterpretationTemplate
 from app.models.interpretation_result import InterpretationResult
 from app.models.reference_range import ReferenceRange
 from app.models.critical_value_rule import CriticalValueRule
+from app.models.notification import Notification
+from app.models.notification_template import NotificationTemplate
+from app.models.notification_recipient import NotificationRecipient
+from app.models.notification_delivery import NotificationDelivery
+from app.models.notification_preference import NotificationPreference
