@@ -121,8 +121,6 @@ from app.web.executive import executive_web_bp
 from app.web.executive_v8 import executive_v8_bp
 from app.web.incidents import incidents_web_bp
 from app.web.tat_kpi import tat_kpi_web_bp
-from app.api.alerts.routes import alerts_bp
-from app.web.alerts import alerts_web_bp
 from app.web.dispatch_performance import dispatch_performance_web_bp
 from app.api.patient_mobile.routes import patient_mobile_bp
 from app.web.doctor_kpi import doctor_kpi_web_bp

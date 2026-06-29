@@ -87,7 +87,7 @@ def logistics_dashboard():
         </div>
 
         <br>
-        <a href="/dispatch">Dispatch Center V6</a> |
+        <a href="/logistics/dispatch">Dispatch Center V6</a> |
         <a href="/iot-box">IoT Box V7</a> |
         <a href="/dashboard">Dashboard</a>
     </body>
@@ -95,7 +95,7 @@ def logistics_dashboard():
     """
 
 
-@logistics_web_bp.route("/dispatch")
+@logistics_web_bp.route("/logistics/dispatch")
 def dispatch_center():
 
     jobs = HomeCollection.query.all()
@@ -108,7 +108,7 @@ def dispatch_center():
 
         for c in collectors:
             assign_links += f"""
-            <a href="/dispatch/assign/{job.id}/{c.id}">
+            <a href="/logistics/dispatch/assign/{job.id}/{c.id}">
                 Assign {c.driver_code}
             </a><br>
             """
@@ -174,7 +174,7 @@ def dispatch_center():
     """
 
 
-@logistics_web_bp.route("/dispatch/assign/<job_id>/<collector_id>")
+@logistics_web_bp.route("/logistics/dispatch/assign/<job_id>/<collector_id>")
 def assign_collector(job_id, collector_id):
 
     job = HomeCollection.query.get(job_id)
@@ -189,7 +189,7 @@ def assign_collector(job_id, collector_id):
 
     return """
     <h2>Collector assigned</h2>
-    <a href="/dispatch">Back Dispatch</a>
+    <a href="/logistics/dispatch">Back Dispatch</a>
     """
 
 

@@ -13,7 +13,7 @@ executive_v8_bp = Blueprint(
 )
 
 
-@executive_v8_bp.route("/executive")
+@executive_v8_bp.route("/executive/v8")
 def executive():
 
     patients = Patient.query.count()
