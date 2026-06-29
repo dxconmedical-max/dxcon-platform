@@ -98,3 +98,9 @@ from app.models.doctor_commission import DoctorCommission
 from app.models.refund_record import RefundRecord
 from app.models.report_snapshot import ReportSnapshot
 from app.models.kpi_event import KPIEvent
+from app.models.lab_result import LabResult
+from app.models.lab_result_item import LabResultItem
+from app.models.result_attachment import ResultAttachment
+from app.models.result_review import ResultReview
+from app.models.result_release import ResultRelease
+from app.models.result_timeline import ResultTimeline

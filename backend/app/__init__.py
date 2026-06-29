@@ -44,6 +44,7 @@ from app.api.order_execution.routes import order_execution_bp
 from app.api.billing.routes import billing_bp
 from app.api.partner_portal.routes import partner_portal_bp
 from app.api.reporting.routes import reporting_bp
+from app.api.results.routes import results_bp
 from app.api.contracts.routes import contracts_bp
 from app.api.contract_prices.routes import contract_prices_bp
 from app.api.invoices.routes import invoices_bp
@@ -69,6 +70,7 @@ from app.web.collector_operations import collector_operations_web_bp
 from app.web.order_execution import order_execution_web_bp
 from app.web.partner_portal_v2 import partner_portal_web_bp
 from app.web.reporting_bi import reporting_bi_web_bp
+from app.web.result_gateway import result_gateway_web_bp
 from app.web.contracts import contracts_web_bp
 from app.web.orders import orders_web_bp
 from app.web.invoices import invoices_web_bp
@@ -147,6 +149,7 @@ def create_app():
     app.register_blueprint(billing_bp)
     app.register_blueprint(partner_portal_bp)
     app.register_blueprint(reporting_bp)
+    app.register_blueprint(results_bp)
     app.register_blueprint(contracts_bp)
     app.register_blueprint(contract_prices_bp)
     app.register_blueprint(invoices_bp)
@@ -176,6 +179,7 @@ def create_app():
     app.register_blueprint(invoices_web_bp)
     app.register_blueprint(payments_web_bp)
     app.register_blueprint(order_items_web_bp)
+    app.register_blueprint(result_gateway_web_bp)
     app.register_blueprint(test_results_web_bp)
     app.register_blueprint(reports_web_bp)
     app.register_blueprint(report_pdf_web_bp)
