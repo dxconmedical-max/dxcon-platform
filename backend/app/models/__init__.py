@@ -104,3 +104,8 @@ from app.models.result_attachment import ResultAttachment
 from app.models.result_review import ResultReview
 from app.models.result_release import ResultRelease
 from app.models.result_timeline import ResultTimeline
+from app.models.interpretation_rule import InterpretationRule
+from app.models.interpretation_template import InterpretationTemplate
+from app.models.interpretation_result import InterpretationResult
+from app.models.reference_range import ReferenceRange
+from app.models.critical_value_rule import CriticalValueRule
