@@ -142,3 +142,11 @@ from app.models.lis_order_message import LISOrderMessage
 from app.models.lis_result_message import LISResultMessage
 from app.models.his_patient_message import HISPatientMessage
 from app.models.integration_audit_log import IntegrationAuditLog
+from app.models.iot_device import IoTDevice
+from app.models.cold_box_device import ColdBoxDevice
+from app.models.temperature_reading import TemperatureReading
+from app.models.humidity_reading import HumidityReading
+from app.models.shock_event import ShockEvent
+from app.models.battery_event import BatteryEvent
+from app.models.gps_reading import GPSReading
+from app.models.cold_chain_alert import ColdChainAlert
