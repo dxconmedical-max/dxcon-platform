@@ -119,3 +119,11 @@ from app.models.patient_preference import PatientPreference
 from app.models.patient_consent import PatientConsent
 from app.models.patient_device import PatientDevice
 from app.models.patient_notification_setting import PatientNotificationSetting
+from app.models.clinic_profile import ClinicProfile
+from app.models.clinic_department import ClinicDepartment
+from app.models.clinic_doctor import ClinicDoctor
+from app.models.clinic_patient import ClinicPatient
+from app.models.clinic_booking import ClinicBooking
+from app.models.clinic_order import ClinicOrder
+from app.models.clinic_referral import ClinicReferral
+from app.models.clinic_revenue_summary import ClinicRevenueSummary
