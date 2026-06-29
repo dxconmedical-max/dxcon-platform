@@ -88,6 +88,10 @@ from app.models.sample_label import SampleLabel
 from app.models.sample_incident import SampleIncident
 from app.models.recollect_request import RecollectRequest
 from app.models.invoice_item import InvoiceItem
+from app.models.billing_account import BillingAccount
+from app.models.billing_ledger import BillingLedger
+from app.models.billing_adjustment import BillingAdjustment
+from app.models.tax_record import TaxRecord
 from app.models.payment_record import PaymentRecord
 from app.models.partner_settlement import PartnerSettlement
 from app.models.settlement_item import SettlementItem

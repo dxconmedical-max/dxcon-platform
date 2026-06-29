@@ -79,6 +79,7 @@ from app.web.interpretation_admin import interpretation_admin_web_bp
 from app.web.notifications_admin import notifications_admin_web_bp
 from app.web.patient_portal_v2 import patient_portal_v2_web_bp
 from app.web.clinic_portal_v2 import clinic_portal_v2_web_bp
+from app.web.billing_invoice_v2 import billing_invoice_web_bp
 from app.web.contracts import contracts_web_bp
 from app.web.orders import orders_web_bp
 from app.web.invoices import invoices_web_bp
@@ -198,6 +199,7 @@ def create_app():
     app.register_blueprint(notifications_admin_web_bp)
     app.register_blueprint(patient_portal_v2_web_bp)
     app.register_blueprint(clinic_portal_v2_web_bp)
+    app.register_blueprint(billing_invoice_web_bp)
     app.register_blueprint(test_results_web_bp)
     app.register_blueprint(reports_web_bp)
     app.register_blueprint(report_pdf_web_bp)

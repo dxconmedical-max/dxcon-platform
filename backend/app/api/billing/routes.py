@@ -1,6 +1,11 @@
 from flask import Blueprint, request
 
-from app.services.billing_service import BillingError, BillingService
+from app.services.billing_service import (
+    BillingError,
+    BillingService,
+    InvoiceService,
+    LedgerService,
+)
 from app.services.commission_service import CommissionService
 from app.services.refund_service import RefundService, RefundServiceError
 from app.services.settlement_service import SettlementError, SettlementService
@@ -23,11 +28,11 @@ def _actor_email():
 
 @billing_bp.route("/invoices", methods=["GET"])
 def list_invoices():
-    invoices = BillingService.list_invoices(
+    payload = InvoiceService.list_invoices(
         partner_id=request.args.get("partner_id"),
         status=request.args.get("status"),
     )
-    return {"count": len(invoices), "invoices": [inv.to_dict() for inv in invoices]}
+    return payload
 
 
 @billing_bp.route("/invoices", methods=["POST"])
@@ -37,7 +42,7 @@ def create_invoice():
     if not medical_order_id:
         return {"error": "medical_order_id is required"}, 400
     try:
-        invoice = BillingService.create_invoice_from_medical_order(
+        invoice = InvoiceService.create_invoice(
             medical_order_id,
             actor_email=_actor_email(),
             ip_address=_client_ip(),
@@ -50,9 +55,41 @@ def create_invoice():
 @billing_bp.route("/invoices/<invoice_id>", methods=["GET"])
 def get_invoice(invoice_id):
     try:
-        payload = BillingService.get_invoice_detail(invoice_id)
+        payload = InvoiceService.get_invoice(invoice_id)
     except BillingError as exc:
         return {"error": exc.message}, exc.status_code
+    return payload
+
+
+@billing_bp.route("/invoices/<invoice_id>/mark-paid", methods=["POST"])
+def mark_invoice_paid(invoice_id):
+    data = request.get_json(silent=True) or {}
+    try:
+        payload = InvoiceService.mark_paid(
+            invoice_id,
+            amount=data.get("amount"),
+            payment_method=data.get("payment_method", "BANK_TRANSFER"),
+            transaction_ref=data.get("transaction_ref"),
+            actor_email=_actor_email(),
+            ip_address=_client_ip(),
+        )
+    except BillingError as exc:
+        return {"error": exc.message}, exc.status_code
+    return {"message": "Invoice marked paid", **payload}
+
+
+@billing_bp.route("/ledger", methods=["GET"])
+def billing_ledger():
+    payload = LedgerService.list_ledger(
+        account_id=request.args.get("account_id"),
+        reference_id=request.args.get("reference_id"),
+    )
+    return payload
+
+
+@billing_bp.route("/summary", methods=["GET"])
+def billing_summary():
+    payload = BillingService.get_summary(partner_id=request.args.get("partner_id"))
     return payload
 
 

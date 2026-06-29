@@ -12,7 +12,7 @@ from app.extensions.db import db
 from app.models.company import Company
 from app.models.partner import Partner
 from app.models.partner_service_mapping import PartnerServiceMapping
-from app.services.billing_service import BillingService
+from app.services.billing_service import BillingService, InvoiceService
 from app.services.commission_service import CommissionService
 from app.services.marketplace_booking import MarketplaceBookingService
 from app.services.order_workflow_service import OrderWorkflowService
@@ -52,8 +52,8 @@ def seed_billing_demo():
         }
     )
     order = OrderWorkflowService.create_from_booking(booking.id)
-    invoice = BillingService.create_invoice_from_medical_order(order.id)
-    BillingService.record_payment(invoice.id)
+    invoice = InvoiceService.create_invoice(order.id)
+    InvoiceService.mark_paid(invoice.id, transaction_ref="BIL-DEMO-001")
     CommissionService.calculate_for_invoice(invoice.id, partner_id=mapping.partner_id)
     settlement = SettlementService.create_settlement(mapping.partner_id)
     SettlementService.finalize_settlement(settlement.id)
