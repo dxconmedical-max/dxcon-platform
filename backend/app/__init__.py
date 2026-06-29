@@ -137,6 +137,7 @@ from app.api.collector.routes import collector_bp
 from app.web.collector_console import collector_console_web_bp
 from app.web.audit_center import audit_center_web_bp
 from app.api.ai_v2.batch import ai_batch_bp
+from app.api.crm.routes import crm_bp
 from app.api.lab.routes import lab_bp
 from app.api.logistics.routes import logistics_platform_bp
 def create_app():
@@ -285,6 +286,7 @@ def create_app():
     app.register_blueprint(admin_security_bp)
     app.register_blueprint(ai_batch_bp)
     app.register_blueprint(system_bp)
+    app.register_blueprint(crm_bp)
     app.register_blueprint(lab_bp)
     app.register_blueprint(logistics_platform_bp)
     app.register_blueprint(monitor_web_bp)

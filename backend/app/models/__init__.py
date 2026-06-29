@@ -44,7 +44,12 @@ from app.models.alert import Alert
 from app.models.incident import Incident
 from app.models.alert import Alert
 from app.models.clinical_summary import ClinicalSummary
-from app.models.crm_lead import CrmLead
+from app.models.crm_lead import CrmLead, Lead
+from app.models.crm_organization import Organization, Customer, ContactPerson
+from app.models.crm_pipeline import SalesPipeline, PipelineStage, Opportunity
+from app.models.crm_activity import Activity
+from app.models.crm_quotation import Quotation, QuotationItem, PriceBook, DiscountRule
+from app.models.crm_sales_contract import SalesContract, SalesContractPrice
 from app.models.lab_facility import LabShift, LabBench, Analyzer
 from app.models.lab_accession import SampleAccession, Worklist, LabWorkflowTransition
 from app.models.lab_operations import (
