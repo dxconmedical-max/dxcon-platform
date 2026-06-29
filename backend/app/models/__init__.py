@@ -114,3 +114,8 @@ from app.models.notification_template import NotificationTemplate
 from app.models.notification_recipient import NotificationRecipient
 from app.models.notification_delivery import NotificationDelivery
 from app.models.notification_preference import NotificationPreference
+from app.models.patient_profile import PatientProfile
+from app.models.patient_preference import PatientPreference
+from app.models.patient_consent import PatientConsent
+from app.models.patient_device import PatientDevice
+from app.models.patient_notification_setting import PatientNotificationSetting

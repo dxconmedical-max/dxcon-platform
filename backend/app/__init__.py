@@ -47,6 +47,7 @@ from app.api.reporting.routes import reporting_bp
 from app.api.results.routes import results_bp
 from app.api.interpretation.routes import interpretation_bp, reference_ranges_bp
 from app.api.notifications.routes import notifications_bp, notification_templates_bp
+from app.api.patient_portal.routes import patient_portal_bp
 from app.api.contracts.routes import contracts_bp
 from app.api.contract_prices.routes import contract_prices_bp
 from app.api.invoices.routes import invoices_bp
@@ -75,6 +76,7 @@ from app.web.reporting_bi import reporting_bi_web_bp
 from app.web.result_gateway import result_gateway_web_bp
 from app.web.interpretation_admin import interpretation_admin_web_bp
 from app.web.notifications_admin import notifications_admin_web_bp
+from app.web.patient_portal_v2 import patient_portal_v2_web_bp
 from app.web.contracts import contracts_web_bp
 from app.web.orders import orders_web_bp
 from app.web.invoices import invoices_web_bp
@@ -158,6 +160,7 @@ def create_app():
     app.register_blueprint(reference_ranges_bp)
     app.register_blueprint(notifications_bp)
     app.register_blueprint(notification_templates_bp)
+    app.register_blueprint(patient_portal_bp)
     app.register_blueprint(contracts_bp)
     app.register_blueprint(contract_prices_bp)
     app.register_blueprint(invoices_bp)
@@ -190,6 +193,7 @@ def create_app():
     app.register_blueprint(result_gateway_web_bp)
     app.register_blueprint(interpretation_admin_web_bp)
     app.register_blueprint(notifications_admin_web_bp)
+    app.register_blueprint(patient_portal_v2_web_bp)
     app.register_blueprint(test_results_web_bp)
     app.register_blueprint(reports_web_bp)
     app.register_blueprint(report_pdf_web_bp)
