@@ -81,3 +81,15 @@ class Config:
     CACHE_DEFAULT_TTL_SECONDS = int(os.getenv("CACHE_DEFAULT_TTL_SECONDS", "60"))
     SLOW_QUERY_THRESHOLD_MS = float(os.getenv("SLOW_QUERY_THRESHOLD_MS", "100"))
     BACKGROUND_TASK_WORKERS = int(os.getenv("BACKGROUND_TASK_WORKERS", "4"))
+
+    BUILD_VERSION = os.getenv("BUILD_VERSION", "2.5.0-dev")
+    GIT_SHA = os.getenv("GIT_SHA", "local")
+    BUILD_TIME = os.getenv("BUILD_TIME", "")
+
+    CORRELATION_ID_HEADER = os.getenv("CORRELATION_ID_HEADER", "X-Correlation-ID")
+
+    DB_CONNECT_RETRIES = int(os.getenv("DB_CONNECT_RETRIES", "5"))
+    DB_CONNECT_RETRY_DELAY_SECONDS = float(os.getenv("DB_CONNECT_RETRY_DELAY_SECONDS", "2"))
+    STARTUP_VALIDATE_DB = os.getenv("STARTUP_VALIDATE_DB", "true").lower() in {
+        "1", "true", "yes", "on",
+    }

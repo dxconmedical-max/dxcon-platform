@@ -9,7 +9,11 @@ SECURITY_HEADERS = {
 
 RATE_LIMIT_EXEMPT_PATHS = {
     "/api/v1/system/health",
+    "/api/v1/system/live",
+    "/api/v1/system/ready",
     "/api/v1/system/metrics",
+    "/api/v1/system/version",
+    "/api/v1/system/build",
 }
 
 

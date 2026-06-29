@@ -1,6 +1,10 @@
 from flask import Blueprint
 
+from app.core.build_info import build_info
+from app.core.database_startup import verify_database_connection, verify_migrations
+from app.core.deployment import deployment_readiness
 from app.core.metrics import metrics
+from app.core.monitoring import application_metrics
 from app.core.performance_metrics import performance_metrics
 from app.extensions.db import db
 from app.models.invoice import Invoice
@@ -56,11 +60,13 @@ def stats():
 
 @system_bp.route("/health")
 def health():
+    from flask import current_app
+
     db_status = "OK"
     overall_status = "OK"
 
     try:
-        db.session.execute(db.text("SELECT 1"))
+        verify_database_connection(current_app._get_current_object(), retries=1, delay_seconds=0)
     except Exception:
         db_status = "ERROR"
         overall_status = "DEGRADED"
@@ -71,12 +77,60 @@ def health():
         "status": overall_status,
         "service": "DxCon Production",
         "database": db_status,
+        "build": build_info(),
+    }
+
+
+@system_bp.route("/live")
+def live():
+    return {
+        "status": "OK",
+        "alive": True,
+    }
+
+
+@system_bp.route("/ready")
+def ready():
+    from flask import current_app
+
+    app = current_app._get_current_object()
+    migration = app.extensions.get("dxcon_deployment", {}).get("migration_status", {})
+
+    try:
+        verify_database_connection(app, retries=1, delay_seconds=0)
+        migration = migration or verify_migrations(app)
+        if migration.get("ready"):
+            return {"status": "OK", "ready": True, "database": "OK", "migrations": migration}
+        return {"status": "DEGRADED", "ready": False, "migrations": migration}, 503
+    except Exception as exc:
+        return {"status": "ERROR", "ready": False, "error": str(exc)}, 503
+
+
+@system_bp.route("/version")
+def version():
+    return build_info()
+
+
+@system_bp.route("/build")
+def build():
+    from flask import current_app
+
+    return {
+        **build_info(),
+        "readiness": deployment_readiness(current_app._get_current_object()),
     }
 
 
 @system_bp.route("/metrics")
 def system_metrics():
-    return metrics.snapshot()
+    from flask import current_app
+
+    app = current_app._get_current_object()
+    payload = application_metrics(app)
+    legacy = metrics.snapshot()
+    payload["legacy"] = legacy
+    payload.update(legacy)
+    return payload
 
 
 @system_bp.route("/performance")

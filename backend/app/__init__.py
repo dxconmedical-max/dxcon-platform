@@ -19,6 +19,7 @@ from flask import Flask, redirect
 
 from app.core.config import Config
 from app.core.config_validation import validate_config
+from app.core.deployment import init_deployment
 from app.core.jwt_auth import init_jwt_security
 from app.core.observability import finalize_observability, init_observability
 from app.core.performance import init_performance
@@ -291,4 +292,5 @@ def create_app():
     app.register_blueprint(box_qr_bp)
     app.register_blueprint(box_qr_web_bp)
     finalize_observability(app)
+    init_deployment(app)
     return app

@@ -18,6 +18,10 @@ def get_user_id():
     return getattr(g, "user_id", None) if g else None
 
 
+def get_correlation_id():
+    return getattr(g, "correlation_id", None) if g else None
+
+
 def _resolve_user_id():
     user_id = request.headers.get("X-User-Id")
     if user_id:
@@ -41,11 +45,13 @@ def _resolve_user_id():
 
 def init_request_context(app):
     header_name = app.config.get("REQUEST_ID_HEADER", "X-Request-ID")
+    correlation_header = app.config.get("CORRELATION_ID_HEADER", "X-Correlation-ID")
 
     @app.before_request
     def assign_request_context():
         incoming = request.headers.get(header_name)
         g.request_id = incoming or str(uuid.uuid4())
+        g.correlation_id = request.headers.get(correlation_header) or g.request_id
         g.request_start_time = time.perf_counter()
         g.user_id = _resolve_user_id()
 
@@ -63,9 +69,11 @@ def init_request_context(app):
             metrics.record_error()
 
         response.headers[header_name] = getattr(g, "request_id", "unknown")
+        response.headers[correlation_header] = getattr(g, "correlation_id", "unknown")
 
         log_payload = {
             "request_id": getattr(g, "request_id", "unknown"),
+            "correlation_id": getattr(g, "correlation_id", "unknown"),
             "method": request.method,
             "path": sanitize_path(request.full_path.rstrip("?")),
             "status_code": response.status_code,
