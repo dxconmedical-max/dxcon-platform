@@ -10,7 +10,7 @@ from app.services.ai_interpretation import generate_interpretation
 test_results_web_bp = Blueprint("test_results_web", __name__)
 
 
-@test_results_web_bp.route("/results")
+@test_results_web_bp.route("/legacy/results")
 def results_page():
 
     results = TestResult.query.all()
@@ -84,7 +84,7 @@ def generate_ai_comment(result_id):
 
     db.session.commit()
 
-    return redirect("/results")
+    return redirect("/legacy/results")
 
 
 @test_results_web_bp.route("/results/new", methods=["GET", "POST"])
@@ -116,7 +116,7 @@ def new_result():
         db.session.add(result)
         db.session.commit()
 
-        return redirect("/results")
+        return redirect("/legacy/results")
 
     item_options = ""
 
@@ -160,7 +160,7 @@ def new_result():
         </form>
 
         <br>
-        <a href="/results">Back to Results</a>
+        <a href="/legacy/results">Back to Results</a>
 
     </body>
     </html>

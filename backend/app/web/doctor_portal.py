@@ -20,7 +20,7 @@ from app.utils.auth import role_required
 doctor_portal_web_bp = Blueprint("doctor_portal_web", __name__)
 
 
-@doctor_portal_web_bp.route("/doctor")
+@doctor_portal_web_bp.route("/legacy/doctor")
 @role_required("SUPER_ADMIN", "DOCTOR")
 def doctor_dashboard():
 
@@ -189,4 +189,4 @@ def approve_result(result_id):
             f"{result.test_name} approved and e-signed"
         )
 
-    return redirect("/doctor")
+    return redirect("/legacy/doctor")
