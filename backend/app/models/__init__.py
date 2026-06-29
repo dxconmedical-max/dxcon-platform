@@ -96,3 +96,5 @@ from app.models.commission_ledger import CommissionLedger
 from app.models.collector_payout import CollectorPayout
 from app.models.doctor_commission import DoctorCommission
 from app.models.refund_record import RefundRecord
+from app.models.report_snapshot import ReportSnapshot
+from app.models.kpi_event import KPIEvent
