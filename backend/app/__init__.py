@@ -41,6 +41,7 @@ from app.api.scheduling.routes import scheduling_bp
 from app.api.order_lifecycle.routes import order_lifecycle_bp
 from app.api.collector_operations.routes import collector_operations_bp
 from app.api.order_execution.routes import order_execution_bp
+from app.api.billing.routes import billing_bp
 from app.api.contracts.routes import contracts_bp
 from app.api.contract_prices.routes import contract_prices_bp
 from app.api.invoices.routes import invoices_bp
@@ -139,6 +140,7 @@ def create_app():
     app.register_blueprint(order_lifecycle_bp)
     app.register_blueprint(collector_operations_bp)
     app.register_blueprint(order_execution_bp)
+    app.register_blueprint(billing_bp)
     app.register_blueprint(contracts_bp)
     app.register_blueprint(contract_prices_bp)
     app.register_blueprint(invoices_bp)

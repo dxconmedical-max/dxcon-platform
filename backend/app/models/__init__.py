@@ -87,3 +87,12 @@ from app.models.medical_sample import Sample
 from app.models.sample_label import SampleLabel
 from app.models.sample_incident import SampleIncident
 from app.models.recollect_request import RecollectRequest
+from app.models.invoice_item import InvoiceItem
+from app.models.payment_record import PaymentRecord
+from app.models.partner_settlement import PartnerSettlement
+from app.models.settlement_item import SettlementItem
+from app.models.commission_rule import CommissionRule
+from app.models.commission_ledger import CommissionLedger
+from app.models.collector_payout import CollectorPayout
+from app.models.doctor_commission import DoctorCommission
+from app.models.refund_record import RefundRecord

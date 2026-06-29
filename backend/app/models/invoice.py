@@ -39,6 +39,21 @@ class Invoice(db.Model):
         default="UNPAID"
     )
 
+    medical_order_id = db.Column(
+        db.String(36),
+        db.ForeignKey("medical_orders.id"),
+    )
+
+    partner_id = db.Column(
+        db.String(36),
+        db.ForeignKey("partners.id"),
+    )
+
+    billing_status = db.Column(
+        db.String(50),
+        default="DRAFT",
+    )
+
     created_at = db.Column(
         db.DateTime,
         default=datetime.utcnow
@@ -51,5 +66,9 @@ class Invoice(db.Model):
             "company_id": self.company_id,
             "order_id": self.order_id,
             "total_amount": self.total_amount,
-            "payment_status": self.payment_status
+            "payment_status": self.payment_status,
+            "medical_order_id": self.medical_order_id,
+            "partner_id": self.partner_id,
+            "billing_status": self.billing_status,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
         }
