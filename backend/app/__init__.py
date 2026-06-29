@@ -49,6 +49,7 @@ from app.api.interpretation.routes import interpretation_bp, reference_ranges_bp
 from app.api.notifications.routes import notifications_bp, notification_templates_bp
 from app.api.patient_portal.routes import patient_portal_bp
 from app.api.clinic_portal.routes import clinic_portal_bp
+from app.api.doctor_portal.routes import doctor_portal_bp
 from app.api.contracts.routes import contracts_bp
 from app.api.contract_prices.routes import contract_prices_bp
 from app.api.invoices.routes import invoices_bp
@@ -81,6 +82,7 @@ from app.web.interpretation_admin import interpretation_admin_web_bp
 from app.web.notifications_admin import notifications_admin_web_bp
 from app.web.patient_portal_v2 import patient_portal_v2_web_bp
 from app.web.clinic_portal_v2 import clinic_portal_v2_web_bp
+from app.web.doctor_portal_v2 import doctor_portal_v2_web_bp
 from app.web.billing_invoice_v2 import billing_invoice_web_bp
 from app.web.payment_gateway_v2 import payment_gateway_web_bp
 from app.web.integrations_v2 import integrations_web_bp
@@ -170,6 +172,7 @@ def create_app():
     app.register_blueprint(notification_templates_bp)
     app.register_blueprint(patient_portal_bp)
     app.register_blueprint(clinic_portal_bp)
+    app.register_blueprint(doctor_portal_bp)
     app.register_blueprint(contracts_bp)
     app.register_blueprint(contract_prices_bp)
     app.register_blueprint(invoices_bp)
@@ -206,6 +209,7 @@ def create_app():
     app.register_blueprint(notifications_admin_web_bp)
     app.register_blueprint(patient_portal_v2_web_bp)
     app.register_blueprint(clinic_portal_v2_web_bp)
+    app.register_blueprint(doctor_portal_v2_web_bp)
     app.register_blueprint(billing_invoice_web_bp)
     app.register_blueprint(payment_gateway_web_bp)
     app.register_blueprint(integrations_web_bp)

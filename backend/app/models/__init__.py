@@ -127,6 +127,14 @@ from app.models.patient_preference import PatientPreference
 from app.models.patient_consent import PatientConsent
 from app.models.patient_device import PatientDevice
 from app.models.patient_notification_setting import PatientNotificationSetting
+from app.models.doctor_profile import DoctorProfile
+from app.models.doctor_specialty import DoctorSpecialty
+from app.models.doctor_availability import DoctorAvailability
+from app.models.doctor_patient import DoctorPatient
+from app.models.doctor_referral import DoctorReferral
+from app.models.doctor_follow_up import DoctorFollowUp
+from app.models.doctor_note import DoctorNote
+from app.models.doctor_dashboard import DoctorDashboard
 from app.models.clinic_profile import ClinicProfile
 from app.models.clinic_department import ClinicDepartment
 from app.models.clinic_doctor import ClinicDoctor
