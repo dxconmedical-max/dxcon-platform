@@ -13,6 +13,7 @@ class EventLog(db.Model):
     object_id = db.Column(db.String(100))
     message = db.Column(db.Text)
     severity = db.Column(db.String(50), default="INFO")
+    request_id = db.Column(db.String(36))
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -24,5 +25,6 @@ class EventLog(db.Model):
             "object_id": self.object_id,
             "message": self.message,
             "severity": self.severity,
+            "request_id": self.request_id,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

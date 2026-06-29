@@ -1,11 +1,15 @@
 from flask import Blueprint
-from app.models.user import User
-from app.models.patient import Patient
+
+from app.core.metrics import metrics
+from app.extensions.db import db
+from app.models.invoice import Invoice
 from app.models.order import Order
+from app.models.patient import Patient
+from app.models.payment import Payment
 from app.models.sample_tracking import SampleTracking
 from app.models.test_result import TestResult
-from app.models.invoice import Invoice
-from app.models.payment import Payment
+from app.models.user import User
+
 system_bp = Blueprint(
     "system",
     __name__,
@@ -33,6 +37,8 @@ def routes():
         "count": len(data),
         "routes": sorted(data, key=lambda x: x["route"])
     }
+
+
 @system_bp.route("/stats")
 def stats():
 
@@ -45,14 +51,31 @@ def stats():
         "invoices": Invoice.query.count(),
         "payments": Payment.query.count()
     }
+
+
 @system_bp.route("/health")
 def health():
+    db_status = "OK"
+    overall_status = "OK"
+
+    try:
+        db.session.execute(db.text("SELECT 1"))
+    except Exception:
+        db_status = "ERROR"
+        overall_status = "DEGRADED"
+
+    metrics.set_health_status(overall_status)
 
     return {
-        "status": "OK",
+        "status": overall_status,
         "service": "DxCon Production",
-        "database": "PostgreSQL"
+        "database": db_status,
     }
+
+
+@system_bp.route("/metrics")
+def system_metrics():
+    return metrics.snapshot()
 
 
 @system_bp.route("/backup-status")

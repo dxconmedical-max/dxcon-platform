@@ -19,6 +19,7 @@ from flask import Flask, redirect
 from flask_cors import CORS
 
 from app.core.config import Config
+from app.core.observability import finalize_observability, init_observability
 
 from app.extensions.db import db
 from app.extensions.jwt import jwt
@@ -141,6 +142,7 @@ def create_app():
 
     db.init_app(app)
     jwt.init_app(app)
+    init_observability(app)
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
@@ -270,4 +272,5 @@ def create_app():
     app.register_blueprint(logistics_v2_web_bp)
     app.register_blueprint(box_qr_bp)
     app.register_blueprint(box_qr_web_bp)
+    finalize_observability(app)
     return app

@@ -26,3 +26,18 @@ class Config:
         "APP_ENV",
         "development"
     )
+
+    LOG_LEVEL = os.getenv(
+        "LOG_LEVEL",
+        "INFO"
+    )
+
+    LOG_FORMAT = os.getenv(
+        "LOG_FORMAT",
+        "text"
+    )
+
+    REQUEST_ID_HEADER = os.getenv(
+        "REQUEST_ID_HEADER",
+        "X-Request-ID"
+    )
