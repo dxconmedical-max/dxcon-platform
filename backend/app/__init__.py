@@ -53,6 +53,7 @@ from app.api.contracts.routes import contracts_bp
 from app.api.contract_prices.routes import contract_prices_bp
 from app.api.invoices.routes import invoices_bp
 from app.api.payments.routes import payments_bp
+from app.api.integrations.routes import integrations_bp
 from app.api.dashboard.routes import dashboard_bp
 from app.api.seeds.routes import seeds_bp
 from app.api.mobile.routes import mobile_bp
@@ -81,6 +82,7 @@ from app.web.patient_portal_v2 import patient_portal_v2_web_bp
 from app.web.clinic_portal_v2 import clinic_portal_v2_web_bp
 from app.web.billing_invoice_v2 import billing_invoice_web_bp
 from app.web.payment_gateway_v2 import payment_gateway_web_bp
+from app.web.integrations_v2 import integrations_web_bp
 from app.web.contracts import contracts_web_bp
 from app.web.orders import orders_web_bp
 from app.web.invoices import invoices_web_bp
@@ -170,6 +172,7 @@ def create_app():
     app.register_blueprint(contract_prices_bp)
     app.register_blueprint(invoices_bp)
     app.register_blueprint(payments_bp)
+    app.register_blueprint(integrations_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(seeds_bp)
     app.register_blueprint(mobile_bp)
@@ -202,6 +205,7 @@ def create_app():
     app.register_blueprint(clinic_portal_v2_web_bp)
     app.register_blueprint(billing_invoice_web_bp)
     app.register_blueprint(payment_gateway_web_bp)
+    app.register_blueprint(integrations_web_bp)
     app.register_blueprint(test_results_web_bp)
     app.register_blueprint(reports_web_bp)
     app.register_blueprint(report_pdf_web_bp)

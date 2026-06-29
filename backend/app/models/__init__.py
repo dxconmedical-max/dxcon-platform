@@ -135,3 +135,10 @@ from app.models.clinic_booking import ClinicBooking
 from app.models.clinic_order import ClinicOrder
 from app.models.clinic_referral import ClinicReferral
 from app.models.clinic_revenue_summary import ClinicRevenueSummary
+from app.models.integration_partner import IntegrationPartner
+from app.models.integration_connection import IntegrationConnection
+from app.models.integration_message import IntegrationMessage
+from app.models.lis_order_message import LISOrderMessage
+from app.models.lis_result_message import LISResultMessage
+from app.models.his_patient_message import HISPatientMessage
+from app.models.integration_audit_log import IntegrationAuditLog
