@@ -1,6 +1,7 @@
 from flask import Blueprint
 
 from app.core.metrics import metrics
+from app.core.performance_metrics import performance_metrics
 from app.extensions.db import db
 from app.models.invoice import Invoice
 from app.models.order import Order
@@ -76,6 +77,13 @@ def health():
 @system_bp.route("/metrics")
 def system_metrics():
     return metrics.snapshot()
+
+
+@system_bp.route("/performance")
+def system_performance():
+    from flask import current_app
+
+    return performance_metrics.snapshot(current_app)
 
 
 @system_bp.route("/backup-status")

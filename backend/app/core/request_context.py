@@ -62,15 +62,15 @@ def init_request_context(app):
         if response.status_code >= 400:
             metrics.record_error()
 
-        response.headers[header_name] = g.request_id
+        response.headers[header_name] = getattr(g, "request_id", "unknown")
 
         log_payload = {
-            "request_id": g.request_id,
+            "request_id": getattr(g, "request_id", "unknown"),
             "method": request.method,
             "path": sanitize_path(request.full_path.rstrip("?")),
             "status_code": response.status_code,
             "duration_ms": duration_ms,
-            "user_id": g.user_id,
+            "user_id": getattr(g, "user_id", None),
         }
 
         log_format = (app.config.get("LOG_FORMAT") or "text").lower()

@@ -16,10 +16,13 @@ from app.web.executive_v9 import executive_v9_bp
 from app.web.crm_v2 import crm_v2_web_bp
 from app.web.finance import finance_web_bp
 from flask import Flask, redirect
-from flask_cors import CORS
 
 from app.core.config import Config
+from app.core.config_validation import validate_config
+from app.core.jwt_auth import init_jwt_security
 from app.core.observability import finalize_observability, init_observability
+from app.core.performance import init_performance
+from app.core.security import init_security
 
 from app.extensions.db import db
 from app.extensions.jwt import jwt
@@ -136,13 +139,28 @@ from app.api.ai_v2.batch import ai_batch_bp
 def create_app():
 
     app = Flask(__name__)
-    CORS(app)
-    app.secret_key = "dxcon-secret-key"
     app.config.from_object(Config)
+    app.secret_key = app.config["SECRET_KEY"]
+    validate_config(app)
+    init_observability(app)
+    init_security(app)
+
+    from app.core.db_pool import build_engine_options
+
+    app.config.setdefault(
+        "SQLALCHEMY_ENGINE_OPTIONS",
+        build_engine_options(
+            app.config.get("SQLALCHEMY_DATABASE_URI"),
+            pool_size=app.config.get("DB_POOL_SIZE", 5),
+            max_overflow=app.config.get("DB_MAX_OVERFLOW", 10),
+            pool_recycle=app.config.get("DB_POOL_RECYCLE", 280),
+        ),
+    )
 
     db.init_app(app)
+    init_performance(app)
     jwt.init_app(app)
-    init_observability(app)
+    init_jwt_security(app)
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)

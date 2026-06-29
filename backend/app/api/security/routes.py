@@ -1,9 +1,17 @@
-from flask import Blueprint, request
+from app.core.audit import write_audit
+from app.core.passwords import hash_password
+from app.core.roles import ALL_ROLES
+from app.core.validation import (
+    get_json_body,
+    require_fields,
+    validate_email,
+    validate_password,
+    validate_role,
+)
 from app.extensions.db import db
 from app.models.user import User
-from app.core.roles import ALL_ROLES
-from app.core.passwords import hash_password
-from app.core.audit import write_audit
+
+from flask import Blueprint
 
 security_api_bp = Blueprint(
     "security_api",
@@ -34,19 +42,13 @@ def users():
 
 @security_api_bp.route("/users", methods=["POST"])
 def create_user():
+    data = get_json_body()
+    require_fields(data, "email", "password")
 
-    data = request.json or {}
-
-    email = data.get("email")
+    email = validate_email(data.get("email"))
+    password = validate_password(data.get("password"))
     phone = data.get("phone")
-    password = data.get("password") or "123456"
-    role = data.get("role") or "PATIENT"
-
-    if not email:
-        return {"error": "email is required"}, 400
-
-    if role not in ALL_ROLES:
-        return {"error": "invalid role", "roles": ALL_ROLES}, 400
+    role = validate_role(data.get("role", "PATIENT"), ALL_ROLES)
 
     existing = User.query.filter_by(
         email=email
@@ -80,13 +82,9 @@ def create_user():
 
 @security_api_bp.route("/users/<user_id>/role", methods=["POST"])
 def update_role(user_id):
-
-    data = request.json or {}
-
-    role = data.get("role")
-
-    if role not in ALL_ROLES:
-        return {"error": "invalid role", "roles": ALL_ROLES}, 400
+    data = get_json_body()
+    require_fields(data, "role")
+    role = validate_role(data.get("role"), ALL_ROLES)
 
     user = User.query.get(user_id)
 
