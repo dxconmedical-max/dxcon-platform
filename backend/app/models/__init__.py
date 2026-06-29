@@ -45,6 +45,18 @@ from app.models.incident import Incident
 from app.models.alert import Alert
 from app.models.clinical_summary import ClinicalSummary
 from app.models.crm_lead import CrmLead
+from app.models.lab_facility import LabShift, LabBench, Analyzer
+from app.models.lab_accession import SampleAccession, Worklist, LabWorkflowTransition
+from app.models.lab_operations import (
+    AnalyzerQueue,
+    QualityControl,
+    TechnicianReview,
+    PathologistReview,
+    CriticalResult,
+    DeltaCheck,
+    ResultApproval,
+    LabOperationResultRelease,
+)
 
 from app.models.shipment import Shipment
 
