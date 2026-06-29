@@ -23,6 +23,10 @@ from app.models.contract_price import ContractPrice
 from app.models.invoice import Invoice
 
 from app.models.payment import Payment
+from app.models.payment_method import PaymentMethod
+from app.models.payment_transaction import PaymentTransaction
+from app.models.payment_refund import Refund
+from app.models.payment_webhook import PaymentWebhook
 
 from app.models.home_collection import HomeCollection
 

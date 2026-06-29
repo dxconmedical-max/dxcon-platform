@@ -38,6 +38,19 @@ class Payment(db.Model):
         default="PAID"
     )
 
+    provider = db.Column(db.String(50))
+
+    external_transaction_id = db.Column(db.String(100))
+
+    payment_method_id = db.Column(db.String(36))
+
+    metadata_json = db.Column(db.Text, default="{}")
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -45,5 +58,10 @@ class Payment(db.Model):
             "amount": self.amount,
             "payment_method": self.payment_method,
             "status": self.status,
-            "payment_date": str(self.payment_date)
+            "provider": self.provider,
+            "external_transaction_id": self.external_transaction_id,
+            "payment_method_id": self.payment_method_id,
+            "metadata_json": self.metadata_json,
+            "payment_date": self.payment_date.isoformat() if self.payment_date else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
         }
