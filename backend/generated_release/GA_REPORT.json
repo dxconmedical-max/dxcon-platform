@@ -1,0 +1,95 @@
+{
+  "generated_at": "2026-07-01T12:28:12.261334+00:00",
+  "release": "v1.0.0-ga-candidate",
+  "git_sha": "bcf6ed1aa04f9d835f5777f031cbf464137bc131",
+  "rc2_baseline": "v1.0.0-rc2",
+  "score": {
+    "score": 100.0,
+    "ready_for_ga": true,
+    "breakdown": {
+      "unit_tests": {
+        "weight": 15,
+        "score": 15,
+        "ok": true
+      },
+      "regression": {
+        "weight": 20,
+        "score": 20,
+        "ok": true
+      },
+      "smoke_suite": {
+        "weight": 20,
+        "score": 20,
+        "ok": true
+      },
+      "production_readiness": {
+        "weight": 15,
+        "score": 15,
+        "ok": true
+      },
+      "rollback_readiness": {
+        "weight": 10,
+        "score": 10,
+        "ok": true
+      },
+      "backup_restore": {
+        "weight": 10,
+        "score": 10,
+        "ok": true
+      },
+      "api_freeze": {
+        "weight": 5,
+        "score": 5,
+        "ok": true
+      },
+      "artifacts": {
+        "weight": 5,
+        "score": 5,
+        "ok": true
+      }
+    }
+  },
+  "sections": {
+    "unit_tests": {
+      "ok": true,
+      "passed": null,
+      "total": null
+    },
+    "regression": {
+      "ok": true,
+      "passed": 21,
+      "total": 21
+    },
+    "smoke_suite": {
+      "ok": true,
+      "passed": 5,
+      "total": 5
+    },
+    "production_readiness": {
+      "ok": true,
+      "passed": null,
+      "total": null
+    },
+    "rollback_readiness": {
+      "ok": true,
+      "passed": null,
+      "total": null
+    },
+    "backup_restore": {
+      "ok": true,
+      "passed": 5,
+      "total": 5
+    },
+    "api_freeze": {
+      "ok": true,
+      "passed": null,
+      "total": null
+    },
+    "artifacts": {
+      "ok": true,
+      "passed": null,
+      "total": null
+    }
+  },
+  "ready_for_ga": true
+}

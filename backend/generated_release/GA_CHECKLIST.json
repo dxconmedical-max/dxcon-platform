@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-07-01T12:28:12.275875+00:00",
+  "release": "v1.0.0-ga-candidate",
+  "git_sha": "bcf6ed1aa04f9d835f5777f031cbf464137bc131",
+  "ready_for_ga": true,
+  "score": 100.0,
+  "items": [
+    {
+      "item": "unit_tests",
+      "status": "PASS"
+    },
+    {
+      "item": "regression",
+      "status": "PASS"
+    },
+    {
+      "item": "smoke_suite",
+      "status": "PASS"
+    },
+    {
+      "item": "production_readiness",
+      "status": "PASS"
+    },
+    {
+      "item": "rollback_readiness",
+      "status": "PASS"
+    },
+    {
+      "item": "backup_restore",
+      "status": "PASS"
+    },
+    {
+      "item": "api_freeze",
+      "status": "PASS"
+    },
+    {
+      "item": "artifacts",
+      "status": "PASS"
+    }
+  ]
+}

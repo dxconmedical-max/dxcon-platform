@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-07-01T12:28:11.967710+00:00",
+  "release": "v1.0.0-ga-candidate",
+  "git_sha": "bcf6ed1aa04f9d835f5777f031cbf464137bc131",
+  "frozen": true,
+  "openapi_paths": 485,
+  "inventory_paths": 485,
+  "missing_in_openapi": [],
+  "missing_count": 0,
+  "duplicate_routes": 0,
+  "path_drift": 0,
+  "hash_before": "882868178d6cd7a0ebcf7247e4368b33fa883166dc804b15af34c2cd770e6296",
+  "hash_after": "882868178d6cd7a0ebcf7247e4368b33fa883166dc804b15af34c2cd770e6296",
+  "regenerated": false
+}

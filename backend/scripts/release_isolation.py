@@ -41,6 +41,14 @@ class ReleaseSpec:
 
 
 RELEASES: tuple[ReleaseSpec, ...] = (
+    ReleaseSpec("staging-sprint-5", "GA Candidate Validation", (
+        "backend/scripts/ga_candidate_lib.py",
+        "backend/scripts/verify_ga_candidate.py",
+        "backend/scripts/final_ga_smoke.py",
+        "backend/generated_release/GA_REPORT.json",
+        "backend/generated_release/GA_CHECKLIST.json",
+        "backend/generated_release/API_FREEZE_REPORT.json",
+    )),
     ReleaseSpec("staging-sprint-4", "Final Security Secrets Review", (
         "backend/scripts/security_preflight_lib.py",
         "backend/scripts/security_preflight.py",
