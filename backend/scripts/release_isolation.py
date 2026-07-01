@@ -40,6 +40,15 @@ class ReleaseSpec:
 
 
 RELEASES: tuple[ReleaseSpec, ...] = (
+    ReleaseSpec("3.9", "Communication & Automation Hub", (
+        "backend/app/models/communication_hub.py",
+        "backend/app/services/communication_hub_service.py",
+        "backend/app/api/communication/",
+        "backend/app/web/communication_hub.py",
+        "backend/scripts/verify_notifications.py",
+        "backend/scripts/smoke_test_notifications.py",
+        "backend/tests/test_communication_hub.py",
+    )),
     ReleaseSpec("3.8", "Medical Knowledge & Guideline Engine", (
         "backend/app/models/knowledge_engine.py",
         "backend/app/services/knowledge_engine_service.py",

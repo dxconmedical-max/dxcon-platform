@@ -224,3 +224,11 @@ from app.models.knowledge_engine import (
     MedicalKnowledge,
     ReferenceLibrary,
 )
+from app.models.communication_hub import (
+    CommunicationDeadLetter,
+    CommunicationDeliveryTrack,
+    CommunicationQueueItem,
+    WebhookDeliveryLog,
+    WebhookEndpoint,
+    WorkflowAutomationEvent,
+)

@@ -84,7 +84,6 @@ from app.web.partner_portal_v2 import partner_portal_web_bp
 from app.web.reporting_bi import reporting_bi_web_bp
 from app.web.result_gateway import result_gateway_web_bp
 from app.web.interpretation_admin import interpretation_admin_web_bp
-from app.web.notifications_admin import notifications_admin_web_bp
 from app.web.patient_portal_v2 import patient_portal_v2_web_bp
 from app.web.clinic_portal_v2 import clinic_portal_v2_web_bp
 from app.web.doctor_portal_v2 import doctor_portal_v2_web_bp
@@ -151,6 +150,13 @@ from app.api.knowledge.routes import (
     knowledge_bp,
 )
 from app.web.knowledge_engine import knowledge_web_bp
+from app.api.communication.routes import (
+    events_bp as communication_events_bp,
+    hub_notifications_bp,
+    templates_bp as communication_templates_bp,
+    webhooks_bp as communication_webhooks_bp,
+)
+from app.web.communication_hub import communication_hub_web_bp
 def create_app():
 
     app = Flask(__name__)
@@ -239,7 +245,6 @@ def create_app():
     app.register_blueprint(order_items_web_bp)
     app.register_blueprint(result_gateway_web_bp)
     app.register_blueprint(interpretation_admin_web_bp)
-    app.register_blueprint(notifications_admin_web_bp)
     app.register_blueprint(patient_portal_v2_web_bp)
     app.register_blueprint(clinic_portal_v2_web_bp)
     app.register_blueprint(doctor_portal_v2_web_bp)
@@ -317,6 +322,11 @@ def create_app():
     app.register_blueprint(diseases_bp)
     app.register_blueprint(correlations_bp)
     app.register_blueprint(knowledge_web_bp)
+    app.register_blueprint(hub_notifications_bp)
+    app.register_blueprint(communication_templates_bp)
+    app.register_blueprint(communication_webhooks_bp)
+    app.register_blueprint(communication_events_bp)
+    app.register_blueprint(communication_hub_web_bp)
     finalize_observability(app)
     init_deployment(app)
     return app
