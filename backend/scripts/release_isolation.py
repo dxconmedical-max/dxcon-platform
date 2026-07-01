@@ -41,6 +41,14 @@ class ReleaseSpec:
 
 
 RELEASES: tuple[ReleaseSpec, ...] = (
+    ReleaseSpec("staging-sprint-4", "Final Security Secrets Review", (
+        "backend/scripts/security_preflight_lib.py",
+        "backend/scripts/security_preflight.py",
+        "backend/scripts/verify_public_routes.py",
+        "backend/scripts/verify_admin_security.py",
+        "backend/tests/test_security_preflight.py",
+        "backend/tests/test_public_route_inventory.py",
+    )),
     ReleaseSpec("staging-sprint-3", "UAT Data Tenant Setup", (
         "backend/scripts/uat_tenant_lib.py",
         "backend/scripts/bootstrap_tenant.py",
