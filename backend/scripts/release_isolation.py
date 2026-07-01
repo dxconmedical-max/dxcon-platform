@@ -23,6 +23,7 @@ SHARED_WIRING = {
 
 GENERATED_ARTIFACT_PREFIXES = (
     "backend/generated_reports/",
+    "backend/generated_release/",
 )
 
 INFRASTRUCTURE_PATHS = {
@@ -59,6 +60,18 @@ RELEASES: tuple[ReleaseSpec, ...] = (
         "backend/tests/test_go_live_day1.py",
         "backend/tests/test_observability.py",
         "backend/inventory/",
+    )),
+    ReleaseSpec("4.8", "Go-Live Validation RC1", (
+        "backend/scripts/go_live_rc1_lib.py",
+        "backend/scripts/e2e_go_live_validation.py",
+        "backend/scripts/verify_release_candidate.py",
+        "backend/scripts/smoke_test_release_candidate.py",
+        "backend/scripts/performance_smoke_test.py",
+        "backend/scripts/create_release_tag.py",
+        "backend/generated_release/",
+        "backend/tests/test_go_live_validation.py",
+        "backend/tests/test_release_candidate.py",
+        "backend/tests/test_data_integrity.py",
     )),
     ReleaseSpec("4.7", "Deployment & Infrastructure Readiness", (
         "backend/app/runtime/",
