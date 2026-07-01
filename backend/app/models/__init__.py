@@ -232,3 +232,21 @@ from app.models.communication_hub import (
     WebhookEndpoint,
     WorkflowAutomationEvent,
 )
+from app.models.enterprise_platform import (
+    EnterpriseAbacPolicy,
+    EnterpriseAccessHistory,
+    EnterpriseAuditRecord,
+    EnterpriseBackgroundJob,
+    EnterpriseBusinessUnit,
+    EnterpriseComplianceExport,
+    EnterpriseDepartment,
+    EnterpriseFeatureFlag,
+    EnterpriseIdentityProvider,
+    EnterpriseLicense,
+    EnterpriseOrganization,
+    EnterpriseRole,
+    EnterpriseSecurityEvent,
+    EnterpriseSystemSetting,
+    EnterpriseTenant,
+    EnterpriseUsageMetric,
+)

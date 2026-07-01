@@ -9,7 +9,6 @@ from app.web.monitor import monitor_web_bp
 from app.api.system.routes import system_bp
 from app.api.ai_v2.routes import ai_interpret_v2_bp
 from app.api.security.routes import security_api_bp
-from app.web.security import security_web_bp
 from app.api.ops.routes import ops_bp
 from app.web.home import home_web_bp
 from app.web.executive_v9 import executive_v9_bp
@@ -157,6 +156,14 @@ from app.api.communication.routes import (
     webhooks_bp as communication_webhooks_bp,
 )
 from app.web.communication_hub import communication_hub_web_bp
+from app.api.enterprise.routes import (
+    audit_bp as enterprise_audit_bp,
+    enterprise_admin_bp,
+    enterprise_security_bp,
+    licenses_bp as enterprise_licenses_bp,
+    tenants_bp as enterprise_tenants_bp,
+)
+from app.web.enterprise_platform import enterprise_web_bp
 def create_app():
 
     app = Flask(__name__)
@@ -295,7 +302,6 @@ def create_app():
     app.register_blueprint(executive_v9_bp)
     app.register_blueprint(home_web_bp)
     app.register_blueprint(ops_bp)
-    app.register_blueprint(security_web_bp)
     app.register_blueprint(security_api_bp)
     app.register_blueprint(ai_interpret_v2_bp)
     app.register_blueprint(audit_center_web_bp)
@@ -327,6 +333,12 @@ def create_app():
     app.register_blueprint(communication_webhooks_bp)
     app.register_blueprint(communication_events_bp)
     app.register_blueprint(communication_hub_web_bp)
+    app.register_blueprint(enterprise_admin_bp)
+    app.register_blueprint(enterprise_tenants_bp)
+    app.register_blueprint(enterprise_licenses_bp)
+    app.register_blueprint(enterprise_security_bp)
+    app.register_blueprint(enterprise_audit_bp)
+    app.register_blueprint(enterprise_web_bp)
     finalize_observability(app)
     init_deployment(app)
     return app
