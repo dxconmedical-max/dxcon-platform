@@ -263,3 +263,13 @@ from app.models.integration_platform import (
     WebhookSecret,
 )
 from app.models.api_platform import ApiClient, ApiKey, ApiUsageLog
+from app.models.healthcare_standards import (
+    DICOMInstanceMetadata,
+    DICOMSeriesMetadata,
+    DICOMStudyMetadata,
+    StandardCode,
+    StandardCodeSystem,
+    StandardImportBatch,
+    StandardMapping,
+    StandardValidationLog,
+)

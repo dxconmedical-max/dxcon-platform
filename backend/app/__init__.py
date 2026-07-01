@@ -174,6 +174,8 @@ from app.api.integration_platform.routes import (
 from app.web.integration_platform import integration_platform_web_bp
 from app.api.api_platform.routes import api_platform_bp
 from app.web.api_platform import api_platform_web_bp
+from app.api.standards.routes import standards_bp
+from app.web.healthcare_standards import healthcare_standards_web_bp
 def create_app():
 
     app = Flask(__name__)
@@ -357,6 +359,8 @@ def create_app():
     app.register_blueprint(integration_platform_web_bp)
     app.register_blueprint(api_platform_bp)
     app.register_blueprint(api_platform_web_bp)
+    app.register_blueprint(standards_bp)
+    app.register_blueprint(healthcare_standards_web_bp)
     finalize_observability(app)
     init_deployment(app)
     return app
