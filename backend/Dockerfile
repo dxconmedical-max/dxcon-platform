@@ -31,4 +31,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
 
 STOPSIGNAL SIGTERM
 
-CMD ["gunicorn", "-c", "gunicorn.conf.py", "run:app"]
+CMD ["python", "production_start.py", "api"]

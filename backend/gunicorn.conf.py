@@ -14,3 +14,5 @@ errorlog = "-"
 capture_output = True
 loglevel = os.getenv("LOG_LEVEL", "info").lower()
 proc_name = "dxcon-api"
+preload_app = os.getenv("GUNICORN_PRELOAD", "false").lower() == "true"
+forwarded_allow_ips = os.getenv("FORWARDED_ALLOW_IPS", "127.0.0.1")

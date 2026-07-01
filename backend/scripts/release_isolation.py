@@ -41,6 +41,29 @@ class ReleaseSpec:
 
 
 RELEASES: tuple[ReleaseSpec, ...] = (
+    ReleaseSpec("staging-sprint-1", "Production Deployment Stack", (
+        "docker-compose.staging.yml",
+        "docker-compose.production.yml",
+        "deployment/nginx/",
+        "deployment/env/",
+        "deployment/scripts/bootstrap_staging.sh",
+        "deployment/scripts/verify_staging_stack.sh",
+        "deployment/scripts/smoke_staging.sh",
+        "deployment/scripts/backup_postgres.sh",
+        "deployment/scripts/restore_postgres_dry_run.sh",
+        "deployment/scripts/backup_uploads.sh",
+        "backend/Dockerfile",
+        "backend/gunicorn.conf.py",
+        "backend/production_start.py",
+        "backend/.env.staging.example",
+        "backend/.env.production.example",
+        "backend/scripts/staging_stack_lib.py",
+        "backend/scripts/verify_staging_stack.py",
+        "backend/scripts/smoke_test_staging_stack.py",
+        "backend/tests/test_staging_stack.py",
+        "backend/tests/test_env_validation.py",
+        "backend/tests/test_production_startup.py",
+    )),
     ReleaseSpec("5.0", "Go-Live RC2 Production Cutover", (
         "backend/scripts/go_live_rc2_lib.py",
         "backend/scripts/final_rc2_smoke.py",
