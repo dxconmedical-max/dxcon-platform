@@ -250,3 +250,15 @@ from app.models.enterprise_platform import (
     EnterpriseTenant,
     EnterpriseUsageMetric,
 )
+from app.models.integration_platform import (
+    IntegrationDeadLetter,
+    IntegrationDomainEvent,
+    IntegrationEventDeliveryLog,
+    IntegrationJob,
+    IntegrationJobAttempt,
+    IntegrationPluginState,
+    WebhookDelivery,
+    WebhookEndpoint,
+    WebhookEvent,
+    WebhookSecret,
+)

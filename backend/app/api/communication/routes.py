@@ -24,8 +24,8 @@ def _error(exc):
 
 hub_notifications_bp = Blueprint("hub_notifications", __name__, url_prefix="/api/v1/notifications")
 templates_bp = Blueprint("communication_templates", __name__, url_prefix="/api/v1/templates")
-webhooks_bp = Blueprint("communication_webhooks", __name__, url_prefix="/api/v1/webhooks")
-events_bp = Blueprint("communication_events", __name__, url_prefix="/api/v1/events")
+webhooks_bp = Blueprint("communication_webhooks", __name__, url_prefix="/api/v1/hub/webhooks")
+events_bp = Blueprint("communication_events", __name__, url_prefix="/api/v1/hub/events")
 
 
 @hub_notifications_bp.route("/hub", methods=["GET"])

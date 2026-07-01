@@ -105,26 +105,26 @@ class CommunicationHubTestCase(unittest.TestCase):
         self.assertEqual(create.status_code, 201)
 
     def test_webhooks_api(self):
-        response = self.client.get("/api/v1/webhooks")
+        response = self.client.get("/api/v1/hub/webhooks")
         self.assertEqual(response.status_code, 200)
         self.assertGreaterEqual(response.get_json()["count"], 1)
 
         create = self.client.post(
-            "/api/v1/webhooks",
+            "/api/v1/hub/webhooks",
             json={"name": "Partner Hook", "target_url": "https://example.com/hook"},
         )
         self.assertEqual(create.status_code, 201)
         webhook_id = create.get_json()["id"]
-        test = self.client.post(f"/api/v1/webhooks/{webhook_id}/test", json={"event_type": "TestEvent"})
+        test = self.client.post(f"/api/v1/hub/webhooks/{webhook_id}/test", json={"event_type": "TestEvent"})
         self.assertEqual(test.status_code, 200)
 
     def test_events_api(self):
-        types = self.client.get("/api/v1/events/types")
+        types = self.client.get("/api/v1/hub/events/types")
         self.assertEqual(types.status_code, 200)
         self.assertIn(EVENT_BOOKING_CREATED, types.get_json()["event_types"])
 
         emit = self.client.post(
-            "/api/v1/events",
+            "/api/v1/hub/events",
             json={
                 "event_type": EVENT_CRITICAL_RESULT,
                 "recipient": "doctor@example.com",

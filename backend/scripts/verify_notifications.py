@@ -67,11 +67,11 @@ def verify_routes(app):
         "/api/v1/notifications/dead-letter",
         "/api/v1/templates",
         "/api/v1/templates/<template_id>",
-        "/api/v1/webhooks",
-        "/api/v1/webhooks/deliveries",
-        "/api/v1/webhooks/<webhook_id>/test",
-        "/api/v1/events",
-        "/api/v1/events/types",
+        "/api/v1/hub/webhooks",
+        "/api/v1/hub/webhooks/deliveries",
+        "/api/v1/hub/webhooks/<webhook_id>/test",
+        "/api/v1/hub/events",
+        "/api/v1/hub/events/types",
     ]
     required_web = [
         "/notifications",
@@ -92,8 +92,8 @@ def verify_no_duplicate_routes(app):
     prefixes = (
         "/api/v1/notifications/",
         "/api/v1/templates",
-        "/api/v1/webhooks",
-        "/api/v1/events",
+        "/api/v1/hub/webhooks",
+        "/api/v1/hub/events",
     )
     seen = set()
     for rule in app.url_map.iter_rules():
