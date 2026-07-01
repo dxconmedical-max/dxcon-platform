@@ -1,0 +1,5720 @@
+{
+  "generated_at": "2026-07-01T06:06:35.262187+00:00",
+  "total_routes": 699,
+  "routes": [
+    {
+      "path": "/",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "home_web.index",
+      "blueprint": "home_web"
+    },
+    {
+      "path": "/admin",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_web.admin_dashboard",
+      "blueprint": "enterprise_web"
+    },
+    {
+      "path": "/ai",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "ai_cds_web.ai_home",
+      "blueprint": "ai_cds_web"
+    },
+    {
+      "path": "/ai/critical",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "ai_cds_web.ai_critical",
+      "blueprint": "ai_cds_web"
+    },
+    {
+      "path": "/ai/interpreter",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "ai_cds_web.ai_interpreter",
+      "blueprint": "ai_cds_web"
+    },
+    {
+      "path": "/ai/risk",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "ai_cds_web.ai_risk",
+      "blueprint": "ai_cds_web"
+    },
+    {
+      "path": "/alerts",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "alerts_web.alerts_page",
+      "blueprint": "alerts_web"
+    },
+    {
+      "path": "/alerts/ack/<alert_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "alerts_web.ack_alert",
+      "blueprint": "alerts_web"
+    },
+    {
+      "path": "/alerts/resolve/<alert_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "alerts_web.resolve_alert",
+      "blueprint": "alerts_web"
+    },
+    {
+      "path": "/analytics",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "analytics_web.analytics",
+      "blueprint": "analytics_web"
+    },
+    {
+      "path": "/api/v1/admin-security/health",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "admin_security_bp.secure_health",
+      "blueprint": "admin_security_bp"
+    },
+    {
+      "path": "/api/v1/admin/feature-flags",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_admin.list_feature_flags",
+      "blueprint": "enterprise_admin"
+    },
+    {
+      "path": "/api/v1/admin/feature-flags",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "enterprise_admin.upsert_feature_flag",
+      "blueprint": "enterprise_admin"
+    },
+    {
+      "path": "/api/v1/admin/health",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_admin.admin_health",
+      "blueprint": "enterprise_admin"
+    },
+    {
+      "path": "/api/v1/admin/jobs",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_admin.list_jobs",
+      "blueprint": "enterprise_admin"
+    },
+    {
+      "path": "/api/v1/admin/jobs",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "enterprise_admin.enqueue_job",
+      "blueprint": "enterprise_admin"
+    },
+    {
+      "path": "/api/v1/admin/metrics",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_admin.admin_metrics",
+      "blueprint": "enterprise_admin"
+    },
+    {
+      "path": "/api/v1/admin/overview",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_admin.admin_overview",
+      "blueprint": "enterprise_admin"
+    },
+    {
+      "path": "/api/v1/admin/settings",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_admin.list_settings",
+      "blueprint": "enterprise_admin"
+    },
+    {
+      "path": "/api/v1/admin/settings",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "enterprise_admin.upsert_setting",
+      "blueprint": "enterprise_admin"
+    },
+    {
+      "path": "/api/v1/admin/tracing",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_admin.admin_tracing",
+      "blueprint": "enterprise_admin"
+    },
+    {
+      "path": "/api/v1/admin/usage",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_admin.usage_statistics",
+      "blueprint": "enterprise_admin"
+    },
+    {
+      "path": "/api/v1/admin/users",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "admin.get_users",
+      "blueprint": "admin"
+    },
+    {
+      "path": "/api/v1/ai-v2/generate-all",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "ai_batch.generate_all",
+      "blueprint": "ai_batch"
+    },
+    {
+      "path": "/api/v1/ai-v2/order/<order_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "ai_interpret_v2.ai_order",
+      "blueprint": "ai_interpret_v2"
+    },
+    {
+      "path": "/api/v1/ai/critical-results",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "ai_cds.critical_results",
+      "blueprint": "ai_cds"
+    },
+    {
+      "path": "/api/v1/ai/interpret",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "ai_cds.interpret",
+      "blueprint": "ai_cds"
+    },
+    {
+      "path": "/api/v1/ai/recommend",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "ai_cds.recommend",
+      "blueprint": "ai_cds"
+    },
+    {
+      "path": "/api/v1/ai/reference-ranges",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "ai_cds.reference_ranges",
+      "blueprint": "ai_cds"
+    },
+    {
+      "path": "/api/v1/ai/risk",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "ai_cds.risk",
+      "blueprint": "ai_cds"
+    },
+    {
+      "path": "/api/v1/alerts",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "alerts.list_alerts",
+      "blueprint": "alerts"
+    },
+    {
+      "path": "/api/v1/alerts",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "alerts.create_alert",
+      "blueprint": "alerts"
+    },
+    {
+      "path": "/api/v1/alerts/<alert_id>/ack",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "alerts.ack_alert",
+      "blueprint": "alerts"
+    },
+    {
+      "path": "/api/v1/alerts/<alert_id>/resolve",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "alerts.resolve_alert",
+      "blueprint": "alerts"
+    },
+    {
+      "path": "/api/v1/audit/access-history",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_audit.access_history",
+      "blueprint": "enterprise_audit"
+    },
+    {
+      "path": "/api/v1/audit/access-history",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "enterprise_audit.log_access_history",
+      "blueprint": "enterprise_audit"
+    },
+    {
+      "path": "/api/v1/audit/compliance-export",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "enterprise_audit.compliance_export",
+      "blueprint": "enterprise_audit"
+    },
+    {
+      "path": "/api/v1/audit/records",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_audit.audit_records",
+      "blueprint": "enterprise_audit"
+    },
+    {
+      "path": "/api/v1/audit/records",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "enterprise_audit.append_audit_record",
+      "blueprint": "enterprise_audit"
+    },
+    {
+      "path": "/api/v1/audit/security-events",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_audit.security_events",
+      "blueprint": "enterprise_audit"
+    },
+    {
+      "path": "/api/v1/audit/security-events",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "enterprise_audit.log_security_event",
+      "blueprint": "enterprise_audit"
+    },
+    {
+      "path": "/api/v1/auth/login",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "auth.login",
+      "blueprint": "auth"
+    },
+    {
+      "path": "/api/v1/auth/logout",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "auth.logout",
+      "blueprint": "auth"
+    },
+    {
+      "path": "/api/v1/auth/refresh",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "auth.refresh",
+      "blueprint": "auth"
+    },
+    {
+      "path": "/api/v1/auth/register",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "auth.register",
+      "blueprint": "auth"
+    },
+    {
+      "path": "/api/v1/billing/commissions",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "billing.list_commissions",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/commissions/calculate",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "billing.calculate_commissions",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/commissions/rules",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "billing.list_commission_rules",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/invoices",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "billing.list_invoices",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/invoices",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "billing.create_invoice",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/invoices/<invoice_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "billing.get_invoice",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/invoices/<invoice_id>/mark-paid",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "billing.mark_invoice_paid",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/ledger",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "billing.billing_ledger",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/payments",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "billing.list_payments",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/payments",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "billing.record_payment",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/refunds",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "billing.list_refunds",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/refunds",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "billing.process_refund",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/settlements",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "billing.list_settlements",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/settlements",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "billing.create_settlement",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/settlements/<settlement_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "billing.get_settlement",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/settlements/<settlement_id>/finalize",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "billing.finalize_settlement",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/billing/summary",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "billing.billing_summary",
+      "blueprint": "billing"
+    },
+    {
+      "path": "/api/v1/biomarkers",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "biomarkers.list_biomarkers",
+      "blueprint": "biomarkers"
+    },
+    {
+      "path": "/api/v1/biomarkers/<biomarker_code>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "biomarkers.get_biomarker",
+      "blueprint": "biomarkers"
+    },
+    {
+      "path": "/api/v1/biomarkers/<biomarker_code>/relationships",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "biomarkers.biomarker_relationships",
+      "blueprint": "biomarkers"
+    },
+    {
+      "path": "/api/v1/box-qr/<box_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "box_qr.get_box_qr",
+      "blueprint": "box_qr"
+    },
+    {
+      "path": "/api/v1/clinic/bookings",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "clinic_portal.clinic_bookings",
+      "blueprint": "clinic_portal"
+    },
+    {
+      "path": "/api/v1/clinic/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "clinic_portal.clinic_dashboard",
+      "blueprint": "clinic_portal"
+    },
+    {
+      "path": "/api/v1/clinic/doctors",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "clinic_portal.clinic_doctors",
+      "blueprint": "clinic_portal"
+    },
+    {
+      "path": "/api/v1/clinic/orders",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "clinic_portal.clinic_orders",
+      "blueprint": "clinic_portal"
+    },
+    {
+      "path": "/api/v1/clinic/patients",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "clinic_portal.clinic_patients",
+      "blueprint": "clinic_portal"
+    },
+    {
+      "path": "/api/v1/clinic/profile",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "clinic_portal.get_clinic_profile",
+      "blueprint": "clinic_portal"
+    },
+    {
+      "path": "/api/v1/clinic/profile",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "clinic_portal.update_clinic_profile",
+      "blueprint": "clinic_portal"
+    },
+    {
+      "path": "/api/v1/clinic/revenue",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "clinic_portal.clinic_revenue",
+      "blueprint": "clinic_portal"
+    },
+    {
+      "path": "/api/v1/collector-operations/assignments/<assignment_id>/accept",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.accept_assignment",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/bookings/<booking_id>/pickup",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.pickup_booking_sample",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/cold-boxes/<box_id>/telemetry",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.update_cold_box",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_operations.list_collectors",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/check-in",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.collector_check_in",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/check-out",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.collector_check_out",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_operations.collector_dashboard",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/gps",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_operations.get_gps_trail",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/gps",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.record_gps",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/jobs",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_operations.list_collector_jobs",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/offline/events",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.queue_offline_event",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/offline/sync",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.sync_offline_events",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/profile",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_operations.get_collector_profile",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/profile",
+      "methods": [
+        "PATCH",
+        "PUT"
+      ],
+      "endpoint": "collector_operations.update_collector_profile",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/routes",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_operations.list_collector_routes",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/routes",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.create_collector_route",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/timeline",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_operations.list_collector_timeline",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/vehicles",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_operations.list_collector_vehicles",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/vehicles",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.create_collector_vehicle",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/collectors/<collector_id>/vehicles/<vehicle_id>/assign",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.assign_collector_vehicle",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/handovers",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.create_handover",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/proofs",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.add_proof",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/qr/scan",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.scan_qr",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/routes/<route_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_operations.get_route",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/routes/<route_id>/complete",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.complete_route",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/routes/<route_id>/optimize",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.optimize_route",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/routes/<route_id>/start",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.start_route",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/shipments/<shipment_id>/accept",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.accept_shipment_route",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/shipments/<shipment_id>/start-trip",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector_operations.start_shipment_trip",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector-operations/supervisor/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_operations.supervisor_dashboard",
+      "blueprint": "collector_operations"
+    },
+    {
+      "path": "/api/v1/collector/checkin/<job_id>",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "collector.checkin",
+      "blueprint": "collector"
+    },
+    {
+      "path": "/api/v1/collector/collected/<job_id>",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "collector.collected",
+      "blueprint": "collector"
+    },
+    {
+      "path": "/api/v1/collector/collectors",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector.list_collectors",
+      "blueprint": "collector"
+    },
+    {
+      "path": "/api/v1/collector/collectors",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector.create_collector",
+      "blueprint": "collector"
+    },
+    {
+      "path": "/api/v1/collector/completed/<sample_id>",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "collector.completed",
+      "blueprint": "collector"
+    },
+    {
+      "path": "/api/v1/collector/jobs",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector.jobs",
+      "blueprint": "collector"
+    },
+    {
+      "path": "/api/v1/collector/processing/<sample_id>",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "collector.processing",
+      "blueprint": "collector"
+    },
+    {
+      "path": "/api/v1/collector/received/<sample_id>",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "collector.received",
+      "blueprint": "collector"
+    },
+    {
+      "path": "/api/v1/collector/samples",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector.samples",
+      "blueprint": "collector"
+    },
+    {
+      "path": "/api/v1/collector/shipments",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector.list_collector_shipments",
+      "blueprint": "collector"
+    },
+    {
+      "path": "/api/v1/collector/shipments/<shipment_id>/accept",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector.accept_collector_shipment",
+      "blueprint": "collector"
+    },
+    {
+      "path": "/api/v1/collector/shipments/<shipment_id>/start-trip",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "collector.start_collector_trip",
+      "blueprint": "collector"
+    },
+    {
+      "path": "/api/v1/companies",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "companies.get_companies",
+      "blueprint": "companies"
+    },
+    {
+      "path": "/api/v1/companies",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "companies.create_company",
+      "blueprint": "companies"
+    },
+    {
+      "path": "/api/v1/companies/<company_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "companies.delete_company",
+      "blueprint": "companies"
+    },
+    {
+      "path": "/api/v1/companies/<company_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "companies.get_company",
+      "blueprint": "companies"
+    },
+    {
+      "path": "/api/v1/companies/<company_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "companies.update_company",
+      "blueprint": "companies"
+    },
+    {
+      "path": "/api/v1/contract-prices",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "contract_prices.get_contract_prices",
+      "blueprint": "contract_prices"
+    },
+    {
+      "path": "/api/v1/contract-prices",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "contract_prices.create_contract_price",
+      "blueprint": "contract_prices"
+    },
+    {
+      "path": "/api/v1/contracts",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "contracts.get_contracts",
+      "blueprint": "contracts"
+    },
+    {
+      "path": "/api/v1/contracts",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "contracts.create_contract",
+      "blueprint": "contracts"
+    },
+    {
+      "path": "/api/v1/contracts/<contract_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "contracts.delete_contract",
+      "blueprint": "contracts"
+    },
+    {
+      "path": "/api/v1/contracts/<contract_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "contracts.get_contract",
+      "blueprint": "contracts"
+    },
+    {
+      "path": "/api/v1/contracts/<contract_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "contracts.update_contract",
+      "blueprint": "contracts"
+    },
+    {
+      "path": "/api/v1/correlations/evaluate",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "correlations.correlate_evaluate",
+      "blueprint": "correlations"
+    },
+    {
+      "path": "/api/v1/correlations/match",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "correlations.correlate_match",
+      "blueprint": "correlations"
+    },
+    {
+      "path": "/api/v1/crm/activities",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.list_activities",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/activities",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "crm_api.create_activity",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/activities/<activity_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "crm_api.delete_activity",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/activities/<activity_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.get_activity",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/activities/<activity_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "crm_api.update_activity",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/contracts",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.list_contracts",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/contracts",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "crm_api.create_contract",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/contracts/<contract_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "crm_api.delete_contract",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/contracts/<contract_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.get_contract",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/contracts/<contract_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "crm_api.update_contract",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/contracts/expiring",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.expiring_contracts",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/customers",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.list_customers",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/customers",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "crm_api.create_customer",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/customers/<customer_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "crm_api.delete_customer",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/customers/<customer_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.get_customer",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/customers/<customer_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "crm_api.update_customer",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.crm_dashboard",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/leads",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.list_leads",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/leads",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "crm_api.create_lead",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/leads/<lead_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "crm_api.delete_lead",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/leads/<lead_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.get_lead",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/leads/<lead_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "crm_api.update_lead",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/leads/<lead_id>/advance",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "crm_api.advance_lead",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/opportunities",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.list_opportunities",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/opportunities",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "crm_api.create_opportunity",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/opportunities/<opportunity_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "crm_api.delete_opportunity",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/opportunities/<opportunity_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.get_opportunity",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/opportunities/<opportunity_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "crm_api.update_opportunity",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/opportunities/<opportunity_id>/advance",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "crm_api.advance_opportunity",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/pipelines",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.list_pipelines",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/pipelines",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "crm_api.create_pipeline",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/pipelines/<pipeline_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "crm_api.delete_pipeline",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/pipelines/<pipeline_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.get_pipeline",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/pipelines/<pipeline_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "crm_api.update_pipeline",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/quotations",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.list_quotations",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/quotations",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "crm_api.create_quotation",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/quotations/<quotation_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "crm_api.delete_quotation",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/quotations/<quotation_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_api.get_quotation",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/quotations/<quotation_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "crm_api.update_quotation",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/quotations/<quotation_id>/approve",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "crm_api.approve_quotation",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/quotations/<quotation_id>/submit",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "crm_api.submit_quotation",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/crm/quotations/generate",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "crm_api.generate_quotation",
+      "blueprint": "crm_api"
+    },
+    {
+      "path": "/api/v1/dashboard/admin",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "dashboard.admin_dashboard",
+      "blueprint": "dashboard"
+    },
+    {
+      "path": "/api/v1/dashboard/clinic",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "dashboard.clinic_dashboard",
+      "blueprint": "dashboard"
+    },
+    {
+      "path": "/api/v1/dashboard/collector",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "dashboard.collector_dashboard",
+      "blueprint": "dashboard"
+    },
+    {
+      "path": "/api/v1/dashboard/executive",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "dashboard.executive_dashboard",
+      "blueprint": "dashboard"
+    },
+    {
+      "path": "/api/v1/dashboard/lab",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "dashboard.lab_dashboard",
+      "blueprint": "dashboard"
+    },
+    {
+      "path": "/api/v1/dashboard/partner",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "dashboard.partner_dashboard",
+      "blueprint": "dashboard"
+    },
+    {
+      "path": "/api/v1/dashboard/summary",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "dashboard.summary",
+      "blueprint": "dashboard"
+    },
+    {
+      "path": "/api/v1/diseases",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "diseases.list_diseases",
+      "blueprint": "diseases"
+    },
+    {
+      "path": "/api/v1/diseases/<disease_code>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "diseases.get_disease",
+      "blueprint": "diseases"
+    },
+    {
+      "path": "/api/v1/diseases/<disease_code>/tests",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "diseases.disease_tests",
+      "blueprint": "diseases"
+    },
+    {
+      "path": "/api/v1/diseases/by-test/<test_code>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "diseases.diseases_by_test",
+      "blueprint": "diseases"
+    },
+    {
+      "path": "/api/v1/doctor/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "doctor_portal.doctor_dashboard",
+      "blueprint": "doctor_portal"
+    },
+    {
+      "path": "/api/v1/doctor/followups",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "doctor_portal.create_follow_up",
+      "blueprint": "doctor_portal"
+    },
+    {
+      "path": "/api/v1/doctor/patients",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "doctor_portal.doctor_patients",
+      "blueprint": "doctor_portal"
+    },
+    {
+      "path": "/api/v1/doctor/profile",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "doctor_portal.get_doctor_profile",
+      "blueprint": "doctor_portal"
+    },
+    {
+      "path": "/api/v1/doctor/profile",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "doctor_portal.update_doctor_profile",
+      "blueprint": "doctor_portal"
+    },
+    {
+      "path": "/api/v1/doctor/referrals",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "doctor_portal.list_referrals",
+      "blueprint": "doctor_portal"
+    },
+    {
+      "path": "/api/v1/doctor/referrals",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "doctor_portal.create_referral",
+      "blueprint": "doctor_portal"
+    },
+    {
+      "path": "/api/v1/doctor/results",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "doctor_portal.doctor_results",
+      "blueprint": "doctor_portal"
+    },
+    {
+      "path": "/api/v1/doctor/schedule",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "doctor_portal.doctor_schedule",
+      "blueprint": "doctor_portal"
+    },
+    {
+      "path": "/api/v1/events",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "communication_events.list_events",
+      "blueprint": "communication_events"
+    },
+    {
+      "path": "/api/v1/events",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "communication_events.emit_event",
+      "blueprint": "communication_events"
+    },
+    {
+      "path": "/api/v1/events/types",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "communication_events.list_event_types",
+      "blueprint": "communication_events"
+    },
+    {
+      "path": "/api/v1/federation/capacity",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "federation.get_capacity",
+      "blueprint": "federation"
+    },
+    {
+      "path": "/api/v1/federation/capacity/history",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "federation.capacity_history",
+      "blueprint": "federation"
+    },
+    {
+      "path": "/api/v1/federation/capacity/update",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "federation.update_capacity",
+      "blueprint": "federation"
+    },
+    {
+      "path": "/api/v1/federation/failover/check",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "federation.failover_check",
+      "blueprint": "federation"
+    },
+    {
+      "path": "/api/v1/federation/failover/events",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "federation.failover_events",
+      "blueprint": "federation"
+    },
+    {
+      "path": "/api/v1/federation/labs",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "federation.list_labs",
+      "blueprint": "federation"
+    },
+    {
+      "path": "/api/v1/federation/labs",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "federation.create_lab",
+      "blueprint": "federation"
+    },
+    {
+      "path": "/api/v1/federation/labs/<lab_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "federation.get_lab",
+      "blueprint": "federation"
+    },
+    {
+      "path": "/api/v1/federation/labs/<lab_id>/connect",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "federation.connect_lab",
+      "blueprint": "federation"
+    },
+    {
+      "path": "/api/v1/federation/labs/<lab_id>/disconnect",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "federation.disconnect_lab",
+      "blueprint": "federation"
+    },
+    {
+      "path": "/api/v1/federation/providers",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "federation.list_providers",
+      "blueprint": "federation"
+    },
+    {
+      "path": "/api/v1/federation/providers",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "federation.create_provider",
+      "blueprint": "federation"
+    },
+    {
+      "path": "/api/v1/federation/route",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "federation.route_request",
+      "blueprint": "federation"
+    },
+    {
+      "path": "/api/v1/federation/routing-audit",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "federation.routing_audit",
+      "blueprint": "federation"
+    },
+    {
+      "path": "/api/v1/federation/routing-decisions",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "federation.routing_decisions",
+      "blueprint": "federation"
+    },
+    {
+      "path": "/api/v1/guidelines",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "guidelines.list_guidelines",
+      "blueprint": "guidelines"
+    },
+    {
+      "path": "/api/v1/guidelines",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "guidelines.create_guideline",
+      "blueprint": "guidelines"
+    },
+    {
+      "path": "/api/v1/guidelines/<guideline_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "guidelines.get_guideline",
+      "blueprint": "guidelines"
+    },
+    {
+      "path": "/api/v1/guidelines/packs",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "guidelines.list_packs",
+      "blueprint": "guidelines"
+    },
+    {
+      "path": "/api/v1/home-collections",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "home_collections.get_home_collections",
+      "blueprint": "home_collections"
+    },
+    {
+      "path": "/api/v1/home-collections",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "home_collections.create_home_collection",
+      "blueprint": "home_collections"
+    },
+    {
+      "path": "/api/v1/incidents",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "incidents.list_incidents",
+      "blueprint": "incidents"
+    },
+    {
+      "path": "/api/v1/incidents",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "incidents.create_incident",
+      "blueprint": "incidents"
+    },
+    {
+      "path": "/api/v1/incidents/<incident_id>/resolve",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "incidents.resolve_incident",
+      "blueprint": "incidents"
+    },
+    {
+      "path": "/api/v1/integrations/audit",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "integrations.list_audit",
+      "blueprint": "integrations"
+    },
+    {
+      "path": "/api/v1/integrations/connections",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "integrations.list_connections",
+      "blueprint": "integrations"
+    },
+    {
+      "path": "/api/v1/integrations/connections",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integrations.create_connection",
+      "blueprint": "integrations"
+    },
+    {
+      "path": "/api/v1/integrations/his/patients",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integrations.his_patients",
+      "blueprint": "integrations"
+    },
+    {
+      "path": "/api/v1/integrations/lis/orders",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integrations.lis_orders",
+      "blueprint": "integrations"
+    },
+    {
+      "path": "/api/v1/integrations/lis/results",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integrations.lis_results",
+      "blueprint": "integrations"
+    },
+    {
+      "path": "/api/v1/integrations/messages",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "integrations.list_messages",
+      "blueprint": "integrations"
+    },
+    {
+      "path": "/api/v1/interpretation/<result_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "interpretation.get_interpretation",
+      "blueprint": "interpretation"
+    },
+    {
+      "path": "/api/v1/interpretation/rules",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "interpretation.list_rules",
+      "blueprint": "interpretation"
+    },
+    {
+      "path": "/api/v1/interpretation/run",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "interpretation.run_interpretation",
+      "blueprint": "interpretation"
+    },
+    {
+      "path": "/api/v1/invoices",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "invoices.get_invoices",
+      "blueprint": "invoices"
+    },
+    {
+      "path": "/api/v1/invoices",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "invoices.create_invoice",
+      "blueprint": "invoices"
+    },
+    {
+      "path": "/api/v1/invoices/generate/<order_id>",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "invoices.generate_invoice",
+      "blueprint": "invoices"
+    },
+    {
+      "path": "/api/v1/iot/alerts",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "iot.list_alerts",
+      "blueprint": "iot"
+    },
+    {
+      "path": "/api/v1/iot/cold-chain/status",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "iot.cold_chain_status",
+      "blueprint": "iot"
+    },
+    {
+      "path": "/api/v1/iot/devices",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "iot.list_devices",
+      "blueprint": "iot"
+    },
+    {
+      "path": "/api/v1/iot/devices",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "iot.register_device",
+      "blueprint": "iot"
+    },
+    {
+      "path": "/api/v1/iot/readings/gps",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "iot.record_gps",
+      "blueprint": "iot"
+    },
+    {
+      "path": "/api/v1/iot/readings/humidity",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "iot.record_humidity",
+      "blueprint": "iot"
+    },
+    {
+      "path": "/api/v1/iot/readings/shock",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "iot.record_shock",
+      "blueprint": "iot"
+    },
+    {
+      "path": "/api/v1/iot/readings/temperature",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "iot.record_temperature",
+      "blueprint": "iot"
+    },
+    {
+      "path": "/api/v1/knowledge",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "knowledge.search_knowledge",
+      "blueprint": "knowledge"
+    },
+    {
+      "path": "/api/v1/knowledge",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "knowledge.create_knowledge",
+      "blueprint": "knowledge"
+    },
+    {
+      "path": "/api/v1/knowledge/<knowledge_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "knowledge.get_knowledge",
+      "blueprint": "knowledge"
+    },
+    {
+      "path": "/api/v1/knowledge/references",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "knowledge.list_references",
+      "blueprint": "knowledge"
+    },
+    {
+      "path": "/api/v1/lab/accessions",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.list_accessions",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/accessions",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.create_accession",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/accessions/<accession_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "lab_operations.delete_accession",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/accessions/<accession_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.get_accession",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/accessions/<accession_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "lab_operations.update_accession",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/accessions/<accession_id>/advance",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.advance_accession",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/accessions/<accession_id>/receive",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.receive_accession",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/analyzers",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.list_analyzers",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/analyzers",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.create_analyzer",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/analyzers/<analyzer_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "lab_operations.delete_analyzer",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/analyzers/<analyzer_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.get_analyzer",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/analyzers/<analyzer_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "lab_operations.update_analyzer",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/critical-results",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.list_critical_results",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/critical-results",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.create_critical_result",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.lab_dashboard",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/delta-checks",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.list_delta_checks",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/delta-checks",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.create_delta_check",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/qc",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.list_qc",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/qc",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.create_qc",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/qc/<qc_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "lab_operations.delete_qc",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/qc/<qc_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.get_qc",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/qc/<qc_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "lab_operations.update_qc",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/qc/<qc_id>/evaluate",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.evaluate_qc",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/queues",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.list_queues",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/queues",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.enqueue_sample",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/queues/<queue_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "lab_operations.delete_queue",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/queues/<queue_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.get_queue",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/queues/<queue_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "lab_operations.update_queue",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/queues/<queue_id>/complete",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.complete_queue",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/queues/<queue_id>/start",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.start_queue",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/releases",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.list_releases",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/releases",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.create_release",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/releases/<release_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "lab_operations.delete_release",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/releases/<release_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.get_release",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/releases/<release_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "lab_operations.update_release",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/reviews",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.list_reviews",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/reviews/<review_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "lab_operations.delete_review",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/reviews/<review_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.get_review",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/reviews/<review_id>/approve",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.approve_review",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/reviews/pathologist",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.create_pathologist_review",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/reviews/technician",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.create_technician_review",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/worklists",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.list_worklists",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/worklists",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "lab_operations.create_worklist",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/worklists/<worklist_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "lab_operations.delete_worklist",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/worklists/<worklist_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_operations.get_worklist",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/lab/worklists/<worklist_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "lab_operations.update_worklist",
+      "blueprint": "lab_operations"
+    },
+    {
+      "path": "/api/v1/laboratories",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "laboratories.get_laboratories",
+      "blueprint": "laboratories"
+    },
+    {
+      "path": "/api/v1/laboratories",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "laboratories.create_laboratory",
+      "blueprint": "laboratories"
+    },
+    {
+      "path": "/api/v1/licenses",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_licenses.list_licenses",
+      "blueprint": "enterprise_licenses"
+    },
+    {
+      "path": "/api/v1/licenses",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "enterprise_licenses.create_license",
+      "blueprint": "enterprise_licenses"
+    },
+    {
+      "path": "/api/v1/licenses/<license_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_licenses.get_license",
+      "blueprint": "enterprise_licenses"
+    },
+    {
+      "path": "/api/v1/licenses/<license_id>/validate",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "enterprise_licenses.validate_license",
+      "blueprint": "enterprise_licenses"
+    },
+    {
+      "path": "/api/v1/logistics-v2/events",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_v2.events",
+      "blueprint": "logistics_v2"
+    },
+    {
+      "path": "/api/v1/logistics-v2/scan",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "logistics_v2.scan_qr",
+      "blueprint": "logistics_v2"
+    },
+    {
+      "path": "/api/v1/logistics-v2/shipments/<shipment_id>/items",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_v2.shipment_items",
+      "blueprint": "logistics_v2"
+    },
+    {
+      "path": "/api/v1/logistics-v2/shipments/<shipment_id>/items",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "logistics_v2.add_shipment_item",
+      "blueprint": "logistics_v2"
+    },
+    {
+      "path": "/api/v1/logistics-v2/shipments/<shipment_id>/timeline",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_v2.shipment_timeline",
+      "blueprint": "logistics_v2"
+    },
+    {
+      "path": "/api/v1/logistics-v2/shipments/<shipment_id>/timeline",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "logistics_v2.add_timeline_event",
+      "blueprint": "logistics_v2"
+    },
+    {
+      "path": "/api/v1/logistics/assign",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "logistics_platform.assign_dispatch",
+      "blueprint": "logistics_platform"
+    },
+    {
+      "path": "/api/v1/logistics/dispatch-board",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_platform.dispatch_board",
+      "blueprint": "logistics_platform"
+    },
+    {
+      "path": "/api/v1/logistics/drivers",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_platform.list_drivers",
+      "blueprint": "logistics_platform"
+    },
+    {
+      "path": "/api/v1/logistics/drivers",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "logistics_platform.create_driver",
+      "blueprint": "logistics_platform"
+    },
+    {
+      "path": "/api/v1/logistics/gps",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "logistics_platform.record_gps",
+      "blueprint": "logistics_platform"
+    },
+    {
+      "path": "/api/v1/logistics/proof",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "logistics_platform.record_proof",
+      "blueprint": "logistics_platform"
+    },
+    {
+      "path": "/api/v1/logistics/routes",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_platform.list_routes",
+      "blueprint": "logistics_platform"
+    },
+    {
+      "path": "/api/v1/logistics/routes",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "logistics_platform.create_route",
+      "blueprint": "logistics_platform"
+    },
+    {
+      "path": "/api/v1/logistics/routes/<route_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_platform.get_route",
+      "blueprint": "logistics_platform"
+    },
+    {
+      "path": "/api/v1/logistics/routes/<route_id>/eta",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_platform.route_eta",
+      "blueprint": "logistics_platform"
+    },
+    {
+      "path": "/api/v1/logistics/routes/optimize",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "logistics_platform.optimize_route",
+      "blueprint": "logistics_platform"
+    },
+    {
+      "path": "/api/v1/logistics/vehicles",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_platform.list_vehicles",
+      "blueprint": "logistics_platform"
+    },
+    {
+      "path": "/api/v1/logistics/vehicles",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "logistics_platform.create_vehicle",
+      "blueprint": "logistics_platform"
+    },
+    {
+      "path": "/api/v1/marketplace/bookings",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "marketplace.list_bookings",
+      "blueprint": "marketplace"
+    },
+    {
+      "path": "/api/v1/marketplace/bookings",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "marketplace.create_booking",
+      "blueprint": "marketplace"
+    },
+    {
+      "path": "/api/v1/marketplace/bookings/<booking_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "marketplace.get_booking",
+      "blueprint": "marketplace"
+    },
+    {
+      "path": "/api/v1/marketplace/bookings/<booking_id>/timeline",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "marketplace.get_booking_timeline",
+      "blueprint": "marketplace"
+    },
+    {
+      "path": "/api/v1/marketplace/bookings/<booking_id>/transition",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "marketplace.transition_booking",
+      "blueprint": "marketplace"
+    },
+    {
+      "path": "/api/v1/marketplace/search",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "marketplace.marketplace_search",
+      "blueprint": "marketplace"
+    },
+    {
+      "path": "/api/v1/mobile/clinical-summary/<patient_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "mobile.clinical_summary",
+      "blueprint": "mobile"
+    },
+    {
+      "path": "/api/v1/mobile/home-collection",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "mobile.create_home_collection",
+      "blueprint": "mobile"
+    },
+    {
+      "path": "/api/v1/mobile/home-collections/<patient_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "mobile.list_home_collections",
+      "blueprint": "mobile"
+    },
+    {
+      "path": "/api/v1/mobile/login",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "mobile.mobile_login",
+      "blueprint": "mobile"
+    },
+    {
+      "path": "/api/v1/mobile/me",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "mobile.me",
+      "blueprint": "mobile"
+    },
+    {
+      "path": "/api/v1/mobile/orders/<patient_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "mobile.orders",
+      "blueprint": "mobile"
+    },
+    {
+      "path": "/api/v1/mobile/profile/<patient_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "mobile.profile",
+      "blueprint": "mobile"
+    },
+    {
+      "path": "/api/v1/mobile/results/<patient_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "mobile.results",
+      "blueprint": "mobile"
+    },
+    {
+      "path": "/api/v1/mobile/secure/orders",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "mobile.secure_orders",
+      "blueprint": "mobile"
+    },
+    {
+      "path": "/api/v1/mobile/secure/profile",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "mobile.secure_profile",
+      "blueprint": "mobile"
+    },
+    {
+      "path": "/api/v1/mobile/tracking/<patient_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "mobile.tracking",
+      "blueprint": "mobile"
+    },
+    {
+      "path": "/api/v1/notification-templates",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "notification_templates.list_templates",
+      "blueprint": "notification_templates"
+    },
+    {
+      "path": "/api/v1/notifications",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "notifications.list_notifications",
+      "blueprint": "notifications"
+    },
+    {
+      "path": "/api/v1/notifications/<notification_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "notifications.get_notification",
+      "blueprint": "notifications"
+    },
+    {
+      "path": "/api/v1/notifications/bulk",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "notifications.bulk_notifications",
+      "blueprint": "notifications"
+    },
+    {
+      "path": "/api/v1/notifications/dead-letter",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "hub_notifications.list_dead_letters",
+      "blueprint": "hub_notifications"
+    },
+    {
+      "path": "/api/v1/notifications/deliveries",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "hub_notifications.list_deliveries",
+      "blueprint": "hub_notifications"
+    },
+    {
+      "path": "/api/v1/notifications/hub",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "hub_notifications.notification_hub_summary",
+      "blueprint": "hub_notifications"
+    },
+    {
+      "path": "/api/v1/notifications/hub/send",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "hub_notifications.hub_send",
+      "blueprint": "hub_notifications"
+    },
+    {
+      "path": "/api/v1/notifications/legacy",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "hub_notifications.list_legacy_notifications",
+      "blueprint": "hub_notifications"
+    },
+    {
+      "path": "/api/v1/notifications/queue",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "hub_notifications.list_queue",
+      "blueprint": "hub_notifications"
+    },
+    {
+      "path": "/api/v1/notifications/queue",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "hub_notifications.enqueue_notification",
+      "blueprint": "hub_notifications"
+    },
+    {
+      "path": "/api/v1/notifications/queue/<queue_item_id>/retry",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "hub_notifications.retry_queue_item",
+      "blueprint": "hub_notifications"
+    },
+    {
+      "path": "/api/v1/notifications/queue/process",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "hub_notifications.process_queue",
+      "blueprint": "hub_notifications"
+    },
+    {
+      "path": "/api/v1/notifications/send",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "notifications.send_notification",
+      "blueprint": "notifications"
+    },
+    {
+      "path": "/api/v1/notifications/test",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "notifications.test_notification",
+      "blueprint": "notifications"
+    },
+    {
+      "path": "/api/v1/ops/health",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "ops.health",
+      "blueprint": "ops"
+    },
+    {
+      "path": "/api/v1/ops/production-check",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "ops.production_check",
+      "blueprint": "ops"
+    },
+    {
+      "path": "/api/v1/order-execution/orders",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "order_execution.list_orders",
+      "blueprint": "order_execution"
+    },
+    {
+      "path": "/api/v1/order-execution/orders",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "order_execution.create_order",
+      "blueprint": "order_execution"
+    },
+    {
+      "path": "/api/v1/order-execution/orders/<order_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "order_execution.get_order",
+      "blueprint": "order_execution"
+    },
+    {
+      "path": "/api/v1/order-execution/orders/<order_id>/advance",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "order_execution.advance_order",
+      "blueprint": "order_execution"
+    },
+    {
+      "path": "/api/v1/order-execution/orders/<order_id>/barcode",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "order_execution.get_order_barcode",
+      "blueprint": "order_execution"
+    },
+    {
+      "path": "/api/v1/order-execution/orders/<order_id>/cancel",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "order_execution.cancel_order",
+      "blueprint": "order_execution"
+    },
+    {
+      "path": "/api/v1/order-execution/orders/<order_id>/incident",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "order_execution.order_incident",
+      "blueprint": "order_execution"
+    },
+    {
+      "path": "/api/v1/order-execution/orders/<order_id>/label",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "order_execution.order_label",
+      "blueprint": "order_execution"
+    },
+    {
+      "path": "/api/v1/order-execution/orders/<order_id>/recollect",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "order_execution.recollect_order",
+      "blueprint": "order_execution"
+    },
+    {
+      "path": "/api/v1/order-execution/orders/<order_id>/refund",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "order_execution.refund_order",
+      "blueprint": "order_execution"
+    },
+    {
+      "path": "/api/v1/order-execution/orders/<order_id>/timeline",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "order_execution.get_order_timeline",
+      "blueprint": "order_execution"
+    },
+    {
+      "path": "/api/v1/order-execution/orders/<order_id>/transition",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "order_execution.transition_order",
+      "blueprint": "order_execution"
+    },
+    {
+      "path": "/api/v1/order-items",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "order_items.get_order_items",
+      "blueprint": "order_items"
+    },
+    {
+      "path": "/api/v1/order-items",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "order_items.create_order_item",
+      "blueprint": "order_items"
+    },
+    {
+      "path": "/api/v1/order-lifecycle/bookings/<booking_id>/check-in",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "order_lifecycle.check_in_collection",
+      "blueprint": "order_lifecycle"
+    },
+    {
+      "path": "/api/v1/order-lifecycle/bookings/<booking_id>/collect",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "order_lifecycle.collect_sample",
+      "blueprint": "order_lifecycle"
+    },
+    {
+      "path": "/api/v1/order-lifecycle/bookings/<booking_id>/collection",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "order_lifecycle.get_booking_collection",
+      "blueprint": "order_lifecycle"
+    },
+    {
+      "path": "/api/v1/order-lifecycle/bookings/<booking_id>/create-order",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "order_lifecycle.create_order_from_booking",
+      "blueprint": "order_lifecycle"
+    },
+    {
+      "path": "/api/v1/order-lifecycle/bookings/<booking_id>/dispatch",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "order_lifecycle.dispatch_sample",
+      "blueprint": "order_lifecycle"
+    },
+    {
+      "path": "/api/v1/order-lifecycle/bookings/<booking_id>/lab-receive",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "order_lifecycle.receive_at_lab",
+      "blueprint": "order_lifecycle"
+    },
+    {
+      "path": "/api/v1/order-lifecycle/bookings/<booking_id>/order",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "order_lifecycle.get_booking_order",
+      "blueprint": "order_lifecycle"
+    },
+    {
+      "path": "/api/v1/order-lifecycle/orders",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "order_lifecycle.list_orders",
+      "blueprint": "order_lifecycle"
+    },
+    {
+      "path": "/api/v1/order-lifecycle/orders/<order_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "order_lifecycle.get_order",
+      "blueprint": "order_lifecycle"
+    },
+    {
+      "path": "/api/v1/orders",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "orders.get_orders",
+      "blueprint": "orders"
+    },
+    {
+      "path": "/api/v1/orders",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "orders.create_order",
+      "blueprint": "orders"
+    },
+    {
+      "path": "/api/v1/partner-portal/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partner_portal.partner_dashboard",
+      "blueprint": "partner_portal"
+    },
+    {
+      "path": "/api/v1/partner-portal/orders",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partner_portal.partner_orders",
+      "blueprint": "partner_portal"
+    },
+    {
+      "path": "/api/v1/partner-portal/orders/<order_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partner_portal.partner_order_detail",
+      "blueprint": "partner_portal"
+    },
+    {
+      "path": "/api/v1/partner-portal/results",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partner_portal.list_results",
+      "blueprint": "partner_portal"
+    },
+    {
+      "path": "/api/v1/partner-portal/results/upload",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "partner_portal.upload_result",
+      "blueprint": "partner_portal"
+    },
+    {
+      "path": "/api/v1/partner-portal/revenue",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partner_portal.partner_revenue",
+      "blueprint": "partner_portal"
+    },
+    {
+      "path": "/api/v1/partner-portal/sla",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partner_portal.partner_sla",
+      "blueprint": "partner_portal"
+    },
+    {
+      "path": "/api/v1/partners",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners.list_partners",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "partners.create_partner",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners.get_partner",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "partners.update_partner",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/activate",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "partners.activate_partner",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/approve",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "partners.approve_partner",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/archive",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "partners.archive_partner",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/credentials",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners.list_api_credentials",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/credentials",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "partners.create_api_credential",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/credentials/<credential_id>/revoke",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "partners.revoke_api_credential",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/reject",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "partners.reject_partner",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/review",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "partners.review_partner",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/services",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners.list_partner_services",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/services",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "partners.add_partner_service",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/submit",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "partners.submit_partner",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/suspend",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "partners.suspend_partner",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/users",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners.list_partner_users",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/users",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "partners.add_partner_user",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/verification",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners.list_verification_items",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/partners/<partner_id>/verification/<item_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "partners.update_verification_item",
+      "blueprint": "partners"
+    },
+    {
+      "path": "/api/v1/patient/consent",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "patient_portal.patient_consent",
+      "blueprint": "patient_portal"
+    },
+    {
+      "path": "/api/v1/patient/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_portal.patient_dashboard",
+      "blueprint": "patient_portal"
+    },
+    {
+      "path": "/api/v1/patient/home-collections/<patient_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_mobile.patient_home_collections",
+      "blueprint": "patient_mobile"
+    },
+    {
+      "path": "/api/v1/patient/notifications",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_portal.patient_notifications",
+      "blueprint": "patient_portal"
+    },
+    {
+      "path": "/api/v1/patient/orders",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_portal.patient_orders",
+      "blueprint": "patient_portal"
+    },
+    {
+      "path": "/api/v1/patient/orders/<patient_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_mobile.patient_orders",
+      "blueprint": "patient_mobile"
+    },
+    {
+      "path": "/api/v1/patient/profile",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_portal.get_patient_profile",
+      "blueprint": "patient_portal"
+    },
+    {
+      "path": "/api/v1/patient/profile",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "patient_portal.update_patient_profile",
+      "blueprint": "patient_portal"
+    },
+    {
+      "path": "/api/v1/patient/report/<order_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_mobile.patient_report",
+      "blueprint": "patient_mobile"
+    },
+    {
+      "path": "/api/v1/patient/results",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_portal.patient_results",
+      "blueprint": "patient_portal"
+    },
+    {
+      "path": "/api/v1/patient/results/<patient_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_mobile.patient_results",
+      "blueprint": "patient_mobile"
+    },
+    {
+      "path": "/api/v1/patient/share-report",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "patient_portal.share_report",
+      "blueprint": "patient_portal"
+    },
+    {
+      "path": "/api/v1/patient/timeline",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_portal.patient_timeline",
+      "blueprint": "patient_portal"
+    },
+    {
+      "path": "/api/v1/patient/tracking/<patient_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_mobile.patient_tracking",
+      "blueprint": "patient_mobile"
+    },
+    {
+      "path": "/api/v1/patients",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patients.get_patients",
+      "blueprint": "patients"
+    },
+    {
+      "path": "/api/v1/patients",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "patients.create_patient",
+      "blueprint": "patients"
+    },
+    {
+      "path": "/api/v1/patients/<patient_id>",
+      "methods": [
+        "DELETE"
+      ],
+      "endpoint": "patients.delete_patient",
+      "blueprint": "patients"
+    },
+    {
+      "path": "/api/v1/patients/<patient_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patients.get_patient",
+      "blueprint": "patients"
+    },
+    {
+      "path": "/api/v1/patients/<patient_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "patients.update_patient",
+      "blueprint": "patients"
+    },
+    {
+      "path": "/api/v1/payments",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "payments.get_payments",
+      "blueprint": "payments"
+    },
+    {
+      "path": "/api/v1/payments/create",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "payments.create_payment",
+      "blueprint": "payments"
+    },
+    {
+      "path": "/api/v1/payments/history",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "payments.payment_history",
+      "blueprint": "payments"
+    },
+    {
+      "path": "/api/v1/payments/providers",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "payments.payment_providers",
+      "blueprint": "payments"
+    },
+    {
+      "path": "/api/v1/payments/refund",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "payments.payment_refund",
+      "blueprint": "payments"
+    },
+    {
+      "path": "/api/v1/payments/webhook",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "payments.payment_webhook",
+      "blueprint": "payments"
+    },
+    {
+      "path": "/api/v1/reference-ranges",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "reference_ranges.list_reference_ranges",
+      "blueprint": "reference_ranges"
+    },
+    {
+      "path": "/api/v1/reports",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "reporting.list_report_definitions",
+      "blueprint": "reporting"
+    },
+    {
+      "path": "/api/v1/reports/collectors",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "reporting.collectors_report",
+      "blueprint": "reporting"
+    },
+    {
+      "path": "/api/v1/reports/download",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "reporting.download_report",
+      "blueprint": "reporting"
+    },
+    {
+      "path": "/api/v1/reports/executive",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "reporting.executive_report",
+      "blueprint": "reporting"
+    },
+    {
+      "path": "/api/v1/reports/generate",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "reporting.generate_report",
+      "blueprint": "reporting"
+    },
+    {
+      "path": "/api/v1/reports/history",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "reporting.report_history",
+      "blueprint": "reporting"
+    },
+    {
+      "path": "/api/v1/reports/kpi",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "reporting.kpi_report",
+      "blueprint": "reporting"
+    },
+    {
+      "path": "/api/v1/reports/operations",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "reporting.operations_report",
+      "blueprint": "reporting"
+    },
+    {
+      "path": "/api/v1/reports/partners",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "reporting.partners_report",
+      "blueprint": "reporting"
+    },
+    {
+      "path": "/api/v1/reports/revenue",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "reporting.revenue_report",
+      "blueprint": "reporting"
+    },
+    {
+      "path": "/api/v1/reports/schedule",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "reporting.report_schedule",
+      "blueprint": "reporting"
+    },
+    {
+      "path": "/api/v1/result-files",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "result_files.list_result_files",
+      "blueprint": "result_files"
+    },
+    {
+      "path": "/api/v1/result-files/order/<order_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "result_files.files_by_order",
+      "blueprint": "result_files"
+    },
+    {
+      "path": "/api/v1/results",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "results_gateway.list_results",
+      "blueprint": "results_gateway"
+    },
+    {
+      "path": "/api/v1/results/<result_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "results_gateway.get_result",
+      "blueprint": "results_gateway"
+    },
+    {
+      "path": "/api/v1/results/<result_id>/approve",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "results_gateway.approve_result",
+      "blueprint": "results_gateway"
+    },
+    {
+      "path": "/api/v1/results/<result_id>/release",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "results_gateway.release_result",
+      "blueprint": "results_gateway"
+    },
+    {
+      "path": "/api/v1/results/<result_id>/review",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "results_gateway.review_result",
+      "blueprint": "results_gateway"
+    },
+    {
+      "path": "/api/v1/results/<result_id>/timeline",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "results_gateway.result_timeline",
+      "blueprint": "results_gateway"
+    },
+    {
+      "path": "/api/v1/results/manual",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "results_gateway.manual_result",
+      "blueprint": "results_gateway"
+    },
+    {
+      "path": "/api/v1/results/upload",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "results_gateway.upload_result",
+      "blueprint": "results_gateway"
+    },
+    {
+      "path": "/api/v1/sample-collections",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "sample_collections.get_sample_collections",
+      "blueprint": "sample_collections"
+    },
+    {
+      "path": "/api/v1/sample-collections",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "sample_collections.create_sample_collection",
+      "blueprint": "sample_collections"
+    },
+    {
+      "path": "/api/v1/sample-trackings",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "sample_trackings.get_sample_trackings",
+      "blueprint": "sample_trackings"
+    },
+    {
+      "path": "/api/v1/sample-trackings",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "sample_trackings.create_sample_tracking",
+      "blueprint": "sample_trackings"
+    },
+    {
+      "path": "/api/v1/sample-trackings/<sample_id>/status",
+      "methods": [
+        "PATCH"
+      ],
+      "endpoint": "sample_trackings.update_sample_status",
+      "blueprint": "sample_trackings"
+    },
+    {
+      "path": "/api/v1/scheduling/bookings/<booking_id>/assign-collector",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "scheduling.assign_booking_collector",
+      "blueprint": "scheduling"
+    },
+    {
+      "path": "/api/v1/scheduling/bookings/<booking_id>/reserve-slot",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "scheduling.reserve_booking_slot",
+      "blueprint": "scheduling"
+    },
+    {
+      "path": "/api/v1/scheduling/collectors/availability",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "scheduling.list_collector_availability",
+      "blueprint": "scheduling"
+    },
+    {
+      "path": "/api/v1/scheduling/partners/<partner_id>/generate-slots",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "scheduling.generate_partner_slots",
+      "blueprint": "scheduling"
+    },
+    {
+      "path": "/api/v1/scheduling/partners/<partner_id>/slots",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "scheduling.list_partner_slots",
+      "blueprint": "scheduling"
+    },
+    {
+      "path": "/api/v1/security/abac/evaluate",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "enterprise_security.abac_evaluate",
+      "blueprint": "enterprise_security"
+    },
+    {
+      "path": "/api/v1/security/abac/policies",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_security.abac_policies",
+      "blueprint": "enterprise_security"
+    },
+    {
+      "path": "/api/v1/security/business-units",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_security.business_units",
+      "blueprint": "enterprise_security"
+    },
+    {
+      "path": "/api/v1/security/departments",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_security.departments",
+      "blueprint": "enterprise_security"
+    },
+    {
+      "path": "/api/v1/security/identity-providers",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_security.identity_providers",
+      "blueprint": "enterprise_security"
+    },
+    {
+      "path": "/api/v1/security/identity-providers",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "enterprise_security.create_identity_provider",
+      "blueprint": "enterprise_security"
+    },
+    {
+      "path": "/api/v1/security/organizations",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_security.organizations",
+      "blueprint": "enterprise_security"
+    },
+    {
+      "path": "/api/v1/security/rbac/roles",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_security.rbac_roles",
+      "blueprint": "enterprise_security"
+    },
+    {
+      "path": "/api/v1/security/roles",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "security_api.roles",
+      "blueprint": "security_api"
+    },
+    {
+      "path": "/api/v1/security/users",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "security_api.users",
+      "blueprint": "security_api"
+    },
+    {
+      "path": "/api/v1/security/users",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "security_api.create_user",
+      "blueprint": "security_api"
+    },
+    {
+      "path": "/api/v1/security/users/<user_id>/disable",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "security_api.disable_user",
+      "blueprint": "security_api"
+    },
+    {
+      "path": "/api/v1/security/users/<user_id>/role",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "security_api.update_role",
+      "blueprint": "security_api"
+    },
+    {
+      "path": "/api/v1/seeds/demo-operations",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "seeds.demo_operations",
+      "blueprint": "seeds"
+    },
+    {
+      "path": "/api/v1/shipments",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "shipments.list_shipments",
+      "blueprint": "shipments"
+    },
+    {
+      "path": "/api/v1/shipments",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "shipments.create_shipment",
+      "blueprint": "shipments"
+    },
+    {
+      "path": "/api/v1/shipments/<shipment_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "shipments.get_shipment",
+      "blueprint": "shipments"
+    },
+    {
+      "path": "/api/v1/shipments/<shipment_id>/arrived",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "shipments.arrived_shipment",
+      "blueprint": "shipments"
+    },
+    {
+      "path": "/api/v1/shipments/<shipment_id>/assign-box/<box_id>",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "shipments.assign_box_to_shipment",
+      "blueprint": "shipments"
+    },
+    {
+      "path": "/api/v1/shipments/<shipment_id>/receive",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "shipments.receive_shipment",
+      "blueprint": "shipments"
+    },
+    {
+      "path": "/api/v1/shipments/<shipment_id>/start",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "shipments.start_shipment",
+      "blueprint": "shipments"
+    },
+    {
+      "path": "/api/v1/shipments/receive-by-box/<box_id>",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "shipments.receive_shipment_by_box",
+      "blueprint": "shipments"
+    },
+    {
+      "path": "/api/v1/shipments/scan/<path:qr_payload>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "shipments.scan_qr",
+      "blueprint": "shipments"
+    },
+    {
+      "path": "/api/v1/system/backup-status",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "system.backup_status",
+      "blueprint": "system"
+    },
+    {
+      "path": "/api/v1/system/build",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "system.build",
+      "blueprint": "system"
+    },
+    {
+      "path": "/api/v1/system/health",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "system.health",
+      "blueprint": "system"
+    },
+    {
+      "path": "/api/v1/system/live",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "system.live",
+      "blueprint": "system"
+    },
+    {
+      "path": "/api/v1/system/liveness",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "system.liveness",
+      "blueprint": "system"
+    },
+    {
+      "path": "/api/v1/system/metrics",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "system.system_metrics",
+      "blueprint": "system"
+    },
+    {
+      "path": "/api/v1/system/performance",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "system.system_performance",
+      "blueprint": "system"
+    },
+    {
+      "path": "/api/v1/system/readiness",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "system.readiness",
+      "blueprint": "system"
+    },
+    {
+      "path": "/api/v1/system/ready",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "system.ready",
+      "blueprint": "system"
+    },
+    {
+      "path": "/api/v1/system/routes",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "system.routes",
+      "blueprint": "system"
+    },
+    {
+      "path": "/api/v1/system/stats",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "system.stats",
+      "blueprint": "system"
+    },
+    {
+      "path": "/api/v1/system/version",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "system.version",
+      "blueprint": "system"
+    },
+    {
+      "path": "/api/v1/templates",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "communication_templates.list_templates",
+      "blueprint": "communication_templates"
+    },
+    {
+      "path": "/api/v1/templates",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "communication_templates.create_template",
+      "blueprint": "communication_templates"
+    },
+    {
+      "path": "/api/v1/templates/<template_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "communication_templates.get_template",
+      "blueprint": "communication_templates"
+    },
+    {
+      "path": "/api/v1/tenants",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_tenants.list_tenants",
+      "blueprint": "enterprise_tenants"
+    },
+    {
+      "path": "/api/v1/tenants",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "enterprise_tenants.create_tenant",
+      "blueprint": "enterprise_tenants"
+    },
+    {
+      "path": "/api/v1/tenants/<tenant_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_tenants.get_tenant",
+      "blueprint": "enterprise_tenants"
+    },
+    {
+      "path": "/api/v1/tenants/<tenant_id>/isolation",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_tenants.tenant_isolation",
+      "blueprint": "enterprise_tenants"
+    },
+    {
+      "path": "/api/v1/test-catalogs",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "test_catalogs.get_tests",
+      "blueprint": "test_catalogs"
+    },
+    {
+      "path": "/api/v1/test-catalogs",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "test_catalogs.create_test",
+      "blueprint": "test_catalogs"
+    },
+    {
+      "path": "/api/v1/test-results",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "test_results.get_results",
+      "blueprint": "test_results"
+    },
+    {
+      "path": "/api/v1/test-results",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "test_results.create_result",
+      "blueprint": "test_results"
+    },
+    {
+      "path": "/api/v1/transport-boxes",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "transport_boxes.get_transport_boxes",
+      "blueprint": "transport_boxes"
+    },
+    {
+      "path": "/api/v1/transport-boxes",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "transport_boxes.create_transport_box",
+      "blueprint": "transport_boxes"
+    },
+    {
+      "path": "/api/v1/transport-boxes/<box_id>",
+      "methods": [
+        "PATCH"
+      ],
+      "endpoint": "transport_boxes.update_transport_box",
+      "blueprint": "transport_boxes"
+    },
+    {
+      "path": "/api/v1/webhooks",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "communication_webhooks.list_webhooks",
+      "blueprint": "communication_webhooks"
+    },
+    {
+      "path": "/api/v1/webhooks",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "communication_webhooks.create_webhook",
+      "blueprint": "communication_webhooks"
+    },
+    {
+      "path": "/api/v1/webhooks/<webhook_id>/test",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "communication_webhooks.test_webhook",
+      "blueprint": "communication_webhooks"
+    },
+    {
+      "path": "/api/v1/webhooks/deliveries",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "communication_webhooks.webhook_deliveries",
+      "blueprint": "communication_webhooks"
+    },
+    {
+      "path": "/api/v1/workflow/assign/<booking_id>/<collector_id>",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "workflow.assign",
+      "blueprint": "workflow"
+    },
+    {
+      "path": "/api/v1/workflow/bookings",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "workflow.bookings",
+      "blueprint": "workflow"
+    },
+    {
+      "path": "/api/v1/workflow/bookings",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "workflow.create_booking",
+      "blueprint": "workflow"
+    },
+    {
+      "path": "/api/v1/workflow/checkin/<booking_id>",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "workflow.checkin",
+      "blueprint": "workflow"
+    },
+    {
+      "path": "/api/v1/workflow/collected/<booking_id>",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "workflow.collected",
+      "blueprint": "workflow"
+    },
+    {
+      "path": "/api/v1/workflow/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "workflow.dashboard",
+      "blueprint": "workflow"
+    },
+    {
+      "path": "/api/v1/workflow/health",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "workflow.health",
+      "blueprint": "workflow"
+    },
+    {
+      "path": "/api/v1/workflow/sample/<sample_id>/<status>",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "workflow.update_sample_status",
+      "blueprint": "workflow"
+    },
+    {
+      "path": "/api/v2/ai/order/<order_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "ai_v2.analyze_order",
+      "blueprint": "ai_v2"
+    },
+    {
+      "path": "/audit",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "audit_center_web.audit_center",
+      "blueprint": "audit_center_web"
+    },
+    {
+      "path": "/billing",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "billing_invoice_web.billing_home",
+      "blueprint": "billing_invoice_web"
+    },
+    {
+      "path": "/billing/invoices",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "billing_invoice_web.billing_invoices_page",
+      "blueprint": "billing_invoice_web"
+    },
+    {
+      "path": "/billing/ledger",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "billing_invoice_web.billing_ledger_page",
+      "blueprint": "billing_invoice_web"
+    },
+    {
+      "path": "/boxes/<box_id>/qr",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "box_qr_web.box_qr_page",
+      "blueprint": "box_qr_web"
+    },
+    {
+      "path": "/clinic",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "clinic_portal_v2_web.clinic_home",
+      "blueprint": "clinic_portal_v2_web"
+    },
+    {
+      "path": "/clinic/bookings",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "clinic_portal_v2_web.clinic_bookings_page",
+      "blueprint": "clinic_portal_v2_web"
+    },
+    {
+      "path": "/clinic/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "clinic_portal_v2_web.clinic_dashboard_page",
+      "blueprint": "clinic_portal_v2_web"
+    },
+    {
+      "path": "/clinic/orders",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "clinic_portal_v2_web.clinic_orders_page",
+      "blueprint": "clinic_portal_v2_web"
+    },
+    {
+      "path": "/clinic/patients",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "clinic_portal_v2_web.clinic_patients_page",
+      "blueprint": "clinic_portal_v2_web"
+    },
+    {
+      "path": "/clinic/revenue",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "clinic_portal_v2_web.clinic_revenue_page",
+      "blueprint": "clinic_portal_v2_web"
+    },
+    {
+      "path": "/collector",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_portal_web.collector_dashboard",
+      "blueprint": "collector_portal_web"
+    },
+    {
+      "path": "/collector-kpi",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_kpi_web.collector_kpi",
+      "blueprint": "collector_kpi_web"
+    },
+    {
+      "path": "/collector-mobile",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_mobile_web.collector_mobile",
+      "blueprint": "collector_mobile_web"
+    },
+    {
+      "path": "/collector-mobile/create-demo",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_mobile_web.create_demo_collector",
+      "blueprint": "collector_mobile_web"
+    },
+    {
+      "path": "/collector-operations",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_operations_web.collector_operations_page",
+      "blueprint": "collector_operations_web"
+    },
+    {
+      "path": "/collector-operations/collectors/<collector_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_operations_web.collector_dashboard_page",
+      "blueprint": "collector_operations_web"
+    },
+    {
+      "path": "/collector-operations/supervisor",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_operations_web.supervisor_dashboard_page",
+      "blueprint": "collector_operations_web"
+    },
+    {
+      "path": "/collector/console",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_console_web.collector_console",
+      "blueprint": "collector_console_web"
+    },
+    {
+      "path": "/collector/status/<collection_id>/<status>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "collector_portal_web.update_collector_status",
+      "blueprint": "collector_portal_web"
+    },
+    {
+      "path": "/companies",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "companies_web.companies_page",
+      "blueprint": "companies_web"
+    },
+    {
+      "path": "/contracts",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "contracts_web.contracts_page",
+      "blueprint": "contracts_web"
+    },
+    {
+      "path": "/critical-values",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "interpretation_admin_web.critical_values_home",
+      "blueprint": "interpretation_admin_web"
+    },
+    {
+      "path": "/crm",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_web.crm_dashboard",
+      "blueprint": "crm_web"
+    },
+    {
+      "path": "/crm-pipeline",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "crm_v2_web.crm_pipeline",
+      "blueprint": "crm_v2_web"
+    },
+    {
+      "path": "/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "dashboard_web.dashboard",
+      "blueprint": "dashboard_web"
+    },
+    {
+      "path": "/disease-library",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "knowledge_web.disease_library_page",
+      "blueprint": "knowledge_web"
+    },
+    {
+      "path": "/dispatch",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "dispatch_web.dispatch_center",
+      "blueprint": "dispatch_web"
+    },
+    {
+      "path": "/dispatch-jobs",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "dispatch_optimizer_web.dispatch_jobs_page",
+      "blueprint": "dispatch_optimizer_web"
+    },
+    {
+      "path": "/dispatch-jobs/<job_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "dispatch_optimizer_web.dispatch_job_detail",
+      "blueprint": "dispatch_optimizer_web"
+    },
+    {
+      "path": "/dispatch-jobs/new",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "dispatch_optimizer_web.new_dispatch_job",
+      "blueprint": "dispatch_optimizer_web"
+    },
+    {
+      "path": "/dispatch-performance",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "dispatch_performance_web.dispatch_performance",
+      "blueprint": "dispatch_performance_web"
+    },
+    {
+      "path": "/doctor",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "doctor_portal_v2_web.doctor_home",
+      "blueprint": "doctor_portal_v2_web"
+    },
+    {
+      "path": "/doctor/approve/<result_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "doctor_portal_web.approve_result",
+      "blueprint": "doctor_portal_web"
+    },
+    {
+      "path": "/doctor/dashboard",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "doctor_portal_v2_web.doctor_dashboard_page",
+      "blueprint": "doctor_portal_v2_web"
+    },
+    {
+      "path": "/doctor/kpi",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "doctor_kpi_web.doctor_kpi",
+      "blueprint": "doctor_kpi_web"
+    },
+    {
+      "path": "/doctor/patients",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "doctor_portal_v2_web.doctor_patients_page",
+      "blueprint": "doctor_portal_v2_web"
+    },
+    {
+      "path": "/doctor/referrals",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "doctor_portal_v2_web.doctor_referrals_page",
+      "blueprint": "doctor_portal_v2_web"
+    },
+    {
+      "path": "/doctor/results",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "doctor_portal_v2_web.doctor_results_page",
+      "blueprint": "doctor_portal_v2_web"
+    },
+    {
+      "path": "/drivers",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "drivers_web.drivers_page",
+      "blueprint": "drivers_web"
+    },
+    {
+      "path": "/drivers/new",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "drivers_web.new_driver",
+      "blueprint": "drivers_web"
+    },
+    {
+      "path": "/events",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "communication_hub_web.events_dashboard",
+      "blueprint": "communication_hub_web"
+    },
+    {
+      "path": "/executive",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "executive_web.executive",
+      "blueprint": "executive_web"
+    },
+    {
+      "path": "/executive-v9",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "executive_v9.executive_v9",
+      "blueprint": "executive_v9"
+    },
+    {
+      "path": "/executive/v8",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "executive_v8.executive",
+      "blueprint": "executive_v8"
+    },
+    {
+      "path": "/federation",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "federation_web.federation_home",
+      "blueprint": "federation_web"
+    },
+    {
+      "path": "/federation/capacity",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "federation_web.federation_capacity",
+      "blueprint": "federation_web"
+    },
+    {
+      "path": "/federation/failover",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "federation_web.federation_failover",
+      "blueprint": "federation_web"
+    },
+    {
+      "path": "/federation/labs",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "federation_web.federation_labs",
+      "blueprint": "federation_web"
+    },
+    {
+      "path": "/federation/routing",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "federation_web.federation_routing",
+      "blueprint": "federation_web"
+    },
+    {
+      "path": "/finance",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "finance_web.finance_dashboard",
+      "blueprint": "finance_web"
+    },
+    {
+      "path": "/guidelines",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "knowledge_web.guidelines_page",
+      "blueprint": "knowledge_web"
+    },
+    {
+      "path": "/home-collections",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "home_collections_web.home_collections_page",
+      "blueprint": "home_collections_web"
+    },
+    {
+      "path": "/home-collections/new",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "home_collections_web.new_collection",
+      "blueprint": "home_collections_web"
+    },
+    {
+      "path": "/home-collections/status/<collection_id>/<status>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "home_collections_web.update_status",
+      "blueprint": "home_collections_web"
+    },
+    {
+      "path": "/incidents",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "incidents_web.incidents_page",
+      "blueprint": "incidents_web"
+    },
+    {
+      "path": "/incidents/resolve/<incident_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "incidents_web.resolve_incident_web",
+      "blueprint": "incidents_web"
+    },
+    {
+      "path": "/integrations",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "integrations_web.integrations_home",
+      "blueprint": "integrations_web"
+    },
+    {
+      "path": "/integrations/connections",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "integrations_web.integrations_connections_page",
+      "blueprint": "integrations_web"
+    },
+    {
+      "path": "/integrations/messages",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "integrations_web.integrations_messages_page",
+      "blueprint": "integrations_web"
+    },
+    {
+      "path": "/interpretation",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "interpretation_admin_web.interpretation_home",
+      "blueprint": "interpretation_admin_web"
+    },
+    {
+      "path": "/invoices",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "invoices_web.invoices_page",
+      "blueprint": "invoices_web"
+    },
+    {
+      "path": "/invoices/new",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "invoices_web.new_invoice",
+      "blueprint": "invoices_web"
+    },
+    {
+      "path": "/iot",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "iot_web.iot_home",
+      "blueprint": "iot_web"
+    },
+    {
+      "path": "/iot-box",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_web.iot_box_dashboard",
+      "blueprint": "logistics_web"
+    },
+    {
+      "path": "/iot-box/create-demo",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_web.create_demo_box",
+      "blueprint": "logistics_web"
+    },
+    {
+      "path": "/iot-box/simulate-normal/<box_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_web.simulate_normal",
+      "blueprint": "logistics_web"
+    },
+    {
+      "path": "/iot-box/simulate-temp-high/<box_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_web.simulate_temp_high",
+      "blueprint": "logistics_web"
+    },
+    {
+      "path": "/iot/alerts",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "iot_web.iot_alerts_page",
+      "blueprint": "iot_web"
+    },
+    {
+      "path": "/iot/cold-chain",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "iot_web.iot_cold_chain_page",
+      "blueprint": "iot_web"
+    },
+    {
+      "path": "/iot/devices",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "iot_web.iot_devices_page",
+      "blueprint": "iot_web"
+    },
+    {
+      "path": "/knowledge",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "knowledge_web.knowledge_home",
+      "blueprint": "knowledge_web"
+    },
+    {
+      "path": "/lab-worklist",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_worklist.lab_worklist",
+      "blueprint": "lab_worklist"
+    },
+    {
+      "path": "/lab-worklist/status/<sample_id>/<status>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "lab_worklist.update_lab_status",
+      "blueprint": "lab_worklist"
+    },
+    {
+      "path": "/legacy/doctor",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "doctor_portal_web.doctor_dashboard",
+      "blueprint": "doctor_portal_web"
+    },
+    {
+      "path": "/legacy/results",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "test_results_web.results_page",
+      "blueprint": "test_results_web"
+    },
+    {
+      "path": "/license",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_web.license_dashboard",
+      "blueprint": "enterprise_web"
+    },
+    {
+      "path": "/login",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "auth_web.login_page",
+      "blueprint": "auth_web"
+    },
+    {
+      "path": "/logistics",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_web.logistics_dashboard",
+      "blueprint": "logistics_web"
+    },
+    {
+      "path": "/logistics-v2",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_v2_web.logistics_v2_dashboard",
+      "blueprint": "logistics_v2_web"
+    },
+    {
+      "path": "/logistics/dispatch",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_web.dispatch_center",
+      "blueprint": "logistics_web"
+    },
+    {
+      "path": "/logistics/dispatch/assign/<job_id>/<collector_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_web.assign_collector",
+      "blueprint": "logistics_web"
+    },
+    {
+      "path": "/logistics/live-map",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_web.logistics_live_map",
+      "blueprint": "logistics_web"
+    },
+    {
+      "path": "/logistics/routes",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "logistics_web.logistics_routes_page",
+      "blueprint": "logistics_web"
+    },
+    {
+      "path": "/logout",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "auth_web.logout",
+      "blueprint": "auth_web"
+    },
+    {
+      "path": "/marketplace",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "marketplace_web.marketplace_page",
+      "blueprint": "marketplace_web"
+    },
+    {
+      "path": "/marketplace/book",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "marketplace_web.marketplace_book_page",
+      "blueprint": "marketplace_web"
+    },
+    {
+      "path": "/marketplace/book",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "marketplace_web.marketplace_book_submit_page",
+      "blueprint": "marketplace_web"
+    },
+    {
+      "path": "/marketplace/bookings",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "marketplace_web.marketplace_bookings_page",
+      "blueprint": "marketplace_web"
+    },
+    {
+      "path": "/marketplace/bookings/<booking_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "marketplace_web.marketplace_booking_detail_page",
+      "blueprint": "marketplace_web"
+    },
+    {
+      "path": "/monitor",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "monitor_web.monitor",
+      "blueprint": "monitor_web"
+    },
+    {
+      "path": "/my-portal",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_portal_web.my_patient_portal",
+      "blueprint": "patient_portal_web"
+    },
+    {
+      "path": "/notifications",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "communication_hub_web.notifications_dashboard",
+      "blueprint": "communication_hub_web"
+    },
+    {
+      "path": "/operations",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "operations_web.operations",
+      "blueprint": "operations_web"
+    },
+    {
+      "path": "/operations/timeline",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "operations_timeline_web.operations_timeline",
+      "blueprint": "operations_timeline_web"
+    },
+    {
+      "path": "/order-execution",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "order_execution_web.order_execution_page",
+      "blueprint": "order_execution_web"
+    },
+    {
+      "path": "/order-execution/orders/<order_id>",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "order_execution_web.order_execution_detail_page",
+      "blueprint": "order_execution_web"
+    },
+    {
+      "path": "/order-lifecycle",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "order_lifecycle_web.order_lifecycle_page",
+      "blueprint": "order_lifecycle_web"
+    },
+    {
+      "path": "/order-lifecycle/bookings/<booking_id>",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "order_lifecycle_web.order_lifecycle_booking_page",
+      "blueprint": "order_lifecycle_web"
+    },
+    {
+      "path": "/orders",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "orders_web.orders_page",
+      "blueprint": "orders_web"
+    },
+    {
+      "path": "/orders/<order_id>/generate-invoice",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "orders_web.generate_invoice_web",
+      "blueprint": "orders_web"
+    },
+    {
+      "path": "/orders/<order_id>/items",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "order_items_web.order_items_page",
+      "blueprint": "order_items_web"
+    },
+    {
+      "path": "/orders/<order_id>/items/new",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "order_items_web.new_order_item",
+      "blueprint": "order_items_web"
+    },
+    {
+      "path": "/orders/new",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "orders_web.new_order",
+      "blueprint": "orders_web"
+    },
+    {
+      "path": "/partner-portal",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partner_portal_web.partner_portal_home",
+      "blueprint": "partner_portal_web"
+    },
+    {
+      "path": "/partner-portal/orders",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partner_portal_web.partner_portal_orders",
+      "blueprint": "partner_portal_web"
+    },
+    {
+      "path": "/partner-portal/results",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partner_portal_web.partner_portal_results",
+      "blueprint": "partner_portal_web"
+    },
+    {
+      "path": "/partner-portal/revenue",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partner_portal_web.partner_portal_revenue",
+      "blueprint": "partner_portal_web"
+    },
+    {
+      "path": "/partner-portal/sla",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partner_portal_web.partner_portal_sla",
+      "blueprint": "partner_portal_web"
+    },
+    {
+      "path": "/partners",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners_web.partners_page",
+      "blueprint": "partners_web"
+    },
+    {
+      "path": "/partners/<partner_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners_web.partner_detail_page",
+      "blueprint": "partners_web"
+    },
+    {
+      "path": "/partners/<partner_id>/activate",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners_web.partner_activate_page",
+      "blueprint": "partners_web"
+    },
+    {
+      "path": "/partners/<partner_id>/approve",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners_web.partner_approve_page",
+      "blueprint": "partners_web"
+    },
+    {
+      "path": "/partners/<partner_id>/archive",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners_web.partner_archive_page",
+      "blueprint": "partners_web"
+    },
+    {
+      "path": "/partners/<partner_id>/credentials/create",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners_web.partner_create_credential_page",
+      "blueprint": "partners_web"
+    },
+    {
+      "path": "/partners/<partner_id>/reject",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners_web.partner_reject_page",
+      "blueprint": "partners_web"
+    },
+    {
+      "path": "/partners/<partner_id>/review",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners_web.partner_review_page",
+      "blueprint": "partners_web"
+    },
+    {
+      "path": "/partners/<partner_id>/services",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "partners_web.partner_add_service_page",
+      "blueprint": "partners_web"
+    },
+    {
+      "path": "/partners/<partner_id>/submit",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners_web.partner_submit_page",
+      "blueprint": "partners_web"
+    },
+    {
+      "path": "/partners/<partner_id>/suspend",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "partners_web.partner_suspend_page",
+      "blueprint": "partners_web"
+    },
+    {
+      "path": "/partners/new",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "partners_web.partners_new_page",
+      "blueprint": "partners_web"
+    },
+    {
+      "path": "/patient",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_portal_v2_web.patient_home",
+      "blueprint": "patient_portal_v2_web"
+    },
+    {
+      "path": "/patient/orders",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_portal_v2_web.patient_orders_page",
+      "blueprint": "patient_portal_v2_web"
+    },
+    {
+      "path": "/patient/profile",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_portal_v2_web.patient_profile_page",
+      "blueprint": "patient_portal_v2_web"
+    },
+    {
+      "path": "/patient/results",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_portal_v2_web.patient_results_page",
+      "blueprint": "patient_portal_v2_web"
+    },
+    {
+      "path": "/patient/timeline",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_portal_v2_web.patient_timeline_page",
+      "blueprint": "patient_portal_v2_web"
+    },
+    {
+      "path": "/patients",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patients_web.patients_page",
+      "blueprint": "patients_web"
+    },
+    {
+      "path": "/patients/new",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "patients_web.new_patient",
+      "blueprint": "patients_web"
+    },
+    {
+      "path": "/payment",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "payment_gateway_web.payment_home",
+      "blueprint": "payment_gateway_web"
+    },
+    {
+      "path": "/payment/history",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "payment_gateway_web.payment_history_page",
+      "blueprint": "payment_gateway_web"
+    },
+    {
+      "path": "/payment/refunds",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "payment_gateway_web.payment_refunds_page",
+      "blueprint": "payment_gateway_web"
+    },
+    {
+      "path": "/payments",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "payments_web.payments_page",
+      "blueprint": "payments_web"
+    },
+    {
+      "path": "/payments/new",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "payments_web.new_payment",
+      "blueprint": "payments_web"
+    },
+    {
+      "path": "/portal/<patient_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "patient_portal_web.patient_portal",
+      "blueprint": "patient_portal_web"
+    },
+    {
+      "path": "/portal/result-files/download/<file_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "result_upload_web.portal_download_result_file",
+      "blueprint": "result_upload_web"
+    },
+    {
+      "path": "/reference-ranges",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "interpretation_admin_web.reference_ranges_home",
+      "blueprint": "interpretation_admin_web"
+    },
+    {
+      "path": "/reports",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "reporting_bi_web.reports_home",
+      "blueprint": "reporting_bi_web"
+    },
+    {
+      "path": "/reports/executive",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "reporting_bi_web.reports_executive",
+      "blueprint": "reporting_bi_web"
+    },
+    {
+      "path": "/reports/operations",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "reporting_bi_web.reports_operations",
+      "blueprint": "reporting_bi_web"
+    },
+    {
+      "path": "/result-files",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "result_upload_web.result_files_page",
+      "blueprint": "result_upload_web"
+    },
+    {
+      "path": "/result-files/download/<file_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "result_upload_web.download_result_file",
+      "blueprint": "result_upload_web"
+    },
+    {
+      "path": "/result-files/new",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "result_upload_web.upload_result_file",
+      "blueprint": "result_upload_web"
+    },
+    {
+      "path": "/results",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "result_gateway_web.results_home",
+      "blueprint": "result_gateway_web"
+    },
+    {
+      "path": "/results/<result_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "result_gateway_web.results_detail",
+      "blueprint": "result_gateway_web"
+    },
+    {
+      "path": "/results/<result_id>/ai",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "test_results_web.generate_ai_comment",
+      "blueprint": "test_results_web"
+    },
+    {
+      "path": "/results/new",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "result_gateway_web.legacy_results_new_redirect",
+      "blueprint": "result_gateway_web"
+    },
+    {
+      "path": "/results/new",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "test_results_web.new_result",
+      "blueprint": "test_results_web"
+    },
+    {
+      "path": "/results/report/<order_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "reports_web.report_page",
+      "blueprint": "reports_web"
+    },
+    {
+      "path": "/results/report/<order_id>/pdf",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "report_pdf_web.report_pdf",
+      "blueprint": "report_pdf_web"
+    },
+    {
+      "path": "/results/upload",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "result_gateway_web.results_upload",
+      "blueprint": "result_gateway_web"
+    },
+    {
+      "path": "/results/verify/<result_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "result_verify_web.verify_result",
+      "blueprint": "result_verify_web"
+    },
+    {
+      "path": "/samples",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "sample_tracking_web.samples_page",
+      "blueprint": "sample_tracking_web"
+    },
+    {
+      "path": "/samples/new",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "sample_tracking_web.new_sample",
+      "blueprint": "sample_tracking_web"
+    },
+    {
+      "path": "/samples/status/<sample_id>/<status>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "sample_tracking_web.update_sample_status_web",
+      "blueprint": "sample_tracking_web"
+    },
+    {
+      "path": "/samples/track/<sample_code>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "sample_public_web.track_sample",
+      "blueprint": "sample_public_web"
+    },
+    {
+      "path": "/samples/verify/<sample_code>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "sample_tracking_web.verify_sample",
+      "blueprint": "sample_tracking_web"
+    },
+    {
+      "path": "/scheduling",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "scheduling_web.scheduling_page",
+      "blueprint": "scheduling_web"
+    },
+    {
+      "path": "/scheduling/bookings/<booking_id>/assign-collector",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "scheduling_web.scheduling_assign_collector_page",
+      "blueprint": "scheduling_web"
+    },
+    {
+      "path": "/scheduling/collectors",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "scheduling_web.scheduling_collectors_page",
+      "blueprint": "scheduling_web"
+    },
+    {
+      "path": "/scheduling/partners/<partner_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "scheduling_web.scheduling_partner_page",
+      "blueprint": "scheduling_web"
+    },
+    {
+      "path": "/scheduling/partners/<partner_id>/generate-slots",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "scheduling_web.scheduling_partner_generate_slots_page",
+      "blueprint": "scheduling_web"
+    },
+    {
+      "path": "/security",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_web.security_dashboard",
+      "blueprint": "enterprise_web"
+    },
+    {
+      "path": "/shipments",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "shipments_web.shipments_page",
+      "blueprint": "shipments_web"
+    },
+    {
+      "path": "/shipments/<shipment_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "shipments_web.shipment_detail",
+      "blueprint": "shipments_web"
+    },
+    {
+      "path": "/shipments/<shipment_id>/accept",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "shipments_web.accept_shipment_web",
+      "blueprint": "shipments_web"
+    },
+    {
+      "path": "/shipments/<shipment_id>/qr",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "shipments_web.shipment_qr",
+      "blueprint": "shipments_web"
+    },
+    {
+      "path": "/shipments/<shipment_id>/receive",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "shipments_web.lab_receive",
+      "blueprint": "shipments_web"
+    },
+    {
+      "path": "/shipments/<shipment_id>/start-trip",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "shipments_web.start_trip_web",
+      "blueprint": "shipments_web"
+    },
+    {
+      "path": "/shipments/new",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "shipments_web.new_shipment",
+      "blueprint": "shipments_web"
+    },
+    {
+      "path": "/static/<path:filename>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "static",
+      "blueprint": "static"
+    },
+    {
+      "path": "/system",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_web.system_dashboard",
+      "blueprint": "enterprise_web"
+    },
+    {
+      "path": "/tat-kpi",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "tat_kpi_web.tat_kpi",
+      "blueprint": "tat_kpi_web"
+    },
+    {
+      "path": "/templates",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "communication_hub_web.templates_dashboard",
+      "blueprint": "communication_hub_web"
+    },
+    {
+      "path": "/tenants",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "enterprise_web.tenants_dashboard",
+      "blueprint": "enterprise_web"
+    },
+    {
+      "path": "/transport-boxes",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "transport_boxes_web.transport_boxes_page",
+      "blueprint": "transport_boxes_web"
+    },
+    {
+      "path": "/transport-boxes/<box_id>/samples",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "transport_boxes_web.transport_box_samples",
+      "blueprint": "transport_boxes_web"
+    },
+    {
+      "path": "/transport-boxes/new",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "transport_boxes_web.new_transport_box",
+      "blueprint": "transport_boxes_web"
+    },
+    {
+      "path": "/transport-boxes/update/<box_id>",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "transport_boxes_web.update_transport_box_web",
+      "blueprint": "transport_boxes_web"
+    },
+    {
+      "path": "/webhooks",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "communication_hub_web.webhooks_dashboard",
+      "blueprint": "communication_hub_web"
+    }
+  ],
+  "duplicate_routes": [],
+  "prefix_counts": {
+    "api": 510,
+    "partners": 12,
+    "results": 9,
+    "doctor": 7,
+    "shipments": 7,
+    "clinic": 6,
+    "federation": 5,
+    "logistics": 5,
+    "marketplace": 5,
+    "orders": 5,
+    "partner-portal": 5,
+    "patient": 5,
+    "samples": 5,
+    "scheduling": 5,
+    "ai": 4,
+    "iot": 4,
+    "iot-box": 4,
+    "transport-boxes": 4,
+    "alerts": 3,
+    "billing": 3,
+    "collector": 3,
+    "collector-operations": 3,
+    "dispatch-jobs": 3,
+    "home-collections": 3,
+    "integrations": 3,
+    "payment": 3,
+    "reports": 3,
+    "result-files": 3,
+    "collector-mobile": 2,
+    "drivers": 2,
+    "executive": 2,
+    "incidents": 2,
+    "invoices": 2,
+    "lab-worklist": 2,
+    "legacy": 2,
+    "operations": 2,
+    "order-execution": 2,
+    "order-lifecycle": 2,
+    "patients": 2,
+    "payments": 2,
+    "portal": 2,
+    "": 1,
+    "admin": 1,
+    "analytics": 1,
+    "audit": 1,
+    "boxes": 1,
+    "collector-kpi": 1,
+    "companies": 1,
+    "contracts": 1,
+    "critical-values": 1,
+    "crm": 1,
+    "crm-pipeline": 1,
+    "dashboard": 1,
+    "disease-library": 1,
+    "dispatch": 1,
+    "dispatch-performance": 1,
+    "events": 1,
+    "executive-v9": 1,
+    "finance": 1,
+    "guidelines": 1,
+    "interpretation": 1,
+    "knowledge": 1,
+    "license": 1,
+    "login": 1,
+    "logistics-v2": 1,
+    "logout": 1,
+    "monitor": 1,
+    "my-portal": 1,
+    "notifications": 1,
+    "reference-ranges": 1,
+    "security": 1,
+    "static": 1,
+    "system": 1,
+    "tat-kpi": 1,
+    "templates": 1,
+    "tenants": 1,
+    "webhooks": 1
+  }
+}

@@ -52,7 +52,8 @@ def main():
         not_found.status_code == 404
         and payload.get("success") is False
         and payload.get("error", {}).get("code") == "NOT_FOUND"
-        and payload.get("error", {}).get("request_id")
+        and payload.get("request_id")
+        and payload.get("timestamp")
     ):
         print("OK: standardized API error response")
     else:
@@ -61,6 +62,7 @@ def main():
 
     metrics = client.get("/api/v1/system/metrics")
     metrics_payload = metrics.get_json() or {}
+    metrics_data = metrics_payload.get("data") if metrics_payload.get("success") is True else metrics_payload
     required = {
         "request_count",
         "error_count",
@@ -68,8 +70,8 @@ def main():
         "route_count",
         "health_status",
     }
-    if metrics.status_code == 200 and required.issubset(metrics_payload.keys()):
-        print("OK: /api/v1/system/metrics", metrics_payload)
+    if metrics.status_code == 200 and required.issubset(metrics_data.keys()):
+        print("OK: /api/v1/system/metrics", metrics_data)
     else:
         print("FAIL: metrics endpoint", metrics.status_code, metrics_payload)
         errors += 1

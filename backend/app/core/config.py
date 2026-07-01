@@ -93,3 +93,21 @@ class Config:
     STARTUP_VALIDATE_DB = os.getenv("STARTUP_VALIDATE_DB", "true").lower() in {
         "1", "true", "yes", "on",
     }
+
+    API_RESPONSE_ENVELOPE = os.getenv("API_RESPONSE_ENVELOPE", "true").lower() in {
+        "1", "true", "yes", "on",
+    }
+
+    TRACE_ID_HEADER = os.getenv("TRACE_ID_HEADER", "X-Trace-ID")
+    TENANT_ID_HEADER = os.getenv("TENANT_ID_HEADER", "X-Tenant-ID")
+
+    REDIS_URL = os.getenv("REDIS_URL", "")
+    SMTP_HOST = os.getenv("SMTP_HOST", "")
+    SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+    SMTP_USER = os.getenv("SMTP_USER", "")
+    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+    SMTP_FROM = os.getenv("SMTP_FROM", "")
+    SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "true").lower() in {"1", "true", "yes", "on"}
+
+    STORAGE_PATH = os.getenv("STORAGE_PATH", "uploads")
+    STORAGE_BACKEND = os.getenv("STORAGE_BACKEND", "local")

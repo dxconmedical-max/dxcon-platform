@@ -5,8 +5,7 @@ from app.core.errors import ApiError
 
 class ValidationError(ApiError):
     def __init__(self, message, field=None):
-        super().__init__(message, status_code=422, code="VALIDATION_ERROR")
-        self.field = field
+        super().__init__(message, status_code=422, code="VALIDATION_ERROR", field=field)
 
 
 def get_json_body():

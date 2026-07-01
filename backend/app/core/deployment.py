@@ -36,8 +36,13 @@ def validate_startup(app):
             if app.config.get("APP_ENV") == "production":
                 raise
 
+    from app.core.startup_checks import run_startup_checks
+
+    startup_status = run_startup_checks(app)
+
     app.extensions.setdefault("dxcon_deployment", {})
     app.extensions["dxcon_deployment"]["migration_status"] = migration_status
+    app.extensions["dxcon_deployment"]["startup_checks"] = startup_status
     app.extensions["dxcon_deployment"]["startup_complete"] = True
 
     if app.config.get("APP_ENV") == "production":

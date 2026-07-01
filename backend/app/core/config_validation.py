@@ -28,6 +28,12 @@ def validate_config(app):
     if app.config.get("JWT_REFRESH_TOKEN_EXPIRES") is None:
         issues.append("JWT_REFRESH_TOKEN_EXPIRES must be configured")
 
+    if env == "production":
+        if not app.config.get("STORAGE_PATH"):
+            issues.append("STORAGE_PATH must be configured in production")
+        if app.config.get("SMTP_HOST") and not app.config.get("SMTP_FROM"):
+            issues.append("SMTP_FROM must be configured when SMTP_HOST is set")
+
     if issues:
         raise RuntimeError("; ".join(issues))
 
@@ -44,4 +50,10 @@ def config_summary(app):
         "rate_limit_enabled": app.config.get("RATE_LIMIT_ENABLED"),
         "security_headers_enabled": app.config.get("SECURITY_HEADERS_ENABLED"),
         "cors_origins": app.config.get("CORS_ORIGINS"),
+        "redis_configured": bool(app.config.get("REDIS_URL")),
+        "smtp_configured": bool(app.config.get("SMTP_HOST")),
+        "storage_backend": app.config.get("STORAGE_BACKEND"),
+        "storage_path": app.config.get("STORAGE_PATH"),
+        "api_response_envelope": app.config.get("API_RESPONSE_ENVELOPE"),
+        "log_format": app.config.get("LOG_FORMAT"),
     }

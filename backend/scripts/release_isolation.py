@@ -40,6 +40,26 @@ class ReleaseSpec:
 
 
 RELEASES: tuple[ReleaseSpec, ...] = (
+    ReleaseSpec("go-live-day1", "Go-Live Sprint Day 1 - Core Stabilization", (
+        "backend/app/core/api_response.py",
+        "backend/app/core/list_params.py",
+        "backend/app/core/startup_checks.py",
+        "backend/app/core/errors.py",
+        "backend/app/core/request_context.py",
+        "backend/app/core/config.py",
+        "backend/app/core/config_validation.py",
+        "backend/app/core/deployment.py",
+        "backend/app/core/observability.py",
+        "backend/app/core/validation.py",
+        "backend/app/api/system/routes.py",
+        "backend/scripts/generate_api_inventory.py",
+        "backend/scripts/go_live_day1_verify.py",
+        "backend/scripts/verify_observability.py",
+        "backend/scripts/verify_deployment.py",
+        "backend/tests/test_go_live_day1.py",
+        "backend/tests/test_observability.py",
+        "backend/inventory/",
+    )),
     ReleaseSpec("4.0", "Enterprise Platform", (
         "backend/app/models/enterprise_platform.py",
         "backend/app/services/enterprise_platform_service.py",

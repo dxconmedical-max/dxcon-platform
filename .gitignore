@@ -28,3 +28,7 @@ build/
 
 # Logs
 *.log
+
+# Generated report job artifacts (local test output)
+backend/generated_reports/JOB-*.*
+backend/generated_reports/DxCon_Report_*.pdf

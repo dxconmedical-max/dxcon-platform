@@ -49,7 +49,9 @@ def main():
     endpoints = [
         ("/api/v1/system/health", 200),
         ("/api/v1/system/live", 200),
+        ("/api/v1/system/liveness", 200),
         ("/api/v1/system/ready", 200),
+        ("/api/v1/system/readiness", 200),
         ("/api/v1/system/metrics", 200),
         ("/api/v1/system/version", 200),
         ("/api/v1/system/build", 200),

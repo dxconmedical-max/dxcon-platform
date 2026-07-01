@@ -77,6 +77,8 @@ class ObservabilityTestCase(unittest.TestCase):
         self.assertFalse(payload["success"])
         self.assertEqual(payload["error"]["code"], "NOT_FOUND")
         self.assertEqual(payload["error"]["message"], "missing resource")
+        self.assertIn("request_id", payload)
+        self.assertIn("timestamp", payload)
         self.assertIn("request_id", payload["error"])
         self.assertEqual(status_code, 404)
 
@@ -86,7 +88,8 @@ class ObservabilityTestCase(unittest.TestCase):
         payload = response.get_json()
         self.assertFalse(payload["success"])
         self.assertEqual(payload["error"]["code"], "NOT_FOUND")
-        self.assertTrue(payload["error"]["request_id"])
+        self.assertTrue(payload.get("request_id"))
+        self.assertTrue(payload.get("timestamp"))
 
     def test_global_internal_error_handler(self):
         response = self.client.get("/api/v1/_observability/error")
