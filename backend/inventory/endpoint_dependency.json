@@ -1,0 +1,6262 @@
+{
+  "generated_at": "2026-07-01T10:13:47.056030+00:00",
+  "blueprint_count": 167,
+  "dependencies": {
+    "admin": [
+      {
+        "path": "/api/v1/admin/users",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "admin.get_users"
+      }
+    ],
+    "admin_security_bp": [
+      {
+        "path": "/api/v1/admin-security/health",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "admin_security_bp.secure_health"
+      }
+    ],
+    "ai_batch": [
+      {
+        "path": "/api/v1/ai-v2/generate-all",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "ai_batch.generate_all"
+      }
+    ],
+    "ai_cds": [
+      {
+        "path": "/api/v1/ai/critical-results",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "ai_cds.critical_results"
+      },
+      {
+        "path": "/api/v1/ai/interpret",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "ai_cds.interpret"
+      },
+      {
+        "path": "/api/v1/ai/recommend",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "ai_cds.recommend"
+      },
+      {
+        "path": "/api/v1/ai/reference-ranges",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "ai_cds.reference_ranges"
+      },
+      {
+        "path": "/api/v1/ai/risk",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "ai_cds.risk"
+      }
+    ],
+    "ai_cds_web": [
+      {
+        "path": "/ai",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "ai_cds_web.ai_home"
+      },
+      {
+        "path": "/ai/critical",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "ai_cds_web.ai_critical"
+      },
+      {
+        "path": "/ai/interpreter",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "ai_cds_web.ai_interpreter"
+      },
+      {
+        "path": "/ai/risk",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "ai_cds_web.ai_risk"
+      }
+    ],
+    "ai_interpret_v2": [
+      {
+        "path": "/api/v1/ai-v2/order/<order_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "ai_interpret_v2.ai_order"
+      }
+    ],
+    "ai_v2": [
+      {
+        "path": "/api/v2/ai/order/<order_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "ai_v2.analyze_order"
+      }
+    ],
+    "alerts": [
+      {
+        "path": "/api/v1/alerts",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "alerts.list_alerts"
+      },
+      {
+        "path": "/api/v1/alerts",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "alerts.create_alert"
+      },
+      {
+        "path": "/api/v1/alerts/<alert_id>/ack",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "alerts.ack_alert"
+      },
+      {
+        "path": "/api/v1/alerts/<alert_id>/resolve",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "alerts.resolve_alert"
+      }
+    ],
+    "alerts_web": [
+      {
+        "path": "/alerts",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "alerts_web.alerts_page"
+      },
+      {
+        "path": "/alerts/ack/<alert_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "alerts_web.ack_alert"
+      },
+      {
+        "path": "/alerts/resolve/<alert_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "alerts_web.resolve_alert"
+      }
+    ],
+    "analytics_web": [
+      {
+        "path": "/analytics",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "analytics_web.analytics"
+      }
+    ],
+    "api_platform": [
+      {
+        "path": "/api/v1/api-clients",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.list_clients"
+      },
+      {
+        "path": "/api/v1/api-clients",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "api_platform.create_client"
+      },
+      {
+        "path": "/api/v1/api-keys",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.list_keys"
+      },
+      {
+        "path": "/api/v1/api-keys",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "api_platform.create_key"
+      },
+      {
+        "path": "/api/v1/api-keys/<key_id>/revoke",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "api_platform.revoke_key"
+      },
+      {
+        "path": "/api/v1/api-platform/domains",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.platform_domains"
+      },
+      {
+        "path": "/api/v1/api-platform/health",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.platform_health"
+      },
+      {
+        "path": "/api/v1/api-platform/routes",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.platform_routes"
+      },
+      {
+        "path": "/api/v1/api-usage",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.list_usage"
+      },
+      {
+        "path": "/api/v1/developer/sandbox/request",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "api_platform.developer_sandbox_request"
+      },
+      {
+        "path": "/api/v1/openapi.json",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.openapi_json"
+      },
+      {
+        "path": "/api/v1/openapi.yaml",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.openapi_yaml"
+      }
+    ],
+    "api_platform_web": [
+      {
+        "path": "/api-docs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform_web.api_docs_index"
+      },
+      {
+        "path": "/api-docs/redoc",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform_web.api_docs_redoc"
+      },
+      {
+        "path": "/api-docs/swagger",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform_web.api_docs_swagger"
+      },
+      {
+        "path": "/developer",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform_web.developer_home"
+      },
+      {
+        "path": "/developer/api-keys",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform_web.developer_api_keys"
+      },
+      {
+        "path": "/developer/routes",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform_web.developer_routes"
+      },
+      {
+        "path": "/developer/sandbox",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform_web.developer_sandbox"
+      }
+    ],
+    "audit_center_web": [
+      {
+        "path": "/audit",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "audit_center_web.audit_center"
+      }
+    ],
+    "auth": [
+      {
+        "path": "/api/v1/auth/login",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "auth.login"
+      },
+      {
+        "path": "/api/v1/auth/logout",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "auth.logout"
+      },
+      {
+        "path": "/api/v1/auth/refresh",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "auth.refresh"
+      },
+      {
+        "path": "/api/v1/auth/register",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "auth.register"
+      }
+    ],
+    "auth_web": [
+      {
+        "path": "/login",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "auth_web.login_page"
+      },
+      {
+        "path": "/logout",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "auth_web.logout"
+      }
+    ],
+    "billing": [
+      {
+        "path": "/api/v1/billing/commissions",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "billing.list_commissions"
+      },
+      {
+        "path": "/api/v1/billing/commissions/calculate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "billing.calculate_commissions"
+      },
+      {
+        "path": "/api/v1/billing/commissions/rules",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "billing.list_commission_rules"
+      },
+      {
+        "path": "/api/v1/billing/invoices",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "billing.list_invoices"
+      },
+      {
+        "path": "/api/v1/billing/invoices",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "billing.create_invoice"
+      },
+      {
+        "path": "/api/v1/billing/invoices/<invoice_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "billing.get_invoice"
+      },
+      {
+        "path": "/api/v1/billing/invoices/<invoice_id>/mark-paid",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "billing.mark_invoice_paid"
+      },
+      {
+        "path": "/api/v1/billing/ledger",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "billing.billing_ledger"
+      },
+      {
+        "path": "/api/v1/billing/payments",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "billing.list_payments"
+      },
+      {
+        "path": "/api/v1/billing/payments",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "billing.record_payment"
+      },
+      {
+        "path": "/api/v1/billing/refunds",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "billing.list_refunds"
+      },
+      {
+        "path": "/api/v1/billing/refunds",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "billing.process_refund"
+      },
+      {
+        "path": "/api/v1/billing/settlements",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "billing.list_settlements"
+      },
+      {
+        "path": "/api/v1/billing/settlements",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "billing.create_settlement"
+      },
+      {
+        "path": "/api/v1/billing/settlements/<settlement_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "billing.get_settlement"
+      },
+      {
+        "path": "/api/v1/billing/settlements/<settlement_id>/finalize",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "billing.finalize_settlement"
+      },
+      {
+        "path": "/api/v1/billing/summary",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "billing.billing_summary"
+      }
+    ],
+    "billing_invoice_web": [
+      {
+        "path": "/billing",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "billing_invoice_web.billing_home"
+      },
+      {
+        "path": "/billing/invoices",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "billing_invoice_web.billing_invoices_page"
+      },
+      {
+        "path": "/billing/ledger",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "billing_invoice_web.billing_ledger_page"
+      }
+    ],
+    "biomarkers": [
+      {
+        "path": "/api/v1/biomarkers",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "biomarkers.list_biomarkers"
+      },
+      {
+        "path": "/api/v1/biomarkers/<biomarker_code>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "biomarkers.get_biomarker"
+      },
+      {
+        "path": "/api/v1/biomarkers/<biomarker_code>/relationships",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "biomarkers.biomarker_relationships"
+      }
+    ],
+    "box_qr": [
+      {
+        "path": "/api/v1/box-qr/<box_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "box_qr.get_box_qr"
+      }
+    ],
+    "box_qr_web": [
+      {
+        "path": "/boxes/<box_id>/qr",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "box_qr_web.box_qr_page"
+      }
+    ],
+    "clinic_portal": [
+      {
+        "path": "/api/v1/clinic/bookings",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "clinic_portal.clinic_bookings"
+      },
+      {
+        "path": "/api/v1/clinic/dashboard",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "clinic_portal.clinic_dashboard"
+      },
+      {
+        "path": "/api/v1/clinic/doctors",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "clinic_portal.clinic_doctors"
+      },
+      {
+        "path": "/api/v1/clinic/orders",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "clinic_portal.clinic_orders"
+      },
+      {
+        "path": "/api/v1/clinic/patients",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "clinic_portal.clinic_patients"
+      },
+      {
+        "path": "/api/v1/clinic/profile",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "clinic_portal.get_clinic_profile"
+      },
+      {
+        "path": "/api/v1/clinic/profile",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "clinic_portal.update_clinic_profile"
+      },
+      {
+        "path": "/api/v1/clinic/revenue",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "clinic_portal.clinic_revenue"
+      }
+    ],
+    "clinic_portal_v2_web": [
+      {
+        "path": "/clinic",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "clinic_portal_v2_web.clinic_home"
+      },
+      {
+        "path": "/clinic/bookings",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "clinic_portal_v2_web.clinic_bookings_page"
+      },
+      {
+        "path": "/clinic/dashboard",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "clinic_portal_v2_web.clinic_dashboard_page"
+      },
+      {
+        "path": "/clinic/orders",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "clinic_portal_v2_web.clinic_orders_page"
+      },
+      {
+        "path": "/clinic/patients",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "clinic_portal_v2_web.clinic_patients_page"
+      },
+      {
+        "path": "/clinic/revenue",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "clinic_portal_v2_web.clinic_revenue_page"
+      }
+    ],
+    "collector": [
+      {
+        "path": "/api/v1/collector/checkin/<job_id>",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "collector.checkin"
+      },
+      {
+        "path": "/api/v1/collector/collected/<job_id>",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "collector.collected"
+      },
+      {
+        "path": "/api/v1/collector/collectors",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector.list_collectors"
+      },
+      {
+        "path": "/api/v1/collector/collectors",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector.create_collector"
+      },
+      {
+        "path": "/api/v1/collector/completed/<sample_id>",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "collector.completed"
+      },
+      {
+        "path": "/api/v1/collector/jobs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector.jobs"
+      },
+      {
+        "path": "/api/v1/collector/processing/<sample_id>",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "collector.processing"
+      },
+      {
+        "path": "/api/v1/collector/received/<sample_id>",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "collector.received"
+      },
+      {
+        "path": "/api/v1/collector/samples",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector.samples"
+      },
+      {
+        "path": "/api/v1/collector/shipments",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector.list_collector_shipments"
+      },
+      {
+        "path": "/api/v1/collector/shipments/<shipment_id>/accept",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector.accept_collector_shipment"
+      },
+      {
+        "path": "/api/v1/collector/shipments/<shipment_id>/start-trip",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector.start_collector_trip"
+      }
+    ],
+    "collector_console_web": [
+      {
+        "path": "/collector/console",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_console_web.collector_console"
+      }
+    ],
+    "collector_kpi_web": [
+      {
+        "path": "/collector-kpi",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_kpi_web.collector_kpi"
+      }
+    ],
+    "collector_mobile_web": [
+      {
+        "path": "/collector-mobile",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_mobile_web.collector_mobile"
+      },
+      {
+        "path": "/collector-mobile/create-demo",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_mobile_web.create_demo_collector"
+      }
+    ],
+    "collector_operations": [
+      {
+        "path": "/api/v1/collector-operations/assignments/<assignment_id>/accept",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.accept_assignment"
+      },
+      {
+        "path": "/api/v1/collector-operations/bookings/<booking_id>/pickup",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.pickup_booking_sample"
+      },
+      {
+        "path": "/api/v1/collector-operations/cold-boxes/<box_id>/telemetry",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.update_cold_box"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_operations.list_collectors"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/check-in",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.collector_check_in"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/check-out",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.collector_check_out"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/dashboard",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_operations.collector_dashboard"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/gps",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.record_gps"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/gps",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_operations.get_gps_trail"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/jobs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_operations.list_collector_jobs"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/offline/events",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.queue_offline_event"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/offline/sync",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.sync_offline_events"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/profile",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_operations.get_collector_profile"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/profile",
+        "methods": [
+          "PATCH",
+          "PUT"
+        ],
+        "endpoint": "collector_operations.update_collector_profile"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/routes",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_operations.list_collector_routes"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/routes",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.create_collector_route"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/timeline",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_operations.list_collector_timeline"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/vehicles",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_operations.list_collector_vehicles"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/vehicles",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.create_collector_vehicle"
+      },
+      {
+        "path": "/api/v1/collector-operations/collectors/<collector_id>/vehicles/<vehicle_id>/assign",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.assign_collector_vehicle"
+      },
+      {
+        "path": "/api/v1/collector-operations/handovers",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.create_handover"
+      },
+      {
+        "path": "/api/v1/collector-operations/proofs",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.add_proof"
+      },
+      {
+        "path": "/api/v1/collector-operations/qr/scan",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.scan_qr"
+      },
+      {
+        "path": "/api/v1/collector-operations/routes/<route_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_operations.get_route"
+      },
+      {
+        "path": "/api/v1/collector-operations/routes/<route_id>/complete",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.complete_route"
+      },
+      {
+        "path": "/api/v1/collector-operations/routes/<route_id>/optimize",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.optimize_route"
+      },
+      {
+        "path": "/api/v1/collector-operations/routes/<route_id>/start",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.start_route"
+      },
+      {
+        "path": "/api/v1/collector-operations/shipments/<shipment_id>/accept",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.accept_shipment_route"
+      },
+      {
+        "path": "/api/v1/collector-operations/shipments/<shipment_id>/start-trip",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "collector_operations.start_shipment_trip"
+      },
+      {
+        "path": "/api/v1/collector-operations/supervisor/dashboard",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_operations.supervisor_dashboard"
+      }
+    ],
+    "collector_operations_web": [
+      {
+        "path": "/collector-operations",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_operations_web.collector_operations_page"
+      },
+      {
+        "path": "/collector-operations/collectors/<collector_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_operations_web.collector_dashboard_page"
+      },
+      {
+        "path": "/collector-operations/supervisor",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_operations_web.supervisor_dashboard_page"
+      }
+    ],
+    "collector_portal_web": [
+      {
+        "path": "/collector",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_portal_web.collector_dashboard"
+      },
+      {
+        "path": "/collector/status/<collection_id>/<status>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "collector_portal_web.update_collector_status"
+      }
+    ],
+    "communication_events": [
+      {
+        "path": "/api/v1/hub/events",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "communication_events.list_events"
+      },
+      {
+        "path": "/api/v1/hub/events",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "communication_events.emit_event"
+      },
+      {
+        "path": "/api/v1/hub/events/types",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "communication_events.list_event_types"
+      }
+    ],
+    "communication_hub_web": [
+      {
+        "path": "/events",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "communication_hub_web.events_dashboard"
+      },
+      {
+        "path": "/hub/notifications",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "communication_hub_web.notifications_dashboard"
+      },
+      {
+        "path": "/templates",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "communication_hub_web.templates_dashboard"
+      },
+      {
+        "path": "/webhooks",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "communication_hub_web.webhooks_dashboard"
+      }
+    ],
+    "communication_templates": [
+      {
+        "path": "/api/v1/templates",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "communication_templates.list_templates"
+      },
+      {
+        "path": "/api/v1/templates",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "communication_templates.create_template"
+      },
+      {
+        "path": "/api/v1/templates/<template_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "communication_templates.get_template"
+      }
+    ],
+    "communication_webhooks": [
+      {
+        "path": "/api/v1/hub/webhooks",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "communication_webhooks.list_webhooks"
+      },
+      {
+        "path": "/api/v1/hub/webhooks",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "communication_webhooks.create_webhook"
+      },
+      {
+        "path": "/api/v1/hub/webhooks/<webhook_id>/test",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "communication_webhooks.test_webhook"
+      },
+      {
+        "path": "/api/v1/hub/webhooks/deliveries",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "communication_webhooks.webhook_deliveries"
+      }
+    ],
+    "companies": [
+      {
+        "path": "/api/v1/companies",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "companies.get_companies"
+      },
+      {
+        "path": "/api/v1/companies",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "companies.create_company"
+      },
+      {
+        "path": "/api/v1/companies/<company_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "companies.get_company"
+      },
+      {
+        "path": "/api/v1/companies/<company_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "companies.update_company"
+      },
+      {
+        "path": "/api/v1/companies/<company_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "companies.delete_company"
+      }
+    ],
+    "companies_web": [
+      {
+        "path": "/companies",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "companies_web.companies_page"
+      }
+    ],
+    "contract_prices": [
+      {
+        "path": "/api/v1/contract-prices",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "contract_prices.get_contract_prices"
+      },
+      {
+        "path": "/api/v1/contract-prices",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "contract_prices.create_contract_price"
+      }
+    ],
+    "contracts": [
+      {
+        "path": "/api/v1/contracts",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "contracts.get_contracts"
+      },
+      {
+        "path": "/api/v1/contracts",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "contracts.create_contract"
+      },
+      {
+        "path": "/api/v1/contracts/<contract_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "contracts.get_contract"
+      },
+      {
+        "path": "/api/v1/contracts/<contract_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "contracts.update_contract"
+      },
+      {
+        "path": "/api/v1/contracts/<contract_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "contracts.delete_contract"
+      }
+    ],
+    "contracts_web": [
+      {
+        "path": "/contracts",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "contracts_web.contracts_page"
+      }
+    ],
+    "correlations": [
+      {
+        "path": "/api/v1/correlations/evaluate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "correlations.correlate_evaluate"
+      },
+      {
+        "path": "/api/v1/correlations/match",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "correlations.correlate_match"
+      }
+    ],
+    "crm_api": [
+      {
+        "path": "/api/v1/crm/activities",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.list_activities"
+      },
+      {
+        "path": "/api/v1/crm/activities",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "crm_api.create_activity"
+      },
+      {
+        "path": "/api/v1/crm/activities/<activity_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.get_activity"
+      },
+      {
+        "path": "/api/v1/crm/activities/<activity_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "crm_api.update_activity"
+      },
+      {
+        "path": "/api/v1/crm/activities/<activity_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "crm_api.delete_activity"
+      },
+      {
+        "path": "/api/v1/crm/contracts",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.list_contracts"
+      },
+      {
+        "path": "/api/v1/crm/contracts",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "crm_api.create_contract"
+      },
+      {
+        "path": "/api/v1/crm/contracts/<contract_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.get_contract"
+      },
+      {
+        "path": "/api/v1/crm/contracts/<contract_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "crm_api.update_contract"
+      },
+      {
+        "path": "/api/v1/crm/contracts/<contract_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "crm_api.delete_contract"
+      },
+      {
+        "path": "/api/v1/crm/contracts/expiring",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.expiring_contracts"
+      },
+      {
+        "path": "/api/v1/crm/customers",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.list_customers"
+      },
+      {
+        "path": "/api/v1/crm/customers",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "crm_api.create_customer"
+      },
+      {
+        "path": "/api/v1/crm/customers/<customer_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.get_customer"
+      },
+      {
+        "path": "/api/v1/crm/customers/<customer_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "crm_api.update_customer"
+      },
+      {
+        "path": "/api/v1/crm/customers/<customer_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "crm_api.delete_customer"
+      },
+      {
+        "path": "/api/v1/crm/dashboard",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.crm_dashboard"
+      },
+      {
+        "path": "/api/v1/crm/leads",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.list_leads"
+      },
+      {
+        "path": "/api/v1/crm/leads",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "crm_api.create_lead"
+      },
+      {
+        "path": "/api/v1/crm/leads/<lead_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.get_lead"
+      },
+      {
+        "path": "/api/v1/crm/leads/<lead_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "crm_api.update_lead"
+      },
+      {
+        "path": "/api/v1/crm/leads/<lead_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "crm_api.delete_lead"
+      },
+      {
+        "path": "/api/v1/crm/leads/<lead_id>/advance",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "crm_api.advance_lead"
+      },
+      {
+        "path": "/api/v1/crm/opportunities",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.list_opportunities"
+      },
+      {
+        "path": "/api/v1/crm/opportunities",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "crm_api.create_opportunity"
+      },
+      {
+        "path": "/api/v1/crm/opportunities/<opportunity_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.get_opportunity"
+      },
+      {
+        "path": "/api/v1/crm/opportunities/<opportunity_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "crm_api.update_opportunity"
+      },
+      {
+        "path": "/api/v1/crm/opportunities/<opportunity_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "crm_api.delete_opportunity"
+      },
+      {
+        "path": "/api/v1/crm/opportunities/<opportunity_id>/advance",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "crm_api.advance_opportunity"
+      },
+      {
+        "path": "/api/v1/crm/pipelines",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.list_pipelines"
+      },
+      {
+        "path": "/api/v1/crm/pipelines",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "crm_api.create_pipeline"
+      },
+      {
+        "path": "/api/v1/crm/pipelines/<pipeline_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.get_pipeline"
+      },
+      {
+        "path": "/api/v1/crm/pipelines/<pipeline_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "crm_api.update_pipeline"
+      },
+      {
+        "path": "/api/v1/crm/pipelines/<pipeline_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "crm_api.delete_pipeline"
+      },
+      {
+        "path": "/api/v1/crm/quotations",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.list_quotations"
+      },
+      {
+        "path": "/api/v1/crm/quotations",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "crm_api.create_quotation"
+      },
+      {
+        "path": "/api/v1/crm/quotations/<quotation_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_api.get_quotation"
+      },
+      {
+        "path": "/api/v1/crm/quotations/<quotation_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "crm_api.update_quotation"
+      },
+      {
+        "path": "/api/v1/crm/quotations/<quotation_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "crm_api.delete_quotation"
+      },
+      {
+        "path": "/api/v1/crm/quotations/<quotation_id>/approve",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "crm_api.approve_quotation"
+      },
+      {
+        "path": "/api/v1/crm/quotations/<quotation_id>/submit",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "crm_api.submit_quotation"
+      },
+      {
+        "path": "/api/v1/crm/quotations/generate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "crm_api.generate_quotation"
+      }
+    ],
+    "crm_v2_web": [
+      {
+        "path": "/crm-pipeline",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_v2_web.crm_pipeline"
+      }
+    ],
+    "crm_web": [
+      {
+        "path": "/crm",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "crm_web.crm_dashboard"
+      }
+    ],
+    "dashboard": [
+      {
+        "path": "/api/v1/dashboard/admin",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "dashboard.admin_dashboard"
+      },
+      {
+        "path": "/api/v1/dashboard/clinic",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "dashboard.clinic_dashboard"
+      },
+      {
+        "path": "/api/v1/dashboard/collector",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "dashboard.collector_dashboard"
+      },
+      {
+        "path": "/api/v1/dashboard/executive",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "dashboard.executive_dashboard"
+      },
+      {
+        "path": "/api/v1/dashboard/lab",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "dashboard.lab_dashboard"
+      },
+      {
+        "path": "/api/v1/dashboard/partner",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "dashboard.partner_dashboard"
+      },
+      {
+        "path": "/api/v1/dashboard/summary",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "dashboard.summary"
+      }
+    ],
+    "dashboard_web": [
+      {
+        "path": "/dashboard",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "dashboard_web.dashboard"
+      }
+    ],
+    "deployment_infra_web": [
+      {
+        "path": "/deployment",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "deployment_infra_web.deployment_home"
+      },
+      {
+        "path": "/deployment/readiness",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "deployment_infra_web.deployment_readiness_page"
+      },
+      {
+        "path": "/deployment/recovery",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "deployment_infra_web.deployment_recovery_page"
+      },
+      {
+        "path": "/deployment/runtime",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "deployment_infra_web.deployment_runtime_page"
+      },
+      {
+        "path": "/deployment/scaling",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "deployment_infra_web.deployment_scaling_page"
+      }
+    ],
+    "diseases": [
+      {
+        "path": "/api/v1/diseases",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "diseases.list_diseases"
+      },
+      {
+        "path": "/api/v1/diseases/<disease_code>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "diseases.get_disease"
+      },
+      {
+        "path": "/api/v1/diseases/<disease_code>/tests",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "diseases.disease_tests"
+      },
+      {
+        "path": "/api/v1/diseases/by-test/<test_code>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "diseases.diseases_by_test"
+      }
+    ],
+    "dispatch_optimizer_web": [
+      {
+        "path": "/dispatch-jobs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "dispatch_optimizer_web.dispatch_jobs_page"
+      },
+      {
+        "path": "/dispatch-jobs/<job_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "dispatch_optimizer_web.dispatch_job_detail"
+      },
+      {
+        "path": "/dispatch-jobs/new",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "dispatch_optimizer_web.new_dispatch_job"
+      }
+    ],
+    "dispatch_performance_web": [
+      {
+        "path": "/dispatch-performance",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "dispatch_performance_web.dispatch_performance"
+      }
+    ],
+    "dispatch_web": [
+      {
+        "path": "/dispatch",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "dispatch_web.dispatch_center"
+      }
+    ],
+    "doctor_kpi_web": [
+      {
+        "path": "/doctor/kpi",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "doctor_kpi_web.doctor_kpi"
+      }
+    ],
+    "doctor_portal": [
+      {
+        "path": "/api/v1/doctor/dashboard",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "doctor_portal.doctor_dashboard"
+      },
+      {
+        "path": "/api/v1/doctor/followups",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "doctor_portal.create_follow_up"
+      },
+      {
+        "path": "/api/v1/doctor/patients",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "doctor_portal.doctor_patients"
+      },
+      {
+        "path": "/api/v1/doctor/profile",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "doctor_portal.get_doctor_profile"
+      },
+      {
+        "path": "/api/v1/doctor/profile",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "doctor_portal.update_doctor_profile"
+      },
+      {
+        "path": "/api/v1/doctor/referrals",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "doctor_portal.list_referrals"
+      },
+      {
+        "path": "/api/v1/doctor/referrals",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "doctor_portal.create_referral"
+      },
+      {
+        "path": "/api/v1/doctor/results",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "doctor_portal.doctor_results"
+      },
+      {
+        "path": "/api/v1/doctor/schedule",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "doctor_portal.doctor_schedule"
+      }
+    ],
+    "doctor_portal_v2_web": [
+      {
+        "path": "/doctor",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "doctor_portal_v2_web.doctor_home"
+      },
+      {
+        "path": "/doctor/dashboard",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "doctor_portal_v2_web.doctor_dashboard_page"
+      },
+      {
+        "path": "/doctor/patients",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "doctor_portal_v2_web.doctor_patients_page"
+      },
+      {
+        "path": "/doctor/referrals",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "doctor_portal_v2_web.doctor_referrals_page"
+      },
+      {
+        "path": "/doctor/results",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "doctor_portal_v2_web.doctor_results_page"
+      }
+    ],
+    "doctor_portal_web": [
+      {
+        "path": "/doctor/approve/<result_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "doctor_portal_web.approve_result"
+      },
+      {
+        "path": "/legacy/doctor",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "doctor_portal_web.doctor_dashboard"
+      }
+    ],
+    "drivers_web": [
+      {
+        "path": "/drivers",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "drivers_web.drivers_page"
+      },
+      {
+        "path": "/drivers/new",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "drivers_web.new_driver"
+      }
+    ],
+    "enterprise_admin": [
+      {
+        "path": "/api/v1/admin/feature-flags",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_admin.list_feature_flags"
+      },
+      {
+        "path": "/api/v1/admin/feature-flags",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "enterprise_admin.upsert_feature_flag"
+      },
+      {
+        "path": "/api/v1/admin/health",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_admin.admin_health"
+      },
+      {
+        "path": "/api/v1/admin/jobs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_admin.list_jobs"
+      },
+      {
+        "path": "/api/v1/admin/jobs",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "enterprise_admin.enqueue_job"
+      },
+      {
+        "path": "/api/v1/admin/metrics",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_admin.admin_metrics"
+      },
+      {
+        "path": "/api/v1/admin/overview",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_admin.admin_overview"
+      },
+      {
+        "path": "/api/v1/admin/settings",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_admin.list_settings"
+      },
+      {
+        "path": "/api/v1/admin/settings",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "enterprise_admin.upsert_setting"
+      },
+      {
+        "path": "/api/v1/admin/tracing",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_admin.admin_tracing"
+      },
+      {
+        "path": "/api/v1/admin/usage",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_admin.usage_statistics"
+      }
+    ],
+    "enterprise_audit": [
+      {
+        "path": "/api/v1/audit/access-history",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_audit.access_history"
+      },
+      {
+        "path": "/api/v1/audit/access-history",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "enterprise_audit.log_access_history"
+      },
+      {
+        "path": "/api/v1/audit/compliance-export",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "enterprise_audit.compliance_export"
+      },
+      {
+        "path": "/api/v1/audit/records",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_audit.audit_records"
+      },
+      {
+        "path": "/api/v1/audit/records",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "enterprise_audit.append_audit_record"
+      },
+      {
+        "path": "/api/v1/audit/security-events",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_audit.security_events"
+      },
+      {
+        "path": "/api/v1/audit/security-events",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "enterprise_audit.log_security_event"
+      }
+    ],
+    "enterprise_licenses": [
+      {
+        "path": "/api/v1/licenses",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_licenses.list_licenses"
+      },
+      {
+        "path": "/api/v1/licenses",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "enterprise_licenses.create_license"
+      },
+      {
+        "path": "/api/v1/licenses/<license_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_licenses.get_license"
+      },
+      {
+        "path": "/api/v1/licenses/<license_id>/validate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "enterprise_licenses.validate_license"
+      }
+    ],
+    "enterprise_security": [
+      {
+        "path": "/api/v1/security/abac/evaluate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "enterprise_security.abac_evaluate"
+      },
+      {
+        "path": "/api/v1/security/abac/policies",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_security.abac_policies"
+      },
+      {
+        "path": "/api/v1/security/business-units",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_security.business_units"
+      },
+      {
+        "path": "/api/v1/security/departments",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_security.departments"
+      },
+      {
+        "path": "/api/v1/security/identity-providers",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_security.identity_providers"
+      },
+      {
+        "path": "/api/v1/security/identity-providers",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "enterprise_security.create_identity_provider"
+      },
+      {
+        "path": "/api/v1/security/organizations",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_security.organizations"
+      },
+      {
+        "path": "/api/v1/security/rbac/roles",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_security.rbac_roles"
+      }
+    ],
+    "enterprise_tenants": [
+      {
+        "path": "/api/v1/tenants",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_tenants.list_tenants"
+      },
+      {
+        "path": "/api/v1/tenants",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "enterprise_tenants.create_tenant"
+      },
+      {
+        "path": "/api/v1/tenants/<tenant_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_tenants.get_tenant"
+      },
+      {
+        "path": "/api/v1/tenants/<tenant_id>/isolation",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_tenants.tenant_isolation"
+      }
+    ],
+    "enterprise_web": [
+      {
+        "path": "/admin",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_web.admin_dashboard"
+      },
+      {
+        "path": "/license",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_web.license_dashboard"
+      },
+      {
+        "path": "/security",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_web.security_dashboard"
+      },
+      {
+        "path": "/system",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_web.system_dashboard"
+      },
+      {
+        "path": "/tenants",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "enterprise_web.tenants_dashboard"
+      }
+    ],
+    "executive_v8": [
+      {
+        "path": "/executive/v8",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "executive_v8.executive"
+      }
+    ],
+    "executive_v9": [
+      {
+        "path": "/executive-v9",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "executive_v9.executive_v9"
+      }
+    ],
+    "executive_web": [
+      {
+        "path": "/executive",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "executive_web.executive"
+      }
+    ],
+    "federation": [
+      {
+        "path": "/api/v1/federation/capacity",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "federation.get_capacity"
+      },
+      {
+        "path": "/api/v1/federation/capacity/history",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "federation.capacity_history"
+      },
+      {
+        "path": "/api/v1/federation/capacity/update",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "federation.update_capacity"
+      },
+      {
+        "path": "/api/v1/federation/failover/check",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "federation.failover_check"
+      },
+      {
+        "path": "/api/v1/federation/failover/events",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "federation.failover_events"
+      },
+      {
+        "path": "/api/v1/federation/labs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "federation.list_labs"
+      },
+      {
+        "path": "/api/v1/federation/labs",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "federation.create_lab"
+      },
+      {
+        "path": "/api/v1/federation/labs/<lab_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "federation.get_lab"
+      },
+      {
+        "path": "/api/v1/federation/labs/<lab_id>/connect",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "federation.connect_lab"
+      },
+      {
+        "path": "/api/v1/federation/labs/<lab_id>/disconnect",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "federation.disconnect_lab"
+      },
+      {
+        "path": "/api/v1/federation/providers",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "federation.list_providers"
+      },
+      {
+        "path": "/api/v1/federation/providers",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "federation.create_provider"
+      },
+      {
+        "path": "/api/v1/federation/route",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "federation.route_request"
+      },
+      {
+        "path": "/api/v1/federation/routing-audit",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "federation.routing_audit"
+      },
+      {
+        "path": "/api/v1/federation/routing-decisions",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "federation.routing_decisions"
+      }
+    ],
+    "federation_web": [
+      {
+        "path": "/federation",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "federation_web.federation_home"
+      },
+      {
+        "path": "/federation/capacity",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "federation_web.federation_capacity"
+      },
+      {
+        "path": "/federation/failover",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "federation_web.federation_failover"
+      },
+      {
+        "path": "/federation/labs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "federation_web.federation_labs"
+      },
+      {
+        "path": "/federation/routing",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "federation_web.federation_routing"
+      }
+    ],
+    "finance_web": [
+      {
+        "path": "/finance",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "finance_web.finance_dashboard"
+      }
+    ],
+    "guidelines": [
+      {
+        "path": "/api/v1/guidelines",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "guidelines.list_guidelines"
+      },
+      {
+        "path": "/api/v1/guidelines",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "guidelines.create_guideline"
+      },
+      {
+        "path": "/api/v1/guidelines/<guideline_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "guidelines.get_guideline"
+      },
+      {
+        "path": "/api/v1/guidelines/packs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "guidelines.list_packs"
+      }
+    ],
+    "healthcare_standards": [
+      {
+        "path": "/api/v1/standards/code-systems",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards.list_code_systems"
+      },
+      {
+        "path": "/api/v1/standards/codes",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards.list_codes"
+      },
+      {
+        "path": "/api/v1/standards/dicom/metadata",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.dicom_metadata_save"
+      },
+      {
+        "path": "/api/v1/standards/dicom/studies",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards.dicom_studies"
+      },
+      {
+        "path": "/api/v1/standards/dicom/studies/<study_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards.dicom_study_detail"
+      },
+      {
+        "path": "/api/v1/standards/fhir/map-order",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.fhir_map_order"
+      },
+      {
+        "path": "/api/v1/standards/fhir/map-result",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.fhir_map_result"
+      },
+      {
+        "path": "/api/v1/standards/fhir/validate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.fhir_validate"
+      },
+      {
+        "path": "/api/v1/standards/hl7/build-oru",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.hl7_build_oru"
+      },
+      {
+        "path": "/api/v1/standards/hl7/parse",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.hl7_parse"
+      },
+      {
+        "path": "/api/v1/standards/hl7/validate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.hl7_validate"
+      },
+      {
+        "path": "/api/v1/standards/mappings",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards.list_mappings"
+      },
+      {
+        "path": "/api/v1/standards/mappings",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.create_mapping"
+      },
+      {
+        "path": "/api/v1/standards/mappings/resolve",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.resolve_mapping"
+      }
+    ],
+    "healthcare_standards_web": [
+      {
+        "path": "/standards",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards_web.standards_home"
+      },
+      {
+        "path": "/standards/dicom",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards_web.standards_dicom"
+      },
+      {
+        "path": "/standards/fhir",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards_web.standards_fhir"
+      },
+      {
+        "path": "/standards/hl7",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards_web.standards_hl7"
+      },
+      {
+        "path": "/standards/mappings",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards_web.standards_mappings"
+      }
+    ],
+    "home_collections": [
+      {
+        "path": "/api/v1/home-collections",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "home_collections.get_home_collections"
+      },
+      {
+        "path": "/api/v1/home-collections",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "home_collections.create_home_collection"
+      }
+    ],
+    "home_collections_web": [
+      {
+        "path": "/home-collections",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "home_collections_web.home_collections_page"
+      },
+      {
+        "path": "/home-collections/new",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "home_collections_web.new_collection"
+      },
+      {
+        "path": "/home-collections/status/<collection_id>/<status>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "home_collections_web.update_status"
+      }
+    ],
+    "home_web": [
+      {
+        "path": "/",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "home_web.index"
+      }
+    ],
+    "hub_notifications": [
+      {
+        "path": "/api/v1/notifications/dead-letter",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "hub_notifications.list_dead_letters"
+      },
+      {
+        "path": "/api/v1/notifications/deliveries",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "hub_notifications.list_deliveries"
+      },
+      {
+        "path": "/api/v1/notifications/hub",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "hub_notifications.notification_hub_summary"
+      },
+      {
+        "path": "/api/v1/notifications/hub/send",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "hub_notifications.hub_send"
+      },
+      {
+        "path": "/api/v1/notifications/legacy",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "hub_notifications.list_legacy_notifications"
+      },
+      {
+        "path": "/api/v1/notifications/queue",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "hub_notifications.list_queue"
+      },
+      {
+        "path": "/api/v1/notifications/queue",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "hub_notifications.enqueue_notification"
+      },
+      {
+        "path": "/api/v1/notifications/queue/<queue_item_id>/retry",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "hub_notifications.retry_queue_item"
+      },
+      {
+        "path": "/api/v1/notifications/queue/process",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "hub_notifications.process_queue"
+      }
+    ],
+    "incidents": [
+      {
+        "path": "/api/v1/incidents",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "incidents.list_incidents"
+      },
+      {
+        "path": "/api/v1/incidents",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "incidents.create_incident"
+      },
+      {
+        "path": "/api/v1/incidents/<incident_id>/resolve",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "incidents.resolve_incident"
+      }
+    ],
+    "incidents_web": [
+      {
+        "path": "/incidents",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "incidents_web.incidents_page"
+      },
+      {
+        "path": "/incidents/resolve/<incident_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "incidents_web.resolve_incident_web"
+      }
+    ],
+    "infrastructure": [
+      {
+        "path": "/api/v1/infrastructure/config",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "infrastructure.infrastructure_config"
+      },
+      {
+        "path": "/api/v1/infrastructure/readiness",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "infrastructure.infrastructure_readiness"
+      },
+      {
+        "path": "/api/v1/infrastructure/recovery",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "infrastructure.infrastructure_recovery"
+      },
+      {
+        "path": "/api/v1/infrastructure/scaling",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "infrastructure.infrastructure_scaling"
+      },
+      {
+        "path": "/api/v1/infrastructure/status",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "infrastructure.infrastructure_status"
+      }
+    ],
+    "integration_events": [
+      {
+        "path": "/api/v1/events",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_events.list_events"
+      },
+      {
+        "path": "/api/v1/events/<event_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_events.get_event"
+      },
+      {
+        "path": "/api/v1/events/test",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_events.test_event"
+      }
+    ],
+    "integration_platform_web": [
+      {
+        "path": "/integrations/adapters",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_platform_web.adapters_dashboard"
+      },
+      {
+        "path": "/integrations/events",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_platform_web.events_dashboard"
+      },
+      {
+        "path": "/integrations/platform",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_platform_web.platform_dashboard"
+      },
+      {
+        "path": "/integrations/plugins",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_platform_web.plugins_dashboard"
+      },
+      {
+        "path": "/integrations/queue",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_platform_web.queue_dashboard"
+      },
+      {
+        "path": "/integrations/sandbox",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_platform_web.sandbox_dashboard"
+      },
+      {
+        "path": "/integrations/webhooks",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_platform_web.webhooks_dashboard"
+      }
+    ],
+    "integration_plugins": [
+      {
+        "path": "/api/v1/plugins",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_plugins.list_plugins"
+      },
+      {
+        "path": "/api/v1/plugins/<plugin_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_plugins.get_plugin"
+      },
+      {
+        "path": "/api/v1/plugins/<plugin_id>/disable",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_plugins.disable_plugin"
+      },
+      {
+        "path": "/api/v1/plugins/<plugin_id>/enable",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_plugins.enable_plugin"
+      },
+      {
+        "path": "/api/v1/plugins/<plugin_id>/health",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_plugins.plugin_health"
+      }
+    ],
+    "integration_queue": [
+      {
+        "path": "/api/v1/integration-queue/dead-letters",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_queue.list_dead_letters"
+      },
+      {
+        "path": "/api/v1/integration-queue/dead-letters/<dead_letter_id>/replay",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_queue.replay_dead_letter"
+      },
+      {
+        "path": "/api/v1/integration-queue/jobs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_queue.list_jobs"
+      },
+      {
+        "path": "/api/v1/integration-queue/jobs",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_queue.create_job"
+      },
+      {
+        "path": "/api/v1/integration-queue/jobs/<job_id>/retry",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_queue.retry_job"
+      }
+    ],
+    "integration_sandbox": [
+      {
+        "path": "/api/v1/sandbox/his/patient",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_sandbox.sandbox_his_patient"
+      },
+      {
+        "path": "/api/v1/sandbox/lis/result",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_sandbox.sandbox_lis_result"
+      },
+      {
+        "path": "/api/v1/sandbox/payment/callback",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_sandbox.sandbox_payment_callback"
+      },
+      {
+        "path": "/api/v1/sandbox/status",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_sandbox.sandbox_status"
+      },
+      {
+        "path": "/api/v1/sandbox/webhook/test",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_sandbox.sandbox_webhook_test"
+      }
+    ],
+    "integration_webhooks": [
+      {
+        "path": "/api/v1/webhooks",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_webhooks.list_webhooks"
+      },
+      {
+        "path": "/api/v1/webhooks",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_webhooks.create_webhook"
+      },
+      {
+        "path": "/api/v1/webhooks/<webhook_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_webhooks.get_webhook"
+      },
+      {
+        "path": "/api/v1/webhooks/<webhook_id>/test",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_webhooks.test_webhook"
+      },
+      {
+        "path": "/api/v1/webhooks/deliveries",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_webhooks.list_deliveries"
+      },
+      {
+        "path": "/api/v1/webhooks/deliveries/<delivery_id>/retry",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_webhooks.retry_delivery"
+      }
+    ],
+    "integrations": [
+      {
+        "path": "/api/v1/integrations/audit",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integrations.list_audit"
+      },
+      {
+        "path": "/api/v1/integrations/connections",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integrations.list_connections"
+      },
+      {
+        "path": "/api/v1/integrations/connections",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integrations.create_connection"
+      },
+      {
+        "path": "/api/v1/integrations/his/patients",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integrations.his_patients"
+      },
+      {
+        "path": "/api/v1/integrations/lis/orders",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integrations.lis_orders"
+      },
+      {
+        "path": "/api/v1/integrations/lis/results",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integrations.lis_results"
+      },
+      {
+        "path": "/api/v1/integrations/messages",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integrations.list_messages"
+      }
+    ],
+    "integrations_web": [
+      {
+        "path": "/integrations",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integrations_web.integrations_home"
+      },
+      {
+        "path": "/integrations/connections",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integrations_web.integrations_connections_page"
+      },
+      {
+        "path": "/integrations/messages",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integrations_web.integrations_messages_page"
+      }
+    ],
+    "interpretation": [
+      {
+        "path": "/api/v1/interpretation/<result_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "interpretation.get_interpretation"
+      },
+      {
+        "path": "/api/v1/interpretation/rules",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "interpretation.list_rules"
+      },
+      {
+        "path": "/api/v1/interpretation/run",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "interpretation.run_interpretation"
+      }
+    ],
+    "interpretation_admin_web": [
+      {
+        "path": "/critical-values",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "interpretation_admin_web.critical_values_home"
+      },
+      {
+        "path": "/interpretation",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "interpretation_admin_web.interpretation_home"
+      },
+      {
+        "path": "/reference-ranges",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "interpretation_admin_web.reference_ranges_home"
+      }
+    ],
+    "invoices": [
+      {
+        "path": "/api/v1/invoices",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "invoices.get_invoices"
+      },
+      {
+        "path": "/api/v1/invoices",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "invoices.create_invoice"
+      },
+      {
+        "path": "/api/v1/invoices/generate/<order_id>",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "invoices.generate_invoice"
+      }
+    ],
+    "invoices_web": [
+      {
+        "path": "/invoices",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "invoices_web.invoices_page"
+      },
+      {
+        "path": "/invoices/new",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "invoices_web.new_invoice"
+      }
+    ],
+    "iot": [
+      {
+        "path": "/api/v1/iot/alerts",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "iot.list_alerts"
+      },
+      {
+        "path": "/api/v1/iot/cold-chain/status",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "iot.cold_chain_status"
+      },
+      {
+        "path": "/api/v1/iot/devices",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "iot.list_devices"
+      },
+      {
+        "path": "/api/v1/iot/devices",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "iot.register_device"
+      },
+      {
+        "path": "/api/v1/iot/readings/gps",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "iot.record_gps"
+      },
+      {
+        "path": "/api/v1/iot/readings/humidity",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "iot.record_humidity"
+      },
+      {
+        "path": "/api/v1/iot/readings/shock",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "iot.record_shock"
+      },
+      {
+        "path": "/api/v1/iot/readings/temperature",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "iot.record_temperature"
+      }
+    ],
+    "iot_web": [
+      {
+        "path": "/iot",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "iot_web.iot_home"
+      },
+      {
+        "path": "/iot/alerts",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "iot_web.iot_alerts_page"
+      },
+      {
+        "path": "/iot/cold-chain",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "iot_web.iot_cold_chain_page"
+      },
+      {
+        "path": "/iot/devices",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "iot_web.iot_devices_page"
+      }
+    ],
+    "knowledge": [
+      {
+        "path": "/api/v1/knowledge",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "knowledge.search_knowledge"
+      },
+      {
+        "path": "/api/v1/knowledge",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "knowledge.create_knowledge"
+      },
+      {
+        "path": "/api/v1/knowledge/<knowledge_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "knowledge.get_knowledge"
+      },
+      {
+        "path": "/api/v1/knowledge/references",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "knowledge.list_references"
+      }
+    ],
+    "knowledge_web": [
+      {
+        "path": "/disease-library",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "knowledge_web.disease_library_page"
+      },
+      {
+        "path": "/guidelines",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "knowledge_web.guidelines_page"
+      },
+      {
+        "path": "/knowledge",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "knowledge_web.knowledge_home"
+      }
+    ],
+    "lab_operations": [
+      {
+        "path": "/api/v1/lab/accessions",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.list_accessions"
+      },
+      {
+        "path": "/api/v1/lab/accessions",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.create_accession"
+      },
+      {
+        "path": "/api/v1/lab/accessions/<accession_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.get_accession"
+      },
+      {
+        "path": "/api/v1/lab/accessions/<accession_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "lab_operations.update_accession"
+      },
+      {
+        "path": "/api/v1/lab/accessions/<accession_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "lab_operations.delete_accession"
+      },
+      {
+        "path": "/api/v1/lab/accessions/<accession_id>/advance",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.advance_accession"
+      },
+      {
+        "path": "/api/v1/lab/accessions/<accession_id>/receive",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.receive_accession"
+      },
+      {
+        "path": "/api/v1/lab/analyzers",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.list_analyzers"
+      },
+      {
+        "path": "/api/v1/lab/analyzers",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.create_analyzer"
+      },
+      {
+        "path": "/api/v1/lab/analyzers/<analyzer_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.get_analyzer"
+      },
+      {
+        "path": "/api/v1/lab/analyzers/<analyzer_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "lab_operations.update_analyzer"
+      },
+      {
+        "path": "/api/v1/lab/analyzers/<analyzer_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "lab_operations.delete_analyzer"
+      },
+      {
+        "path": "/api/v1/lab/critical-results",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.list_critical_results"
+      },
+      {
+        "path": "/api/v1/lab/critical-results",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.create_critical_result"
+      },
+      {
+        "path": "/api/v1/lab/dashboard",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.lab_dashboard"
+      },
+      {
+        "path": "/api/v1/lab/delta-checks",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.list_delta_checks"
+      },
+      {
+        "path": "/api/v1/lab/delta-checks",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.create_delta_check"
+      },
+      {
+        "path": "/api/v1/lab/qc",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.list_qc"
+      },
+      {
+        "path": "/api/v1/lab/qc",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.create_qc"
+      },
+      {
+        "path": "/api/v1/lab/qc/<qc_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.get_qc"
+      },
+      {
+        "path": "/api/v1/lab/qc/<qc_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "lab_operations.update_qc"
+      },
+      {
+        "path": "/api/v1/lab/qc/<qc_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "lab_operations.delete_qc"
+      },
+      {
+        "path": "/api/v1/lab/qc/<qc_id>/evaluate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.evaluate_qc"
+      },
+      {
+        "path": "/api/v1/lab/queues",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.list_queues"
+      },
+      {
+        "path": "/api/v1/lab/queues",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.enqueue_sample"
+      },
+      {
+        "path": "/api/v1/lab/queues/<queue_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.get_queue"
+      },
+      {
+        "path": "/api/v1/lab/queues/<queue_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "lab_operations.update_queue"
+      },
+      {
+        "path": "/api/v1/lab/queues/<queue_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "lab_operations.delete_queue"
+      },
+      {
+        "path": "/api/v1/lab/queues/<queue_id>/complete",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.complete_queue"
+      },
+      {
+        "path": "/api/v1/lab/queues/<queue_id>/start",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.start_queue"
+      },
+      {
+        "path": "/api/v1/lab/releases",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.list_releases"
+      },
+      {
+        "path": "/api/v1/lab/releases",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.create_release"
+      },
+      {
+        "path": "/api/v1/lab/releases/<release_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.get_release"
+      },
+      {
+        "path": "/api/v1/lab/releases/<release_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "lab_operations.update_release"
+      },
+      {
+        "path": "/api/v1/lab/releases/<release_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "lab_operations.delete_release"
+      },
+      {
+        "path": "/api/v1/lab/reviews",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.list_reviews"
+      },
+      {
+        "path": "/api/v1/lab/reviews/<review_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.get_review"
+      },
+      {
+        "path": "/api/v1/lab/reviews/<review_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "lab_operations.delete_review"
+      },
+      {
+        "path": "/api/v1/lab/reviews/<review_id>/approve",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.approve_review"
+      },
+      {
+        "path": "/api/v1/lab/reviews/pathologist",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.create_pathologist_review"
+      },
+      {
+        "path": "/api/v1/lab/reviews/technician",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.create_technician_review"
+      },
+      {
+        "path": "/api/v1/lab/worklists",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.list_worklists"
+      },
+      {
+        "path": "/api/v1/lab/worklists",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "lab_operations.create_worklist"
+      },
+      {
+        "path": "/api/v1/lab/worklists/<worklist_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_operations.get_worklist"
+      },
+      {
+        "path": "/api/v1/lab/worklists/<worklist_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "lab_operations.update_worklist"
+      },
+      {
+        "path": "/api/v1/lab/worklists/<worklist_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "lab_operations.delete_worklist"
+      }
+    ],
+    "lab_worklist": [
+      {
+        "path": "/lab-worklist",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_worklist.lab_worklist"
+      },
+      {
+        "path": "/lab-worklist/status/<sample_id>/<status>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "lab_worklist.update_lab_status"
+      }
+    ],
+    "laboratories": [
+      {
+        "path": "/api/v1/laboratories",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "laboratories.get_laboratories"
+      },
+      {
+        "path": "/api/v1/laboratories",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "laboratories.create_laboratory"
+      }
+    ],
+    "logistics_platform": [
+      {
+        "path": "/api/v1/logistics/assign",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "logistics_platform.assign_dispatch"
+      },
+      {
+        "path": "/api/v1/logistics/dispatch-board",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_platform.dispatch_board"
+      },
+      {
+        "path": "/api/v1/logistics/drivers",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_platform.list_drivers"
+      },
+      {
+        "path": "/api/v1/logistics/drivers",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "logistics_platform.create_driver"
+      },
+      {
+        "path": "/api/v1/logistics/gps",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "logistics_platform.record_gps"
+      },
+      {
+        "path": "/api/v1/logistics/proof",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "logistics_platform.record_proof"
+      },
+      {
+        "path": "/api/v1/logistics/routes",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_platform.list_routes"
+      },
+      {
+        "path": "/api/v1/logistics/routes",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "logistics_platform.create_route"
+      },
+      {
+        "path": "/api/v1/logistics/routes/<route_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_platform.get_route"
+      },
+      {
+        "path": "/api/v1/logistics/routes/<route_id>/eta",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_platform.route_eta"
+      },
+      {
+        "path": "/api/v1/logistics/routes/optimize",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "logistics_platform.optimize_route"
+      },
+      {
+        "path": "/api/v1/logistics/vehicles",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_platform.list_vehicles"
+      },
+      {
+        "path": "/api/v1/logistics/vehicles",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "logistics_platform.create_vehicle"
+      }
+    ],
+    "logistics_v2": [
+      {
+        "path": "/api/v1/logistics-v2/events",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_v2.events"
+      },
+      {
+        "path": "/api/v1/logistics-v2/scan",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "logistics_v2.scan_qr"
+      },
+      {
+        "path": "/api/v1/logistics-v2/shipments/<shipment_id>/items",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_v2.shipment_items"
+      },
+      {
+        "path": "/api/v1/logistics-v2/shipments/<shipment_id>/items",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "logistics_v2.add_shipment_item"
+      },
+      {
+        "path": "/api/v1/logistics-v2/shipments/<shipment_id>/timeline",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_v2.shipment_timeline"
+      },
+      {
+        "path": "/api/v1/logistics-v2/shipments/<shipment_id>/timeline",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "logistics_v2.add_timeline_event"
+      }
+    ],
+    "logistics_v2_web": [
+      {
+        "path": "/logistics-v2",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_v2_web.logistics_v2_dashboard"
+      }
+    ],
+    "logistics_web": [
+      {
+        "path": "/iot-box",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_web.iot_box_dashboard"
+      },
+      {
+        "path": "/iot-box/create-demo",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_web.create_demo_box"
+      },
+      {
+        "path": "/iot-box/simulate-normal/<box_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_web.simulate_normal"
+      },
+      {
+        "path": "/iot-box/simulate-temp-high/<box_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_web.simulate_temp_high"
+      },
+      {
+        "path": "/logistics",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_web.logistics_dashboard"
+      },
+      {
+        "path": "/logistics/dispatch",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_web.dispatch_center"
+      },
+      {
+        "path": "/logistics/dispatch/assign/<job_id>/<collector_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_web.assign_collector"
+      },
+      {
+        "path": "/logistics/live-map",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_web.logistics_live_map"
+      },
+      {
+        "path": "/logistics/routes",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "logistics_web.logistics_routes_page"
+      }
+    ],
+    "marketplace": [
+      {
+        "path": "/api/v1/marketplace/bookings",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "marketplace.list_bookings"
+      },
+      {
+        "path": "/api/v1/marketplace/bookings",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "marketplace.create_booking"
+      },
+      {
+        "path": "/api/v1/marketplace/bookings/<booking_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "marketplace.get_booking"
+      },
+      {
+        "path": "/api/v1/marketplace/bookings/<booking_id>/timeline",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "marketplace.get_booking_timeline"
+      },
+      {
+        "path": "/api/v1/marketplace/bookings/<booking_id>/transition",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "marketplace.transition_booking"
+      },
+      {
+        "path": "/api/v1/marketplace/search",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "marketplace.marketplace_search"
+      }
+    ],
+    "marketplace_web": [
+      {
+        "path": "/marketplace",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "marketplace_web.marketplace_page"
+      },
+      {
+        "path": "/marketplace/book",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "marketplace_web.marketplace_book_page"
+      },
+      {
+        "path": "/marketplace/book",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "marketplace_web.marketplace_book_submit_page"
+      },
+      {
+        "path": "/marketplace/bookings",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "marketplace_web.marketplace_bookings_page"
+      },
+      {
+        "path": "/marketplace/bookings/<booking_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "marketplace_web.marketplace_booking_detail_page"
+      }
+    ],
+    "mobile": [
+      {
+        "path": "/api/v1/mobile/clinical-summary/<patient_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "mobile.clinical_summary"
+      },
+      {
+        "path": "/api/v1/mobile/home-collection",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "mobile.create_home_collection"
+      },
+      {
+        "path": "/api/v1/mobile/home-collections/<patient_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "mobile.list_home_collections"
+      },
+      {
+        "path": "/api/v1/mobile/login",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "mobile.mobile_login"
+      },
+      {
+        "path": "/api/v1/mobile/me",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "mobile.me"
+      },
+      {
+        "path": "/api/v1/mobile/orders/<patient_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "mobile.orders"
+      },
+      {
+        "path": "/api/v1/mobile/profile/<patient_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "mobile.profile"
+      },
+      {
+        "path": "/api/v1/mobile/results/<patient_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "mobile.results"
+      },
+      {
+        "path": "/api/v1/mobile/secure/orders",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "mobile.secure_orders"
+      },
+      {
+        "path": "/api/v1/mobile/secure/profile",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "mobile.secure_profile"
+      },
+      {
+        "path": "/api/v1/mobile/tracking/<patient_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "mobile.tracking"
+      }
+    ],
+    "monitor_web": [
+      {
+        "path": "/monitor",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "monitor_web.monitor"
+      }
+    ],
+    "notification_center": [
+      {
+        "path": "/api/v1/notifications",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center.list_notifications"
+      },
+      {
+        "path": "/api/v1/notifications",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "notification_center.create_notification"
+      },
+      {
+        "path": "/api/v1/notifications/<notification_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center.get_notification"
+      },
+      {
+        "path": "/api/v1/notifications/<notification_id>/retry",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "notification_center.retry_notification"
+      },
+      {
+        "path": "/api/v1/notifications/providers",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center.list_providers"
+      },
+      {
+        "path": "/api/v1/notifications/statistics",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center.statistics"
+      },
+      {
+        "path": "/api/v1/notifications/templates",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center.list_templates"
+      },
+      {
+        "path": "/api/v1/notifications/templates",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "notification_center.create_template"
+      },
+      {
+        "path": "/api/v1/notifications/templates/<template_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "notification_center.update_template"
+      }
+    ],
+    "notification_center_web": [
+      {
+        "path": "/notifications",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center_web.notifications_home"
+      },
+      {
+        "path": "/notifications/history",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center_web.notifications_history"
+      },
+      {
+        "path": "/notifications/providers",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center_web.notifications_providers"
+      },
+      {
+        "path": "/notifications/statistics",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center_web.notifications_statistics"
+      },
+      {
+        "path": "/notifications/templates",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center_web.notifications_templates"
+      }
+    ],
+    "notification_templates": [
+      {
+        "path": "/api/v1/notification-templates",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_templates.list_templates"
+      }
+    ],
+    "notifications": [
+      {
+        "path": "/api/v1/notification-legacy",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notifications.list_notifications"
+      },
+      {
+        "path": "/api/v1/notification-legacy/<notification_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notifications.get_notification"
+      },
+      {
+        "path": "/api/v1/notification-legacy/bulk",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "notifications.bulk_notifications"
+      },
+      {
+        "path": "/api/v1/notification-legacy/send",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "notifications.send_notification"
+      },
+      {
+        "path": "/api/v1/notification-legacy/test",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "notifications.test_notification"
+      }
+    ],
+    "observability_alerts": [
+      {
+        "path": "/api/v1/alerts/test",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "observability_alerts.test_alert"
+      }
+    ],
+    "observability_health_root": [
+      {
+        "path": "/health",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_health_root.root_health"
+      },
+      {
+        "path": "/live",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_health_root.root_live"
+      },
+      {
+        "path": "/ready",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_health_root.root_ready"
+      }
+    ],
+    "observability_metrics": [
+      {
+        "path": "/api/v1/metrics",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_metrics.metrics_all"
+      },
+      {
+        "path": "/api/v1/metrics/business",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_metrics.metrics_business"
+      },
+      {
+        "path": "/api/v1/metrics/system",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_metrics.metrics_system"
+      }
+    ],
+    "observability_prometheus": [
+      {
+        "path": "/metrics/prometheus",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_prometheus.prometheus_metrics"
+      }
+    ],
+    "observability_web": [
+      {
+        "path": "/system/alerts",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_web.system_alerts_page"
+      },
+      {
+        "path": "/system/audit",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_web.system_audit_page"
+      },
+      {
+        "path": "/system/health",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_web.system_health_page"
+      },
+      {
+        "path": "/system/logs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_web.system_logs_page"
+      },
+      {
+        "path": "/system/metrics",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_web.system_metrics_page"
+      },
+      {
+        "path": "/system/traces",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_web.system_traces_page"
+      }
+    ],
+    "operations_platform": [
+      {
+        "path": "/api/v1/operations/backups",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.list_backups"
+      },
+      {
+        "path": "/api/v1/operations/backups/<backup_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.get_backup"
+      },
+      {
+        "path": "/api/v1/operations/backups/<backup_id>/validate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.validate_backup"
+      },
+      {
+        "path": "/api/v1/operations/backups/run",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.run_backup"
+      },
+      {
+        "path": "/api/v1/operations/deployment",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.deployment_status"
+      },
+      {
+        "path": "/api/v1/operations/deployment/check",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.deployment_check"
+      },
+      {
+        "path": "/api/v1/operations/deployment/rollback-plan",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.deployment_rollback_plan"
+      },
+      {
+        "path": "/api/v1/operations/jobs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.list_jobs"
+      },
+      {
+        "path": "/api/v1/operations/jobs",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.create_job"
+      },
+      {
+        "path": "/api/v1/operations/jobs/<job_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.get_job"
+      },
+      {
+        "path": "/api/v1/operations/jobs/<job_id>/disable",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.disable_job"
+      },
+      {
+        "path": "/api/v1/operations/jobs/<job_id>/enable",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.enable_job"
+      },
+      {
+        "path": "/api/v1/operations/jobs/<job_id>/run",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.run_job"
+      },
+      {
+        "path": "/api/v1/operations/jobs/<job_id>/runs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.list_job_runs"
+      },
+      {
+        "path": "/api/v1/operations/maintenance",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.maintenance_status"
+      },
+      {
+        "path": "/api/v1/operations/maintenance/disable",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.maintenance_disable"
+      },
+      {
+        "path": "/api/v1/operations/maintenance/enable",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.maintenance_enable"
+      },
+      {
+        "path": "/api/v1/operations/maintenance/schedule",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.maintenance_schedule"
+      },
+      {
+        "path": "/api/v1/operations/queues",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.queue_summary"
+      },
+      {
+        "path": "/api/v1/operations/queues/dead-letters",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.queue_dead_letters"
+      },
+      {
+        "path": "/api/v1/operations/queues/dead-letters/<dead_letter_id>/replay",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.replay_dead_letter"
+      },
+      {
+        "path": "/api/v1/operations/restores",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.list_restores"
+      },
+      {
+        "path": "/api/v1/operations/restores/dry-run",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.restore_dry_run"
+      },
+      {
+        "path": "/api/v1/operations/secrets",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.list_secrets"
+      },
+      {
+        "path": "/api/v1/operations/secrets/<plan_id>/mark-rotated",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.mark_secret_rotated"
+      },
+      {
+        "path": "/api/v1/operations/secrets/rotation-plan",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.create_rotation_plan"
+      },
+      {
+        "path": "/api/v1/operations/secrets/validate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.validate_secrets"
+      }
+    ],
+    "operations_platform_web": [
+      {
+        "path": "/operations",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform_web.operations_home"
+      },
+      {
+        "path": "/operations/backups",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform_web.operations_backups"
+      },
+      {
+        "path": "/operations/deployment",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform_web.operations_deployment"
+      },
+      {
+        "path": "/operations/jobs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform_web.operations_jobs"
+      },
+      {
+        "path": "/operations/maintenance",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform_web.operations_maintenance"
+      },
+      {
+        "path": "/operations/queues",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform_web.operations_queues"
+      },
+      {
+        "path": "/operations/secrets",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform_web.operations_secrets"
+      }
+    ],
+    "operations_timeline_web": [
+      {
+        "path": "/operations/timeline",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_timeline_web.operations_timeline"
+      }
+    ],
+    "operations_web": [
+      {
+        "path": "/lab-operations",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_web.operations"
+      }
+    ],
+    "ops": [
+      {
+        "path": "/api/v1/ops/health",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "ops.health"
+      },
+      {
+        "path": "/api/v1/ops/production-check",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "ops.production_check"
+      }
+    ],
+    "order_execution": [
+      {
+        "path": "/api/v1/order-execution/orders",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "order_execution.list_orders"
+      },
+      {
+        "path": "/api/v1/order-execution/orders",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "order_execution.create_order"
+      },
+      {
+        "path": "/api/v1/order-execution/orders/<order_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "order_execution.get_order"
+      },
+      {
+        "path": "/api/v1/order-execution/orders/<order_id>/advance",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "order_execution.advance_order"
+      },
+      {
+        "path": "/api/v1/order-execution/orders/<order_id>/barcode",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "order_execution.get_order_barcode"
+      },
+      {
+        "path": "/api/v1/order-execution/orders/<order_id>/cancel",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "order_execution.cancel_order"
+      },
+      {
+        "path": "/api/v1/order-execution/orders/<order_id>/incident",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "order_execution.order_incident"
+      },
+      {
+        "path": "/api/v1/order-execution/orders/<order_id>/label",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "order_execution.order_label"
+      },
+      {
+        "path": "/api/v1/order-execution/orders/<order_id>/recollect",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "order_execution.recollect_order"
+      },
+      {
+        "path": "/api/v1/order-execution/orders/<order_id>/refund",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "order_execution.refund_order"
+      },
+      {
+        "path": "/api/v1/order-execution/orders/<order_id>/timeline",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "order_execution.get_order_timeline"
+      },
+      {
+        "path": "/api/v1/order-execution/orders/<order_id>/transition",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "order_execution.transition_order"
+      }
+    ],
+    "order_execution_web": [
+      {
+        "path": "/order-execution",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "order_execution_web.order_execution_page"
+      },
+      {
+        "path": "/order-execution/orders/<order_id>",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "order_execution_web.order_execution_detail_page"
+      }
+    ],
+    "order_items": [
+      {
+        "path": "/api/v1/order-items",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "order_items.get_order_items"
+      },
+      {
+        "path": "/api/v1/order-items",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "order_items.create_order_item"
+      }
+    ],
+    "order_items_web": [
+      {
+        "path": "/orders/<order_id>/items",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "order_items_web.order_items_page"
+      },
+      {
+        "path": "/orders/<order_id>/items/new",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "order_items_web.new_order_item"
+      }
+    ],
+    "order_lifecycle": [
+      {
+        "path": "/api/v1/order-lifecycle/bookings/<booking_id>/check-in",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "order_lifecycle.check_in_collection"
+      },
+      {
+        "path": "/api/v1/order-lifecycle/bookings/<booking_id>/collect",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "order_lifecycle.collect_sample"
+      },
+      {
+        "path": "/api/v1/order-lifecycle/bookings/<booking_id>/collection",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "order_lifecycle.get_booking_collection"
+      },
+      {
+        "path": "/api/v1/order-lifecycle/bookings/<booking_id>/create-order",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "order_lifecycle.create_order_from_booking"
+      },
+      {
+        "path": "/api/v1/order-lifecycle/bookings/<booking_id>/dispatch",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "order_lifecycle.dispatch_sample"
+      },
+      {
+        "path": "/api/v1/order-lifecycle/bookings/<booking_id>/lab-receive",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "order_lifecycle.receive_at_lab"
+      },
+      {
+        "path": "/api/v1/order-lifecycle/bookings/<booking_id>/order",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "order_lifecycle.get_booking_order"
+      },
+      {
+        "path": "/api/v1/order-lifecycle/orders",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "order_lifecycle.list_orders"
+      },
+      {
+        "path": "/api/v1/order-lifecycle/orders/<order_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "order_lifecycle.get_order"
+      }
+    ],
+    "order_lifecycle_web": [
+      {
+        "path": "/order-lifecycle",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "order_lifecycle_web.order_lifecycle_page"
+      },
+      {
+        "path": "/order-lifecycle/bookings/<booking_id>",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "order_lifecycle_web.order_lifecycle_booking_page"
+      }
+    ],
+    "orders": [
+      {
+        "path": "/api/v1/orders",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "orders.get_orders"
+      },
+      {
+        "path": "/api/v1/orders",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "orders.create_order"
+      }
+    ],
+    "orders_web": [
+      {
+        "path": "/orders",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "orders_web.orders_page"
+      },
+      {
+        "path": "/orders/<order_id>/generate-invoice",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "orders_web.generate_invoice_web"
+      },
+      {
+        "path": "/orders/new",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "orders_web.new_order"
+      }
+    ],
+    "partner_portal": [
+      {
+        "path": "/api/v1/partner-portal/dashboard",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partner_portal.partner_dashboard"
+      },
+      {
+        "path": "/api/v1/partner-portal/orders",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partner_portal.partner_orders"
+      },
+      {
+        "path": "/api/v1/partner-portal/orders/<order_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partner_portal.partner_order_detail"
+      },
+      {
+        "path": "/api/v1/partner-portal/results",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partner_portal.list_results"
+      },
+      {
+        "path": "/api/v1/partner-portal/results/upload",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "partner_portal.upload_result"
+      },
+      {
+        "path": "/api/v1/partner-portal/revenue",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partner_portal.partner_revenue"
+      },
+      {
+        "path": "/api/v1/partner-portal/sla",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partner_portal.partner_sla"
+      }
+    ],
+    "partner_portal_web": [
+      {
+        "path": "/partner-portal",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partner_portal_web.partner_portal_home"
+      },
+      {
+        "path": "/partner-portal/orders",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partner_portal_web.partner_portal_orders"
+      },
+      {
+        "path": "/partner-portal/results",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partner_portal_web.partner_portal_results"
+      },
+      {
+        "path": "/partner-portal/revenue",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partner_portal_web.partner_portal_revenue"
+      },
+      {
+        "path": "/partner-portal/sla",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partner_portal_web.partner_portal_sla"
+      }
+    ],
+    "partners": [
+      {
+        "path": "/api/v1/partners",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners.list_partners"
+      },
+      {
+        "path": "/api/v1/partners",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "partners.create_partner"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners.get_partner"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "partners.update_partner"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/activate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "partners.activate_partner"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/approve",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "partners.approve_partner"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/archive",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "partners.archive_partner"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/credentials",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners.list_api_credentials"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/credentials",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "partners.create_api_credential"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/credentials/<credential_id>/revoke",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "partners.revoke_api_credential"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/reject",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "partners.reject_partner"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/review",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "partners.review_partner"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/services",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners.list_partner_services"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/services",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "partners.add_partner_service"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/submit",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "partners.submit_partner"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/suspend",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "partners.suspend_partner"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/users",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners.list_partner_users"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/users",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "partners.add_partner_user"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/verification",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners.list_verification_items"
+      },
+      {
+        "path": "/api/v1/partners/<partner_id>/verification/<item_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "partners.update_verification_item"
+      }
+    ],
+    "partners_web": [
+      {
+        "path": "/partners",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners_web.partners_page"
+      },
+      {
+        "path": "/partners/<partner_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners_web.partner_detail_page"
+      },
+      {
+        "path": "/partners/<partner_id>/activate",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners_web.partner_activate_page"
+      },
+      {
+        "path": "/partners/<partner_id>/approve",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners_web.partner_approve_page"
+      },
+      {
+        "path": "/partners/<partner_id>/archive",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners_web.partner_archive_page"
+      },
+      {
+        "path": "/partners/<partner_id>/credentials/create",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners_web.partner_create_credential_page"
+      },
+      {
+        "path": "/partners/<partner_id>/reject",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners_web.partner_reject_page"
+      },
+      {
+        "path": "/partners/<partner_id>/review",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners_web.partner_review_page"
+      },
+      {
+        "path": "/partners/<partner_id>/services",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "partners_web.partner_add_service_page"
+      },
+      {
+        "path": "/partners/<partner_id>/submit",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners_web.partner_submit_page"
+      },
+      {
+        "path": "/partners/<partner_id>/suspend",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "partners_web.partner_suspend_page"
+      },
+      {
+        "path": "/partners/new",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "partners_web.partners_new_page"
+      }
+    ],
+    "patient_mobile": [
+      {
+        "path": "/api/v1/patient/home-collections/<patient_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_mobile.patient_home_collections"
+      },
+      {
+        "path": "/api/v1/patient/orders/<patient_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_mobile.patient_orders"
+      },
+      {
+        "path": "/api/v1/patient/report/<order_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_mobile.patient_report"
+      },
+      {
+        "path": "/api/v1/patient/results/<patient_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_mobile.patient_results"
+      },
+      {
+        "path": "/api/v1/patient/tracking/<patient_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_mobile.patient_tracking"
+      }
+    ],
+    "patient_portal": [
+      {
+        "path": "/api/v1/patient/consent",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "patient_portal.patient_consent"
+      },
+      {
+        "path": "/api/v1/patient/dashboard",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_portal.patient_dashboard"
+      },
+      {
+        "path": "/api/v1/patient/notifications",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_portal.patient_notifications"
+      },
+      {
+        "path": "/api/v1/patient/orders",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_portal.patient_orders"
+      },
+      {
+        "path": "/api/v1/patient/profile",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_portal.get_patient_profile"
+      },
+      {
+        "path": "/api/v1/patient/profile",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "patient_portal.update_patient_profile"
+      },
+      {
+        "path": "/api/v1/patient/results",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_portal.patient_results"
+      },
+      {
+        "path": "/api/v1/patient/share-report",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "patient_portal.share_report"
+      },
+      {
+        "path": "/api/v1/patient/timeline",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_portal.patient_timeline"
+      }
+    ],
+    "patient_portal_v2_web": [
+      {
+        "path": "/patient",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_portal_v2_web.patient_home"
+      },
+      {
+        "path": "/patient/orders",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_portal_v2_web.patient_orders_page"
+      },
+      {
+        "path": "/patient/profile",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_portal_v2_web.patient_profile_page"
+      },
+      {
+        "path": "/patient/results",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_portal_v2_web.patient_results_page"
+      },
+      {
+        "path": "/patient/timeline",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_portal_v2_web.patient_timeline_page"
+      }
+    ],
+    "patient_portal_web": [
+      {
+        "path": "/my-portal",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_portal_web.my_patient_portal"
+      },
+      {
+        "path": "/portal/<patient_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patient_portal_web.patient_portal"
+      }
+    ],
+    "patients": [
+      {
+        "path": "/api/v1/patients",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patients.get_patients"
+      },
+      {
+        "path": "/api/v1/patients",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "patients.create_patient"
+      },
+      {
+        "path": "/api/v1/patients/<patient_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patients.get_patient"
+      },
+      {
+        "path": "/api/v1/patients/<patient_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "patients.update_patient"
+      },
+      {
+        "path": "/api/v1/patients/<patient_id>",
+        "methods": [
+          "DELETE"
+        ],
+        "endpoint": "patients.delete_patient"
+      }
+    ],
+    "patients_web": [
+      {
+        "path": "/patients",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "patients_web.patients_page"
+      },
+      {
+        "path": "/patients/new",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "patients_web.new_patient"
+      }
+    ],
+    "payment_gateway_web": [
+      {
+        "path": "/payment",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "payment_gateway_web.payment_home"
+      },
+      {
+        "path": "/payment/history",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "payment_gateway_web.payment_history_page"
+      },
+      {
+        "path": "/payment/refunds",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "payment_gateway_web.payment_refunds_page"
+      }
+    ],
+    "payments": [
+      {
+        "path": "/api/v1/payments",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "payments.get_payments"
+      },
+      {
+        "path": "/api/v1/payments/create",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "payments.create_payment"
+      },
+      {
+        "path": "/api/v1/payments/history",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "payments.payment_history"
+      },
+      {
+        "path": "/api/v1/payments/providers",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "payments.payment_providers"
+      },
+      {
+        "path": "/api/v1/payments/refund",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "payments.payment_refund"
+      },
+      {
+        "path": "/api/v1/payments/webhook",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "payments.payment_webhook"
+      }
+    ],
+    "payments_web": [
+      {
+        "path": "/payments",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "payments_web.payments_page"
+      },
+      {
+        "path": "/payments/new",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "payments_web.new_payment"
+      }
+    ],
+    "reference_ranges": [
+      {
+        "path": "/api/v1/reference-ranges",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "reference_ranges.list_reference_ranges"
+      }
+    ],
+    "report_pdf_web": [
+      {
+        "path": "/results/report/<order_id>/pdf",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "report_pdf_web.report_pdf"
+      }
+    ],
+    "reporting": [
+      {
+        "path": "/api/v1/reports",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "reporting.list_report_definitions"
+      },
+      {
+        "path": "/api/v1/reports/collectors",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "reporting.collectors_report"
+      },
+      {
+        "path": "/api/v1/reports/download",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "reporting.download_report"
+      },
+      {
+        "path": "/api/v1/reports/executive",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "reporting.executive_report"
+      },
+      {
+        "path": "/api/v1/reports/generate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "reporting.generate_report"
+      },
+      {
+        "path": "/api/v1/reports/history",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "reporting.report_history"
+      },
+      {
+        "path": "/api/v1/reports/kpi",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "reporting.kpi_report"
+      },
+      {
+        "path": "/api/v1/reports/operations",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "reporting.operations_report"
+      },
+      {
+        "path": "/api/v1/reports/partners",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "reporting.partners_report"
+      },
+      {
+        "path": "/api/v1/reports/revenue",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "reporting.revenue_report"
+      },
+      {
+        "path": "/api/v1/reports/schedule",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "reporting.report_schedule"
+      }
+    ],
+    "reporting_bi_web": [
+      {
+        "path": "/reports",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "reporting_bi_web.reports_home"
+      },
+      {
+        "path": "/reports/executive",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "reporting_bi_web.reports_executive"
+      },
+      {
+        "path": "/reports/operations",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "reporting_bi_web.reports_operations"
+      }
+    ],
+    "reports_web": [
+      {
+        "path": "/results/report/<order_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "reports_web.report_page"
+      }
+    ],
+    "result_files": [
+      {
+        "path": "/api/v1/result-files",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "result_files.list_result_files"
+      },
+      {
+        "path": "/api/v1/result-files/order/<order_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "result_files.files_by_order"
+      }
+    ],
+    "result_gateway_web": [
+      {
+        "path": "/results",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "result_gateway_web.results_home"
+      },
+      {
+        "path": "/results/<result_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "result_gateway_web.results_detail"
+      },
+      {
+        "path": "/results/new",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "result_gateway_web.legacy_results_new_redirect"
+      },
+      {
+        "path": "/results/upload",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "result_gateway_web.results_upload"
+      }
+    ],
+    "result_upload_web": [
+      {
+        "path": "/portal/result-files/download/<file_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "result_upload_web.portal_download_result_file"
+      },
+      {
+        "path": "/result-files",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "result_upload_web.result_files_page"
+      },
+      {
+        "path": "/result-files/download/<file_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "result_upload_web.download_result_file"
+      },
+      {
+        "path": "/result-files/new",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "result_upload_web.upload_result_file"
+      }
+    ],
+    "result_verify_web": [
+      {
+        "path": "/results/verify/<result_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "result_verify_web.verify_result"
+      }
+    ],
+    "results_gateway": [
+      {
+        "path": "/api/v1/results",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "results_gateway.list_results"
+      },
+      {
+        "path": "/api/v1/results/<result_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "results_gateway.get_result"
+      },
+      {
+        "path": "/api/v1/results/<result_id>/approve",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "results_gateway.approve_result"
+      },
+      {
+        "path": "/api/v1/results/<result_id>/release",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "results_gateway.release_result"
+      },
+      {
+        "path": "/api/v1/results/<result_id>/review",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "results_gateway.review_result"
+      },
+      {
+        "path": "/api/v1/results/<result_id>/timeline",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "results_gateway.result_timeline"
+      },
+      {
+        "path": "/api/v1/results/manual",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "results_gateway.manual_result"
+      },
+      {
+        "path": "/api/v1/results/upload",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "results_gateway.upload_result"
+      }
+    ],
+    "sample_collections": [
+      {
+        "path": "/api/v1/sample-collections",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "sample_collections.get_sample_collections"
+      },
+      {
+        "path": "/api/v1/sample-collections",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "sample_collections.create_sample_collection"
+      }
+    ],
+    "sample_public_web": [
+      {
+        "path": "/samples/track/<sample_code>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "sample_public_web.track_sample"
+      }
+    ],
+    "sample_tracking_web": [
+      {
+        "path": "/samples",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "sample_tracking_web.samples_page"
+      },
+      {
+        "path": "/samples/new",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "sample_tracking_web.new_sample"
+      },
+      {
+        "path": "/samples/status/<sample_id>/<status>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "sample_tracking_web.update_sample_status_web"
+      },
+      {
+        "path": "/samples/verify/<sample_code>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "sample_tracking_web.verify_sample"
+      }
+    ],
+    "sample_trackings": [
+      {
+        "path": "/api/v1/sample-trackings",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "sample_trackings.get_sample_trackings"
+      },
+      {
+        "path": "/api/v1/sample-trackings",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "sample_trackings.create_sample_tracking"
+      },
+      {
+        "path": "/api/v1/sample-trackings/<sample_id>/status",
+        "methods": [
+          "PATCH"
+        ],
+        "endpoint": "sample_trackings.update_sample_status"
+      }
+    ],
+    "scheduling": [
+      {
+        "path": "/api/v1/scheduling/bookings/<booking_id>/assign-collector",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "scheduling.assign_booking_collector"
+      },
+      {
+        "path": "/api/v1/scheduling/bookings/<booking_id>/reserve-slot",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "scheduling.reserve_booking_slot"
+      },
+      {
+        "path": "/api/v1/scheduling/collectors/availability",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "scheduling.list_collector_availability"
+      },
+      {
+        "path": "/api/v1/scheduling/partners/<partner_id>/generate-slots",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "scheduling.generate_partner_slots"
+      },
+      {
+        "path": "/api/v1/scheduling/partners/<partner_id>/slots",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "scheduling.list_partner_slots"
+      }
+    ],
+    "scheduling_web": [
+      {
+        "path": "/scheduling",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "scheduling_web.scheduling_page"
+      },
+      {
+        "path": "/scheduling/bookings/<booking_id>/assign-collector",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "scheduling_web.scheduling_assign_collector_page"
+      },
+      {
+        "path": "/scheduling/collectors",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "scheduling_web.scheduling_collectors_page"
+      },
+      {
+        "path": "/scheduling/partners/<partner_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "scheduling_web.scheduling_partner_page"
+      },
+      {
+        "path": "/scheduling/partners/<partner_id>/generate-slots",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "scheduling_web.scheduling_partner_generate_slots_page"
+      }
+    ],
+    "security_api": [
+      {
+        "path": "/api/v1/security/roles",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "security_api.roles"
+      },
+      {
+        "path": "/api/v1/security/users",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "security_api.users"
+      },
+      {
+        "path": "/api/v1/security/users",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "security_api.create_user"
+      },
+      {
+        "path": "/api/v1/security/users/<user_id>/disable",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "security_api.disable_user"
+      },
+      {
+        "path": "/api/v1/security/users/<user_id>/role",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "security_api.update_role"
+      }
+    ],
+    "seeds": [
+      {
+        "path": "/api/v1/seeds/demo-operations",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "seeds.demo_operations"
+      }
+    ],
+    "shipments": [
+      {
+        "path": "/api/v1/shipments",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "shipments.list_shipments"
+      },
+      {
+        "path": "/api/v1/shipments",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "shipments.create_shipment"
+      },
+      {
+        "path": "/api/v1/shipments/<shipment_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "shipments.get_shipment"
+      },
+      {
+        "path": "/api/v1/shipments/<shipment_id>/arrived",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "shipments.arrived_shipment"
+      },
+      {
+        "path": "/api/v1/shipments/<shipment_id>/assign-box/<box_id>",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "shipments.assign_box_to_shipment"
+      },
+      {
+        "path": "/api/v1/shipments/<shipment_id>/receive",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "shipments.receive_shipment"
+      },
+      {
+        "path": "/api/v1/shipments/<shipment_id>/start",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "shipments.start_shipment"
+      },
+      {
+        "path": "/api/v1/shipments/receive-by-box/<box_id>",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "shipments.receive_shipment_by_box"
+      },
+      {
+        "path": "/api/v1/shipments/scan/<path:qr_payload>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "shipments.scan_qr"
+      }
+    ],
+    "shipments_web": [
+      {
+        "path": "/shipments",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "shipments_web.shipments_page"
+      },
+      {
+        "path": "/shipments/<shipment_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "shipments_web.shipment_detail"
+      },
+      {
+        "path": "/shipments/<shipment_id>/accept",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "shipments_web.accept_shipment_web"
+      },
+      {
+        "path": "/shipments/<shipment_id>/qr",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "shipments_web.shipment_qr"
+      },
+      {
+        "path": "/shipments/<shipment_id>/receive",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "shipments_web.lab_receive"
+      },
+      {
+        "path": "/shipments/<shipment_id>/start-trip",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "shipments_web.start_trip_web"
+      },
+      {
+        "path": "/shipments/new",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "shipments_web.new_shipment"
+      }
+    ],
+    "static": [
+      {
+        "path": "/static/<path:filename>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "static"
+      }
+    ],
+    "system": [
+      {
+        "path": "/api/v1/system/backup-status",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "system.backup_status"
+      },
+      {
+        "path": "/api/v1/system/build",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "system.build"
+      },
+      {
+        "path": "/api/v1/system/health",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "system.health"
+      },
+      {
+        "path": "/api/v1/system/live",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "system.live"
+      },
+      {
+        "path": "/api/v1/system/liveness",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "system.liveness"
+      },
+      {
+        "path": "/api/v1/system/metrics",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "system.system_metrics"
+      },
+      {
+        "path": "/api/v1/system/performance",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "system.system_performance"
+      },
+      {
+        "path": "/api/v1/system/readiness",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "system.readiness"
+      },
+      {
+        "path": "/api/v1/system/ready",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "system.ready"
+      },
+      {
+        "path": "/api/v1/system/routes",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "system.routes"
+      },
+      {
+        "path": "/api/v1/system/stats",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "system.stats"
+      },
+      {
+        "path": "/api/v1/system/version",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "system.version"
+      }
+    ],
+    "tat_kpi_web": [
+      {
+        "path": "/tat-kpi",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "tat_kpi_web.tat_kpi"
+      }
+    ],
+    "test_catalogs": [
+      {
+        "path": "/api/v1/test-catalogs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "test_catalogs.get_tests"
+      },
+      {
+        "path": "/api/v1/test-catalogs",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "test_catalogs.create_test"
+      }
+    ],
+    "test_results": [
+      {
+        "path": "/api/v1/test-results",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "test_results.get_results"
+      },
+      {
+        "path": "/api/v1/test-results",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "test_results.create_result"
+      }
+    ],
+    "test_results_web": [
+      {
+        "path": "/legacy/results",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "test_results_web.results_page"
+      },
+      {
+        "path": "/results/<result_id>/ai",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "test_results_web.generate_ai_comment"
+      },
+      {
+        "path": "/results/new",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "test_results_web.new_result"
+      }
+    ],
+    "transport_boxes": [
+      {
+        "path": "/api/v1/transport-boxes",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "transport_boxes.get_transport_boxes"
+      },
+      {
+        "path": "/api/v1/transport-boxes",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "transport_boxes.create_transport_box"
+      },
+      {
+        "path": "/api/v1/transport-boxes/<box_id>",
+        "methods": [
+          "PATCH"
+        ],
+        "endpoint": "transport_boxes.update_transport_box"
+      }
+    ],
+    "transport_boxes_web": [
+      {
+        "path": "/transport-boxes",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "transport_boxes_web.transport_boxes_page"
+      },
+      {
+        "path": "/transport-boxes/<box_id>/samples",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "transport_boxes_web.transport_box_samples"
+      },
+      {
+        "path": "/transport-boxes/new",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "transport_boxes_web.new_transport_box"
+      },
+      {
+        "path": "/transport-boxes/update/<box_id>",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "transport_boxes_web.update_transport_box_web"
+      }
+    ],
+    "workflow": [
+      {
+        "path": "/api/v1/workflow/assign/<booking_id>/<collector_id>",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "workflow.assign"
+      },
+      {
+        "path": "/api/v1/workflow/bookings",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "workflow.bookings"
+      },
+      {
+        "path": "/api/v1/workflow/bookings",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "workflow.create_booking"
+      },
+      {
+        "path": "/api/v1/workflow/checkin/<booking_id>",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "workflow.checkin"
+      },
+      {
+        "path": "/api/v1/workflow/collected/<booking_id>",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "workflow.collected"
+      },
+      {
+        "path": "/api/v1/workflow/dashboard",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "workflow.dashboard"
+      },
+      {
+        "path": "/api/v1/workflow/health",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "workflow.health"
+      },
+      {
+        "path": "/api/v1/workflow/sample/<sample_id>/<status>",
+        "methods": [
+          "GET",
+          "POST"
+        ],
+        "endpoint": "workflow.update_sample_status"
+      }
+    ]
+  }
+}

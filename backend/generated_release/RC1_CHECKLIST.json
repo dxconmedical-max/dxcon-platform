@@ -1,0 +1,40 @@
+{
+  "generated_at": "2026-07-01T10:12:22.835399+00:00",
+  "items": [
+    {
+      "section": "End-to-end workflows",
+      "status": "PASS",
+      "passed": 18,
+      "total": 18
+    },
+    {
+      "section": "Security and production checks",
+      "status": "PASS",
+      "passed": 12,
+      "total": 12
+    },
+    {
+      "section": "Deployment checks",
+      "status": "PASS",
+      "passed": 9,
+      "total": 9
+    },
+    {
+      "section": "Data integrity checks",
+      "status": "PASS",
+      "passed": 6,
+      "total": 6
+    },
+    {
+      "section": "Performance smoke",
+      "status": "PASS",
+      "passed": 1,
+      "total": 1
+    },
+    {
+      "section": "Release candidate score",
+      "status": "PASS",
+      "score": 100.0
+    }
+  ]
+}

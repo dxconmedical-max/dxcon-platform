@@ -1,0 +1,144 @@
+{
+  "generated_at": "2026-07-01T10:13:48.425650+00:00",
+  "release": "v1.0.0-rc2",
+  "git_sha": "9b816acb9ee02dd0bf97c413948e68a2cca1f527",
+  "items": [
+    {
+      "item": "staging_env_template",
+      "status": "PASS"
+    },
+    {
+      "item": "production_env_template",
+      "status": "PASS"
+    },
+    {
+      "item": "production_required_variables",
+      "status": "PASS"
+    },
+    {
+      "item": "staging_env_ready",
+      "status": "PASS"
+    },
+    {
+      "item": "postgresql_required",
+      "status": "PASS"
+    },
+    {
+      "item": "cors_hardened",
+      "status": "PASS"
+    },
+    {
+      "item": "redis_readiness",
+      "status": "PASS"
+    },
+    {
+      "item": "smtp_readiness",
+      "status": "PASS"
+    },
+    {
+      "item": "health_probes",
+      "status": "PASS"
+    },
+    {
+      "item": "observability_evaluate",
+      "status": "PASS"
+    },
+    {
+      "item": "openapi_regenerated",
+      "status": "PASS"
+    },
+    {
+      "item": "api_inventory",
+      "status": "PASS"
+    },
+    {
+      "item": "no_duplicate_routes",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:auth",
+      "status": "FAIL"
+    },
+    {
+      "item": "regression:crm",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:marketplace",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:scheduling",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:collector",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:logistics",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:lab_operations",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:result_gateway",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:patient_portal",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:doctor_portal",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:billing",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:payment",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:notifications",
+      "status": "FAIL"
+    },
+    {
+      "item": "regression:integrations",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:federation",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:reporting",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:ai_cds",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:standards_gateway",
+      "status": "PASS"
+    },
+    {
+      "item": "regression:observability",
+      "status": "FAIL"
+    },
+    {
+      "item": "regression:operations",
+      "status": "FAIL"
+    },
+    {
+      "item": "regression:deployment",
+      "status": "PASS"
+    }
+  ],
+  "ready": false
+}

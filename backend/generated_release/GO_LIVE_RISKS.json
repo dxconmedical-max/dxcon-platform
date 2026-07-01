@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-07-01T10:12:22.835547+00:00",
+  "ready_for_rc1": true,
+  "score": 100.0,
+  "blockers": [],
+  "known_risks": [
+    {
+      "risk": "Redis not configured",
+      "severity": "medium",
+      "mitigation": "Configure REDIS_URL for production cache/queue"
+    },
+    {
+      "risk": "SMTP not configured",
+      "severity": "medium",
+      "mitigation": "Configure SMTP_HOST before patient notifications go-live"
+    },
+    {
+      "risk": "CORS wildcard in production",
+      "severity": "high",
+      "mitigation": "Set explicit CORS_ORIGINS for production"
+    },
+    {
+      "risk": "SQLite used in validation",
+      "severity": "low",
+      "mitigation": "Re-run RC1 against PostgreSQL staging"
+    }
+  ]
+}

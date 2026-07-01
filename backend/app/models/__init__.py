@@ -1,4 +1,5 @@
 from app.models.user import User
+from app.models.refresh_token import RefreshTokenRecord
 
 from app.models.patient import Patient
 
@@ -43,7 +44,27 @@ from app.models.alert import Alert
 from app.models.incident import Incident
 from app.models.alert import Alert
 from app.models.clinical_summary import ClinicalSummary
-from app.models.crm_lead import CrmLead
+from app.models.crm_lead import CrmLead, Lead
+from app.models.crm_organization import Organization, Customer, ContactPerson
+from app.models.crm_pipeline import SalesPipeline, PipelineStage, Opportunity
+from app.models.crm_activity import Activity
+from app.models.crm_quotation import Quotation, QuotationItem, PriceBook, DiscountRule
+from app.models.crm_sales_contract import SalesContract, SalesContractPrice
+from app.models.lab_facility import LabShift, LabBench, Analyzer
+from app.models.lab_accession import SampleAccession, Worklist, LabWorkflowTransition
+from app.models.lab_operations import (
+    AnalyzerQueue,
+    QualityControl,
+    TechnicianReview,
+    PathologistReview,
+    CriticalResult,
+    DeltaCheck,
+    ResultApproval,
+    LabOperationResultRelease,
+)
+from app.models.logistics_driver import DriverProfile, Vehicle
+from app.models.logistics_route import RoutePlan, RouteStop, DispatchAssignment, ETAEstimate
+from app.models.logistics_tracking import GPSPing, DeliveryProof, ChainOfCustodyEvent
 
 from app.models.shipment import Shipment
 
@@ -106,6 +127,20 @@ from app.models.doctor_commission import DoctorCommission
 from app.models.refund_record import RefundRecord
 from app.models.report_snapshot import ReportSnapshot
 from app.models.kpi_event import KPIEvent
+from app.models.reporting_platform import (
+    ReportDefinition,
+    ReportJob,
+    ReportSchedule,
+    DashboardWidget,
+    DashboardLayout,
+    KPIRecord,
+    MetricSnapshot,
+    RevenueAnalytics,
+    LabAnalytics,
+    CollectorAnalytics,
+    PartnerAnalytics,
+    ClinicAnalytics,
+)
 from app.models.lab_result import LabResult
 from app.models.lab_result_item import LabResultItem
 from app.models.result_attachment import ResultAttachment
@@ -158,3 +193,123 @@ from app.models.shock_event import ShockEvent
 from app.models.battery_event import BatteryEvent
 from app.models.gps_reading import GPSReading
 from app.models.cold_chain_alert import ColdChainAlert
+from app.models.federation_core import (
+    FederatedLab,
+    FederationProvider,
+    FederationProviderBranch,
+    FederationCapability,
+    FederationPolicy,
+    FederationEvent,
+)
+from app.models.federation_capacity import (
+    CapacitySnapshot,
+    CapacityRule,
+    AnalyzerCapacity,
+    LabWorkloadSnapshot,
+)
+from app.models.federation_routing import RoutingRule, RoutingDecision, RoutingAudit
+from app.models.federation_failover import FailoverRule, FailoverEvent
+from app.models.ai_cds import (
+    ClinicalDeltaCheck,
+    ClinicalGuidelinePack,
+    ClinicalRecommendation,
+    ClinicalRiskAssessment,
+    ClinicalRuleDefinition,
+    CriticalAlertEvent,
+)
+from app.models.knowledge_engine import (
+    Biomarker,
+    ClinicalGuideline,
+    DiseaseProfile,
+    MedicalKnowledge,
+    ReferenceLibrary,
+)
+from app.models.communication_hub import (
+    CommunicationDeadLetter,
+    CommunicationDeliveryTrack,
+    CommunicationQueueItem,
+    WebhookDeliveryLog,
+    WebhookEndpoint,
+    WorkflowAutomationEvent,
+)
+from app.models.enterprise_platform import (
+    EnterpriseAbacPolicy,
+    EnterpriseAccessHistory,
+    EnterpriseAuditRecord,
+    EnterpriseBackgroundJob,
+    EnterpriseBusinessUnit,
+    EnterpriseComplianceExport,
+    EnterpriseDepartment,
+    EnterpriseFeatureFlag,
+    EnterpriseIdentityProvider,
+    EnterpriseLicense,
+    EnterpriseOrganization,
+    EnterpriseRole,
+    EnterpriseSecurityEvent,
+    EnterpriseSystemSetting,
+    EnterpriseTenant,
+    EnterpriseUsageMetric,
+)
+from app.models.integration_platform import (
+    IntegrationDeadLetter,
+    IntegrationDomainEvent,
+    IntegrationEventDeliveryLog,
+    IntegrationJob,
+    IntegrationJobAttempt,
+    IntegrationPluginState,
+    WebhookDelivery,
+    WebhookEndpoint,
+    WebhookEvent,
+    WebhookSecret,
+)
+from app.models.api_platform import ApiClient, ApiKey, ApiUsageLog
+from app.models.healthcare_standards import (
+    DICOMInstanceMetadata,
+    DICOMSeriesMetadata,
+    DICOMStudyMetadata,
+    StandardCode,
+    StandardCodeSystem,
+    StandardImportBatch,
+    StandardMapping,
+    StandardValidationLog,
+)
+from app.models.notification_center import (
+    NCNotification,
+    NCNotificationChannel,
+    NCNotificationDelivery,
+    NCNotificationPreference,
+    NCNotificationProvider,
+    NCNotificationRetry,
+    NCNotificationTemplate,
+)
+from app.models.observability_platform import (
+    AuditActor,
+    AuditEvent,
+    AuditResource,
+    AuditTimeline,
+    ObsAlert,
+    ObsHealthEvent,
+    ObsMetricSnapshot,
+)
+from app.models.operations_platform import (
+    BackupArtifact,
+    BackupJob,
+    DeploymentCheck,
+    DeploymentRecord,
+    DeploymentRollbackPlan,
+    JobExecutionLog,
+    MaintenanceWindow,
+    RestoreJob,
+    RestoreValidation,
+    ScheduledJob,
+    ScheduledJobLock,
+    ScheduledJobRun,
+    SecretRotationEvent,
+    SecretRotationPlan,
+)
+from app.models.infrastructure_readiness import (
+    RecoveryArtifact,
+    RecoveryPlan,
+    RecoveryReport,
+    RecoveryTest,
+)

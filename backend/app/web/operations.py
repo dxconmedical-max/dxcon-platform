@@ -11,7 +11,7 @@ operations_web_bp = Blueprint(
 )
 
 
-@operations_web_bp.route("/operations")
+@operations_web_bp.route("/lab-operations")
 def operations():
 
     checked_in = SampleTracking.query.filter_by(

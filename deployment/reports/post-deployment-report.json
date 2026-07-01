@@ -1,0 +1,322 @@
+{
+  "phase": "post",
+  "runtime": {
+    "status": "DEGRADED",
+    "checks": [
+      {
+        "component": "database",
+        "status": "OK",
+        "engine": "sqlite"
+      },
+      {
+        "component": "redis",
+        "status": "DEGRADED",
+        "mode": "not_configured"
+      },
+      {
+        "component": "storage",
+        "status": "OK",
+        "path": "/var/folders/zt/k5jcj90d0b71zqgnj2dyf1180000gn/T"
+      },
+      {
+        "component": "smtp",
+        "status": "DEGRADED",
+        "mode": "demo"
+      },
+      {
+        "component": "jwt",
+        "status": "OK",
+        "configured": true
+      },
+      {
+        "component": "secret_keys",
+        "status": "OK",
+        "missing": []
+      },
+      {
+        "component": "plugin_registry",
+        "status": "OK",
+        "handlers": 9
+      },
+      {
+        "component": "integration_platform",
+        "status": "OK",
+        "plugins": 0
+      },
+      {
+        "component": "notification_platform",
+        "status": "OK",
+        "providers": 0
+      },
+      {
+        "component": "observability_platform",
+        "status": "DEGRADED",
+        "components": [
+          {
+            "component": "application",
+            "status": "OK",
+            "checks": 6
+          },
+          {
+            "component": "database",
+            "status": "OK"
+          },
+          {
+            "component": "redis",
+            "status": "DEGRADED"
+          },
+          {
+            "component": "storage",
+            "status": "OK"
+          },
+          {
+            "component": "smtp",
+            "status": "DEGRADED"
+          },
+          {
+            "component": "queue",
+            "status": "OK"
+          },
+          {
+            "component": "scheduler",
+            "status": "OK"
+          },
+          {
+            "component": "event_bus",
+            "status": "OK"
+          },
+          {
+            "component": "webhook_engine",
+            "status": "OK"
+          },
+          {
+            "component": "plugin_framework",
+            "status": "OK"
+          },
+          {
+            "component": "integration_platform",
+            "status": "OK"
+          }
+        ]
+      },
+      {
+        "component": "operations_platform",
+        "status": "OK",
+        "jobs": 4
+      }
+    ]
+  },
+  "readiness": {
+    "ready": true,
+    "runtime_status": "DEGRADED",
+    "config_valid": true,
+    "deployment": {
+      "score": 85,
+      "ready_for_production": true,
+      "checks": [
+        {
+          "name": "config_validation",
+          "status": "pass"
+        },
+        {
+          "name": "database_migrations",
+          "status": "warn",
+          "detail": {
+            "ready": false,
+            "error": "Working outside of application context.\n\nThis typically means that you attempted to use functionality that needed\nthe current application. To solve this, set up an application context\nwith app.app_context(). See the documentation for more information."
+          }
+        },
+        {
+          "name": "database_configured",
+          "status": "pass"
+        },
+        {
+          "name": "secret_key",
+          "status": "pass"
+        },
+        {
+          "name": "jwt_secret",
+          "status": "pass"
+        },
+        {
+          "name": "connection_pool",
+          "status": "pass"
+        }
+      ],
+      "build": {
+        "version": "2.5.0-dev",
+        "git_sha": "local",
+        "build_time": "",
+        "service": "dxcon-api",
+        "environment": "development"
+      }
+    },
+    "issues": []
+  },
+  "config": {
+    "profile": "development",
+    "settings": {
+      "profile": "development",
+      "debug": true,
+      "testing": false,
+      "strict_validation": false,
+      "expose_debug_routes": true,
+      "maintenance_allowed": true,
+      "log_level": "DEBUG",
+      "rate_limit_enabled": false
+    },
+    "environment": {
+      "provider": "local",
+      "hostname": null,
+      "region": null,
+      "service": "dxcon-api",
+      "namespace": null
+    },
+    "feature_flags": {
+      "maintenance_mode": false,
+      "integration_sandbox": true,
+      "notification_demo_providers": true,
+      "observability_platform": true,
+      "operations_platform": true,
+      "strict_runtime_validation": false
+    },
+    "app_name": "DxCon",
+    "database_uri_prefix": "sqlite"
+  },
+  "status": {
+    "status": "DEGRADED",
+    "runtime_profile": "development",
+    "environment": {
+      "provider": "local",
+      "hostname": null,
+      "region": null,
+      "service": "dxcon-api",
+      "namespace": null
+    },
+    "deployment_score": 85,
+    "components": [
+      {
+        "component": "database",
+        "status": "OK",
+        "engine": "sqlite"
+      },
+      {
+        "component": "redis",
+        "status": "DEGRADED",
+        "mode": "not_configured"
+      },
+      {
+        "component": "storage",
+        "status": "OK",
+        "path": "/var/folders/zt/k5jcj90d0b71zqgnj2dyf1180000gn/T"
+      },
+      {
+        "component": "smtp",
+        "status": "DEGRADED",
+        "mode": "demo"
+      },
+      {
+        "component": "jwt",
+        "status": "OK",
+        "configured": true
+      },
+      {
+        "component": "secret_keys",
+        "status": "OK",
+        "missing": []
+      },
+      {
+        "component": "plugin_registry",
+        "status": "OK",
+        "handlers": 9
+      },
+      {
+        "component": "integration_platform",
+        "status": "OK",
+        "plugins": 0
+      },
+      {
+        "component": "notification_platform",
+        "status": "OK",
+        "providers": 0
+      },
+      {
+        "component": "observability_platform",
+        "status": "DEGRADED",
+        "components": [
+          {
+            "component": "application",
+            "status": "OK",
+            "checks": 6
+          },
+          {
+            "component": "database",
+            "status": "OK"
+          },
+          {
+            "component": "redis",
+            "status": "DEGRADED"
+          },
+          {
+            "component": "storage",
+            "status": "OK"
+          },
+          {
+            "component": "smtp",
+            "status": "DEGRADED"
+          },
+          {
+            "component": "queue",
+            "status": "OK"
+          },
+          {
+            "component": "scheduler",
+            "status": "OK"
+          },
+          {
+            "component": "event_bus",
+            "status": "OK"
+          },
+          {
+            "component": "webhook_engine",
+            "status": "OK"
+          },
+          {
+            "component": "plugin_framework",
+            "status": "OK"
+          },
+          {
+            "component": "integration_platform",
+            "status": "OK"
+          }
+        ]
+      },
+      {
+        "component": "operations_platform",
+        "status": "OK",
+        "jobs": 4
+      }
+    ],
+    "ready_for_production": true
+  },
+  "manifest": {
+    "generated_at": "2026-07-01T09:06:56.754982+00:00",
+    "environment": "development",
+    "provider": "local",
+    "kubernetes_manifests": [
+      "configmap.yaml",
+      "deployment.yaml",
+      "hpa.yaml",
+      "ingress.yaml",
+      "namespace.yaml",
+      "network-policy.yaml",
+      "pdb.yaml",
+      "secret.example.yaml",
+      "service.yaml"
+    ],
+    "docker": {
+      "dockerfile": "/Users/mac/dxcon-platform/backend/Dockerfile",
+      "compose": "/Users/mac/dxcon-platform/docker-compose.yml"
+    }
+  }
+}

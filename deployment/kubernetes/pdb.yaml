@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: dxcon-api
+  namespace: dxcon
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: dxcon-api

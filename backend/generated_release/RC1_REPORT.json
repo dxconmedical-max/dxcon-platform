@@ -1,0 +1,272 @@
+{
+  "generated_at": "2026-07-01T10:12:22.834878+00:00",
+  "release": "v1.0.0-rc1",
+  "route_summary": {
+    "total_routes": 840,
+    "api_routes": 605
+  },
+  "score": {
+    "score": 100.0,
+    "ready_for_rc1": true,
+    "breakdown": {
+      "workflows": {
+        "weight": 40,
+        "passed": 18,
+        "total": 18,
+        "score": 40.0,
+        "ok": true
+      },
+      "security": {
+        "weight": 20,
+        "passed": 12,
+        "total": 12,
+        "score": 20.0,
+        "ok": true
+      },
+      "deployment": {
+        "weight": 15,
+        "passed": 9,
+        "total": 9,
+        "score": 15.0,
+        "ok": true
+      },
+      "data_integrity": {
+        "weight": 10,
+        "passed": 6,
+        "total": 6,
+        "score": 10.0,
+        "ok": true
+      },
+      "performance": {
+        "weight": 15,
+        "passed": 1,
+        "total": 1,
+        "score": 15.0,
+        "ok": true
+      }
+    }
+  },
+  "workflows": {
+    "ok": true,
+    "passed": 18,
+    "total": 18,
+    "workflows": {
+      "auth_register_login": {
+        "ok": true
+      },
+      "partner_onboarding": {
+        "ok": true
+      },
+      "marketplace_search_booking": {
+        "ok": true
+      },
+      "scheduling_slot_reservation": {
+        "ok": true
+      },
+      "collector_assignment": {
+        "ok": true
+      },
+      "sample_collection": {
+        "ok": true
+      },
+      "lab_receiving": {
+        "ok": true
+      },
+      "result_upload_approve_release": {
+        "ok": true
+      },
+      "patient_portal_visibility": {
+        "ok": true
+      },
+      "doctor_portal_visibility": {
+        "ok": true
+      },
+      "billing_invoice_creation": {
+        "ok": true
+      },
+      "payment_simulation": {
+        "ok": true
+      },
+      "notification_dispatch": {
+        "ok": true
+      },
+      "reporting_dashboard": {
+        "ok": true
+      },
+      "ai_interpretation": {
+        "ok": true
+      },
+      "integration_sandbox": {
+        "ok": true
+      },
+      "webhook_test": {
+        "ok": true
+      },
+      "health_readiness_liveness": {
+        "ok": true
+      }
+    }
+  },
+  "security": {
+    "ok": true,
+    "passed": 12,
+    "total": 12,
+    "checks": {
+      "config_validation": {
+        "ok": true
+      },
+      "jwt_configured": {
+        "ok": true
+      },
+      "secret_keys": {
+        "ok": true,
+        "from_env": true
+      },
+      "cors_production": {
+        "ok": true,
+        "origins": "*"
+      },
+      "debug_production": {
+        "ok": true
+      },
+      "security_headers": {
+        "ok": true,
+        "missing": []
+      },
+      "error_handler": {
+        "ok": true
+      },
+      "request_id": {
+        "ok": true
+      },
+      "audit_logging": {
+        "ok": true
+      },
+      "api_keys_hashed": {
+        "ok": true
+      },
+      "api_key_one_time_exposure": {
+        "ok": true
+      },
+      "jwt_rejection": {
+        "ok": true
+      }
+    }
+  },
+  "deployment": {
+    "ok": true,
+    "passed": 9,
+    "total": 9,
+    "checks": {
+      "gunicorn_config": {
+        "ok": true
+      },
+      "docker_config": {
+        "ok": true
+      },
+      "environment_validation": {
+        "ok": true
+      },
+      "database_connectivity": {
+        "ok": true
+      },
+      "migration_readiness": {
+        "ok": true,
+        "score": 100
+      },
+      "storage_readiness": {
+        "ok": true
+      },
+      "smtp_optional": {
+        "ok": true,
+        "status": "DEGRADED"
+      },
+      "redis_optional": {
+        "ok": true,
+        "status": "DEGRADED"
+      },
+      "startup_checks": {
+        "ok": true,
+        "failed": []
+      }
+    }
+  },
+  "data_integrity": {
+    "ok": true,
+    "passed": 6,
+    "total": 6,
+    "checks": {
+      "duplicate_routes": {
+        "ok": true,
+        "count": 0,
+        "samples": {}
+      },
+      "model_exports": {
+        "ok": true,
+        "exported_count": 90,
+        "model_modules": 167
+      },
+      "orphan_records": {
+        "ok": true,
+        "orphan_bookings": 0
+      },
+      "order_status_values": {
+        "ok": true,
+        "invalid_samples": []
+      },
+      "timestamp_fields": {
+        "ok": true,
+        "missing_samples": []
+      },
+      "required_configuration": {
+        "ok": true,
+        "missing_in_production": [],
+        "summary": {
+          "app_env": "development",
+          "database_configured": true,
+          "secret_key_from_env": true,
+          "jwt_secret_from_env": true,
+          "max_content_length": 1048576,
+          "rate_limit_enabled": true,
+          "security_headers_enabled": true,
+          "cors_origins": "*",
+          "cors_strict_safe": true,
+          "redis_configured": false,
+          "smtp_configured": false,
+          "database_dialect": "sqlite",
+          "storage_backend": "local",
+          "storage_path": "uploads",
+          "api_response_envelope": true,
+          "log_format": "text"
+        }
+      }
+    }
+  },
+  "performance": {
+    "ok": true,
+    "passed": 1,
+    "total": 1,
+    "timings": {
+      "app_startup_ms": 163.17,
+      "endpoint_latencies": {
+        "/api/v1/system/health": {
+          "latency_ms": 1.45,
+          "status_code": 200
+        },
+        "/api/v1/infrastructure/status": {
+          "latency_ms": 5.51,
+          "status_code": 200
+        },
+        "/api/v1/marketplace/search": {
+          "latency_ms": 6.75,
+          "status_code": 200
+        }
+      },
+      "db_query_ms": 0.16,
+      "route_inventory_ms": 0.15,
+      "route_count": 840,
+      "memory_mb": 254.16
+    },
+    "slow_or_failed_endpoints": []
+  }
+}

@@ -1,0 +1,21 @@
+---
+description: Split mixed release changes before commit so each release stays isolated
+alwaysApply: true
+---
+
+# Release Isolation
+
+Before any release commit:
+
+1. Run `python backend/scripts/release_isolation.py check --release <id>`.
+2. If multiple exclusive releases appear in the working tree, **do not commit**.
+3. Run `python backend/scripts/release_isolation.py split-plan` and create **one commit per release**.
+4. Stage named files only. Never `git add .`.
+5. Shared wiring files are allowed in a single release commit:
+   - `backend/app/__init__.py`
+   - `backend/app/core/statuses.py`
+   - `backend/app/models/__init__.py`
+6. Exclude generated artifacts (`backend/generated_reports/**`) and unrelated paths.
+7. Re-run tests and verify scripts for the active release before each isolated commit.
+
+When a release touches shared wiring, commit that release's exclusive files plus shared wiring in the same release commit only. Do not mix exclusive files from another unfinished release.

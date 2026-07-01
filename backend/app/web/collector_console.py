@@ -9,7 +9,7 @@ collector_console_web_bp = Blueprint(
 )
 
 
-@collector_console_web_bp.route("/collector")
+@collector_console_web_bp.route("/collector/console")
 def collector_console():
 
     jobs_html = ""

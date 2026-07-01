@@ -3,10 +3,15 @@ services:
     name: dxcon-api
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn run:app --bind 0.0.0.0:$PORT
+    startCommand: gunicorn -c gunicorn.conf.py run:app
+    healthCheckPath: /api/v1/system/health
     envVars:
       - key: APP_ENV
         value: production
+      - key: LOG_FORMAT
+        value: json
+      - key: STARTUP_VALIDATE_DB
+        value: "true"
       - key: SECRET_KEY
         generateValue: true
       - key: JWT_SECRET_KEY
@@ -15,6 +20,8 @@ services:
         fromDatabase:
           name: dxcon-postgres
           property: connectionString
+      - key: BUILD_VERSION
+        value: "2.5.0"
 
 databases:
   - name: dxcon-postgres

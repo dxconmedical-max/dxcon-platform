@@ -5,8 +5,9 @@ from app.extensions.db import db
 
 app = create_app()
 
-with app.app_context():
-    db.create_all()
+if os.getenv("APP_ENV", "development") != "production":
+    with app.app_context():
+        db.create_all()
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
@@ -14,5 +15,5 @@ if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=port,
-        debug=os.getenv("APP_ENV", "development") != "production"
+        debug=os.getenv("APP_ENV", "development") != "production",
     )

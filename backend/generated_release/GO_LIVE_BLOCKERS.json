@@ -1,0 +1,176 @@
+{
+  "generated_at": "2026-07-01T10:08:43.490652+00:00",
+  "app_env": "development",
+  "ready": true,
+  "blocker_count": 0,
+  "warning_count": 0,
+  "blockers": [],
+  "warnings": [],
+  "cors": {
+    "ok": true,
+    "origins": "*",
+    "strict_env": false,
+    "wildcard_allowed": true
+  },
+  "database": {
+    "dialect": "sqlite",
+    "configured": true,
+    "sqlite": true,
+    "sqlite_blocked_in_env": false,
+    "postgresql_expected": false,
+    "ok": true
+  },
+  "redis": {
+    "status": "DEGRADED",
+    "required": false,
+    "mode": "not_configured",
+    "ok": true
+  },
+  "smtp": {
+    "status": "DEGRADED",
+    "blocker": false,
+    "mode": "not_configured",
+    "ok": true
+  },
+  "observability_health": {
+    "status": "DEGRADED",
+    "components": [
+      {
+        "component": "application",
+        "status": "OK",
+        "detail": {
+          "status": "OK",
+          "checks": [
+            {
+              "name": "storage",
+              "status": "pass",
+              "path": "/Users/mac/dxcon-platform/backend/uploads"
+            },
+            {
+              "name": "jwt",
+              "status": "pass"
+            },
+            {
+              "name": "scheduler",
+              "status": "pass",
+              "workers": 4,
+              "stats": {
+                "submitted": 0,
+                "completed": 0,
+                "failed": 0,
+                "pending": 0
+              }
+            },
+            {
+              "name": "plugins",
+              "status": "pass",
+              "blueprint_count": 166,
+              "api_v1_route_count": 604
+            },
+            {
+              "name": "smtp",
+              "status": "skipped",
+              "detail": "SMTP_HOST not configured"
+            },
+            {
+              "name": "redis",
+              "status": "skipped",
+              "detail": "REDIS_URL not configured"
+            }
+          ]
+        }
+      },
+      {
+        "component": "database",
+        "status": "OK",
+        "detail": {
+          "status": "OK",
+          "engine": "sqlite"
+        }
+      },
+      {
+        "component": "redis",
+        "status": "DEGRADED",
+        "detail": {
+          "status": "DEGRADED",
+          "mode": "not_configured"
+        }
+      },
+      {
+        "component": "storage",
+        "status": "OK",
+        "detail": {
+          "status": "OK",
+          "path": "/var/folders/zt/k5jcj90d0b71zqgnj2dyf1180000gn/T"
+        }
+      },
+      {
+        "component": "smtp",
+        "status": "DEGRADED",
+        "detail": {
+          "status": "DEGRADED",
+          "mode": "demo"
+        }
+      },
+      {
+        "component": "queue",
+        "status": "OK",
+        "detail": {
+          "status": "OK",
+          "depth": 0
+        }
+      },
+      {
+        "component": "scheduler",
+        "status": "OK",
+        "detail": {
+          "status": "OK",
+          "mode": "embedded"
+        }
+      },
+      {
+        "component": "event_bus",
+        "status": "OK",
+        "detail": {
+          "status": "OK",
+          "handlers": 9
+        }
+      },
+      {
+        "component": "webhook_engine",
+        "status": "OK",
+        "detail": {
+          "status": "OK",
+          "endpoints": 0
+        }
+      },
+      {
+        "component": "plugin_framework",
+        "status": "OK",
+        "detail": {
+          "status": "OK",
+          "plugins": 0
+        }
+      },
+      {
+        "component": "integration_platform",
+        "status": "OK",
+        "detail": {
+          "status": "OK",
+          "depth": 0
+        }
+      }
+    ]
+  },
+  "notification_readiness": {
+    "status": "OK",
+    "providers": 0,
+    "smtp": {
+      "status": "DEGRADED",
+      "blocker": false,
+      "mode": "not_configured",
+      "ok": true
+    },
+    "ok": true
+  }
+}

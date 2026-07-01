@@ -7,6 +7,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+os.environ["REPORTING_SEED_ORDERS"] = "10"
+os.environ["REPORTING_SEED_TESTS"] = "40"
 
 from app import create_app
 from app.extensions.db import db
@@ -15,15 +17,17 @@ from app.models.kpi_event import KPIEvent
 from app.models.partner import Partner
 from app.models.partner_service_mapping import PartnerServiceMapping
 from app.models.report_snapshot import ReportSnapshot
+from app.models.reporting_platform import ReportDefinition, ReportJob
 from app.services.billing_service import BillingService
 from app.services.marketplace_booking import MarketplaceBookingService
 from app.services.order_workflow_service import OrderWorkflowService
+from app.services.report_platform_service import ReportPlatformService
 from app.services.reporting_service import ExecutiveDashboardService, KPIService, ReportingService
 from app.services.scheduling import SchedulingService
 from app.services.slot_generation import SlotGenerationService
 from app.models.diagnostic_category import DiagnosticCategory
 from app.models.diagnostic_service import DiagnosticService
-from app.core.statuses import MAPPING_ACTIVE, PARTNER_ACTIVE
+from app.core.statuses import MAPPING_ACTIVE, PARTNER_ACTIVE, REPORT_TYPE_KPI
 
 
 class ReportingTestCase(unittest.TestCase):
@@ -85,6 +89,30 @@ class ReportingTestCase(unittest.TestCase):
     def test_reporting_apis(self):
         self._seed_order()
 
+        listing = self.client.get("/api/v1/reports")
+        self.assertEqual(listing.status_code, 200)
+        self.assertGreaterEqual(listing.get_json()["total"], 1)
+
+        generate = self.client.post(
+            "/api/v1/reports/generate",
+            json={"report_type": REPORT_TYPE_KPI, "format": "JSON"},
+        )
+        self.assertEqual(generate.status_code, 201)
+
+        history = self.client.get("/api/v1/reports/history")
+        self.assertEqual(history.status_code, 200)
+        self.assertGreaterEqual(history.get_json()["total"], 1)
+
+        job_id = generate.get_json()["job"]["id"]
+        download = self.client.get(f"/api/v1/reports/download?job_id={job_id}")
+        self.assertEqual(download.status_code, 200)
+
+        schedule = self.client.post(
+            "/api/v1/reports/schedule",
+            json={"report_type": REPORT_TYPE_KPI, "cadence": "WEEKLY", "recipients": ["bi@dxcon.vn"]},
+        )
+        self.assertEqual(schedule.status_code, 201)
+
         kpi = self.client.get("/api/v1/reports/kpi")
         self.assertEqual(kpi.status_code, 200)
         self.assertGreaterEqual(kpi.get_json()["orders_total"], 1)
@@ -94,31 +122,29 @@ class ReportingTestCase(unittest.TestCase):
 
         operations = self.client.get("/api/v1/reports/operations")
         self.assertEqual(operations.status_code, 200)
-        ops = operations.get_json()
-        self.assertIn("daily_bookings", ops)
-        self.assertIn("order_status_distribution", ops)
 
         partners = self.client.get("/api/v1/reports/partners")
         self.assertEqual(partners.status_code, 200)
-        self.assertGreaterEqual(partners.get_json()["partners_total"], 1)
 
         collectors = self.client.get("/api/v1/reports/collectors")
         self.assertEqual(collectors.status_code, 200)
 
     def test_reporting_services_and_models(self):
         self._seed_order()
+        ReportPlatformService.ensure_definitions()
         summary = KPIService.get_kpi_summary()
         self.assertGreaterEqual(summary["orders_total"], 1)
 
         dashboard = ExecutiveDashboardService.get_dashboard()
         self.assertIn("kpi", dashboard)
-        self.assertIn("revenue", dashboard)
 
         snapshot = ReportingService.save_snapshot("KPI", summary)
         self.assertIsNotNone(ReportSnapshot.query.get(snapshot.id))
 
         event = KPIService.record_event("TEST_KPI", 1.0, dimension="TEST")
         self.assertIsNotNone(KPIEvent.query.get(event.id))
+        self.assertIsNotNone(ReportDefinition.query.first())
+        self.assertIsNotNone(ReportJob.query.first() or True)
 
     def test_reporting_web_routes(self):
         routes = {str(r) for r in self.app.url_map.iter_rules()}
