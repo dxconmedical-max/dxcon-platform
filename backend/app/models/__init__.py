@@ -209,3 +209,11 @@ from app.models.federation_capacity import (
 )
 from app.models.federation_routing import RoutingRule, RoutingDecision, RoutingAudit
 from app.models.federation_failover import FailoverRule, FailoverEvent
+from app.models.ai_cds import (
+    ClinicalDeltaCheck,
+    ClinicalGuidelinePack,
+    ClinicalRecommendation,
+    ClinicalRiskAssessment,
+    ClinicalRuleDefinition,
+    CriticalAlertEvent,
+)

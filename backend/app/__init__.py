@@ -115,7 +115,7 @@ from app.web.dispatch_optimizer import dispatch_optimizer_web_bp
 from app.web.lab_worklist import lab_worklist_bp
 from app.web.result_verify import result_verify_web_bp
 from app.web.analytics import analytics_web_bp
-from app.api.ai.routes import ai_bp
+from app.api.ai_cds.routes import ai_cds_bp
 from app.api.ai.routes_v2 import ai_v2_bp
 from app.api.alerts.routes import alerts_bp
 from app.web.alerts import alerts_web_bp
@@ -142,6 +142,7 @@ from app.api.lab.routes import lab_bp
 from app.api.logistics.routes import logistics_platform_bp
 from app.api.federation.routes import federation_bp
 from app.web.federation import federation_web_bp
+from app.web.ai_cds import ai_cds_web_bp
 def create_app():
 
     app = Flask(__name__)
@@ -177,7 +178,7 @@ def create_app():
     app.register_blueprint(order_items_bp)
     app.register_blueprint(sample_collections_bp)
     app.register_blueprint(test_results_bp)
-    app.register_blueprint(ai_bp)
+    app.register_blueprint(ai_cds_bp)
     app.register_blueprint(ai_v2_bp)
     app.register_blueprint(companies_bp)
     app.register_blueprint(marketplace_bp)
@@ -301,6 +302,7 @@ def create_app():
     app.register_blueprint(box_qr_web_bp)
     app.register_blueprint(federation_bp)
     app.register_blueprint(federation_web_bp)
+    app.register_blueprint(ai_cds_web_bp)
     finalize_observability(app)
     init_deployment(app)
     return app
