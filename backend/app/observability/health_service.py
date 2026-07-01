@@ -37,8 +37,16 @@ class HealthPlatformService:
     @staticmethod
     def check_application():
         app = current_app._get_current_object()
-        startup = app.extensions.get("dxcon_startup", {}).get("checks") or run_startup_checks(app)
-        failed = [item for item in startup if item.get("status") != "OK"]
+        cached = app.extensions.get("dxcon_startup", {}).get("checks")
+        startup = cached if cached else run_startup_checks(app)
+        if isinstance(startup, dict):
+            checks = startup.get("checks", [])
+            failed = [item for item in checks if item.get("status") == "fail"]
+            status = startup.get("status", "OK")
+            if failed and status == "OK":
+                status = "DEGRADED"
+            return {"status": status, "checks": checks}
+        failed = [item for item in startup if item.get("status") in {"fail", "DOWN"}]
         return {"status": "OK" if not failed else "DEGRADED", "checks": startup}
 
     @staticmethod

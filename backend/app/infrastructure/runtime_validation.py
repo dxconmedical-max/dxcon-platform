@@ -44,14 +44,25 @@ class RuntimeValidationService:
 
     @staticmethod
     def check_database(app):
+        from app.infrastructure.production_readiness import database_dialect_report
+
         db.session.execute(text("SELECT 1"))
-        return {"status": "OK", "engine": (app.config.get("SQLALCHEMY_DATABASE_URI") or "").split(":", 1)[0]}
+        report = database_dialect_report(app)
+        status = "OK" if report["ok"] else "DOWN"
+        if report.get("sqlite_blocked_in_env"):
+            status = "DOWN"
+        return {"status": status, "engine": report["dialect"], "report": report}
 
     @staticmethod
     def check_redis(app):
-        if not app.config.get("REDIS_URL"):
-            return {"status": "DEGRADED", "mode": "not_configured"}
-        return {"status": "OK", "mode": "configured"}
+        from app.infrastructure.production_readiness import check_redis_health
+
+        payload = check_redis_health(app)
+        return {
+            "status": payload.get("status", "DEGRADED"),
+            "mode": payload.get("mode"),
+            "required": payload.get("required", False),
+        }
 
     @staticmethod
     def check_storage(app):
@@ -63,9 +74,14 @@ class RuntimeValidationService:
 
     @staticmethod
     def check_smtp(app):
-        if app.config.get("SMTP_HOST"):
-            return {"status": "OK", "host": app.config.get("SMTP_HOST")}
-        return {"status": "DEGRADED", "mode": "demo"}
+        from app.infrastructure.production_readiness import check_smtp_readiness
+
+        payload = check_smtp_readiness(app)
+        return {
+            "status": payload.get("status", "DEGRADED"),
+            "mode": payload.get("mode", "configured"),
+            "blocker": payload.get("blocker", False),
+        }
 
     @staticmethod
     def check_jwt(app):
@@ -101,50 +117,9 @@ class RuntimeValidationService:
 
     @staticmethod
     def check_observability_platform(app):
-        from app.core.startup_checks import run_startup_checks
         from app.observability.health_service import HealthPlatformService
 
-        cached = app.extensions.get("dxcon_startup", {}).get("checks")
-        startup = cached if cached else run_startup_checks(app)
-        if isinstance(startup, dict):
-            checks = startup.get("checks", [])
-            failed = [item for item in checks if item.get("status") == "fail"]
-            app_status = startup.get("status", "OK")
-            if failed and app_status == "OK":
-                app_status = "DEGRADED"
-        else:
-            checks = startup if isinstance(startup, list) else []
-            app_status = "OK"
-
-        components = [{"component": "application", "status": app_status, "checks": len(checks)}]
-        overall = app_status
-        for name in (
-            "database",
-            "redis",
-            "storage",
-            "smtp",
-            "queue",
-            "scheduler",
-            "event_bus",
-            "webhook_engine",
-            "plugin_framework",
-            "integration_platform",
-        ):
-            fn = getattr(HealthPlatformService, f"check_{name}", None)
-            if fn is None:
-                continue
-            try:
-                result = fn()
-                status = result.get("status", "OK")
-            except Exception as exc:
-                status = "DOWN"
-                result = {"error": str(exc)}
-            components.append({"component": name, "status": status})
-            if status == "DOWN":
-                overall = "DOWN"
-            elif status != "OK" and overall == "OK":
-                overall = "DEGRADED"
-        return {"status": overall, "components": components}
+        return HealthPlatformService.evaluate()
 
     @staticmethod
     def check_operations_platform(app):

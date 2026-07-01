@@ -22,8 +22,12 @@ def init_security(app):
 
     from app.core.errors import build_error_response
     from app.core.rate_limit import check_rate_limit
+    from app.infrastructure.production_readiness import app_env, is_relaxed_env
 
     cors_origins = app.config.get("CORS_ORIGINS", "*")
+    env = app_env(app)
+    if cors_origins == "*" and not is_relaxed_env(app):
+        cors_origins = ""
     if cors_origins == "*":
         CORS(
             app,

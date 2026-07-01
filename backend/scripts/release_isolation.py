@@ -41,6 +41,25 @@ class ReleaseSpec:
 
 
 RELEASES: tuple[ReleaseSpec, ...] = (
+    ReleaseSpec("4.9", "Production Infrastructure & Go-Live Blocker Fix", (
+        "backend/app/infrastructure/production_readiness.py",
+        "backend/app/infrastructure/runtime_validation.py",
+        "backend/app/infrastructure/infrastructure_services.py",
+        "backend/app/core/config_validation.py",
+        "backend/app/core/security.py",
+        "backend/app/observability/health_service.py",
+        "backend/.env.production.example",
+        "backend/.env.staging.example",
+        "backend/scripts/verify_go_live_blockers.py",
+        "backend/scripts/smoke_test_production_blockers.py",
+        "backend/scripts/check_production_env.py",
+        "backend/scripts/verify_postgresql_readiness.py",
+        "backend/tests/test_cors_hardening.py",
+        "backend/tests/test_redis_readiness.py",
+        "backend/tests/test_smtp_readiness.py",
+        "backend/tests/test_database_readiness.py",
+        "backend/tests/test_observability_health_regression.py",
+    )),
     ReleaseSpec("go-live-day1", "Go-Live Sprint Day 1 - Core Stabilization", (
         "backend/app/core/api_response.py",
         "backend/app/core/list_params.py",
