@@ -176,6 +176,9 @@ from app.api.api_platform.routes import api_platform_bp
 from app.web.api_platform import api_platform_web_bp
 from app.api.standards.routes import standards_bp
 from app.web.healthcare_standards import healthcare_standards_web_bp
+from app.api.notification_center.routes import notification_center_bp
+from app.web.notification_center import notification_center_web_bp
+from app.notifications.notification_service import NotificationEventSubscriber
 def create_app():
 
     app = Flask(__name__)
@@ -361,6 +364,9 @@ def create_app():
     app.register_blueprint(api_platform_web_bp)
     app.register_blueprint(standards_bp)
     app.register_blueprint(healthcare_standards_web_bp)
+    app.register_blueprint(notification_center_bp)
+    app.register_blueprint(notification_center_web_bp)
+    NotificationEventSubscriber.register()
     finalize_observability(app)
     init_deployment(app)
     return app

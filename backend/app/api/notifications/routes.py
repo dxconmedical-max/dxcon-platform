@@ -6,7 +6,7 @@ from app.services.notification_service import NotificationError, NotificationSer
 notifications_bp = Blueprint(
     "notifications",
     __name__,
-    url_prefix="/api/v1/notifications",
+    url_prefix="/api/v1/notification-legacy",
 )
 
 notification_templates_bp = Blueprint(

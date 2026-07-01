@@ -44,7 +44,7 @@ class NotificationsTestCase(unittest.TestCase):
         self.assertGreaterEqual(templates.get_json()["count"], 8)
 
         send = self.client.post(
-            "/api/v1/notifications/send",
+            "/api/v1/notification-legacy/send",
             json={
                 "template_code": NOTIFICATION_TEMPLATE_RESULT_READY,
                 "context": {"name": "Patient A", "order_code": "MDO-000001"},
@@ -65,16 +65,16 @@ class NotificationsTestCase(unittest.TestCase):
         self.assertGreaterEqual(payload["delivery_count"], 1)
 
         notification_id = payload["notification"]["id"]
-        detail = self.client.get(f"/api/v1/notifications/{notification_id}")
+        detail = self.client.get(f"/api/v1/notification-legacy/{notification_id}")
         self.assertEqual(detail.status_code, 200)
         self.assertGreaterEqual(len(detail.get_json()["deliveries"]), 1)
 
-        listing = self.client.get("/api/v1/notifications")
+        listing = self.client.get("/api/v1/notification-legacy")
         self.assertEqual(listing.status_code, 200)
         self.assertGreaterEqual(listing.get_json()["count"], 1)
 
         bulk = self.client.post(
-            "/api/v1/notifications/bulk",
+            "/api/v1/notification-legacy/bulk",
             json={
                 "notifications": [
                     {
@@ -93,7 +93,7 @@ class NotificationsTestCase(unittest.TestCase):
         self.assertEqual(bulk.status_code, 201)
         self.assertEqual(bulk.get_json()["count"], 2)
 
-        test = self.client.post("/api/v1/notifications/test", json={"email": "test@dxcon.vn"})
+        test = self.client.post("/api/v1/notification-legacy/test", json={"email": "test@dxcon.vn"})
         self.assertEqual(test.status_code, 201)
 
     def test_notification_services(self):
@@ -120,7 +120,13 @@ class NotificationsTestCase(unittest.TestCase):
 
     def test_notification_web_routes(self):
         routes = {str(r) for r in self.app.url_map.iter_rules()}
-        for route in ["/notifications", "/notification-templates"]:
+        for route in [
+            "/notifications",
+            "/notifications/history",
+            "/notifications/templates",
+            "/notifications/providers",
+            "/notifications/statistics",
+        ]:
             self.assertIn(route, routes)
 
 

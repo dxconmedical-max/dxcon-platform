@@ -34,7 +34,7 @@ def _styles():
 
 def _sidebar(active):
     links = [
-        ("/notifications", "Notifications"),
+        ("/hub/notifications", "Notifications"),
         ("/events", "Events"),
         ("/templates", "Templates"),
         ("/webhooks", "Webhooks"),
@@ -46,7 +46,7 @@ def _sidebar(active):
     return f'<div class="sidebar"><h2>Communication Hub</h2>{items}</div>'
 
 
-@communication_hub_web_bp.route("/notifications")
+@communication_hub_web_bp.route("/hub/notifications")
 def notifications_dashboard():
     CommunicationHubService.ensure_defaults()
     summary = NotificationCenterService.hub_summary()
@@ -60,7 +60,7 @@ def notifications_dashboard():
         queue_table += f"<tr><td>{row.queue_code}</td><td>{row.channel}</td><td>{row.status}</td><td>{row.retry_count}</td></tr>"
     return f"""
     <html><head><title>Notifications</title><style>{_styles()}</style></head><body>
-    <div class="layout">{_sidebar("/notifications")}<div class="content">
+    <div class="layout">{_sidebar("/hub/notifications")}<div class="content">
     <div class="card"><h1>Notification Center</h1>
     <div class="grid">
         <div class="metric"><span>Queue</span><strong>{summary["queue_size"]}</strong></div>

@@ -135,7 +135,7 @@ class CommunicationHubTestCase(unittest.TestCase):
         self.assertGreaterEqual(WorkflowAutomationEvent.query.count(), 1)
 
     def test_dashboard_pages(self):
-        for path in ("/notifications", "/events", "/templates", "/webhooks"):
+        for path in ("/hub/notifications", "/events", "/templates", "/webhooks"):
             response = self.client.get(path)
             self.assertEqual(response.status_code, 200, path)
 
