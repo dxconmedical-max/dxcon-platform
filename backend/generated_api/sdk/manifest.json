@@ -1,0 +1,26 @@
+{
+  "route_count": 545,
+  "domain_count": 79,
+  "domains": [
+    "admin",
+    "admin-security",
+    "ai",
+    "ai-v2",
+    "alerts",
+    "api-clients",
+    "api-keys",
+    "api-platform",
+    "api-usage",
+    "audit",
+    "auth",
+    "billing",
+    "biomarkers",
+    "box-qr",
+    "clinic",
+    "collector",
+    "collector-operations",
+    "companies",
+    "contract-prices",
+    "contracts"
+  ]
+}
