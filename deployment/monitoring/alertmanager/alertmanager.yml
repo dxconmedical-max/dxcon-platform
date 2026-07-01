@@ -1,0 +1,23 @@
+# Alertmanager placeholder — wire PagerDuty/Slack receivers before GA.
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: staging-default
+  group_by: [alertname, cluster, service]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+receivers:
+  - name: staging-default
+    webhook_configs:
+      - url: http://127.0.0.1:65535/alerts-disabled
+        send_resolved: true
+
+inhibit_rules:
+  - source_matchers:
+      - severity = critical
+    target_matchers:
+      - severity = warning
+    equal: [alertname, cluster, service]

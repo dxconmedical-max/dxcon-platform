@@ -41,6 +41,17 @@ class ReleaseSpec:
 
 
 RELEASES: tuple[ReleaseSpec, ...] = (
+    ReleaseSpec("staging-sprint-2", "Monitoring Backup Restore", (
+        "deployment/monitoring/",
+        "deployment/scripts/verify_backup_restore.sh",
+        "deployment/scripts/uat_smoke_staging.sh",
+        "backend/scripts/backup_restore_lib.py",
+        "backend/scripts/staging_monitoring_lib.py",
+        "backend/scripts/verify_staging_monitoring.py",
+        "backend/scripts/uat_smoke.py",
+        "backend/tests/test_backup_restore.py",
+        "backend/tests/test_uat_smoke.py",
+    )),
     ReleaseSpec("staging-sprint-1", "Production Deployment Stack", (
         "docker-compose.staging.yml",
         "docker-compose.production.yml",

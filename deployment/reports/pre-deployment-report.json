@@ -242,7 +242,7 @@
       }
     },
     "go_live_blockers": {
-      "generated_at": "2026-07-01T10:11:18.709362+00:00",
+      "generated_at": "2026-07-01T11:59:47.216901+00:00",
       "app_env": "development",
       "ready": true,
       "blocker_count": 0,
@@ -515,7 +515,7 @@
     "ready_for_production": true
   },
   "manifest": {
-    "generated_at": "2026-07-01T10:11:18.711237+00:00",
+    "generated_at": "2026-07-01T11:59:47.218716+00:00",
     "environment": "development",
     "provider": "local",
     "kubernetes_manifests": [

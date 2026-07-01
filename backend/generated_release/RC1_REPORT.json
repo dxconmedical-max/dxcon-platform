@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-01T10:12:22.834878+00:00",
+  "generated_at": "2026-07-01T12:00:49.226305+00:00",
   "release": "v1.0.0-rc1",
   "route_summary": {
     "total_routes": 840,
@@ -247,25 +247,25 @@
     "passed": 1,
     "total": 1,
     "timings": {
-      "app_startup_ms": 163.17,
+      "app_startup_ms": 333.97,
       "endpoint_latencies": {
         "/api/v1/system/health": {
-          "latency_ms": 1.45,
+          "latency_ms": 1.39,
           "status_code": 200
         },
         "/api/v1/infrastructure/status": {
-          "latency_ms": 5.51,
+          "latency_ms": 4.18,
           "status_code": 200
         },
         "/api/v1/marketplace/search": {
-          "latency_ms": 6.75,
+          "latency_ms": 6.73,
           "status_code": 200
         }
       },
-      "db_query_ms": 0.16,
-      "route_inventory_ms": 0.15,
+      "db_query_ms": 0.17,
+      "route_inventory_ms": 0.17,
       "route_count": 840,
-      "memory_mb": 254.16
+      "memory_mb": 257.45
     },
     "slow_or_failed_endpoints": []
   }
