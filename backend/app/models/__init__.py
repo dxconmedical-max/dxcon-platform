@@ -307,3 +307,9 @@ from app.models.operations_platform import (
     SecretRotationEvent,
     SecretRotationPlan,
 )
+from app.models.infrastructure_readiness import (
+    RecoveryArtifact,
+    RecoveryPlan,
+    RecoveryReport,
+    RecoveryTest,
+)

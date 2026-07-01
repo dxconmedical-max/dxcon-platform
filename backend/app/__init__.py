@@ -188,6 +188,8 @@ from app.web.observability_platform import observability_web_bp
 from app.observability.platform_init import init_observability_platform
 from app.api.operations.routes import operations_bp
 from app.web.operations_platform import operations_platform_web_bp
+from app.api.infrastructure.routes import infrastructure_bp
+from app.web.deployment_infrastructure import deployment_infra_web_bp
 from app.operations.maintenance_service import MaintenanceService
 from app.notifications.notification_service import NotificationEventSubscriber
 
@@ -388,6 +390,8 @@ def create_app():
     app.register_blueprint(observability_web_bp)
     app.register_blueprint(operations_bp)
     app.register_blueprint(operations_platform_web_bp)
+    app.register_blueprint(infrastructure_bp)
+    app.register_blueprint(deployment_infra_web_bp)
     finalize_observability(app)
     init_deployment(app)
     return app

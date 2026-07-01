@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dxcon-api
+  namespace: dxcon
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: dxcon.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dxcon-api
+                port:
+                  number: 80

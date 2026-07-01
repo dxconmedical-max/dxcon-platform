@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dxcon-config
+  namespace: dxcon
+data:
+  APP_ENV: production
+  LOG_FORMAT: json
+  DXCON_ENV_PROVIDER: kubernetes
+  DXCON_SERVICE_NAME: dxcon-api
+  STARTUP_VALIDATE_DB: "true"
+  OBSERVABILITY_PLATFORM_ENABLED: "true"
