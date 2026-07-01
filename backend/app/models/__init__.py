@@ -291,3 +291,19 @@ from app.models.observability_platform import (
     ObsHealthEvent,
     ObsMetricSnapshot,
 )
+from app.models.operations_platform import (
+    BackupArtifact,
+    BackupJob,
+    DeploymentCheck,
+    DeploymentRecord,
+    DeploymentRollbackPlan,
+    JobExecutionLog,
+    MaintenanceWindow,
+    RestoreJob,
+    RestoreValidation,
+    ScheduledJob,
+    ScheduledJobLock,
+    ScheduledJobRun,
+    SecretRotationEvent,
+    SecretRotationPlan,
+)

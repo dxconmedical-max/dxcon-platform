@@ -186,6 +186,9 @@ from app.api.observability.routes import (
 )
 from app.web.observability_platform import observability_web_bp
 from app.observability.platform_init import init_observability_platform
+from app.api.operations.routes import operations_bp
+from app.web.operations_platform import operations_platform_web_bp
+from app.operations.maintenance_service import MaintenanceService
 from app.notifications.notification_service import NotificationEventSubscriber
 
 
@@ -196,6 +199,7 @@ def create_app():
     validate_config(app)
     init_observability(app)
     init_observability_platform(app)
+    MaintenanceService.init_app(app)
     init_security(app)
 
     from app.core.db_pool import build_engine_options
@@ -382,6 +386,8 @@ def create_app():
     app.register_blueprint(observability_health_root_bp)
     app.register_blueprint(observability_alerts_bp)
     app.register_blueprint(observability_web_bp)
+    app.register_blueprint(operations_bp)
+    app.register_blueprint(operations_platform_web_bp)
     finalize_observability(app)
     init_deployment(app)
     return app
