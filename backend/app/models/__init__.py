@@ -217,3 +217,10 @@ from app.models.ai_cds import (
     ClinicalRuleDefinition,
     CriticalAlertEvent,
 )
+from app.models.knowledge_engine import (
+    Biomarker,
+    ClinicalGuideline,
+    DiseaseProfile,
+    MedicalKnowledge,
+    ReferenceLibrary,
+)

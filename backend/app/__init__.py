@@ -143,6 +143,14 @@ from app.api.logistics.routes import logistics_platform_bp
 from app.api.federation.routes import federation_bp
 from app.web.federation import federation_web_bp
 from app.web.ai_cds import ai_cds_web_bp
+from app.api.knowledge.routes import (
+    biomarkers_bp,
+    correlations_bp,
+    diseases_bp,
+    guidelines_bp,
+    knowledge_bp,
+)
+from app.web.knowledge_engine import knowledge_web_bp
 def create_app():
 
     app = Flask(__name__)
@@ -303,6 +311,12 @@ def create_app():
     app.register_blueprint(federation_bp)
     app.register_blueprint(federation_web_bp)
     app.register_blueprint(ai_cds_web_bp)
+    app.register_blueprint(knowledge_bp)
+    app.register_blueprint(guidelines_bp)
+    app.register_blueprint(biomarkers_bp)
+    app.register_blueprint(diseases_bp)
+    app.register_blueprint(correlations_bp)
+    app.register_blueprint(knowledge_web_bp)
     finalize_observability(app)
     init_deployment(app)
     return app
