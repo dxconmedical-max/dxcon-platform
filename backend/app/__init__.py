@@ -178,14 +178,24 @@ from app.api.standards.routes import standards_bp
 from app.web.healthcare_standards import healthcare_standards_web_bp
 from app.api.notification_center.routes import notification_center_bp
 from app.web.notification_center import notification_center_web_bp
+from app.api.observability.routes import (
+    observability_alerts_bp,
+    observability_health_root_bp,
+    observability_metrics_bp,
+    observability_prometheus_bp,
+)
+from app.web.observability_platform import observability_web_bp
+from app.observability.platform_init import init_observability_platform
 from app.notifications.notification_service import NotificationEventSubscriber
-def create_app():
 
+
+def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     app.secret_key = app.config["SECRET_KEY"]
     validate_config(app)
     init_observability(app)
+    init_observability_platform(app)
     init_security(app)
 
     from app.core.db_pool import build_engine_options
@@ -367,6 +377,11 @@ def create_app():
     app.register_blueprint(notification_center_bp)
     app.register_blueprint(notification_center_web_bp)
     NotificationEventSubscriber.register()
+    app.register_blueprint(observability_metrics_bp)
+    app.register_blueprint(observability_prometheus_bp)
+    app.register_blueprint(observability_health_root_bp)
+    app.register_blueprint(observability_alerts_bp)
+    app.register_blueprint(observability_web_bp)
     finalize_observability(app)
     init_deployment(app)
     return app

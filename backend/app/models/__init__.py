@@ -282,3 +282,12 @@ from app.models.notification_center import (
     NCNotificationRetry,
     NCNotificationTemplate,
 )
+from app.models.observability_platform import (
+    AuditActor,
+    AuditEvent,
+    AuditResource,
+    AuditTimeline,
+    ObsAlert,
+    ObsHealthEvent,
+    ObsMetricSnapshot,
+)

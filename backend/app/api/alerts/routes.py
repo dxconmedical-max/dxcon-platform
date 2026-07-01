@@ -4,6 +4,7 @@ import uuid
 
 from app.extensions.db import db
 from app.models.alert import Alert
+from app.observability.alert_engine import AlertEngine
 
 
 alerts_bp = Blueprint(
@@ -19,14 +20,13 @@ def alert_code():
 
 @alerts_bp.route("", methods=["GET"])
 def list_alerts():
-
-    alerts = Alert.query.order_by(
-        Alert.created_at.desc()
-    ).all()
-
+    alerts = Alert.query.order_by(Alert.created_at.desc()).all()
+    platform = AlertEngine.list_alerts(limit=100)
     return {
-        "count": len(alerts),
-        "alerts": [a.to_dict() for a in alerts]
+        "count": len(alerts) + platform["count"],
+        "alerts": [a.to_dict() for a in alerts],
+        "platform_alerts": platform["alerts"],
+        "rules": platform["rules"],
     }
 
 
