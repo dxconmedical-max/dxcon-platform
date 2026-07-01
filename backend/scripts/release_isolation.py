@@ -41,6 +41,17 @@ class ReleaseSpec:
 
 
 RELEASES: tuple[ReleaseSpec, ...] = (
+    ReleaseSpec("5.0", "Go-Live RC2 Production Cutover", (
+        "backend/scripts/go_live_rc2_lib.py",
+        "backend/scripts/final_rc2_smoke.py",
+        "backend/scripts/prepare_rollback_package.py",
+        "backend/scripts/verify_rollback_package.py",
+        "backend/scripts/verify_rc2_cutover.py",
+        "backend/scripts/release_isolation.py",
+        "backend/tests/test_rc2_cutover.py",
+        "backend/tests/test_final_smoke.py",
+        "backend/tests/test_rollback_package.py",
+    )),
     ReleaseSpec("4.9", "Production Infrastructure & Go-Live Blocker Fix", (
         "backend/app/infrastructure/production_readiness.py",
         "backend/app/infrastructure/runtime_validation.py",

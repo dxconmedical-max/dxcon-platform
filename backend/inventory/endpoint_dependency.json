@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-01T06:06:35.262187+00:00",
-  "blueprint_count": 146,
+  "generated_at": "2026-07-01T10:13:47.056030+00:00",
+  "blueprint_count": 167,
   "dependencies": {
     "admin": [
       {
@@ -174,6 +174,143 @@
           "GET"
         ],
         "endpoint": "analytics_web.analytics"
+      }
+    ],
+    "api_platform": [
+      {
+        "path": "/api/v1/api-clients",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.list_clients"
+      },
+      {
+        "path": "/api/v1/api-clients",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "api_platform.create_client"
+      },
+      {
+        "path": "/api/v1/api-keys",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.list_keys"
+      },
+      {
+        "path": "/api/v1/api-keys",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "api_platform.create_key"
+      },
+      {
+        "path": "/api/v1/api-keys/<key_id>/revoke",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "api_platform.revoke_key"
+      },
+      {
+        "path": "/api/v1/api-platform/domains",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.platform_domains"
+      },
+      {
+        "path": "/api/v1/api-platform/health",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.platform_health"
+      },
+      {
+        "path": "/api/v1/api-platform/routes",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.platform_routes"
+      },
+      {
+        "path": "/api/v1/api-usage",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.list_usage"
+      },
+      {
+        "path": "/api/v1/developer/sandbox/request",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "api_platform.developer_sandbox_request"
+      },
+      {
+        "path": "/api/v1/openapi.json",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.openapi_json"
+      },
+      {
+        "path": "/api/v1/openapi.yaml",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform.openapi_yaml"
+      }
+    ],
+    "api_platform_web": [
+      {
+        "path": "/api-docs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform_web.api_docs_index"
+      },
+      {
+        "path": "/api-docs/redoc",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform_web.api_docs_redoc"
+      },
+      {
+        "path": "/api-docs/swagger",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform_web.api_docs_swagger"
+      },
+      {
+        "path": "/developer",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform_web.developer_home"
+      },
+      {
+        "path": "/developer/api-keys",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform_web.developer_api_keys"
+      },
+      {
+        "path": "/developer/routes",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform_web.developer_routes"
+      },
+      {
+        "path": "/developer/sandbox",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "api_platform_web.developer_sandbox"
       }
     ],
     "audit_center_web": [
@@ -898,21 +1035,21 @@
     ],
     "communication_events": [
       {
-        "path": "/api/v1/events",
+        "path": "/api/v1/hub/events",
         "methods": [
           "GET"
         ],
         "endpoint": "communication_events.list_events"
       },
       {
-        "path": "/api/v1/events",
+        "path": "/api/v1/hub/events",
         "methods": [
           "POST"
         ],
         "endpoint": "communication_events.emit_event"
       },
       {
-        "path": "/api/v1/events/types",
+        "path": "/api/v1/hub/events/types",
         "methods": [
           "GET"
         ],
@@ -928,7 +1065,7 @@
         "endpoint": "communication_hub_web.events_dashboard"
       },
       {
-        "path": "/notifications",
+        "path": "/hub/notifications",
         "methods": [
           "GET"
         ],
@@ -974,28 +1111,28 @@
     ],
     "communication_webhooks": [
       {
-        "path": "/api/v1/webhooks",
+        "path": "/api/v1/hub/webhooks",
         "methods": [
           "GET"
         ],
         "endpoint": "communication_webhooks.list_webhooks"
       },
       {
-        "path": "/api/v1/webhooks",
+        "path": "/api/v1/hub/webhooks",
         "methods": [
           "POST"
         ],
         "endpoint": "communication_webhooks.create_webhook"
       },
       {
-        "path": "/api/v1/webhooks/<webhook_id>/test",
+        "path": "/api/v1/hub/webhooks/<webhook_id>/test",
         "methods": [
           "POST"
         ],
         "endpoint": "communication_webhooks.test_webhook"
       },
       {
-        "path": "/api/v1/webhooks/deliveries",
+        "path": "/api/v1/hub/webhooks/deliveries",
         "methods": [
           "GET"
         ],
@@ -1498,6 +1635,43 @@
           "GET"
         ],
         "endpoint": "dashboard_web.dashboard"
+      }
+    ],
+    "deployment_infra_web": [
+      {
+        "path": "/deployment",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "deployment_infra_web.deployment_home"
+      },
+      {
+        "path": "/deployment/readiness",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "deployment_infra_web.deployment_readiness_page"
+      },
+      {
+        "path": "/deployment/recovery",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "deployment_infra_web.deployment_recovery_page"
+      },
+      {
+        "path": "/deployment/runtime",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "deployment_infra_web.deployment_runtime_page"
+      },
+      {
+        "path": "/deployment/scaling",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "deployment_infra_web.deployment_scaling_page"
       }
     ],
     "diseases": [
@@ -2211,6 +2385,143 @@
         "endpoint": "guidelines.list_packs"
       }
     ],
+    "healthcare_standards": [
+      {
+        "path": "/api/v1/standards/code-systems",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards.list_code_systems"
+      },
+      {
+        "path": "/api/v1/standards/codes",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards.list_codes"
+      },
+      {
+        "path": "/api/v1/standards/dicom/metadata",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.dicom_metadata_save"
+      },
+      {
+        "path": "/api/v1/standards/dicom/studies",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards.dicom_studies"
+      },
+      {
+        "path": "/api/v1/standards/dicom/studies/<study_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards.dicom_study_detail"
+      },
+      {
+        "path": "/api/v1/standards/fhir/map-order",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.fhir_map_order"
+      },
+      {
+        "path": "/api/v1/standards/fhir/map-result",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.fhir_map_result"
+      },
+      {
+        "path": "/api/v1/standards/fhir/validate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.fhir_validate"
+      },
+      {
+        "path": "/api/v1/standards/hl7/build-oru",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.hl7_build_oru"
+      },
+      {
+        "path": "/api/v1/standards/hl7/parse",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.hl7_parse"
+      },
+      {
+        "path": "/api/v1/standards/hl7/validate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.hl7_validate"
+      },
+      {
+        "path": "/api/v1/standards/mappings",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards.list_mappings"
+      },
+      {
+        "path": "/api/v1/standards/mappings",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.create_mapping"
+      },
+      {
+        "path": "/api/v1/standards/mappings/resolve",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "healthcare_standards.resolve_mapping"
+      }
+    ],
+    "healthcare_standards_web": [
+      {
+        "path": "/standards",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards_web.standards_home"
+      },
+      {
+        "path": "/standards/dicom",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards_web.standards_dicom"
+      },
+      {
+        "path": "/standards/fhir",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards_web.standards_fhir"
+      },
+      {
+        "path": "/standards/hl7",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards_web.standards_hl7"
+      },
+      {
+        "path": "/standards/mappings",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "healthcare_standards_web.standards_mappings"
+      }
+    ],
     "home_collections": [
       {
         "path": "/api/v1/home-collections",
@@ -2362,6 +2673,272 @@
           "GET"
         ],
         "endpoint": "incidents_web.resolve_incident_web"
+      }
+    ],
+    "infrastructure": [
+      {
+        "path": "/api/v1/infrastructure/config",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "infrastructure.infrastructure_config"
+      },
+      {
+        "path": "/api/v1/infrastructure/readiness",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "infrastructure.infrastructure_readiness"
+      },
+      {
+        "path": "/api/v1/infrastructure/recovery",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "infrastructure.infrastructure_recovery"
+      },
+      {
+        "path": "/api/v1/infrastructure/scaling",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "infrastructure.infrastructure_scaling"
+      },
+      {
+        "path": "/api/v1/infrastructure/status",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "infrastructure.infrastructure_status"
+      }
+    ],
+    "integration_events": [
+      {
+        "path": "/api/v1/events",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_events.list_events"
+      },
+      {
+        "path": "/api/v1/events/<event_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_events.get_event"
+      },
+      {
+        "path": "/api/v1/events/test",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_events.test_event"
+      }
+    ],
+    "integration_platform_web": [
+      {
+        "path": "/integrations/adapters",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_platform_web.adapters_dashboard"
+      },
+      {
+        "path": "/integrations/events",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_platform_web.events_dashboard"
+      },
+      {
+        "path": "/integrations/platform",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_platform_web.platform_dashboard"
+      },
+      {
+        "path": "/integrations/plugins",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_platform_web.plugins_dashboard"
+      },
+      {
+        "path": "/integrations/queue",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_platform_web.queue_dashboard"
+      },
+      {
+        "path": "/integrations/sandbox",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_platform_web.sandbox_dashboard"
+      },
+      {
+        "path": "/integrations/webhooks",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_platform_web.webhooks_dashboard"
+      }
+    ],
+    "integration_plugins": [
+      {
+        "path": "/api/v1/plugins",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_plugins.list_plugins"
+      },
+      {
+        "path": "/api/v1/plugins/<plugin_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_plugins.get_plugin"
+      },
+      {
+        "path": "/api/v1/plugins/<plugin_id>/disable",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_plugins.disable_plugin"
+      },
+      {
+        "path": "/api/v1/plugins/<plugin_id>/enable",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_plugins.enable_plugin"
+      },
+      {
+        "path": "/api/v1/plugins/<plugin_id>/health",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_plugins.plugin_health"
+      }
+    ],
+    "integration_queue": [
+      {
+        "path": "/api/v1/integration-queue/dead-letters",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_queue.list_dead_letters"
+      },
+      {
+        "path": "/api/v1/integration-queue/dead-letters/<dead_letter_id>/replay",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_queue.replay_dead_letter"
+      },
+      {
+        "path": "/api/v1/integration-queue/jobs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_queue.list_jobs"
+      },
+      {
+        "path": "/api/v1/integration-queue/jobs",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_queue.create_job"
+      },
+      {
+        "path": "/api/v1/integration-queue/jobs/<job_id>/retry",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_queue.retry_job"
+      }
+    ],
+    "integration_sandbox": [
+      {
+        "path": "/api/v1/sandbox/his/patient",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_sandbox.sandbox_his_patient"
+      },
+      {
+        "path": "/api/v1/sandbox/lis/result",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_sandbox.sandbox_lis_result"
+      },
+      {
+        "path": "/api/v1/sandbox/payment/callback",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_sandbox.sandbox_payment_callback"
+      },
+      {
+        "path": "/api/v1/sandbox/status",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_sandbox.sandbox_status"
+      },
+      {
+        "path": "/api/v1/sandbox/webhook/test",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_sandbox.sandbox_webhook_test"
+      }
+    ],
+    "integration_webhooks": [
+      {
+        "path": "/api/v1/webhooks",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_webhooks.list_webhooks"
+      },
+      {
+        "path": "/api/v1/webhooks",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_webhooks.create_webhook"
+      },
+      {
+        "path": "/api/v1/webhooks/<webhook_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_webhooks.get_webhook"
+      },
+      {
+        "path": "/api/v1/webhooks/<webhook_id>/test",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_webhooks.test_webhook"
+      },
+      {
+        "path": "/api/v1/webhooks/deliveries",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "integration_webhooks.list_deliveries"
+      },
+      {
+        "path": "/api/v1/webhooks/deliveries/<delivery_id>/retry",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "integration_webhooks.retry_delivery"
       }
     ],
     "integrations": [
@@ -3402,6 +3979,108 @@
         "endpoint": "monitor_web.monitor"
       }
     ],
+    "notification_center": [
+      {
+        "path": "/api/v1/notifications",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center.list_notifications"
+      },
+      {
+        "path": "/api/v1/notifications",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "notification_center.create_notification"
+      },
+      {
+        "path": "/api/v1/notifications/<notification_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center.get_notification"
+      },
+      {
+        "path": "/api/v1/notifications/<notification_id>/retry",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "notification_center.retry_notification"
+      },
+      {
+        "path": "/api/v1/notifications/providers",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center.list_providers"
+      },
+      {
+        "path": "/api/v1/notifications/statistics",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center.statistics"
+      },
+      {
+        "path": "/api/v1/notifications/templates",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center.list_templates"
+      },
+      {
+        "path": "/api/v1/notifications/templates",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "notification_center.create_template"
+      },
+      {
+        "path": "/api/v1/notifications/templates/<template_id>",
+        "methods": [
+          "PUT"
+        ],
+        "endpoint": "notification_center.update_template"
+      }
+    ],
+    "notification_center_web": [
+      {
+        "path": "/notifications",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center_web.notifications_home"
+      },
+      {
+        "path": "/notifications/history",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center_web.notifications_history"
+      },
+      {
+        "path": "/notifications/providers",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center_web.notifications_providers"
+      },
+      {
+        "path": "/notifications/statistics",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center_web.notifications_statistics"
+      },
+      {
+        "path": "/notifications/templates",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "notification_center_web.notifications_templates"
+      }
+    ],
     "notification_templates": [
       {
         "path": "/api/v1/notification-templates",
@@ -3413,39 +4092,389 @@
     ],
     "notifications": [
       {
-        "path": "/api/v1/notifications",
+        "path": "/api/v1/notification-legacy",
         "methods": [
           "GET"
         ],
         "endpoint": "notifications.list_notifications"
       },
       {
-        "path": "/api/v1/notifications/<notification_id>",
+        "path": "/api/v1/notification-legacy/<notification_id>",
         "methods": [
           "GET"
         ],
         "endpoint": "notifications.get_notification"
       },
       {
-        "path": "/api/v1/notifications/bulk",
+        "path": "/api/v1/notification-legacy/bulk",
         "methods": [
           "POST"
         ],
         "endpoint": "notifications.bulk_notifications"
       },
       {
-        "path": "/api/v1/notifications/send",
+        "path": "/api/v1/notification-legacy/send",
         "methods": [
           "POST"
         ],
         "endpoint": "notifications.send_notification"
       },
       {
-        "path": "/api/v1/notifications/test",
+        "path": "/api/v1/notification-legacy/test",
         "methods": [
           "POST"
         ],
         "endpoint": "notifications.test_notification"
+      }
+    ],
+    "observability_alerts": [
+      {
+        "path": "/api/v1/alerts/test",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "observability_alerts.test_alert"
+      }
+    ],
+    "observability_health_root": [
+      {
+        "path": "/health",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_health_root.root_health"
+      },
+      {
+        "path": "/live",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_health_root.root_live"
+      },
+      {
+        "path": "/ready",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_health_root.root_ready"
+      }
+    ],
+    "observability_metrics": [
+      {
+        "path": "/api/v1/metrics",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_metrics.metrics_all"
+      },
+      {
+        "path": "/api/v1/metrics/business",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_metrics.metrics_business"
+      },
+      {
+        "path": "/api/v1/metrics/system",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_metrics.metrics_system"
+      }
+    ],
+    "observability_prometheus": [
+      {
+        "path": "/metrics/prometheus",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_prometheus.prometheus_metrics"
+      }
+    ],
+    "observability_web": [
+      {
+        "path": "/system/alerts",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_web.system_alerts_page"
+      },
+      {
+        "path": "/system/audit",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_web.system_audit_page"
+      },
+      {
+        "path": "/system/health",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_web.system_health_page"
+      },
+      {
+        "path": "/system/logs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_web.system_logs_page"
+      },
+      {
+        "path": "/system/metrics",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_web.system_metrics_page"
+      },
+      {
+        "path": "/system/traces",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "observability_web.system_traces_page"
+      }
+    ],
+    "operations_platform": [
+      {
+        "path": "/api/v1/operations/backups",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.list_backups"
+      },
+      {
+        "path": "/api/v1/operations/backups/<backup_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.get_backup"
+      },
+      {
+        "path": "/api/v1/operations/backups/<backup_id>/validate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.validate_backup"
+      },
+      {
+        "path": "/api/v1/operations/backups/run",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.run_backup"
+      },
+      {
+        "path": "/api/v1/operations/deployment",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.deployment_status"
+      },
+      {
+        "path": "/api/v1/operations/deployment/check",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.deployment_check"
+      },
+      {
+        "path": "/api/v1/operations/deployment/rollback-plan",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.deployment_rollback_plan"
+      },
+      {
+        "path": "/api/v1/operations/jobs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.list_jobs"
+      },
+      {
+        "path": "/api/v1/operations/jobs",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.create_job"
+      },
+      {
+        "path": "/api/v1/operations/jobs/<job_id>",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.get_job"
+      },
+      {
+        "path": "/api/v1/operations/jobs/<job_id>/disable",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.disable_job"
+      },
+      {
+        "path": "/api/v1/operations/jobs/<job_id>/enable",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.enable_job"
+      },
+      {
+        "path": "/api/v1/operations/jobs/<job_id>/run",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.run_job"
+      },
+      {
+        "path": "/api/v1/operations/jobs/<job_id>/runs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.list_job_runs"
+      },
+      {
+        "path": "/api/v1/operations/maintenance",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.maintenance_status"
+      },
+      {
+        "path": "/api/v1/operations/maintenance/disable",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.maintenance_disable"
+      },
+      {
+        "path": "/api/v1/operations/maintenance/enable",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.maintenance_enable"
+      },
+      {
+        "path": "/api/v1/operations/maintenance/schedule",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.maintenance_schedule"
+      },
+      {
+        "path": "/api/v1/operations/queues",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.queue_summary"
+      },
+      {
+        "path": "/api/v1/operations/queues/dead-letters",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.queue_dead_letters"
+      },
+      {
+        "path": "/api/v1/operations/queues/dead-letters/<dead_letter_id>/replay",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.replay_dead_letter"
+      },
+      {
+        "path": "/api/v1/operations/restores",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.list_restores"
+      },
+      {
+        "path": "/api/v1/operations/restores/dry-run",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.restore_dry_run"
+      },
+      {
+        "path": "/api/v1/operations/secrets",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform.list_secrets"
+      },
+      {
+        "path": "/api/v1/operations/secrets/<plan_id>/mark-rotated",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.mark_secret_rotated"
+      },
+      {
+        "path": "/api/v1/operations/secrets/rotation-plan",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.create_rotation_plan"
+      },
+      {
+        "path": "/api/v1/operations/secrets/validate",
+        "methods": [
+          "POST"
+        ],
+        "endpoint": "operations_platform.validate_secrets"
+      }
+    ],
+    "operations_platform_web": [
+      {
+        "path": "/operations",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform_web.operations_home"
+      },
+      {
+        "path": "/operations/backups",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform_web.operations_backups"
+      },
+      {
+        "path": "/operations/deployment",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform_web.operations_deployment"
+      },
+      {
+        "path": "/operations/jobs",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform_web.operations_jobs"
+      },
+      {
+        "path": "/operations/maintenance",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform_web.operations_maintenance"
+      },
+      {
+        "path": "/operations/queues",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform_web.operations_queues"
+      },
+      {
+        "path": "/operations/secrets",
+        "methods": [
+          "GET"
+        ],
+        "endpoint": "operations_platform_web.operations_secrets"
       }
     ],
     "operations_timeline_web": [
@@ -3459,7 +4488,7 @@
     ],
     "operations_web": [
       {
-        "path": "/operations",
+        "path": "/lab-operations",
         "methods": [
           "GET"
         ],

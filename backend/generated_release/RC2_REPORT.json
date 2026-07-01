@@ -1,0 +1,92 @@
+{
+  "generated_at": "2026-07-01T10:13:48.407884+00:00",
+  "release": "v1.0.0-rc2",
+  "git_sha": "9b816acb9ee02dd0bf97c413948e68a2cca1f527",
+  "score": {
+    "score": 91.43,
+    "ready_for_rc2": false,
+    "breakdown": {
+      "regression": {
+        "weight": 45,
+        "passed": 17,
+        "total": 21,
+        "score": 36.43,
+        "ok": false
+      },
+      "cutover": {
+        "weight": 30,
+        "passed": 13,
+        "total": 13,
+        "score": 30.0,
+        "ok": true
+      },
+      "final_smoke": {
+        "weight": 25,
+        "passed": 14,
+        "total": 14,
+        "score": 25.0,
+        "ok": true
+      }
+    }
+  },
+  "regression": {
+    "passed": 17,
+    "total": 21,
+    "ok": false
+  },
+  "cutover": {
+    "passed": 13,
+    "total": 13,
+    "ok": true
+  },
+  "final_smoke": {
+    "ok": true,
+    "passed": 14,
+    "total": 14,
+    "steps": {
+      "register_login": {
+        "ok": true
+      },
+      "create_patient": {
+        "ok": true
+      },
+      "create_booking_order": {
+        "ok": true
+      },
+      "schedule_collection": {
+        "ok": true
+      },
+      "assign_collector": {
+        "ok": true
+      },
+      "collect_sample": {
+        "ok": true
+      },
+      "receive_lab": {
+        "ok": true
+      },
+      "approve_result": {
+        "ok": true
+      },
+      "release_result": {
+        "ok": true
+      },
+      "patient_view_result": {
+        "ok": true
+      },
+      "billing_invoice": {
+        "ok": true
+      },
+      "payment_simulation": {
+        "ok": true
+      },
+      "notification_queued": {
+        "ok": true
+      },
+      "dashboard_metrics": {
+        "ok": true,
+        "kpi_records": 11
+      }
+    }
+  }
+}

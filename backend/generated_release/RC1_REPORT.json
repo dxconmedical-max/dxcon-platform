@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-01T09:24:02.026582+00:00",
+  "generated_at": "2026-07-01T10:12:22.834878+00:00",
   "release": "v1.0.0-rc1",
   "route_summary": {
     "total_routes": 840,
@@ -230,8 +230,10 @@
           "rate_limit_enabled": true,
           "security_headers_enabled": true,
           "cors_origins": "*",
+          "cors_strict_safe": true,
           "redis_configured": false,
           "smtp_configured": false,
+          "database_dialect": "sqlite",
           "storage_backend": "local",
           "storage_path": "uploads",
           "api_response_envelope": true,
@@ -245,25 +247,25 @@
     "passed": 1,
     "total": 1,
     "timings": {
-      "app_startup_ms": 348.09,
+      "app_startup_ms": 163.17,
       "endpoint_latencies": {
         "/api/v1/system/health": {
-          "latency_ms": 1.46,
+          "latency_ms": 1.45,
           "status_code": 200
         },
         "/api/v1/infrastructure/status": {
-          "latency_ms": 5.23,
+          "latency_ms": 5.51,
           "status_code": 200
         },
         "/api/v1/marketplace/search": {
-          "latency_ms": 7.72,
+          "latency_ms": 6.75,
           "status_code": 200
         }
       },
-      "db_query_ms": 0.17,
-      "route_inventory_ms": 0.16,
+      "db_query_ms": 0.16,
+      "route_inventory_ms": 0.15,
       "route_count": 840,
-      "memory_mb": 257.91
+      "memory_mb": 254.16
     },
     "slow_or_failed_endpoints": []
   }

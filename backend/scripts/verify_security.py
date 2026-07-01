@@ -12,6 +12,7 @@ from app import create_app
 from app.core.config_validation import config_summary, validate_config
 from app.core.rate_limit import rate_limiter
 from app.core.security import SECURITY_HEADERS
+from app.extensions.db import db
 
 
 def _route_key(rule):
@@ -25,6 +26,8 @@ def main():
 
     try:
         app = create_app()
+        with app.app_context():
+            db.create_all()
         print("OK: app creates successfully")
     except Exception as exc:
         print("FAIL: app create", exc)

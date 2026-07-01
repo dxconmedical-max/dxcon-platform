@@ -1,0 +1,194 @@
+{
+  "generated_at": "2026-07-01T10:13:48.456393+00:00",
+  "environments": [
+    "staging",
+    "production"
+  ],
+  "variables": [
+    {
+      "variable": "APP_ENV",
+      "staging": "staging",
+      "production": "production"
+    },
+    {
+      "variable": "BACKGROUND_TASK_WORKERS",
+      "staging": "4",
+      "production": "8"
+    },
+    {
+      "variable": "BUILD_TIME",
+      "staging": "",
+      "production": ""
+    },
+    {
+      "variable": "BUILD_VERSION",
+      "staging": "2.5.0-staging",
+      "production": "2.5.0"
+    },
+    {
+      "variable": "CACHE_DEFAULT_TTL_SECONDS",
+      "staging": "60",
+      "production": "60"
+    },
+    {
+      "variable": "CORRELATION_ID_HEADER",
+      "staging": "X-Correlation-ID",
+      "production": "X-Correlation-ID"
+    },
+    {
+      "variable": "CORS_ORIGINS",
+      "staging": "https://staging.dxcon.test,https://admin-staging.dxcon.test",
+      "production": "https://app.dxcon.com,https://admin.dxcon.com"
+    },
+    {
+      "variable": "DATABASE_URL",
+      "staging": "postgresql://dxcon:dxcon@postgres:5432/dxcon_staging",
+      "production": "postgresql://dxcon:dxcon@postgres:5432/dxcon"
+    },
+    {
+      "variable": "DB_CONNECT_RETRIES",
+      "staging": "5",
+      "production": "5"
+    },
+    {
+      "variable": "DB_CONNECT_RETRY_DELAY_SECONDS",
+      "staging": "2",
+      "production": "2"
+    },
+    {
+      "variable": "DB_MAX_OVERFLOW",
+      "staging": "20",
+      "production": "30"
+    },
+    {
+      "variable": "DB_POOL_RECYCLE",
+      "staging": "280",
+      "production": "280"
+    },
+    {
+      "variable": "DB_POOL_SIZE",
+      "staging": "10",
+      "production": "20"
+    },
+    {
+      "variable": "GIT_SHA",
+      "staging": "local",
+      "production": "local"
+    },
+    {
+      "variable": "GUNICORN_GRACEFUL_TIMEOUT",
+      "staging": "30",
+      "production": "30"
+    },
+    {
+      "variable": "GUNICORN_KEEPALIVE",
+      "staging": "5",
+      "production": "5"
+    },
+    {
+      "variable": "GUNICORN_TIMEOUT",
+      "staging": "120",
+      "production": "120"
+    },
+    {
+      "variable": "JWT_SECRET_KEY",
+      "staging": "replace-with-staging-jwt-secret",
+      "production": "replace-with-production-jwt-secret"
+    },
+    {
+      "variable": "LOG_FORMAT",
+      "staging": "json",
+      "production": "json"
+    },
+    {
+      "variable": "LOG_LEVEL",
+      "staging": "INFO",
+      "production": "INFO"
+    },
+    {
+      "variable": "RATE_LIMIT_ENABLED",
+      "staging": "true",
+      "production": "true"
+    },
+    {
+      "variable": "RATE_LIMIT_MAX",
+      "staging": "120",
+      "production": "120"
+    },
+    {
+      "variable": "RATE_LIMIT_WINDOW_SECONDS",
+      "staging": "60",
+      "production": "60"
+    },
+    {
+      "variable": "REDIS_URL",
+      "staging": "redis://redis:6379/0",
+      "production": "redis://redis:6379/0"
+    },
+    {
+      "variable": "REQUEST_ID_HEADER",
+      "staging": "X-Request-ID",
+      "production": "X-Request-ID"
+    },
+    {
+      "variable": "SECRET_KEY",
+      "staging": "replace-with-staging-secret",
+      "production": "replace-with-production-secret"
+    },
+    {
+      "variable": "SLOW_QUERY_THRESHOLD_MS",
+      "staging": "100",
+      "production": "100"
+    },
+    {
+      "variable": "SMTP_FROM",
+      "staging": "noreply@staging.dxcon.test",
+      "production": "noreply@dxcon.com"
+    },
+    {
+      "variable": "SMTP_HOST",
+      "staging": "smtp.example.com",
+      "production": "smtp.example.com"
+    },
+    {
+      "variable": "SMTP_PASSWORD",
+      "staging": "replace-me",
+      "production": "replace-me"
+    },
+    {
+      "variable": "SMTP_PORT",
+      "staging": "587",
+      "production": "587"
+    },
+    {
+      "variable": "SMTP_USER",
+      "staging": "dxcon-staging",
+      "production": "dxcon-prod"
+    },
+    {
+      "variable": "SMTP_USE_TLS",
+      "staging": "true",
+      "production": "true"
+    },
+    {
+      "variable": "STARTUP_VALIDATE_DB",
+      "staging": "true",
+      "production": "true"
+    },
+    {
+      "variable": "STORAGE_BACKEND",
+      "staging": "local",
+      "production": "local"
+    },
+    {
+      "variable": "STORAGE_PATH",
+      "staging": "/var/lib/dxcon/uploads",
+      "production": "/var/lib/dxcon/uploads"
+    },
+    {
+      "variable": "WEB_CONCURRENCY",
+      "staging": "2",
+      "production": "4"
+    }
+  ]
+}

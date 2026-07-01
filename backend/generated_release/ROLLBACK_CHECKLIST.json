@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-07-01T10:13:48.440891+00:00",
+  "current_git_sha": "9b816acb9ee02dd0bf97c413948e68a2cca1f527",
+  "previous_release_sha": "568dbdb",
+  "previous_tag": "v1.0.0-rc1",
+  "recommended_commands": [
+    "git checkout 568dbdb",
+    "docker compose down && docker compose up -d --build",
+    "python backend/scripts/verify_deployment_readiness.py"
+  ],
+  "database_migration_warning": "Review Alembic migrations before rollback; downgrades may be destructive.",
+  "artifact_checklist": [
+    "backend/generated_release/RC2_REPORT.json",
+    "backend/generated_release/PRODUCTION_CUTOVER_CHECKLIST.json",
+    "deployment/kubernetes/",
+    "docker-compose.yml",
+    "backend/Dockerfile"
+  ]
+}

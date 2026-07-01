@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-01T06:06:35.262187+00:00",
+  "generated_at": "2026-07-01T10:13:47.056030+00:00",
   "api_version": "v1",
   "frozen": true,
-  "total_v1_endpoints": 509,
+  "total_v1_endpoints": 604,
   "endpoints": [
     {
       "path": "/api/v1/admin-security/health",
@@ -195,6 +195,86 @@
       ],
       "endpoint": "alerts.resolve_alert",
       "blueprint": "alerts"
+    },
+    {
+      "path": "/api/v1/alerts/test",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "observability_alerts.test_alert",
+      "blueprint": "observability_alerts"
+    },
+    {
+      "path": "/api/v1/api-clients",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "api_platform.list_clients",
+      "blueprint": "api_platform"
+    },
+    {
+      "path": "/api/v1/api-clients",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "api_platform.create_client",
+      "blueprint": "api_platform"
+    },
+    {
+      "path": "/api/v1/api-keys",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "api_platform.list_keys",
+      "blueprint": "api_platform"
+    },
+    {
+      "path": "/api/v1/api-keys",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "api_platform.create_key",
+      "blueprint": "api_platform"
+    },
+    {
+      "path": "/api/v1/api-keys/<key_id>/revoke",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "api_platform.revoke_key",
+      "blueprint": "api_platform"
+    },
+    {
+      "path": "/api/v1/api-platform/domains",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "api_platform.platform_domains",
+      "blueprint": "api_platform"
+    },
+    {
+      "path": "/api/v1/api-platform/health",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "api_platform.platform_health",
+      "blueprint": "api_platform"
+    },
+    {
+      "path": "/api/v1/api-platform/routes",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "api_platform.platform_routes",
+      "blueprint": "api_platform"
+    },
+    {
+      "path": "/api/v1/api-usage",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "api_platform.list_usage",
+      "blueprint": "api_platform"
     },
     {
       "path": "/api/v1/audit/access-history",
@@ -1363,6 +1443,14 @@
       "blueprint": "dashboard"
     },
     {
+      "path": "/api/v1/developer/sandbox/request",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "api_platform.developer_sandbox_request",
+      "blueprint": "api_platform"
+    },
+    {
       "path": "/api/v1/diseases",
       "methods": [
         "GET"
@@ -1471,24 +1559,24 @@
       "methods": [
         "GET"
       ],
-      "endpoint": "communication_events.list_events",
-      "blueprint": "communication_events"
+      "endpoint": "integration_events.list_events",
+      "blueprint": "integration_events"
     },
     {
-      "path": "/api/v1/events",
-      "methods": [
-        "POST"
-      ],
-      "endpoint": "communication_events.emit_event",
-      "blueprint": "communication_events"
-    },
-    {
-      "path": "/api/v1/events/types",
+      "path": "/api/v1/events/<event_id>",
       "methods": [
         "GET"
       ],
-      "endpoint": "communication_events.list_event_types",
-      "blueprint": "communication_events"
+      "endpoint": "integration_events.get_event",
+      "blueprint": "integration_events"
+    },
+    {
+      "path": "/api/v1/events/test",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integration_events.test_event",
+      "blueprint": "integration_events"
     },
     {
       "path": "/api/v1/federation/capacity",
@@ -1659,6 +1747,62 @@
       "blueprint": "home_collections"
     },
     {
+      "path": "/api/v1/hub/events",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "communication_events.list_events",
+      "blueprint": "communication_events"
+    },
+    {
+      "path": "/api/v1/hub/events",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "communication_events.emit_event",
+      "blueprint": "communication_events"
+    },
+    {
+      "path": "/api/v1/hub/events/types",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "communication_events.list_event_types",
+      "blueprint": "communication_events"
+    },
+    {
+      "path": "/api/v1/hub/webhooks",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "communication_webhooks.list_webhooks",
+      "blueprint": "communication_webhooks"
+    },
+    {
+      "path": "/api/v1/hub/webhooks",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "communication_webhooks.create_webhook",
+      "blueprint": "communication_webhooks"
+    },
+    {
+      "path": "/api/v1/hub/webhooks/<webhook_id>/test",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "communication_webhooks.test_webhook",
+      "blueprint": "communication_webhooks"
+    },
+    {
+      "path": "/api/v1/hub/webhooks/deliveries",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "communication_webhooks.webhook_deliveries",
+      "blueprint": "communication_webhooks"
+    },
+    {
       "path": "/api/v1/incidents",
       "methods": [
         "GET"
@@ -1681,6 +1825,86 @@
       ],
       "endpoint": "incidents.resolve_incident",
       "blueprint": "incidents"
+    },
+    {
+      "path": "/api/v1/infrastructure/config",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "infrastructure.infrastructure_config",
+      "blueprint": "infrastructure"
+    },
+    {
+      "path": "/api/v1/infrastructure/readiness",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "infrastructure.infrastructure_readiness",
+      "blueprint": "infrastructure"
+    },
+    {
+      "path": "/api/v1/infrastructure/recovery",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "infrastructure.infrastructure_recovery",
+      "blueprint": "infrastructure"
+    },
+    {
+      "path": "/api/v1/infrastructure/scaling",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "infrastructure.infrastructure_scaling",
+      "blueprint": "infrastructure"
+    },
+    {
+      "path": "/api/v1/infrastructure/status",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "infrastructure.infrastructure_status",
+      "blueprint": "infrastructure"
+    },
+    {
+      "path": "/api/v1/integration-queue/dead-letters",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "integration_queue.list_dead_letters",
+      "blueprint": "integration_queue"
+    },
+    {
+      "path": "/api/v1/integration-queue/dead-letters/<dead_letter_id>/replay",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integration_queue.replay_dead_letter",
+      "blueprint": "integration_queue"
+    },
+    {
+      "path": "/api/v1/integration-queue/jobs",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "integration_queue.list_jobs",
+      "blueprint": "integration_queue"
+    },
+    {
+      "path": "/api/v1/integration-queue/jobs",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integration_queue.create_job",
+      "blueprint": "integration_queue"
+    },
+    {
+      "path": "/api/v1/integration-queue/jobs/<job_id>/retry",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integration_queue.retry_job",
+      "blueprint": "integration_queue"
     },
     {
       "path": "/api/v1/integrations/audit",
@@ -2499,6 +2723,30 @@
       "blueprint": "marketplace"
     },
     {
+      "path": "/api/v1/metrics",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "observability_metrics.metrics_all",
+      "blueprint": "observability_metrics"
+    },
+    {
+      "path": "/api/v1/metrics/business",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "observability_metrics.metrics_business",
+      "blueprint": "observability_metrics"
+    },
+    {
+      "path": "/api/v1/metrics/system",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "observability_metrics.metrics_system",
+      "blueprint": "observability_metrics"
+    },
+    {
       "path": "/api/v1/mobile/clinical-summary/<patient_id>",
       "methods": [
         "GET"
@@ -2587,6 +2835,46 @@
       "blueprint": "mobile"
     },
     {
+      "path": "/api/v1/notification-legacy",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "notifications.list_notifications",
+      "blueprint": "notifications"
+    },
+    {
+      "path": "/api/v1/notification-legacy/<notification_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "notifications.get_notification",
+      "blueprint": "notifications"
+    },
+    {
+      "path": "/api/v1/notification-legacy/bulk",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "notifications.bulk_notifications",
+      "blueprint": "notifications"
+    },
+    {
+      "path": "/api/v1/notification-legacy/send",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "notifications.send_notification",
+      "blueprint": "notifications"
+    },
+    {
+      "path": "/api/v1/notification-legacy/test",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "notifications.test_notification",
+      "blueprint": "notifications"
+    },
+    {
       "path": "/api/v1/notification-templates",
       "methods": [
         "GET"
@@ -2599,24 +2887,32 @@
       "methods": [
         "GET"
       ],
-      "endpoint": "notifications.list_notifications",
-      "blueprint": "notifications"
+      "endpoint": "notification_center.list_notifications",
+      "blueprint": "notification_center"
+    },
+    {
+      "path": "/api/v1/notifications",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "notification_center.create_notification",
+      "blueprint": "notification_center"
     },
     {
       "path": "/api/v1/notifications/<notification_id>",
       "methods": [
         "GET"
       ],
-      "endpoint": "notifications.get_notification",
-      "blueprint": "notifications"
+      "endpoint": "notification_center.get_notification",
+      "blueprint": "notification_center"
     },
     {
-      "path": "/api/v1/notifications/bulk",
+      "path": "/api/v1/notifications/<notification_id>/retry",
       "methods": [
         "POST"
       ],
-      "endpoint": "notifications.bulk_notifications",
-      "blueprint": "notifications"
+      "endpoint": "notification_center.retry_notification",
+      "blueprint": "notification_center"
     },
     {
       "path": "/api/v1/notifications/dead-letter",
@@ -2659,6 +2955,14 @@
       "blueprint": "hub_notifications"
     },
     {
+      "path": "/api/v1/notifications/providers",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "notification_center.list_providers",
+      "blueprint": "notification_center"
+    },
+    {
       "path": "/api/v1/notifications/queue",
       "methods": [
         "GET"
@@ -2691,20 +2995,268 @@
       "blueprint": "hub_notifications"
     },
     {
-      "path": "/api/v1/notifications/send",
+      "path": "/api/v1/notifications/statistics",
       "methods": [
-        "POST"
+        "GET"
       ],
-      "endpoint": "notifications.send_notification",
-      "blueprint": "notifications"
+      "endpoint": "notification_center.statistics",
+      "blueprint": "notification_center"
     },
     {
-      "path": "/api/v1/notifications/test",
+      "path": "/api/v1/notifications/templates",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "notification_center.list_templates",
+      "blueprint": "notification_center"
+    },
+    {
+      "path": "/api/v1/notifications/templates",
       "methods": [
         "POST"
       ],
-      "endpoint": "notifications.test_notification",
-      "blueprint": "notifications"
+      "endpoint": "notification_center.create_template",
+      "blueprint": "notification_center"
+    },
+    {
+      "path": "/api/v1/notifications/templates/<template_id>",
+      "methods": [
+        "PUT"
+      ],
+      "endpoint": "notification_center.update_template",
+      "blueprint": "notification_center"
+    },
+    {
+      "path": "/api/v1/openapi.json",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "api_platform.openapi_json",
+      "blueprint": "api_platform"
+    },
+    {
+      "path": "/api/v1/openapi.yaml",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "api_platform.openapi_yaml",
+      "blueprint": "api_platform"
+    },
+    {
+      "path": "/api/v1/operations/backups",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "operations_platform.list_backups",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/backups/<backup_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "operations_platform.get_backup",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/backups/<backup_id>/validate",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "operations_platform.validate_backup",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/backups/run",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "operations_platform.run_backup",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/deployment",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "operations_platform.deployment_status",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/deployment/check",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "operations_platform.deployment_check",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/deployment/rollback-plan",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "operations_platform.deployment_rollback_plan",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/jobs",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "operations_platform.list_jobs",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/jobs",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "operations_platform.create_job",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/jobs/<job_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "operations_platform.get_job",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/jobs/<job_id>/disable",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "operations_platform.disable_job",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/jobs/<job_id>/enable",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "operations_platform.enable_job",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/jobs/<job_id>/run",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "operations_platform.run_job",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/jobs/<job_id>/runs",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "operations_platform.list_job_runs",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/maintenance",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "operations_platform.maintenance_status",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/maintenance/disable",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "operations_platform.maintenance_disable",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/maintenance/enable",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "operations_platform.maintenance_enable",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/maintenance/schedule",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "operations_platform.maintenance_schedule",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/queues",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "operations_platform.queue_summary",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/queues/dead-letters",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "operations_platform.queue_dead_letters",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/queues/dead-letters/<dead_letter_id>/replay",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "operations_platform.replay_dead_letter",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/restores",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "operations_platform.list_restores",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/restores/dry-run",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "operations_platform.restore_dry_run",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/secrets",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "operations_platform.list_secrets",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/secrets/<plan_id>/mark-rotated",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "operations_platform.mark_secret_rotated",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/secrets/rotation-plan",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "operations_platform.create_rotation_plan",
+      "blueprint": "operations_platform"
+    },
+    {
+      "path": "/api/v1/operations/secrets/validate",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "operations_platform.validate_secrets",
+      "blueprint": "operations_platform"
     },
     {
       "path": "/api/v1/ops/health",
@@ -3341,6 +3893,46 @@
       "blueprint": "payments"
     },
     {
+      "path": "/api/v1/plugins",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "integration_plugins.list_plugins",
+      "blueprint": "integration_plugins"
+    },
+    {
+      "path": "/api/v1/plugins/<plugin_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "integration_plugins.get_plugin",
+      "blueprint": "integration_plugins"
+    },
+    {
+      "path": "/api/v1/plugins/<plugin_id>/disable",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integration_plugins.disable_plugin",
+      "blueprint": "integration_plugins"
+    },
+    {
+      "path": "/api/v1/plugins/<plugin_id>/enable",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integration_plugins.enable_plugin",
+      "blueprint": "integration_plugins"
+    },
+    {
+      "path": "/api/v1/plugins/<plugin_id>/health",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "integration_plugins.plugin_health",
+      "blueprint": "integration_plugins"
+    },
+    {
       "path": "/api/v1/reference-ranges",
       "methods": [
         "GET"
@@ -3556,6 +4148,46 @@
       ],
       "endpoint": "sample_trackings.update_sample_status",
       "blueprint": "sample_trackings"
+    },
+    {
+      "path": "/api/v1/sandbox/his/patient",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integration_sandbox.sandbox_his_patient",
+      "blueprint": "integration_sandbox"
+    },
+    {
+      "path": "/api/v1/sandbox/lis/result",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integration_sandbox.sandbox_lis_result",
+      "blueprint": "integration_sandbox"
+    },
+    {
+      "path": "/api/v1/sandbox/payment/callback",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integration_sandbox.sandbox_payment_callback",
+      "blueprint": "integration_sandbox"
+    },
+    {
+      "path": "/api/v1/sandbox/status",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "integration_sandbox.sandbox_status",
+      "blueprint": "integration_sandbox"
+    },
+    {
+      "path": "/api/v1/sandbox/webhook/test",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integration_sandbox.sandbox_webhook_test",
+      "blueprint": "integration_sandbox"
     },
     {
       "path": "/api/v1/scheduling/bookings/<booking_id>/assign-collector",
@@ -3788,6 +4420,118 @@
       "blueprint": "shipments"
     },
     {
+      "path": "/api/v1/standards/code-systems",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "healthcare_standards.list_code_systems",
+      "blueprint": "healthcare_standards"
+    },
+    {
+      "path": "/api/v1/standards/codes",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "healthcare_standards.list_codes",
+      "blueprint": "healthcare_standards"
+    },
+    {
+      "path": "/api/v1/standards/dicom/metadata",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "healthcare_standards.dicom_metadata_save",
+      "blueprint": "healthcare_standards"
+    },
+    {
+      "path": "/api/v1/standards/dicom/studies",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "healthcare_standards.dicom_studies",
+      "blueprint": "healthcare_standards"
+    },
+    {
+      "path": "/api/v1/standards/dicom/studies/<study_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "healthcare_standards.dicom_study_detail",
+      "blueprint": "healthcare_standards"
+    },
+    {
+      "path": "/api/v1/standards/fhir/map-order",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "healthcare_standards.fhir_map_order",
+      "blueprint": "healthcare_standards"
+    },
+    {
+      "path": "/api/v1/standards/fhir/map-result",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "healthcare_standards.fhir_map_result",
+      "blueprint": "healthcare_standards"
+    },
+    {
+      "path": "/api/v1/standards/fhir/validate",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "healthcare_standards.fhir_validate",
+      "blueprint": "healthcare_standards"
+    },
+    {
+      "path": "/api/v1/standards/hl7/build-oru",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "healthcare_standards.hl7_build_oru",
+      "blueprint": "healthcare_standards"
+    },
+    {
+      "path": "/api/v1/standards/hl7/parse",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "healthcare_standards.hl7_parse",
+      "blueprint": "healthcare_standards"
+    },
+    {
+      "path": "/api/v1/standards/hl7/validate",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "healthcare_standards.hl7_validate",
+      "blueprint": "healthcare_standards"
+    },
+    {
+      "path": "/api/v1/standards/mappings",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "healthcare_standards.list_mappings",
+      "blueprint": "healthcare_standards"
+    },
+    {
+      "path": "/api/v1/standards/mappings",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "healthcare_standards.create_mapping",
+      "blueprint": "healthcare_standards"
+    },
+    {
+      "path": "/api/v1/standards/mappings/resolve",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "healthcare_standards.resolve_mapping",
+      "blueprint": "healthcare_standards"
+    },
+    {
       "path": "/api/v1/system/backup-status",
       "methods": [
         "GET"
@@ -4000,32 +4744,48 @@
       "methods": [
         "GET"
       ],
-      "endpoint": "communication_webhooks.list_webhooks",
-      "blueprint": "communication_webhooks"
+      "endpoint": "integration_webhooks.list_webhooks",
+      "blueprint": "integration_webhooks"
     },
     {
       "path": "/api/v1/webhooks",
       "methods": [
         "POST"
       ],
-      "endpoint": "communication_webhooks.create_webhook",
-      "blueprint": "communication_webhooks"
+      "endpoint": "integration_webhooks.create_webhook",
+      "blueprint": "integration_webhooks"
+    },
+    {
+      "path": "/api/v1/webhooks/<webhook_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "integration_webhooks.get_webhook",
+      "blueprint": "integration_webhooks"
     },
     {
       "path": "/api/v1/webhooks/<webhook_id>/test",
       "methods": [
         "POST"
       ],
-      "endpoint": "communication_webhooks.test_webhook",
-      "blueprint": "communication_webhooks"
+      "endpoint": "integration_webhooks.test_webhook",
+      "blueprint": "integration_webhooks"
     },
     {
       "path": "/api/v1/webhooks/deliveries",
       "methods": [
         "GET"
       ],
-      "endpoint": "communication_webhooks.webhook_deliveries",
-      "blueprint": "communication_webhooks"
+      "endpoint": "integration_webhooks.list_deliveries",
+      "blueprint": "integration_webhooks"
+    },
+    {
+      "path": "/api/v1/webhooks/deliveries/<delivery_id>/retry",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integration_webhooks.retry_delivery",
+      "blueprint": "integration_webhooks"
     },
     {
       "path": "/api/v1/workflow/assign/<booking_id>/<collector_id>",
