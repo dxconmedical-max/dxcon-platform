@@ -21,7 +21,7 @@ scrape_configs:
           - localhost:9090
 
   - job_name: dxcon-api
-    metrics_path: /api/v1/system/metrics
+    metrics_path: /metrics/prometheus
     static_configs:
       - targets:
           - api:8000

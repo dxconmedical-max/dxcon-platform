@@ -41,6 +41,19 @@ class ReleaseSpec:
 
 
 RELEASES: tuple[ReleaseSpec, ...] = (
+    ReleaseSpec("staging-sprint-2-observability", "Observability and Monitoring", (
+        "deployment/monitoring/alerts/",
+        "deployment/monitoring/prometheus.yml",
+        "deployment/monitoring/grafana/",
+        "backend/app/observability/metrics_registry.py",
+        "backend/app/observability/metrics_service.py",
+        "backend/scripts/monitoring_stack_lib.py",
+        "backend/scripts/verify_monitoring_stack.py",
+        "backend/scripts/uat_monitoring_smoke.py",
+        "backend/tests/test_monitoring_stack.py",
+        "backend/tests/test_prometheus_metrics.py",
+        "backend/tests/test_log_safety.py",
+    )),
     ReleaseSpec("staging-sprint-5", "GA Candidate Validation", (
         "backend/scripts/ga_candidate_lib.py",
         "backend/scripts/verify_ga_candidate.py",

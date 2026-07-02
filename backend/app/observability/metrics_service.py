@@ -12,17 +12,54 @@ from app.observability.metrics_registry import list_metric_definitions
 class MetricsPlatformService:
     @staticmethod
     def refresh_runtime_metrics(app):
+        from app.core.background_tasks import background_tasks
+        from app.infrastructure.production_readiness import check_redis_health
+
         try:
             from app.models.integration_platform import IntegrationJob
             from app.models.notification_center import NCNotification
 
-            platform_metrics.set_gauge("queue_depth", IntegrationJob.query.filter_by(status="QUEUED").count())
-            sent = NCNotification.query.filter_by(status="SENT").all()
-            if sent:
-                avg_latency = sum(row.latency_ms or 0 for row in sent) / len(sent)
+            queue_depth = IntegrationJob.query.filter_by(status="QUEUED").count()
+            platform_metrics.set_gauge("queue_depth", queue_depth)
+            failed_jobs = IntegrationJob.query.filter_by(status="FAILED").count()
+            platform_metrics.set_gauge("webhook_delivery_failures_total", failed_jobs)
+
+            sent = NCNotification.query.filter_by(status="SENT").count()
+            failed_notifications = NCNotification.query.filter_by(status="FAILED").count()
+            platform_metrics.set_gauge("notification_delivery_success_total", sent)
+            platform_metrics.set_gauge("notification_delivery_failures_total", failed_notifications)
+            sent_rows = NCNotification.query.filter_by(status="SENT").all()
+            if sent_rows:
+                avg_latency = sum(row.latency_ms or 0 for row in sent_rows) / len(sent_rows)
                 platform_metrics.set_gauge("notification_latency_ms", round(avg_latency, 2))
         except Exception:
             platform_metrics.set_gauge("queue_depth", 0)
+            platform_metrics.set_gauge("webhook_delivery_failures_total", 0)
+            platform_metrics.set_gauge("notification_delivery_success_total", 0)
+            platform_metrics.set_gauge("notification_delivery_failures_total", 0)
+
+        try:
+            from app.observability.health_service import HealthPlatformService
+
+            HealthPlatformService.check_database()
+            platform_metrics.set_gauge("db_health", 1)
+        except Exception:
+            platform_metrics.set_gauge("db_health", 0)
+
+        redis = check_redis_health(app)
+        platform_metrics.set_gauge("redis_health", 1 if redis.get("ok") else 0)
+
+        bg = background_tasks.snapshot()
+        platform_metrics.set_gauge("background_job_pending", bg.get("pending", 0))
+        platform_metrics.set_gauge("background_job_failed", bg.get("failed", 0))
+
+        try:
+            from app.core.database_startup import verify_database_connection
+
+            verify_database_connection(app, retries=1, delay_seconds=0)
+            platform_metrics.set_gauge("readiness_ok", 1)
+        except Exception:
+            platform_metrics.set_gauge("readiness_ok", 0)
 
         perf = performance_metrics.snapshot(app)
         platform_metrics.set_gauge("database_latency_ms", perf.get("average_query_ms", 0))
@@ -77,6 +114,7 @@ class MetricsPlatformService:
         core_metrics.record_request(latency_ms)
         if status_code >= 400:
             core_metrics.record_error()
+            platform_metrics.inc("http_errors_total")
 
     @staticmethod
     def record_auth_failure():

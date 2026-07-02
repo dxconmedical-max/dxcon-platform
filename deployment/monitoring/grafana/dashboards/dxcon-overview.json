@@ -6,65 +6,90 @@
   "graphTooltip": 0,
   "panels": [
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 0
-      },
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
       "id": 1,
-      "targets": [
-        {
-          "expr": "up{job=\"dxcon-api\"}",
-          "legendFormat": "API",
-          "refId": "A"
-        }
-      ],
+      "targets": [{"expr": "up{job=\"dxcon-api\"}", "legendFormat": "API", "refId": "A"}],
       "title": "DxCon API Up",
       "type": "timeseries"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
       "id": 2,
-      "targets": [
-        {
-          "expr": "up{job=\"postgres\"}",
-          "legendFormat": "PostgreSQL",
-          "refId": "A"
-        }
-      ],
-      "title": "PostgreSQL Up",
+      "targets": [{"expr": "rate(http_requests_total[5m])", "legendFormat": "requests/s", "refId": "A"}],
+      "title": "API Request Rate",
       "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+      "id": 3,
+      "targets": [{"expr": "rate(http_errors_total[5m])", "legendFormat": "errors/s", "refId": "A"}],
+      "title": "API Error Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "id": 4,
+      "targets": [{"expr": "queue_depth", "legendFormat": "depth", "refId": "A"}],
+      "title": "Queue Depth",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 8},
+      "id": 5,
+      "targets": [{"expr": "db_health", "legendFormat": "DB", "refId": "A"}],
+      "title": "Database Health",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "gridPos": {"h": 8, "w": 6, "x": 18, "y": 8},
+      "id": 6,
+      "targets": [{"expr": "redis_health", "legendFormat": "Redis", "refId": "A"}],
+      "title": "Redis Health",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+      "id": 7,
+      "targets": [{"expr": "notification_delivery_failures_total", "legendFormat": "failures", "refId": "A"}],
+      "title": "Notification Failures",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+      "id": 8,
+      "targets": [{"expr": "webhook_delivery_failures_total", "legendFormat": "failures", "refId": "A"}],
+      "title": "Webhook Failures",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+      "id": 9,
+      "targets": [{"expr": "background_job_pending", "legendFormat": "pending", "refId": "A"}],
+      "title": "Background Jobs Pending",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+      "id": 10,
+      "targets": [{"expr": "readiness_ok", "legendFormat": "ready", "refId": "A"}],
+      "title": "Readiness Status",
+      "type": "stat"
     }
   ],
   "schemaVersion": 39,
-  "tags": ["dxcon", "staging"],
-  "time": {
-    "from": "now-6h",
-    "to": "now"
-  },
+  "tags": ["dxcon", "staging", "observability"],
+  "time": {"from": "now-6h", "to": "now"},
   "title": "DxCon Staging Overview",
   "uid": "dxcon-staging-overview",
-  "version": 1
+  "version": 2
 }

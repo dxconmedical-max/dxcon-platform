@@ -1,0 +1,77 @@
+groups:
+  - name: dxcon-staging
+    rules:
+      - alert: ApiErrorRateHigh
+        expr: |
+          (
+            sum(rate(http_errors_total[5m]))
+            /
+            clamp_min(sum(rate(http_requests_total[5m])), 1)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: dxcon-api
+        annotations:
+          summary: DxCon API error rate is elevated
+          description: More than 5% of API requests are failing over the last 5 minutes.
+
+      - alert: DatabaseUnavailable
+        expr: db_health == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: postgres
+        annotations:
+          summary: DxCon database health check failed
+          description: Database health gauge reports unavailable for 2 minutes.
+
+      - alert: RedisUnavailable
+        expr: redis_health == 0 and on() vector(1)
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: DxCon Redis health check failed
+          description: Redis health gauge reports unavailable.
+
+      - alert: QueueBacklogHigh
+        expr: queue_depth > 100
+        for: 10m
+        labels:
+          severity: warning
+          service: queue
+        annotations:
+          summary: DxCon queue backlog is high
+          description: Integration/background queue depth exceeds 100 for 10 minutes.
+
+      - alert: WebhookDeliveryFailures
+        expr: increase(webhook_delivery_failures_total[15m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: webhooks
+        annotations:
+          summary: DxCon webhook delivery failures detected
+          description: More than 5 webhook failures in the last 15 minutes.
+
+      - alert: NotificationDeliveryFailures
+        expr: increase(notification_delivery_failures_total[15m]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: notifications
+        annotations:
+          summary: DxCon notification delivery failures detected
+          description: More than 5 notification failures in the last 15 minutes.
+
+      - alert: ReadinessFailed
+        expr: readiness_ok == 0
+        for: 3m
+        labels:
+          severity: critical
+          service: dxcon-api
+        annotations:
+          summary: DxCon readiness probe failed
+          description: API readiness gauge reports not ready for 3 minutes.
