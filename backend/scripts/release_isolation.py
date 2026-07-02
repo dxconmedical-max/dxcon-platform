@@ -41,6 +41,25 @@ class ReleaseSpec:
 
 
 RELEASES: tuple[ReleaseSpec, ...] = (
+    ReleaseSpec("production-staging-phase-f", "RC3 Production Candidate", (
+        "backend/scripts/verify_production_staging_phase_f.py",
+    )),
+    ReleaseSpec("production-staging-phase-e", "Performance Scale Smoke", (
+        "backend/scripts/verify_production_staging_phase_e.py",
+    )),
+    ReleaseSpec("production-staging-phase-d", "Backup Restore DR", (
+        "backend/scripts/verify_production_staging_phase_d.py",
+    )),
+    ReleaseSpec("production-staging-phase-c", "Observability Operations", (
+        "backend/scripts/verify_production_staging_phase_c.py",
+    )),
+    ReleaseSpec("production-staging-phase-b", "Runtime Infrastructure", (
+        "backend/scripts/verify_production_staging_phase_b.py",
+    )),
+    ReleaseSpec("production-staging-phase-a", "Production Configuration", (
+        "backend/scripts/production_staging_lib.py",
+        "backend/scripts/verify_production_staging_phase_a.py",
+    )),
     ReleaseSpec("enterprise-hardening-pack-10", "Enterprise Signoff", (
         "backend/scripts/enterprise_signoff_lib.py",
         "backend/scripts/verify_enterprise_hardening_pack10.py",

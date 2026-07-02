@@ -1,0 +1,231 @@
+{
+  "generated_at": "2026-07-02T17:48:12.207255+00:00",
+  "release": "production-staging-phase-a",
+  "phase": "A",
+  "checks": {
+    "postgresql_config": {
+      "ok": true,
+      "files": {
+        "backend/.env.staging.example": {
+          "ok": true,
+          "database_url": "postgresql://dxcon:dxcon@postgres:5432/dxcon_staging"
+        },
+        "backend/.env.production.example": {
+          "ok": true,
+          "database_url": "postgresql://dxcon:replace-me@postgres:5432/dxcon"
+        },
+        "deployment/env/staging.env.example": {
+          "ok": true,
+          "database_url": "postgresql://dxcon:dxcon@postgres:5432/dxcon_staging"
+        },
+        "deployment/env/production.env.example": {
+          "ok": true,
+          "database_url": "postgresql://dxcon:replace-me@postgres:5432/dxcon"
+        }
+      }
+    },
+    "redis_config": {
+      "ok": true,
+      "files": {
+        "backend/.env.staging.example": {
+          "ok": true,
+          "redis_url": "redis://redis:6379/0"
+        },
+        "backend/.env.production.example": {
+          "ok": true,
+          "redis_url": "redis://redis:6379/0"
+        },
+        "deployment/env/staging.env.example": {
+          "ok": true,
+          "redis_url": "redis://redis:6379/0"
+        },
+        "deployment/env/production.env.example": {
+          "ok": true,
+          "redis_url": "redis://redis:6379/0"
+        }
+      }
+    },
+    "smtp_config": {
+      "ok": true,
+      "files": {
+        "backend/.env.staging.example": {
+          "ok": true,
+          "missing": []
+        },
+        "backend/.env.production.example": {
+          "ok": true,
+          "missing": []
+        },
+        "deployment/env/staging.env.example": {
+          "ok": true,
+          "missing": []
+        },
+        "deployment/env/production.env.example": {
+          "ok": true,
+          "missing": []
+        }
+      }
+    },
+    "cors_origins": {
+      "ok": true,
+      "files": {
+        "backend/.env.staging.example": {
+          "ok": true,
+          "cors_origins": "https://staging.dxcon.test,https://admin-staging.dxcon.test"
+        },
+        "backend/.env.production.example": {
+          "ok": true,
+          "cors_origins": "https://app.dxcon.com,https://admin.dxcon.com"
+        },
+        "deployment/env/staging.env.example": {
+          "ok": true,
+          "cors_origins": "https://staging.dxcon.test,https://admin-staging.dxcon.test"
+        },
+        "deployment/env/production.env.example": {
+          "ok": true,
+          "cors_origins": "https://app.dxcon.com,https://admin.dxcon.com"
+        }
+      }
+    },
+    "secret_keys": {
+      "ok": true,
+      "files": {
+        "backend/.env.staging.example": {
+          "ok": true,
+          "keys": {
+            "SECRET_KEY": {
+              "ok": true,
+              "length": 40
+            },
+            "JWT_SECRET_KEY": {
+              "ok": true,
+              "length": 44
+            }
+          }
+        },
+        "backend/.env.production.example": {
+          "ok": true,
+          "keys": {
+            "SECRET_KEY": {
+              "ok": true,
+              "length": 43
+            },
+            "JWT_SECRET_KEY": {
+              "ok": true,
+              "length": 47
+            }
+          }
+        },
+        "deployment/env/staging.env.example": {
+          "ok": true,
+          "keys": {
+            "SECRET_KEY": {
+              "ok": true,
+              "length": 40
+            },
+            "JWT_SECRET_KEY": {
+              "ok": true,
+              "length": 44
+            }
+          }
+        },
+        "deployment/env/production.env.example": {
+          "ok": true,
+          "keys": {
+            "SECRET_KEY": {
+              "ok": true,
+              "length": 43
+            },
+            "JWT_SECRET_KEY": {
+              "ok": true,
+              "length": 47
+            }
+          }
+        }
+      },
+      "production_guards": {
+        "ok": true
+      }
+    },
+    "domain_tls_readiness": {
+      "ok": true,
+      "checks": {
+        "forwarded_proto_header": true,
+        "health_routes": true,
+        "security_headers": true,
+        "https_cors_origins": true,
+        "kubernetes_ingress": true
+      }
+    },
+    "env_examples": {
+      "ok": true,
+      "templates": {
+        "ok": true,
+        "files": {
+          "backend/.env.staging.example": {
+            "ok": true,
+            "missing": [],
+            "cors": "https://staging.dxcon.test,https://admin-staging.dxcon.test",
+            "database_url": "postgresql://dxcon:dxcon@postgres:5432/dxcon_staging"
+          },
+          "backend/.env.production.example": {
+            "ok": true,
+            "missing": [],
+            "cors": "https://app.dxcon.com,https://admin.dxcon.com",
+            "database_url": "postgresql://dxcon:replace-me@postgres:5432/dxcon"
+          },
+          "deployment/env/staging.env.example": {
+            "ok": true,
+            "missing": [],
+            "cors": "https://staging.dxcon.test,https://admin-staging.dxcon.test",
+            "database_url": "postgresql://dxcon:dxcon@postgres:5432/dxcon_staging"
+          },
+          "deployment/env/production.env.example": {
+            "ok": true,
+            "missing": [],
+            "cors": "https://app.dxcon.com,https://admin.dxcon.com",
+            "database_url": "postgresql://dxcon:replace-me@postgres:5432/dxcon"
+          }
+        }
+      },
+      "env_safety": {
+        "ok": true,
+        "passed": 5,
+        "total": 5,
+        "checks": {
+          "env_not_tracked": {
+            "ok": true,
+            "path": "backend/.env"
+          },
+          "env_example_exists": {
+            "ok": true
+          },
+          "staging_example_exists": {
+            "ok": true
+          },
+          "production_example_exists": {
+            "ok": true
+          },
+          "example_secret_scan": {
+            "ok": true,
+            "findings": []
+          }
+        }
+      }
+    },
+    "staging_config": {
+      "ok": true,
+      "database": {
+        "dialect": "postgresql",
+        "configured": true,
+        "sqlite": false,
+        "sqlite_blocked_in_env": false,
+        "postgresql_expected": true,
+        "ok": true
+      },
+      "blockers": []
+    }
+  },
+  "production_config_score": 100,
+  "ok": true
+}
