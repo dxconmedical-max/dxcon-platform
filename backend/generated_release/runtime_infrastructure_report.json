@@ -1,0 +1,72 @@
+{
+  "generated_at": "2026-07-02T17:53:55.440413+00:00",
+  "release": "production-staging-phase-b",
+  "phase": "B",
+  "checks": {
+    "docker_stack": {
+      "ok": true,
+      "missing_files": [],
+      "missing_services": [],
+      "hardened": true
+    },
+    "nginx_config": {
+      "ok": true,
+      "missing_files": [],
+      "checks": {
+        "gzip": true,
+        "client_max_body_size": true,
+        "proxy_timeouts": true,
+        "health_route": true,
+        "security_headers": true,
+        "reverse_proxy": true
+      }
+    },
+    "gunicorn_runtime": {
+      "ok": true,
+      "checks": {
+        "workers": true,
+        "timeout": true,
+        "graceful_timeout": true,
+        "keepalive": true,
+        "access_log": true,
+        "error_log": true
+      }
+    },
+    "worker_scheduler_runtime": {
+      "ok": true,
+      "checks": {
+        "production_start": true,
+        "api_role": true,
+        "worker_role": true,
+        "scheduler_role": true,
+        "staging_worker": true,
+        "staging_scheduler": true,
+        "production_worker": true,
+        "production_scheduler": true
+      }
+    },
+    "graceful_shutdown": {
+      "ok": true,
+      "checks": {
+        "graceful_timeout_configured": true,
+        "max_requests_rotation": true,
+        "gunicorn_entrypoint": true
+      }
+    },
+    "health_readiness_liveness": {
+      "ok": true,
+      "status_codes": {
+        "/live": 200,
+        "/ready": 200,
+        "/api/v1/system/health": 200,
+        "/api/v1/system/liveness": 200
+      }
+    },
+    "app_boot": {
+      "ok": true,
+      "name": "app"
+    }
+  },
+  "infrastructure_score": 100,
+  "ok": true
+}
