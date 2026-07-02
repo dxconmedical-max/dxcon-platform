@@ -183,6 +183,7 @@ def check_production_config_safety() -> dict:
             "SECRET_KEY": production_values.get("SECRET_KEY", "production-secret-key-min-32-chars"),
             "JWT_SECRET_KEY": production_values.get("JWT_SECRET_KEY", "production-jwt-secret-min-32-chars"),
             "STORAGE_PATH": production_values.get("STORAGE_PATH", "/var/lib/dxcon/uploads"),
+            "LOG_FORMAT": production_values.get("LOG_FORMAT", "json"),
             "RATE_LIMIT_ENABLED": True,
             "RATE_LIMIT_MAX": 120,
         }

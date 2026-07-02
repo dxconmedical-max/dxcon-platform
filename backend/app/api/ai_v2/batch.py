@@ -1,9 +1,13 @@
+import logging
+
 from flask import Blueprint
 
 from app.models.order import Order
 from app.models.clinical_summary import ClinicalSummary
 
 from app.api.ai_v2.routes import ai_order
+
+logger = logging.getLogger("dxcon.ai.batch")
 
 ai_batch_bp = Blueprint(
     "ai_batch",
@@ -31,8 +35,8 @@ def generate_all():
         try:
             ai_order(order.id)
             generated += 1
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning("batch generate failed for order %s: %s", order.id, exc)
 
     return {
         "success": True,

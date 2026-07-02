@@ -76,8 +76,12 @@ class RefundService:
                     actor_email=actor_email,
                     ip_address=ip_address,
                 )
-            except Exception:
-                pass
+            except Exception as exc:
+                import logging
+
+                logging.getLogger("dxcon.billing").warning(
+                    "refund workflow transition skipped: %s", exc
+                )
 
         write_audit(
             action="BILLING_REFUND_PROCESSED",

@@ -18,6 +18,6 @@ def init_observability_platform(app):
 
         try:
             MetricsPlatformService.record_http_request(duration_ms, response.status_code)
-        except Exception:
-            pass
+        except Exception as exc:
+            app.logger.debug("metrics record skipped: %s", exc)
         return response

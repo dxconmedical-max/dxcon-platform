@@ -40,6 +40,12 @@ def validate_config(app):
         if app.config.get("SMTP_HOST") and not app.config.get("SMTP_FROM"):
             issues.append("SMTP_FROM must be configured when SMTP_HOST is set")
 
+    if env in {"production", "staging"} and (app.config.get("LOG_FORMAT") or "text").lower() != "json":
+        issues.append("LOG_FORMAT should be json in production and staging")
+
+    if env == "production" and app.config.get("CORS_ORIGINS") == "*":
+        issues.append("CORS_ORIGINS must not be wildcard in production")
+
     from app.infrastructure.production_readiness import validate_production_config
 
     if issues:

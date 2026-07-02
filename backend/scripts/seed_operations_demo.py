@@ -42,8 +42,8 @@ def seed_operations_demo():
 
             try:
                 JobRunner.run_job(row, manual=True)
-            except Exception:
-                pass
+            except Exception as exc:
+                print(f"seed job run skipped: {exc}")
 
     BackupService.run_backup({"backup_type": "DATABASE"})
     BackupService.run_backup({"backup_type": "STORAGE"})

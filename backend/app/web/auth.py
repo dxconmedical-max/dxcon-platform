@@ -21,7 +21,7 @@ def verify_password(stored_password, input_password):
             input_password.encode("utf-8"),
             stored_password.encode("utf-8")
         )
-    except:
+    except (ValueError, TypeError):
         return False
 
 

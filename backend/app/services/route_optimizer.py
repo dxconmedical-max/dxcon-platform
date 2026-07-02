@@ -4,7 +4,7 @@ import math
 def to_float(value):
     try:
         return float(value)
-    except:
+    except (TypeError, ValueError):
         return None
 
 

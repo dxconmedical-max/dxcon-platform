@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-07-02T15:17:44.187418+00:00",
+  "release": "enterprise-hardening-pack-2",
+  "checks": {
+    "unit_tests": {
+      "ok": true,
+      "exit_code": 0,
+      "total": null,
+      "tail": [
+        "DXCON worker placeholder active \u2014 configure background jobs before GA"
+      ]
+    },
+    "blueprint_registry": {
+      "ok": true,
+      "passed": 5,
+      "total": 5,
+      "checks": {
+        "app_created": {
+          "ok": true
+        },
+        "blueprints_registered": {
+          "ok": true,
+          "count": 169
+        },
+        "routes_registered": {
+          "ok": true,
+          "count": 861
+        },
+        "no_duplicate_routes": {
+          "ok": true,
+          "count": 0,
+          "duplicates": {}
+        },
+        "route_prefixes": {
+          "ok": true,
+          "missing": []
+        }
+      }
+    }
+  },
+  "ok": true
+}

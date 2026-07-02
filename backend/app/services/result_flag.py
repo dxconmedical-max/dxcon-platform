@@ -2,7 +2,7 @@ def calculate_result_flag(result_value, reference_range):
 
     try:
         value = float(result_value)
-    except:
+    except (TypeError, ValueError):
         return "UNKNOWN"
 
     if not reference_range:
@@ -40,7 +40,7 @@ def calculate_result_flag(result_value, reference_range):
 
             return "NORMAL"
 
-    except:
+    except (TypeError, ValueError):
         return "UNKNOWN"
 
     return "UNKNOWN"

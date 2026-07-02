@@ -4,6 +4,7 @@ from flask import request
 from werkzeug.exceptions import HTTPException
 
 from app.core.api_response import error_response, is_api_path
+from app.core.exceptions import ApiError
 from app.core.request_context import get_request_id
 
 logger = logging.getLogger("dxcon.errors")
@@ -19,16 +20,6 @@ STATUS_CODES = {
     429: "RATE_LIMIT_EXCEEDED",
     500: "INTERNAL_SERVER_ERROR",
 }
-
-
-class ApiError(Exception):
-    def __init__(self, message, status_code=400, code=None, field=None, details=None):
-        super().__init__(message)
-        self.message = message
-        self.status_code = status_code
-        self.code = code or STATUS_CODES.get(status_code, "API_ERROR")
-        self.field = field
-        self.details = details
 
 
 def build_error_response(code, message, status_code, field=None, details=None):
@@ -49,8 +40,9 @@ def register_error_handlers(app):
 
     @app.errorhandler(ApiError)
     def handle_api_error(error):
+        code = error.code or STATUS_CODES.get(error.status_code, "API_ERROR")
         return build_error_response(
-            error.code,
+            code,
             error.message,
             error.status_code,
             field=getattr(error, "field", None),

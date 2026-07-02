@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, request
+from flask import Blueprint, current_app, redirect, request
 
 from app.models.booking_assignment import BookingAssignment
 from app.models.driver import Driver
@@ -209,8 +209,8 @@ def scheduling_partner_page(partner_id):
 def scheduling_partner_generate_slots_page(partner_id):
     try:
         SlotGenerationService.generate_partner_daily_slots(partner_id, days=7)
-    except Exception:
-        pass
+    except Exception as exc:
+        current_app.logger.warning("slot generation failed for partner %s: %s", partner_id, exc)
     return redirect(f"/scheduling/partners/{partner_id}")
 
 

@@ -1,14 +1,9 @@
 from app.core.api_response import init_api_response_envelope
 from app.core.logging_config import configure_logging
-from app.core.metrics import metrics
 from app.core.request_context import init_request_context
 
 
-def init_observability(app):
+def register_middleware(app):
     configure_logging(app)
     init_request_context(app)
     init_api_response_envelope(app)
-
-
-def finalize_observability(app):
-    metrics.set_route_count(len(list(app.url_map.iter_rules())))

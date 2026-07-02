@@ -1,7 +1,11 @@
 # Python
 venv/
+backend/venv/
 __pycache__/
 *.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
 # Database
 *.db
@@ -13,9 +17,16 @@ backups/
 
 # macOS
 .DS_Store
+__MACOSX/
+
+# Editor / temp saves
+*.save
 
 # Environment
 .env
+
+# Upload scratch space
+uploads/tmp/
 
 # Flutter build
 build/
@@ -30,5 +41,7 @@ build/
 *.log
 
 # Generated report job artifacts (local test output)
+generated_reports/
+backend/generated_reports/
 backend/generated_reports/JOB-*.*
 backend/generated_reports/DxCon_Report_*.pdf

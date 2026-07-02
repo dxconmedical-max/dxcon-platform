@@ -8,7 +8,7 @@ def generate_medical_summary(results):
 
         try:
             value = float(result.result_value)
-        except:
+        except (TypeError, ValueError):
             continue
 
         if "hba1c" in name and value >= 6.5:

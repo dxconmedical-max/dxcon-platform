@@ -490,8 +490,12 @@ class ResultReleaseService(ResultGatewayBase):
                     ip_address=ip_address,
                     message=f"Lab result {result.result_code} released",
                 )
-            except Exception:
-                pass
+            except Exception as exc:
+                import logging
+
+                logging.getLogger("dxcon.results").warning(
+                    "order transition skipped for result %s: %s", result.result_code, exc
+                )
 
         db.session.commit()
         return result, release

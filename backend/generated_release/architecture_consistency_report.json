@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-07-02T15:15:54.479441+00:00",
+  "release": "enterprise-hardening-pack-2",
+  "checks": {
+    "bootstrap_layout": {
+      "ok": true,
+      "missing": []
+    },
+    "no_bare_except": {
+      "ok": true,
+      "count": 0,
+      "findings": []
+    },
+    "no_broad_except_pass": {
+      "ok": true,
+      "count": 0,
+      "findings": []
+    },
+    "duplicate_helper_scan": {
+      "ok": true,
+      "count": 0,
+      "duplicates": []
+    }
+  },
+  "ok": true
+}

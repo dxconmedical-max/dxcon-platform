@@ -5,7 +5,7 @@ def generate_interpretation(test_name, result_value, reference_range=None, flag=
 
     try:
         value = float(value_text)
-    except:
+    except (TypeError, ValueError):
         value = None
 
     if "hba1c" in name:
