@@ -187,3 +187,63 @@ def backup_status():
         "recommended_retention": "7-30 days",
         "status": "MANUAL_CHECK_REQUIRED"
     }
+
+
+@system_bp.route("/queues")
+def system_queues():
+    from app.api.system.queue_service import QueueMonitoringService
+
+    payload = QueueMonitoringService.queues()
+    if current_app.config.get("TESTING"):
+        return payload
+    return success_response(payload)[0]
+
+
+@system_bp.route("/workers")
+def system_workers():
+    from app.api.system.queue_service import QueueMonitoringService
+
+    payload = QueueMonitoringService.workers()
+    if current_app.config.get("TESTING"):
+        return payload
+    return success_response(payload)[0]
+
+
+@system_bp.route("/jobs", methods=["GET", "POST"])
+def system_jobs():
+    from flask import request
+
+    from app.api.system.queue_service import QueueMonitoringService
+
+    if request.method == "POST":
+        body = request.get_json(silent=True) or {}
+        payload = QueueMonitoringService.enqueue(
+            body.get("type", "integration.process"),
+            payload=body.get("payload"),
+            tenant_id=body.get("tenant_id"),
+            priority=int(body.get("priority", 0)),
+        )
+        if current_app.config.get("TESTING"):
+            return payload, 201
+        return success_response(payload)[0], 201
+
+    status = request.args.get("status")
+    limit = int(request.args.get("limit", "100"))
+    payload = QueueMonitoringService.jobs(status=status, limit=limit)
+    if current_app.config.get("TESTING"):
+        return payload
+    return success_response(payload)[0]
+
+
+@system_bp.route("/storage")
+def system_storage():
+    from app.storage.metrics import storage_health, storage_metrics
+
+    app = current_app._get_current_object()
+    payload = {
+        "health": storage_health(app),
+        "metrics": storage_metrics(app),
+    }
+    if current_app.config.get("TESTING"):
+        return payload
+    return success_response(payload)[0]

@@ -81,6 +81,10 @@ class Config:
     CACHE_DEFAULT_TTL_SECONDS = int(os.getenv("CACHE_DEFAULT_TTL_SECONDS", "60"))
     SLOW_QUERY_THRESHOLD_MS = float(os.getenv("SLOW_QUERY_THRESHOLD_MS", "100"))
     BACKGROUND_TASK_WORKERS = int(os.getenv("BACKGROUND_TASK_WORKERS", "4"))
+    QUEUE_PROVIDER = os.getenv("QUEUE_PROVIDER", "memory")
+    SCHEDULER_PROVIDER = os.getenv("SCHEDULER_PROVIDER", "apscheduler")
+    CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "")
+    RABBITMQ_URL = os.getenv("RABBITMQ_URL", "")
 
     BUILD_VERSION = os.getenv("BUILD_VERSION", "2.5.0-dev")
     GIT_SHA = os.getenv("GIT_SHA", "local")
@@ -111,3 +115,12 @@ class Config:
 
     STORAGE_PATH = os.getenv("STORAGE_PATH", "uploads")
     STORAGE_BACKEND = os.getenv("STORAGE_BACKEND", "local")
+    STORAGE_PROVIDER = os.getenv("STORAGE_PROVIDER", os.getenv("STORAGE_BACKEND", "local"))
+    S3_BUCKET = os.getenv("S3_BUCKET", "")
+    S3_REGION = os.getenv("S3_REGION", "us-east-1")
+    S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY", "")
+    S3_SECRET_KEY = os.getenv("S3_SECRET_KEY", "")
+    S3_ENDPOINT_URL = os.getenv("S3_ENDPOINT_URL", "")
+    SIGNED_URL_TTL_SECONDS = int(os.getenv("SIGNED_URL_TTL_SECONDS", "3600"))
+    FILE_MAX_SIZE_BYTES = int(os.getenv("FILE_MAX_SIZE_BYTES", str(10 * 1024 * 1024)))
+    FILE_RETENTION_DAYS = int(os.getenv("FILE_RETENTION_DAYS", "365"))

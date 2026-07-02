@@ -34,6 +34,7 @@ from app.models.home_collection import HomeCollection
 from app.models.sample_tracking import SampleTracking
 
 from app.models.result_file import ResultFile
+from app.storage.models import FileMetadata
 from app.models.transport_box import TransportBox
 from app.models.sample_event import SampleEvent
 from app.models.driver import Driver

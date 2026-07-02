@@ -7,6 +7,7 @@ from app.api.shipments.routes import shipments_bp
 from app.api.result_files.routes import result_files_bp
 from app.web.monitor import monitor_web_bp
 from app.api.system.routes import system_bp
+from app.api.files.routes import files_bp
 from app.api.ai_v2.routes import ai_interpret_v2_bp
 from app.api.security.routes import security_api_bp
 from app.api.ops.routes import ops_bp
@@ -201,6 +202,14 @@ def create_app():
     validate_config(app)
     init_observability(app)
     init_observability_platform(app)
+    from app.core.queue.factory import init_queue_platform
+    from app.core.scheduler.factory import init_scheduler_platform
+
+    init_queue_platform(app)
+    init_scheduler_platform(app)
+    from app.storage.factory import init_storage_platform
+
+    init_storage_platform(app)
     MaintenanceService.init_app(app)
     init_security(app)
 
@@ -339,6 +348,7 @@ def create_app():
     app.register_blueprint(admin_security_bp)
     app.register_blueprint(ai_batch_bp)
     app.register_blueprint(system_bp)
+    app.register_blueprint(files_bp)
     app.register_blueprint(crm_bp)
     app.register_blueprint(lab_bp)
     app.register_blueprint(logistics_platform_bp)
