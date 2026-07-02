@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-07-02T16:08:36.231921+00:00",
+  "release": "enterprise-hardening-pack-7",
+  "checks": {
+    "connection_pool": {
+      "ok": true,
+      "driver": "sqlite",
+      "pool_pre_ping": false,
+      "review_ok": true,
+      "notes": []
+    },
+    "query_patterns": {
+      "ok": true,
+      "timed_query_usages": 1,
+      "raw_sql_usages": 24
+    },
+    "endpoint_latency": {
+      "ok": true,
+      "samples": {
+        "/api/v1/system/health": {
+          "status": 200,
+          "duration_ms": 155.2
+        },
+        "/api/v1/system/version": {
+          "status": 200,
+          "duration_ms": 0.82
+        },
+        "/api/v1/system/stats": {
+          "status": 200,
+          "duration_ms": 9.77
+        }
+      },
+      "slow_endpoints": []
+    },
+    "performance_module": {
+      "ok": true
+    }
+  },
+  "score": 100,
+  "ok": true
+}

@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-07-02T16:08:36.278223+00:00",
+  "release": "enterprise-hardening-pack-7",
+  "checks": {
+    "redis_usage": {
+      "ok": true,
+      "references": 10
+    },
+    "webhook_throughput_hooks": {
+      "ok": true,
+      "references": 33
+    },
+    "queue_throughput_hooks": {
+      "ok": true,
+      "references": 40
+    }
+  },
+  "ok": true
+}
