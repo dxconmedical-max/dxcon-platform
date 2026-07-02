@@ -165,6 +165,7 @@ from app.api.enterprise.routes import (
     tenants_bp as enterprise_tenants_bp,
 )
 from app.web.enterprise_platform import enterprise_web_bp
+from app.api.connectors.routes import connectors_bp
 from app.api.integration_platform.routes import (
     events_bp as integration_events_bp,
     plugins_bp as integration_plugins_bp,
@@ -202,11 +203,6 @@ def create_app():
     validate_config(app)
     init_observability(app)
     init_observability_platform(app)
-    from app.core.queue.factory import init_queue_platform
-    from app.core.scheduler.factory import init_scheduler_platform
-
-    init_queue_platform(app)
-    init_scheduler_platform(app)
     from app.storage.factory import init_storage_platform
 
     init_storage_platform(app)
@@ -381,6 +377,7 @@ def create_app():
     app.register_blueprint(enterprise_audit_bp)
     app.register_blueprint(enterprise_web_bp)
     app.register_blueprint(integration_plugins_bp)
+    app.register_blueprint(connectors_bp)
     app.register_blueprint(integration_events_bp)
     app.register_blueprint(integration_webhooks_bp)
     app.register_blueprint(integration_queue_bp)

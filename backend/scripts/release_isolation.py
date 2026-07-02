@@ -41,6 +41,30 @@ class ReleaseSpec:
 
 
 RELEASES: tuple[ReleaseSpec, ...] = (
+    ReleaseSpec("staging-sprint-5-integration-hardening", "Integration Platform Hardening", (
+        "backend/app/webhooks/",
+        "backend/app/integrations/connector_registry.py",
+        "backend/app/integrations/connector_health.py",
+        "backend/app/integrations/outbound_signing.py",
+        "backend/app/integrations/audit_trail.py",
+        "backend/app/integrations/sandbox_tokens.py",
+        "backend/app/integrations/models.py",
+        "backend/app/events/deduplication.py",
+        "backend/app/api/connectors/",
+        "backend/app/api/integrations/routes.py",
+        "backend/app/api/integration_platform/routes.py",
+        "backend/app/events/event_bus.py",
+        "backend/app/services/integration_platform_service.py",
+        "backend/app/core/config.py",
+        "backend/app/models/__init__.py",
+        "backend/scripts/integration_hardening_lib.py",
+        "backend/scripts/verify_integration_hardening.py",
+        "backend/scripts/integration_hardening_smoke.py",
+        "backend/tests/test_webhook_idempotency.py",
+        "backend/tests/test_event_deduplication.py",
+        "backend/tests/test_connector_registry.py",
+        "backend/tests/test_signature_verification.py",
+    )),
     ReleaseSpec("staging-sprint-4-storage", "Object Storage and File Service", (
         "backend/app/storage/",
         "backend/app/api/files/",

@@ -179,7 +179,15 @@ class WebhookEngineService:
         return WebhookSecret.query.filter_by(webhook_id=webhook_id, is_active=True).first()
 
     @staticmethod
-    def deliver(webhook_id, event_type, payload=None, simulate_failure=False):
+    def deliver(webhook_id, event_type, payload=None, simulate_failure=False, idempotency_key=None):
+        from app.webhooks.idempotency import WebhookIdempotencyService
+        from app.webhooks.models import WebhookIdempotencyKey
+
+        if idempotency_key:
+            existing = WebhookIdempotencyKey.query.filter_by(idempotency_key=idempotency_key).first()
+            if existing:
+                return json.loads(existing.response_json or "{}")
+
         endpoint = WebhookEndpoint.query.filter_by(id=webhook_id).first()
         if endpoint is None:
             raise IntegrationError("Webhook not found", 404)
@@ -213,12 +221,17 @@ class WebhookEngineService:
         )
         db.session.add(delivery)
         db.session.commit()
-        return {
+        result = {
             "webhook": endpoint.to_dict(),
             "event": event.to_dict(),
             "delivery": delivery.to_dict(),
             "signature": signature,
         }
+        if idempotency_key:
+            idem = WebhookIdempotencyService.check_or_store(idempotency_key, webhook_id, delivery.id, result)
+            if idem.get("duplicate"):
+                return idem.get("response") or result
+        return result
 
     @staticmethod
     def test(webhook_id, data=None):

@@ -1,5 +1,7 @@
 from flask import Blueprint, request
 
+from app.integrations.audit_trail import IntegrationAuditTrail
+from app.integrations.sandbox_tokens import SandboxTokenService
 from app.services.integration_service import (
     HISPatientService,
     IntegrationError,
@@ -94,5 +96,27 @@ def list_messages():
 
 @integrations_bp.route("/audit", methods=["GET"])
 def list_audit():
+    if request.args.get("scope") == "platform":
+        page = max(int(request.args.get("page", 1)), 1)
+        page_size = min(max(int(request.args.get("page_size", 50)), 1), 200)
+        return IntegrationAuditTrail.list_entries(
+            action=request.args.get("action"),
+            resource_type=request.args.get("resource_type"),
+            page=page,
+            page_size=page_size,
+        )
     payload = IntegrationGatewayService.list_audit(connection_id=request.args.get("connection_id"))
     return payload
+
+
+@integrations_bp.route("/sandbox-token", methods=["POST"])
+def issue_sandbox_token():
+    data = request.get_json(silent=True) or {}
+    partner_id = data.get("partner_id")
+    if not partner_id:
+        return {"error": "partner_id is required"}, 400
+    return SandboxTokenService.issue(
+        partner_id=partner_id,
+        scopes=data.get("scopes"),
+        ttl_seconds=data.get("ttl_seconds"),
+    ), 201

@@ -10,6 +10,17 @@ from app.models.integration_platform import IntegrationDomainEvent, IntegrationE
 class EventBus:
     @classmethod
     def publish(cls, event: DomainEvent):
+        from app.events.deduplication import EventDeduplicationService
+        from app.integrations.audit_trail import IntegrationAuditTrail
+
+        duplicate, existing_id = EventDeduplicationService.is_duplicate(
+            event.event_type,
+            event.payload,
+            event.correlation_id,
+        )
+        if duplicate:
+            return {"event": {"event_id": existing_id, "deduplicated": True}, "deliveries": []}
+
         row = IntegrationDomainEvent(
             id=event.event_id,
             event_code=f"EVT-{event.event_id[:8].upper()}",
@@ -38,6 +49,13 @@ class EventBus:
                 )
             )
         db.session.commit()
+        EventDeduplicationService.register(event.event_id, event.event_type, event.payload, event.correlation_id)
+        IntegrationAuditTrail.write(
+            action="EVENT_PUBLISHED",
+            resource_type="IntegrationDomainEvent",
+            resource_id=event.event_id,
+            detail={"event_type": event.event_type},
+        )
         return {"event": event.to_dict(), "deliveries": deliveries}
 
     @classmethod

@@ -138,6 +138,17 @@ def retry_delivery(delivery_id):
         return _error(exc)
 
 
+@webhooks_bp.route("/replay", methods=["POST"])
+def replay_webhook():
+    from app.webhooks.replay import WebhookReplayService
+
+    data = request.get_json(silent=True) or {}
+    try:
+        return WebhookReplayService.replay_from_payload(data)
+    except IntegrationError as exc:
+        return _error(exc)
+
+
 @queue_bp.route("/jobs", methods=["GET"])
 def list_jobs():
     return IntegrationQueueService.list_jobs(status=request.args.get("status"))
