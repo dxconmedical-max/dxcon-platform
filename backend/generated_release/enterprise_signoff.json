@@ -1,0 +1,60 @@
+{
+  "generated_at": "2026-07-02T17:37:35.741815+00:00",
+  "release": "enterprise-hardening-pack-10",
+  "pack_results": {
+    "pack_3_database": {
+      "ok": true,
+      "score": 100.0
+    },
+    "pack_4_api": {
+      "ok": true,
+      "score": 100.0
+    },
+    "pack_5_operations": {
+      "ok": true,
+      "score": 100.0
+    },
+    "pack_6_security": {
+      "ok": true,
+      "score": 100.0
+    },
+    "pack_7_performance": {
+      "ok": true,
+      "score": 100.0
+    },
+    "pack_8_code_quality": {
+      "ok": true,
+      "score": 100.0
+    },
+    "pack_9_documentation": {
+      "ok": true,
+      "score": 100.0
+    }
+  },
+  "compile": {
+    "ok": true,
+    "exit_code": 0
+  },
+  "unit_tests": {
+    "ok": true,
+    "exit_code": 0,
+    "total": null,
+    "tail": [
+      "DXCON worker placeholder active \u2014 configure background jobs before GA"
+    ]
+  },
+  "release_isolation": {
+    "ok": true,
+    "exit_code": 0,
+    "stdout_tail": [
+      "Changed files by release:",
+      "",
+      "[enterprise-hardening-pack-10 (Enterprise Signoff)]",
+      "  backend/scripts/enterprise_signoff_lib.py",
+      "  backend/scripts/verify_enterprise_hardening_pack10.py",
+      "",
+      "OK: isolated for release enterprise-hardening-pack-10"
+    ]
+  },
+  "ok": true
+}
