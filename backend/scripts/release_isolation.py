@@ -41,6 +41,43 @@ class ReleaseSpec:
 
 
 RELEASES: tuple[ReleaseSpec, ...] = (
+    ReleaseSpec("enterprise-hardening-pack-10", "Enterprise Signoff", (
+        "backend/scripts/enterprise_signoff_lib.py",
+        "backend/scripts/verify_enterprise_hardening_pack10.py",
+    )),
+    ReleaseSpec("enterprise-hardening-pack-9", "Documentation", (
+        "docs/ARCHITECTURE.md",
+        "docs/MODULES.md",
+        "docs/API_REFERENCE.md",
+        "docs/DEPLOYMENT.md",
+        "docs/OPERATIONS.md",
+        "docs/BACKUP.md",
+        "docs/RESTORE.md",
+        "docs/RUNBOOK.md",
+        "docs/DISASTER_RECOVERY.md",
+        "backend/scripts/verify_enterprise_hardening_pack9.py",
+    )),
+    ReleaseSpec("enterprise-hardening-pack-8", "Code Quality", (
+        "backend/scripts/code_quality_excellence_lib.py",
+        "backend/scripts/verify_enterprise_hardening_pack8.py",
+    )),
+    ReleaseSpec("enterprise-hardening-pack-7", "Performance Excellence", (
+        "backend/scripts/performance_excellence_lib.py",
+        "backend/scripts/verify_enterprise_hardening_pack7.py",
+    )),
+    ReleaseSpec("enterprise-hardening-pack-6", "Security Excellence", (
+        "backend/scripts/security_excellence_lib.py",
+        "backend/scripts/verify_enterprise_hardening_pack6.py",
+    )),
+    ReleaseSpec("enterprise-hardening-pack-5", "Operations Excellence", (
+        "backend/scripts/operations_excellence_lib.py",
+        "backend/scripts/verify_enterprise_hardening_pack5.py",
+    )),
+    ReleaseSpec("enterprise-hardening-pack-4", "API Excellence", (
+        "backend/scripts/api_excellence_lib.py",
+        "backend/scripts/verify_enterprise_hardening_pack4.py",
+        "backend/tests/test_api_excellence.py",
+    )),
     ReleaseSpec("enterprise-hardening-pack-3", "Database Excellence", (
         "backend/scripts/enterprise_master_lib.py",
         "backend/scripts/database_excellence_lib.py",

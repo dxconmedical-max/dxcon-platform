@@ -1,0 +1,23 @@
+{
+  "generated_at": "2026-07-02T15:52:43.548568+00:00",
+  "release": "enterprise-hardening-pack-4",
+  "checks": {
+    "duplicate_routes": {
+      "ok": true,
+      "count": 0,
+      "duplicates": {}
+    },
+    "api_prefix": {
+      "ok": true,
+      "api_routes": 626
+    },
+    "health_public": {
+      "ok": true,
+      "status_code": 200,
+      "has_success": false,
+      "legacy_health_ok": true
+    }
+  },
+  "score": 100,
+  "ok": true
+}

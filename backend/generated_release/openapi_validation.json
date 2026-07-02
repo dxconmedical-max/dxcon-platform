@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-07-02T15:52:54.174987+00:00",
+  "release": "enterprise-hardening-pack-4",
+  "checks": {
+    "openapi": {
+      "ok": true,
+      "json_status": 200,
+      "yaml_status": 200,
+      "path_count": 503,
+      "openapi_version": "3.0.3"
+    }
+  },
+  "ok": true
+}
