@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-07-02T16:08:42.475948+00:00",
+  "release": "enterprise-hardening-pack-6",
+  "checks": {
+    "security_headers": {
+      "ok": true,
+      "count": 6
+    },
+    "jwt_configured": {
+      "ok": true
+    },
+    "rate_limit_enabled": {
+      "ok": true
+    },
+    "cors_configured": {
+      "ok": true
+    }
+  },
+  "score": 100,
+  "ok": true
+}
