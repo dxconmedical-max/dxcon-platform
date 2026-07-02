@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-01T12:00:47.226210+00:00",
-  "total_routes": 840,
-  "api_routes": 605,
+  "generated_at": "2026-07-02T08:49:55.427048+00:00",
+  "total_routes": 861,
+  "api_routes": 626,
   "routes": [
     {
       "path": "/",
@@ -210,6 +210,62 @@
       ],
       "endpoint": "admin.get_users",
       "blueprint": "admin"
+    },
+    {
+      "path": "/api/v1/ai-platform/audit",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "ai_platform.list_audit",
+      "blueprint": "ai_platform"
+    },
+    {
+      "path": "/api/v1/ai-platform/infer",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "ai_platform.infer",
+      "blueprint": "ai_platform"
+    },
+    {
+      "path": "/api/v1/ai-platform/prompts",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "ai_platform.list_prompts",
+      "blueprint": "ai_platform"
+    },
+    {
+      "path": "/api/v1/ai-platform/prompts",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "ai_platform.register_prompt",
+      "blueprint": "ai_platform"
+    },
+    {
+      "path": "/api/v1/ai-platform/providers",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "ai_platform.list_providers",
+      "blueprint": "ai_platform"
+    },
+    {
+      "path": "/api/v1/ai-platform/providers",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "ai_platform.register_provider",
+      "blueprint": "ai_platform"
+    },
+    {
+      "path": "/api/v1/ai-platform/usage",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "ai_platform.usage_metrics",
+      "blueprint": "ai_platform"
     },
     {
       "path": "/api/v1/ai-v2/generate-all",
@@ -1082,6 +1138,30 @@
       "blueprint": "companies"
     },
     {
+      "path": "/api/v1/connectors",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "connectors.list_connectors",
+      "blueprint": "connectors"
+    },
+    {
+      "path": "/api/v1/connectors",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "connectors.register_connector",
+      "blueprint": "connectors"
+    },
+    {
+      "path": "/api/v1/connectors/<connector_id>/health",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "connectors.connector_health",
+      "blueprint": "connectors"
+    },
+    {
       "path": "/api/v1/contract-prices",
       "methods": [
         "GET"
@@ -1802,6 +1882,46 @@
       "blueprint": "federation"
     },
     {
+      "path": "/api/v1/files",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "files.list_files",
+      "blueprint": "files"
+    },
+    {
+      "path": "/api/v1/files/<file_id>",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "files.get_file",
+      "blueprint": "files"
+    },
+    {
+      "path": "/api/v1/files/<file_id>/download",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "files.download_file",
+      "blueprint": "files"
+    },
+    {
+      "path": "/api/v1/files/<file_id>/signed-url",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "files.signed_url",
+      "blueprint": "files"
+    },
+    {
+      "path": "/api/v1/files/upload",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "files.upload_file",
+      "blueprint": "files"
+    },
+    {
       "path": "/api/v1/guidelines",
       "methods": [
         "GET"
@@ -2063,6 +2183,14 @@
         "GET"
       ],
       "endpoint": "integrations.list_messages",
+      "blueprint": "integrations"
+    },
+    {
+      "path": "/api/v1/integrations/sandbox-token",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integrations.issue_sandbox_token",
       "blueprint": "integrations"
     },
     {
@@ -4659,6 +4787,15 @@
       "blueprint": "system"
     },
     {
+      "path": "/api/v1/system/jobs",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "endpoint": "system.system_jobs",
+      "blueprint": "system"
+    },
+    {
       "path": "/api/v1/system/live",
       "methods": [
         "GET"
@@ -4688,6 +4825,14 @@
         "GET"
       ],
       "endpoint": "system.system_performance",
+      "blueprint": "system"
+    },
+    {
+      "path": "/api/v1/system/queues",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "system.system_queues",
       "blueprint": "system"
     },
     {
@@ -4723,11 +4868,27 @@
       "blueprint": "system"
     },
     {
+      "path": "/api/v1/system/storage",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "system.system_storage",
+      "blueprint": "system"
+    },
+    {
       "path": "/api/v1/system/version",
       "methods": [
         "GET"
       ],
       "endpoint": "system.version",
+      "blueprint": "system"
+    },
+    {
+      "path": "/api/v1/system/workers",
+      "methods": [
+        "GET"
+      ],
+      "endpoint": "system.system_workers",
       "blueprint": "system"
     },
     {
@@ -4888,6 +5049,14 @@
         "POST"
       ],
       "endpoint": "integration_webhooks.retry_delivery",
+      "blueprint": "integration_webhooks"
+    },
+    {
+      "path": "/api/v1/webhooks/replay",
+      "methods": [
+        "POST"
+      ],
+      "endpoint": "integration_webhooks.replay_webhook",
       "blueprint": "integration_webhooks"
     },
     {

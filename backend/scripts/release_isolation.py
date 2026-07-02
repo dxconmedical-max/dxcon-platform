@@ -41,6 +41,20 @@ class ReleaseSpec:
 
 
 RELEASES: tuple[ReleaseSpec, ...] = (
+    ReleaseSpec("staging-sprint-6-ai-platform", "AI Platform Foundation", (
+        "backend/app/ai_platform/",
+        "backend/app/api/ai_platform/",
+        "backend/app/core/config.py",
+        "backend/app/models/__init__.py",
+        "backend/scripts/ai_platform_lib.py",
+        "backend/scripts/verify_ai_platform.py",
+        "backend/scripts/ai_platform_smoke.py",
+        "backend/tests/test_ai_provider.py",
+        "backend/tests/test_prompt_registry.py",
+        "backend/tests/test_ai_audit.py",
+        "backend/tests/test_ai_safety.py",
+        "backend/tests/test_phi_redaction.py",
+    )),
     ReleaseSpec("staging-sprint-5-integration-hardening", "Integration Platform Hardening", (
         "backend/app/webhooks/",
         "backend/app/integrations/connector_registry.py",

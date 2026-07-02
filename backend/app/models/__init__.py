@@ -266,6 +266,14 @@ from app.models.integration_platform import (
 from app.integrations.models import IntegrationConnector, IntegrationPlatformAuditLog, PartnerSandboxToken
 from app.webhooks.models import WebhookIdempotencyKey, WebhookReplayLog
 from app.events.deduplication import EventDedupRecord
+from app.ai_platform.models import (
+    AIAuditLog,
+    AIInferenceJob,
+    AIProvider,
+    AIUsageMetric,
+    PromptTemplate,
+    PromptVersion,
+)
 from app.models.api_platform import ApiClient, ApiKey, ApiUsageLog
 from app.models.healthcare_standards import (
     DICOMInstanceMetadata,

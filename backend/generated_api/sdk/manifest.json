@@ -1,10 +1,11 @@
 {
-  "route_count": 604,
-  "domain_count": 84,
+  "route_count": 625,
+  "domain_count": 87,
   "domains": [
     "admin",
     "admin-security",
     "ai",
+    "ai-platform",
     "ai-v2",
     "alerts",
     "api-clients",
@@ -20,7 +21,6 @@
     "collector",
     "collector-operations",
     "companies",
-    "contract-prices",
-    "contracts"
+    "connectors"
   ]
 }

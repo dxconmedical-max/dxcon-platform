@@ -129,3 +129,8 @@ class Config:
     WEBHOOK_IDEMPOTENCY_TTL_SECONDS = int(os.getenv("WEBHOOK_IDEMPOTENCY_TTL_SECONDS", "86400"))
     SANDBOX_TOKEN_TTL_SECONDS = int(os.getenv("SANDBOX_TOKEN_TTL_SECONDS", "3600"))
     EVENT_DEDUP_TTL_SECONDS = int(os.getenv("EVENT_DEDUP_TTL_SECONDS", "3600"))
+
+    AI_PLATFORM_PROVIDER = os.getenv("AI_PLATFORM_PROVIDER", "LOCAL")
+    AI_PLATFORM_DEFAULT_MODEL = os.getenv("AI_PLATFORM_DEFAULT_MODEL", "local-advisory-v1")
+    AI_INFERENCE_ASYNC = os.getenv("AI_INFERENCE_ASYNC", "true").lower() in {"1", "true", "yes", "on"}
+    AI_SAFETY_ENFORCED = os.getenv("AI_SAFETY_ENFORCED", "true").lower() in {"1", "true", "yes", "on"}

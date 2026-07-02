@@ -8,6 +8,7 @@ from app.api.result_files.routes import result_files_bp
 from app.web.monitor import monitor_web_bp
 from app.api.system.routes import system_bp
 from app.api.files.routes import files_bp
+from app.api.ai_platform.routes import ai_platform_bp
 from app.api.ai_v2.routes import ai_interpret_v2_bp
 from app.api.security.routes import security_api_bp
 from app.api.ops.routes import ops_bp
@@ -222,6 +223,9 @@ def create_app():
     )
 
     db.init_app(app)
+    from app.ai_platform.factory import init_ai_platform
+
+    init_ai_platform(app)
     init_performance(app)
     jwt.init_app(app)
     init_jwt_security(app)
@@ -345,6 +349,7 @@ def create_app():
     app.register_blueprint(ai_batch_bp)
     app.register_blueprint(system_bp)
     app.register_blueprint(files_bp)
+    app.register_blueprint(ai_platform_bp)
     app.register_blueprint(crm_bp)
     app.register_blueprint(lab_bp)
     app.register_blueprint(logistics_platform_bp)

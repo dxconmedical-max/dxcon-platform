@@ -91,8 +91,8 @@
                 {
                   "name": "plugins",
                   "status": "pass",
-                  "blueprint_count": 166,
-                  "api_v1_route_count": 604
+                  "blueprint_count": 169,
+                  "api_v1_route_count": 625
                 },
                 {
                   "name": "smtp",
@@ -242,7 +242,7 @@
       }
     },
     "go_live_blockers": {
-      "generated_at": "2026-07-01T11:59:47.216901+00:00",
+      "generated_at": "2026-07-02T07:17:57.510824+00:00",
       "app_env": "development",
       "ready": true,
       "blocker_count": 0,
@@ -408,8 +408,8 @@
                 {
                   "name": "plugins",
                   "status": "pass",
-                  "blueprint_count": 166,
-                  "api_v1_route_count": 604
+                  "blueprint_count": 169,
+                  "api_v1_route_count": 625
                 },
                 {
                   "name": "smtp",
@@ -515,7 +515,7 @@
     "ready_for_production": true
   },
   "manifest": {
-    "generated_at": "2026-07-01T11:59:47.218716+00:00",
+    "generated_at": "2026-07-02T07:17:57.512719+00:00",
     "environment": "development",
     "provider": "local",
     "kubernetes_manifests": [
