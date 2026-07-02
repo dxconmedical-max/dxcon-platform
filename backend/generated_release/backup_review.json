@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-07-02T16:05:10.194082+00:00",
+  "release": "enterprise-hardening-pack-5",
+  "checks": {
+    "backup_restore_lib": {
+      "ok": true
+    },
+    "backup_scripts": {
+      "ok": true,
+      "restore_dry_run": true
+    },
+    "operations_backup_api": {
+      "ok": true
+    }
+  },
+  "ok": true
+}

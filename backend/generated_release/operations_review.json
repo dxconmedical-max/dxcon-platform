@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-07-02T16:05:10.193885+00:00",
+  "release": "enterprise-hardening-pack-5",
+  "checks": {
+    "health_endpoints": {
+      "ok": true,
+      "paths": [
+        "/api/v1/system/health",
+        "/api/v1/system/ready",
+        "/api/v1/system/live"
+      ]
+    },
+    "observability_platform": {
+      "ok": true,
+      "metrics": true
+    },
+    "operations_platform": {
+      "ok": true,
+      "maintenance": true
+    },
+    "deployment_readiness": {
+      "ok": true
+    },
+    "runtime_health_probes": {
+      "ok": true,
+      "status_codes": {
+        "health": 200,
+        "ready": 503,
+        "live": 200
+      }
+    }
+  },
+  "score": 100,
+  "ok": true
+}
