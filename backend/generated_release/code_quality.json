@@ -1,0 +1,40 @@
+{
+  "generated_at": "2026-07-02T16:12:15.719238+00:00",
+  "release": "enterprise-hardening-pack-8",
+  "checks": {
+    "no_bare_except": {
+      "ok": true,
+      "count": 0,
+      "findings": []
+    },
+    "no_broad_except_pass": {
+      "ok": true,
+      "count": 0,
+      "findings": []
+    },
+    "duplicate_helpers": {
+      "ok": true,
+      "count": 0,
+      "duplicates": []
+    },
+    "unused_import_sample": {
+      "ok": true,
+      "sample_findings": []
+    },
+    "module_cohesion": {
+      "ok": true,
+      "large_files": [
+        {
+          "file": "app/core/statuses.py",
+          "lines": 1341
+        },
+        {
+          "file": "app/services/collector_operations.py",
+          "lines": 1018
+        }
+      ]
+    }
+  },
+  "score": 100,
+  "ok": true
+}

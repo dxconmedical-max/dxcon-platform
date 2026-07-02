@@ -1,0 +1,39 @@
+{
+  "generated_at": "2026-07-02T16:12:16.677403+00:00",
+  "release": "enterprise-hardening-pack-8",
+  "checks": {
+    "bootstrap_layout": {
+      "ok": true,
+      "missing": []
+    },
+    "blueprint_registry": {
+      "ok": true,
+      "passed": 5,
+      "total": 5,
+      "checks": {
+        "app_created": {
+          "ok": true
+        },
+        "blueprints_registered": {
+          "ok": true,
+          "count": 169
+        },
+        "routes_registered": {
+          "ok": true,
+          "count": 861
+        },
+        "no_duplicate_routes": {
+          "ok": true,
+          "count": 0,
+          "duplicates": {}
+        },
+        "route_prefixes": {
+          "ok": true,
+          "missing": []
+        }
+      }
+    }
+  },
+  "score": 100,
+  "ok": true
+}
