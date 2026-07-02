@@ -41,6 +41,12 @@ class ReleaseSpec:
 
 
 RELEASES: tuple[ReleaseSpec, ...] = (
+    ReleaseSpec("enterprise-hardening-pack-3", "Database Excellence", (
+        "backend/scripts/enterprise_master_lib.py",
+        "backend/scripts/database_excellence_lib.py",
+        "backend/scripts/verify_enterprise_hardening_pack3.py",
+        "backend/tests/test_database_excellence.py",
+    )),
     ReleaseSpec("enterprise-hardening-pack-2", "Code Quality and Production Standards", (
         ".gitignore",
         "backend/.env",

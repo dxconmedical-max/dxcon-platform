@@ -1,0 +1,121 @@
+{
+  "generated_at": "2026-07-02T15:36:12.302692+00:00",
+  "release": "enterprise-hardening-pack-3",
+  "checks": {
+    "model_inventory": {
+      "ok": true,
+      "count": 302,
+      "sample": [
+        {
+          "name": "LISResultMessage",
+          "file": "app/models/lis_result_message.py"
+        },
+        {
+          "name": "MarketplaceBookingTimeline",
+          "file": "app/models/marketplace_booking_timeline.py"
+        },
+        {
+          "name": "ClinicalGuidelinePack",
+          "file": "app/models/ai_cds.py"
+        },
+        {
+          "name": "ClinicalRuleDefinition",
+          "file": "app/models/ai_cds.py"
+        },
+        {
+          "name": "ClinicalDeltaCheck",
+          "file": "app/models/ai_cds.py"
+        },
+        {
+          "name": "ClinicalRiskAssessment",
+          "file": "app/models/ai_cds.py"
+        },
+        {
+          "name": "ClinicalRecommendation",
+          "file": "app/models/ai_cds.py"
+        },
+        {
+          "name": "CriticalAlertEvent",
+          "file": "app/models/ai_cds.py"
+        },
+        {
+          "name": "NotificationDelivery",
+          "file": "app/models/notification_delivery.py"
+        },
+        {
+          "name": "CollectorPayout",
+          "file": "app/models/collector_payout.py"
+        }
+      ]
+    },
+    "audit_fields": {
+      "ok": true,
+      "total_model_files": 167,
+      "with_created_at": 154,
+      "with_updated_at": 52,
+      "with_both": 50,
+      "created_at_coverage_pct": 92.2,
+      "missing_created_at_sample": [
+        "app/models/doctor_patient.py",
+        "app/models/collector_availability.py",
+        "app/models/clinic_doctor.py",
+        "app/models/humidity_reading.py",
+        "app/models/payment_webhook.py",
+        "app/models/battery_event.py",
+        "app/models/partner_capacity.py",
+        "app/models/order_item.py",
+        "app/models/shock_event.py",
+        "app/models/result_release.py",
+        "app/models/gps_reading.py",
+        "app/models/clinic_patient.py",
+        "app/models/temperature_reading.py"
+      ]
+    },
+    "soft_delete": {
+      "ok": true,
+      "strategy": "is_active_boolean",
+      "deleted_at_usages": 0,
+      "is_active_usages": 43,
+      "status_active_usages": 16,
+      "note": "Platform uses is_active/status deactivation rather than deleted_at soft deletes"
+    },
+    "relationship_loading": {
+      "ok": true,
+      "relationship_count": 33,
+      "lazy": 0,
+      "eager_joined_or_selectin": 0,
+      "dynamic": 0
+    },
+    "transaction_patterns": {
+      "ok": true,
+      "session_commits": 425,
+      "session_rollbacks": 9,
+      "session_removes": 0,
+      "pattern": "explicit_commit_rollback"
+    },
+    "alembic_consistency": {
+      "ok": true,
+      "migrations_directory": false,
+      "revision_count": 0,
+      "strategy": "create_all_bootstrap",
+      "note": "Alembic not wired; schema bootstrapped via db.create_all() with startup table verification"
+    },
+    "schema_metadata": {
+      "ok": true,
+      "table_count": 301,
+      "total_indexes": 23,
+      "total_foreign_keys": 245,
+      "total_unique_constraints": 206,
+      "composite_index_declarations": 0,
+      "composite_index_files_sample": []
+    },
+    "migration_validation": {
+      "ok": true,
+      "alembic_present": false,
+      "table_count": 301,
+      "missing_core_tables": []
+    }
+  },
+  "score": 100,
+  "ok": true
+}

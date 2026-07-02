@@ -1,0 +1,172 @@
+{
+  "generated_at": "2026-07-02T15:36:11.375716+00:00",
+  "release": "enterprise-hardening-pack-3",
+  "checks": {
+    "tables_with_indexes": 19,
+    "total_indexes": 23,
+    "foreign_key_count": 245,
+    "unique_constraint_count": 206,
+    "top_indexed_columns": [
+      [
+        "action",
+        2
+      ],
+      [
+        "prompt_id",
+        2
+      ],
+      [
+        "provider_id",
+        2
+      ],
+      [
+        "task_type",
+        2
+      ],
+      [
+        "status",
+        1
+      ],
+      [
+        "provider_type",
+        1
+      ],
+      [
+        "key_prefix",
+        1
+      ],
+      [
+        "clinic_id",
+        1
+      ],
+      [
+        "doctor_id",
+        1
+      ],
+      [
+        "fingerprint",
+        1
+      ],
+      [
+        "adapter_type",
+        1
+      ],
+      [
+        "event_type",
+        1
+      ],
+      [
+        "event_id",
+        1
+      ],
+      [
+        "user_id",
+        1
+      ],
+      [
+        "partner_id",
+        1
+      ]
+    ]
+  },
+  "ok": true,
+  "table_index_sample": {
+    "ai_platform_audit_logs": [
+      {
+        "name": "ix_ai_platform_audit_logs_action",
+        "column_names": [
+          "action"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      }
+    ],
+    "ai_platform_inference_jobs": [
+      {
+        "name": "ix_ai_platform_inference_jobs_prompt_id",
+        "column_names": [
+          "prompt_id"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      },
+      {
+        "name": "ix_ai_platform_inference_jobs_provider_id",
+        "column_names": [
+          "provider_id"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      },
+      {
+        "name": "ix_ai_platform_inference_jobs_status",
+        "column_names": [
+          "status"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      }
+    ],
+    "ai_platform_prompt_versions": [
+      {
+        "name": "ix_ai_platform_prompt_versions_prompt_id",
+        "column_names": [
+          "prompt_id"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      }
+    ],
+    "ai_platform_prompts": [
+      {
+        "name": "ix_ai_platform_prompts_task_type",
+        "column_names": [
+          "task_type"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      }
+    ],
+    "ai_platform_providers": [
+      {
+        "name": "ix_ai_platform_providers_provider_type",
+        "column_names": [
+          "provider_type"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      }
+    ],
+    "ai_platform_usage_metrics": [
+      {
+        "name": "ix_ai_platform_usage_metrics_provider_id",
+        "column_names": [
+          "provider_id"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      },
+      {
+        "name": "ix_ai_platform_usage_metrics_task_type",
+        "column_names": [
+          "task_type"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      }
+    ],
+    "alerts": [],
+    "api_clients": [],
+    "api_keys": [
+      {
+        "name": "ix_api_keys_key_prefix",
+        "column_names": [
+          "key_prefix"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      }
+    ],
+    "api_usage_logs": []
+  }
+}

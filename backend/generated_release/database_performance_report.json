@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-07-02T15:35:40.577332+00:00",
+  "release": "enterprise-hardening-pack-3",
+  "checks": {
+    "connection_pool": {
+      "ok": true,
+      "dialect": "sqlite",
+      "pool_size": null,
+      "max_overflow": null,
+      "pool_pre_ping": false,
+      "review_notes": []
+    },
+    "transaction_boundaries": {
+      "ok": true,
+      "session_commits": 425,
+      "session_rollbacks": 9,
+      "session_removes": 0,
+      "pattern": "explicit_commit_rollback"
+    },
+    "relationship_loading": {
+      "ok": true,
+      "relationship_count": 33,
+      "lazy": 0,
+      "eager_joined_or_selectin": 0,
+      "dynamic": 0
+    },
+    "n_plus_one_risk": {
+      "ok": true,
+      "lazy_relationships": 0,
+      "eager_relationships": 0,
+      "total_relationships": 33
+    }
+  },
+  "score": 100,
+  "ok": true
+}
