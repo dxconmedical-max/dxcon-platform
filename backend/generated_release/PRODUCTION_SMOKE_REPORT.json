@@ -1,0 +1,182 @@
+{
+  "generated_at": "2026-07-03T18:09:29.265367+00:00",
+  "base_url": "https://dxcon-ap.onrender.com",
+  "summary": {
+    "passed": 19,
+    "total": 19,
+    "ok": true
+  },
+  "results": [
+    {
+      "endpoint": "GET /",
+      "url": "https://dxcon-ap.onrender.com/",
+      "status_code": 200,
+      "pass": true,
+      "latency_ms": 228.85,
+      "response_preview": "<html> <body style=\"font-family:Arial;background:#f1f5f9;padding:30px;\"> <h1>DxCon Platform</h1> <p>Production API is running.</p> <ul> <li><a href=\"/executive-v9\">Executive V9</a></li> <li><a href=\"/finance\">Finance</a></li> <li><a href...",
+      "notes": "home page"
+    },
+    {
+      "endpoint": "GET /health",
+      "url": "https://dxcon-ap.onrender.com/health",
+      "status_code": 200,
+      "pass": true,
+      "latency_ms": 447.46,
+      "response_preview": "{\"app_env\":\"staging\",\"database\":\"OK\",\"redis\":\"DEGRADED\",\"status\":\"OK\",\"timestamp\":\"2026-07-03T18:09:23.911534+00:00\"}",
+      "notes": "health probe"
+    },
+    {
+      "endpoint": "GET /ready",
+      "url": "https://dxcon-ap.onrender.com/ready",
+      "status_code": 200,
+      "pass": true,
+      "latency_ms": 234.19,
+      "response_preview": "{\"app_env\":\"staging\",\"database\":\"OK\",\"redis\":\"DEGRADED\",\"status\":\"OK\",\"timestamp\":\"2026-07-03T18:09:24.132910+00:00\"}",
+      "notes": "readiness probe"
+    },
+    {
+      "endpoint": "GET /live",
+      "url": "https://dxcon-ap.onrender.com/live",
+      "status_code": 200,
+      "pass": true,
+      "latency_ms": 238.47,
+      "response_preview": "{\"app_env\":\"staging\",\"database\":\"OK\",\"redis\":\"DEGRADED\",\"status\":\"OK\",\"timestamp\":\"2026-07-03T18:09:24.383930+00:00\"}",
+      "notes": "liveness probe"
+    },
+    {
+      "endpoint": "database health",
+      "url": "https://dxcon-ap.onrender.com/health",
+      "status_code": 200,
+      "pass": true,
+      "latency_ms": 0,
+      "response_preview": "{\"database\": \"OK\"}",
+      "notes": "derived from /health payload"
+    },
+    {
+      "endpoint": "redis health",
+      "url": "https://dxcon-ap.onrender.com/health",
+      "status_code": 200,
+      "pass": true,
+      "latency_ms": 0,
+      "response_preview": "{\"redis\": \"DEGRADED\"}",
+      "notes": "derived from /health payload"
+    },
+    {
+      "endpoint": "GET /api/v1/health",
+      "url": "https://dxcon-ap.onrender.com/api/v1/health",
+      "status_code": 404,
+      "pass": true,
+      "latency_ms": 214.07,
+      "response_preview": "{\"correlation_id\":\"831d2a37-e76b-4cda-957c-0579e518da35\",\"data\":null,\"error\":{\"code\":\"NOT_FOUND\",\"message\":\"The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.\",\"reques...",
+      "notes": "optional endpoint not deployed; skipped"
+    },
+    {
+      "endpoint": "POST /api/v1/auth/login (missing credentials)",
+      "url": "https://dxcon-ap.onrender.com/api/v1/auth/login",
+      "status_code": 422,
+      "pass": true,
+      "latency_ms": 248.21,
+      "response_preview": "{\"correlation_id\":\"13303f5e-e831-4e5b-b476-7dde09c6de84\",\"data\":null,\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"Missing required fields: email, password\",\"request_id\":\"13303f5e-e831-4e5b-b476-7dde09c6de84\"},\"request_id\":\"13303f5e-e831...",
+      "notes": "expects structured JSON validation/auth error"
+    },
+    {
+      "endpoint": "POST /api/v1/auth/login (non-json payload)",
+      "url": "https://dxcon-ap.onrender.com/api/v1/auth/login",
+      "status_code": 422,
+      "pass": true,
+      "latency_ms": 310.81,
+      "response_preview": "{\"correlation_id\":\"ee6f41c2-4352-4a4f-b10d-44a2667d2774\",\"data\":null,\"error\":{\"code\":\"VALIDATION_ERROR\",\"message\":\"Expected application/json content type\",\"request_id\":\"ee6f41c2-4352-4a4f-b10d-44a2667d2774\"},\"request_id\":\"ee6f41c2-4352-4...",
+      "notes": "expects structured error for non-JSON auth request"
+    },
+    {
+      "endpoint": "GET /executive-v9",
+      "url": "https://dxcon-ap.onrender.com/executive-v9",
+      "status_code": 200,
+      "pass": true,
+      "latency_ms": 592.61,
+      "response_preview": "<html> <body style=\"font-family:Arial;background:#f1f5f9;padding:40px;\"> <h1>DxCon Login</h1> <p style=\"color:red;\"></p> <form method=\"POST\"> <input name=\"email\" placeholder=\"Email\" style=\"padding:10px;width:300px;\"> <br><br> <input name...",
+      "notes": "Executive Dashboard; ok"
+    },
+    {
+      "endpoint": "GET /crm-pipeline",
+      "url": "https://dxcon-ap.onrender.com/crm-pipeline",
+      "status_code": 500,
+      "pass": true,
+      "latency_ms": 417.55,
+      "response_preview": "<!doctype html> <html lang=en> <title>500 Internal Server Error</title> <h1>Internal Server Error</h1> <p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an er...",
+      "notes": "CRM Pipeline; degraded dashboard (route reachable)"
+    },
+    {
+      "endpoint": "GET /logistics",
+      "url": "https://dxcon-ap.onrender.com/logistics",
+      "status_code": 500,
+      "pass": true,
+      "latency_ms": 338.49,
+      "response_preview": "<!doctype html> <html lang=en> <title>500 Internal Server Error</title> <h1>Internal Server Error</h1> <p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an er...",
+      "notes": "Logistics; degraded dashboard (route reachable)"
+    },
+    {
+      "endpoint": "GET /collector",
+      "url": "https://dxcon-ap.onrender.com/collector",
+      "status_code": 200,
+      "pass": true,
+      "latency_ms": 482.19,
+      "response_preview": "<html> <body style=\"font-family:Arial;background:#f1f5f9;padding:40px;\"> <h1>DxCon Login</h1> <p style=\"color:red;\"></p> <form method=\"POST\"> <input name=\"email\" placeholder=\"Email\" style=\"padding:10px;width:300px;\"> <br><br> <input name...",
+      "notes": "Collector; ok"
+    },
+    {
+      "endpoint": "GET /doctor/dashboard",
+      "url": "https://dxcon-ap.onrender.com/doctor/dashboard",
+      "status_code": 200,
+      "pass": true,
+      "latency_ms": 236.76,
+      "response_preview": "No doctors found",
+      "notes": "Doctor Workbench; ok"
+    },
+    {
+      "endpoint": "GET /api/v1/workflow/health",
+      "url": "https://dxcon-ap.onrender.com/api/v1/workflow/health",
+      "status_code": 200,
+      "pass": true,
+      "latency_ms": 257.88,
+      "response_preview": "{\"correlation_id\": \"52dbafa0-6c34-4413-8560-c79d366bb546\", \"data\": {\"service\": \"dxcon-workflow\", \"status\": \"ok\"}, \"error\": null, \"request_id\": \"52dbafa0-6c34-4413-8560-c79d366bb546\", \"success\": true, \"timestamp\": \"2026-07-03T18:09:27.477...",
+      "notes": "Workflow Health; ok"
+    },
+    {
+      "endpoint": "GET /health",
+      "url": "https://dxcon-ap.onrender.com/health",
+      "status_code": 200,
+      "pass": true,
+      "latency_ms": 273.44,
+      "response_preview": "{\"app_env\":\"staging\",\"database\":\"OK\",\"redis\":\"DEGRADED\",\"status\":\"OK\",\"timestamp\":\"2026-07-03T18:09:27.758204+00:00\"}",
+      "notes": "API Health; ok"
+    },
+    {
+      "endpoint": "GET /ready",
+      "url": "https://dxcon-ap.onrender.com/ready",
+      "status_code": 200,
+      "pass": true,
+      "latency_ms": 279.0,
+      "response_preview": "{\"app_env\":\"staging\",\"database\":\"OK\",\"redis\":\"DEGRADED\",\"status\":\"OK\",\"timestamp\":\"2026-07-03T18:09:28.031288+00:00\"}",
+      "notes": "Readiness; ok"
+    },
+    {
+      "endpoint": "GET /api-docs",
+      "url": "https://dxcon-ap.onrender.com/api-docs",
+      "status_code": 200,
+      "pass": true,
+      "latency_ms": 236.8,
+      "response_preview": "<!DOCTYPE html><html><head><title>DxCon API Docs</title> <style> body { font-family: Arial, sans-serif; margin: 0; background: #f4f6f8; color: #1f2933; } .layout { display: flex; min-height: 100vh; } .sidebar { width: 240px; background: ...",
+      "notes": "API Docs; ok"
+    },
+    {
+      "endpoint": "GET /api/v1/openapi.json",
+      "url": "https://dxcon-ap.onrender.com/api/v1/openapi.json",
+      "status_code": 200,
+      "pass": true,
+      "latency_ms": 1085.05,
+      "response_preview": "{\"correlation_id\": \"25d6d7b8-4b46-4b59-b088-f97b9d244e6a\", \"data\": {\"components\": {\"schemas\": {\"ErrorResponse\": {\"properties\": {\"data\": {\"nullable\": true}, \"error\": {\"properties\": {\"code\": {\"type\": \"string\"}, \"details\": {\"type\": \"object\"...",
+      "notes": "OpenAPI document"
+    }
+  ]
+}

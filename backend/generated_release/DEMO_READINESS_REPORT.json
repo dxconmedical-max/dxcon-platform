@@ -1,0 +1,25 @@
+{
+  "checks": {
+    "app_imports": {
+      "ok": true
+    },
+    "required_files": {
+      "ok": true,
+      "missing": []
+    },
+    "generated_release_directory": {
+      "ok": true,
+      "path": "/Users/mac/dxcon-platform/backend/generated_release"
+    },
+    "required_routes": {
+      "ok": true,
+      "missing": [],
+      "count": 737
+    }
+  },
+  "summary": {
+    "passed": 4,
+    "total": 4,
+    "ok": true
+  }
+}
