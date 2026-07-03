@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-07-03T17:55:48.215595+00:00",
+  "mode": "dry_run",
+  "targets": {
+    "super_admin_users": 1,
+    "admin_staff_users": 5,
+    "doctor_users": 10,
+    "laboratories": 5,
+    "partners_clinics": 10,
+    "patients": 100,
+    "test_catalog_items": 200,
+    "orders": 50,
+    "order_items": 50,
+    "sample_collections": 20,
+    "collectors_drivers": 10,
+    "shipments": 20,
+    "invoices": 10,
+    "notifications": 10
+  },
+  "created_counts": {
+    "users": 16,
+    "laboratories": 5,
+    "partners_clinics": 10,
+    "doctor_profiles": 10,
+    "companies": 1,
+    "test_catalog_items": 200,
+    "patients": 100,
+    "orders": 50,
+    "order_items": 50,
+    "sample_collections": 20,
+    "collectors_drivers": 10,
+    "shipments": 20,
+    "invoices": 10,
+    "notifications": 10
+  },
+  "existing_counts": {
+    "users": 0,
+    "laboratories": 0,
+    "partners_clinics": 0,
+    "doctor_profiles": 0,
+    "companies": 0,
+    "test_catalog_items": 0,
+    "patients": 0,
+    "orders": 0,
+    "order_items": 0,
+    "sample_collections": 0,
+    "collectors_drivers": 0,
+    "shipments": 0,
+    "invoices": 0,
+    "notifications": 0
+  },
+  "skipped_models": [],
+  "errors": [],
+  "runtime_seconds": 0.252,
+  "ok": true,
+  "demo_accounts": {
+    "super_admin": "demo-superadmin@demo.dxcon.test",
+    "admin_staff_pattern": "demo-admin-01@demo.dxcon.test .. demo-admin-05@demo.dxcon.test",
+    "doctor_pattern": "demo-doctor-01@demo.dxcon.test .. demo-doctor-10@demo.dxcon.test",
+    "password": "DemoPass123!",
+    "code_prefixes": [
+      "DEMO-LAB-",
+      "DEMO-CLN-",
+      "DEMO-PAT-",
+      "DEMO-TST-",
+      "DEMO-ORD-"
+    ]
+  }
+}
