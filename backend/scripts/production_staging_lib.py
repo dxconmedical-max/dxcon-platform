@@ -243,8 +243,9 @@ def check_audit_timeline(app) -> dict:
         event = AuditTimelineService.record("ProductionStaging", "phase_c_verify", actor={"display_name": "System"})
         listed = AuditTimelineService.list_events(limit=5)
     return {
-        "ok": event is not None and listed.get("total", 0) >= 1,
+        "ok": event is not None and listed.get("count", 0) >= 1,
         "event_types": listed.get("event_types", []),
+        "count": listed.get("count", 0),
     }
 
 

@@ -19,6 +19,7 @@ SHARED_WIRING = {
     "backend/app/__init__.py",
     "backend/app/core/statuses.py",
     "backend/app/models/__init__.py",
+    "backend/scripts/production_staging_lib.py",
 }
 
 GENERATED_ARTIFACT_PREFIXES = (

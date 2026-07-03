@@ -1,0 +1,163 @@
+{
+  "generated_at": "2026-07-03T05:59:22.027668+00:00",
+  "release": "production-staging-phase-c",
+  "phase": "C",
+  "checks": {
+    "monitoring_stack": {
+      "ok": true,
+      "passed": 6,
+      "total": 6,
+      "checks": {
+        "prometheus": {
+          "ok": true,
+          "checks": {
+            "scrape_configs": true,
+            "dxcon_api_job": true,
+            "prometheus_metrics_path": true,
+            "alertmanager_target": true,
+            "health_job": true,
+            "rule_files": true
+          }
+        },
+        "alert_rules": {
+          "ok": true,
+          "present": [
+            "ApiErrorRateHigh",
+            "DatabaseUnavailable",
+            "RedisUnavailable",
+            "QueueBacklogHigh",
+            "WebhookDeliveryFailures",
+            "NotificationDeliveryFailures",
+            "ReadinessFailed"
+          ],
+          "missing": [],
+          "count": 7
+        },
+        "grafana": {
+          "ok": true,
+          "missing": [],
+          "missing_panels": [],
+          "checks": {
+            "prometheus_datasource": true,
+            "loki_datasource": true,
+            "dashboard_provider": true,
+            "overview_dashboard": true,
+            "required_panels": true
+          },
+          "panel_count": 10
+        },
+        "log_readiness": {
+          "ok": true,
+          "checks": {
+            "json_log_format": true,
+            "request_id_header": true,
+            "correlation_id_header": true,
+            "json_formatter": true,
+            "password_redacted": true,
+            "query_token_redacted": true,
+            "structured_redaction": true
+          }
+        },
+        "prometheus_metrics": {
+          "ok": true,
+          "status_code": 200,
+          "present": [
+            "http_requests_total",
+            "http_errors_total",
+            "api_latency_ms",
+            "db_health",
+            "redis_health",
+            "queue_depth",
+            "notification_delivery_success_total",
+            "notification_delivery_failures_total",
+            "webhook_delivery_failures_total",
+            "background_job_pending",
+            "readiness_ok"
+          ],
+          "missing": [],
+          "sample_lines": [
+            "http_requests_total 3.0",
+            "orders_created_total 0.0",
+            "results_approved_total 0.0",
+            "critical_results_total 0.0",
+            "queue_depth 0.0",
+            "webhook_delivery_failures_total 0.0",
+            "notification_delivery_success_total 0.0",
+            "notification_delivery_failures_total 0.0"
+          ]
+        },
+        "route_inventory": {
+          "ok": true,
+          "count": 0
+        }
+      }
+    },
+    "audit_timeline": {
+      "ok": true,
+      "event_types": [
+        "Login",
+        "Logout",
+        "Patient",
+        "Order",
+        "Sample",
+        "Result",
+        "Invoice",
+        "Partner",
+        "Integration",
+        "Notification",
+        "API key"
+      ],
+      "count": 1
+    },
+    "error_monitoring_hooks": {
+      "ok": true,
+      "checks": {
+        "health_endpoint": true,
+        "metrics_endpoint": true,
+        "http_errors_metric": true,
+        "readiness_metric": true
+      }
+    },
+    "structured_logging": {
+      "ok": true,
+      "checks": {
+        "json_log_format": true,
+        "request_id_header": true,
+        "correlation_id_header": true,
+        "json_formatter": true,
+        "password_redacted": true,
+        "query_token_redacted": true,
+        "structured_redaction": true
+      }
+    },
+    "prometheus_alerts": {
+      "ok": true,
+      "present": [
+        "ApiErrorRateHigh",
+        "DatabaseUnavailable",
+        "RedisUnavailable",
+        "QueueBacklogHigh",
+        "WebhookDeliveryFailures",
+        "NotificationDeliveryFailures",
+        "ReadinessFailed"
+      ],
+      "missing": [],
+      "count": 7
+    },
+    "grafana_provisioning": {
+      "ok": true,
+      "missing": [],
+      "missing_panels": [],
+      "checks": {
+        "prometheus_datasource": true,
+        "loki_datasource": true,
+        "dashboard_provider": true,
+        "overview_dashboard": true,
+        "required_panels": true
+      },
+      "panel_count": 10
+    }
+  },
+  "observability_score": 100,
+  "ok": true
+}
