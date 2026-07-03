@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-03T19:06:41.606599+00:00",
+  "generated_at": "2026-07-03T19:57:30.363285+00:00",
   "mode": "summary",
   "targets": {
     "super_admin_users": 1,
@@ -24,14 +24,14 @@
     "orders": 0
   },
   "existing_counts": {
-    "users": 0,
-    "patients": 0,
-    "test_catalog": 0,
-    "orders": 0
+    "users": 16,
+    "patients": 100,
+    "test_catalog": 200,
+    "orders": 50
   },
   "skipped_models": [],
   "errors": [],
-  "runtime_seconds": 0.167,
+  "runtime_seconds": 0.184,
   "ok": true,
   "demo_accounts": {
     "super_admin": "demo-superadmin@demo.dxcon.test",
@@ -61,6 +61,9 @@
           "patient_code",
           "phone"
         ],
+        "primary_key": [
+          "id"
+        ],
         "has_id": true,
         "has_patient_code": true
       },
@@ -81,6 +84,9 @@
           "timezone",
           "updated_at"
         ],
+        "primary_key": [
+          "id"
+        ],
         "has_id": true,
         "has_patient_code": false
       },
@@ -97,6 +103,42 @@
           "status",
           "total_amount"
         ],
+        "primary_key": [
+          "id"
+        ],
+        "has_id": true,
+        "has_patient_code": false
+      },
+      "laboratories": {
+        "columns": [
+          "address",
+          "code",
+          "created_at",
+          "email",
+          "id",
+          "is_active",
+          "name",
+          "phone"
+        ],
+        "primary_key": [
+          "id"
+        ],
+        "has_id": true,
+        "has_patient_code": false
+      },
+      "test_catalogs": {
+        "columns": [
+          "category",
+          "code",
+          "created_at",
+          "id",
+          "name",
+          "price",
+          "sample_type"
+        ],
+        "primary_key": [
+          "id"
+        ],
         "has_id": true,
         "has_patient_code": false
       }
@@ -104,8 +146,8 @@
     "warnings": []
   },
   "create_all": {
-    "executed": true,
+    "executed": false,
     "app_env": "development",
-    "reason": "--allow-create-all"
+    "reason": "development_requires_--allow-create-all"
   }
 }

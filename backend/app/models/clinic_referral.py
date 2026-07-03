@@ -19,8 +19,8 @@ class ClinicReferral(db.Model):
     clinic_id = db.Column(db.String(36), nullable=False)
 
     patient_id = db.Column(
-        db.String(36),
-        db.ForeignKey("patients.id"),
+        db.String(50),
+        db.ForeignKey("patients.patient_code"),
         nullable=False,
     )
 

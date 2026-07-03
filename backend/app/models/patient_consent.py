@@ -15,8 +15,8 @@ class PatientConsent(db.Model):
     )
 
     patient_id = db.Column(
-        db.String(36),
-        db.ForeignKey("patients.id"),
+        db.String(50),
+        db.ForeignKey("patients.patient_code"),
         nullable=False,
     )
 

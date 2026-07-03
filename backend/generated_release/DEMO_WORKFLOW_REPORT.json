@@ -1,0 +1,115 @@
+{
+  "generated_at": "2026-07-03T19:57:31.656410+00:00",
+  "summary": {
+    "checks_passed": 4,
+    "checks_total": 4,
+    "ok": true,
+    "runtime_seconds": 1.027
+  },
+  "checks": {
+    "seeded_counts": {
+      "ok": true,
+      "demo": {
+        "users": 16,
+        "patients": 100,
+        "test_catalog": 200,
+        "orders": 50
+      },
+      "totals": {
+        "users": 16,
+        "patients": 100,
+        "test_catalog": 200,
+        "orders": 50
+      },
+      "optional": {
+        "order_items": 50,
+        "sample_collections": 20
+      }
+    },
+    "dashboard_routes": {
+      "ok": true,
+      "required": [
+        "/",
+        "/executive-v9",
+        "/crm-pipeline",
+        "/logistics",
+        "/reception",
+        "/doctor/dashboard",
+        "/patient/demo"
+      ],
+      "missing": []
+    },
+    "health_endpoints": {
+      "ok": true,
+      "routes": {
+        "/health": {
+          "status_code": 200,
+          "payload": {
+            "app_env": "development",
+            "database": "OK",
+            "redis": "DEGRADED",
+            "status": "OK",
+            "timestamp": "2026-07-03T19:57:31.606211+00:00"
+          },
+          "ok": true
+        },
+        "/ready": {
+          "status_code": 200,
+          "payload": {
+            "app_env": "development",
+            "database": "OK",
+            "redis": "DEGRADED",
+            "status": "OK",
+            "timestamp": "2026-07-03T19:57:31.607335+00:00"
+          },
+          "ok": true
+        },
+        "/live": {
+          "status_code": 200,
+          "payload": {
+            "app_env": "development",
+            "database": "OK",
+            "redis": "DEGRADED",
+            "status": "OK",
+            "timestamp": "2026-07-03T19:57:31.608633+00:00"
+          },
+          "ok": true
+        }
+      }
+    },
+    "dashboard_pages": {
+      "ok": true,
+      "routes": {
+        "/": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/executive-v9": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/crm-pipeline": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/logistics": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/reception": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/doctor/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/patient/demo": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    }
+  },
+  "blockers": []
+}

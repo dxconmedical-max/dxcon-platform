@@ -26,9 +26,11 @@ def index():
     links = [
         ("Executive Dashboard", "/executive-v9"),
         ("CRM Pipeline", "/crm-pipeline"),
-        ("Logistics", "/logistics"),
-        ("Collector", "/collector"),
+        ("Logistics Dashboard", "/logistics"),
+        ("Reception Dashboard", "/reception"),
         ("Doctor Workbench", "/doctor/dashboard"),
+        ("Patient Portal Demo", "/patient/demo"),
+        ("Collector Portal", "/collector"),
         ("Workflow Health", "/api/v1/workflow/health"),
         ("API Health", "/health"),
         ("Readiness", "/ready"),

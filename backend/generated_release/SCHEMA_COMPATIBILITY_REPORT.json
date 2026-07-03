@@ -1,0 +1,782 @@
+{
+  "generated_at": "2026-07-03T19:31:31.114980+00:00",
+  "summary": {
+    "seed_models_checked": 15,
+    "compatible_models": 14,
+    "incompatible_models": 1,
+    "models_changed_for_production_schema": 14
+  },
+  "changed_models": [
+    {
+      "model": "Patient",
+      "table": "patients",
+      "change": "primary_key",
+      "from": "id",
+      "to": "patient_code",
+      "reason": "Production PostgreSQL uses patient_code as patients PK; id column absent."
+    },
+    {
+      "model": "PatientProfile",
+      "table": "patient_profiles",
+      "change": "foreign_key",
+      "from": "patients.id",
+      "to": "patients.patient_code",
+      "reason": "Align patient_profiles.patient_id FK with patients primary key."
+    },
+    {
+      "model": "PatientConsent",
+      "table": "patient_consents",
+      "change": "foreign_key",
+      "from": "patients.id",
+      "to": "patients.patient_code",
+      "reason": "Patient FK target follows patients.patient_code PK."
+    },
+    {
+      "model": "PatientPreference",
+      "table": "patient_preferences",
+      "change": "foreign_key",
+      "from": "patients.id",
+      "to": "patients.patient_code",
+      "reason": "Patient FK target follows patients.patient_code PK."
+    },
+    {
+      "model": "PatientNotificationSetting",
+      "table": "patient_notification_settings",
+      "change": "foreign_key",
+      "from": "patients.id",
+      "to": "patients.patient_code",
+      "reason": "Patient FK target follows patients.patient_code PK."
+    },
+    {
+      "model": "PatientDevice",
+      "table": "patient_devices",
+      "change": "foreign_key",
+      "from": "patients.id",
+      "to": "patients.patient_code",
+      "reason": "Patient FK target follows patients.patient_code PK."
+    },
+    {
+      "model": "DoctorPatient",
+      "table": "doctor_patients",
+      "change": "foreign_key",
+      "from": "patients.id",
+      "to": "patients.patient_code",
+      "reason": "Patient FK target follows patients.patient_code PK."
+    },
+    {
+      "model": "DoctorFollowUp",
+      "table": "doctor_follow_ups",
+      "change": "foreign_key",
+      "from": "patients.id",
+      "to": "patients.patient_code",
+      "reason": "Patient FK target follows patients.patient_code PK."
+    },
+    {
+      "model": "DoctorReferral",
+      "table": "doctor_referrals",
+      "change": "foreign_key",
+      "from": "patients.id",
+      "to": "patients.patient_code",
+      "reason": "Patient FK target follows patients.patient_code PK."
+    },
+    {
+      "model": "DoctorNote",
+      "table": "doctor_notes",
+      "change": "foreign_key",
+      "from": "patients.id",
+      "to": "patients.patient_code",
+      "reason": "Patient FK target follows patients.patient_code PK."
+    },
+    {
+      "model": "ClinicPatient",
+      "table": "clinic_patients",
+      "change": "foreign_key",
+      "from": "patients.id",
+      "to": "patients.patient_code",
+      "reason": "Patient FK target follows patients.patient_code PK."
+    },
+    {
+      "model": "ClinicBooking",
+      "table": "clinic_bookings",
+      "change": "foreign_key",
+      "from": "patients.id",
+      "to": "patients.patient_code",
+      "reason": "Patient FK target follows patients.patient_code PK."
+    },
+    {
+      "model": "ClinicOrder",
+      "table": "clinic_orders",
+      "change": "foreign_key",
+      "from": "patients.id",
+      "to": "patients.patient_code",
+      "reason": "Patient FK target follows patients.patient_code PK."
+    },
+    {
+      "model": "ClinicReferral",
+      "table": "clinic_referrals",
+      "change": "foreign_key",
+      "from": "patients.id",
+      "to": "patients.patient_code",
+      "reason": "Patient FK target follows patients.patient_code PK."
+    }
+  ],
+  "models": [
+    {
+      "table": "users",
+      "table_exists": true,
+      "model_primary_key": [
+        "id"
+      ],
+      "database_primary_key": [
+        "id"
+      ],
+      "primary_key_match": true,
+      "model_columns": [
+        "created_at",
+        "email",
+        "id",
+        "is_active",
+        "password_hash",
+        "phone",
+        "role",
+        "updated_at"
+      ],
+      "database_columns": [
+        "created_at",
+        "email",
+        "id",
+        "is_active",
+        "password_hash",
+        "phone",
+        "role",
+        "updated_at"
+      ],
+      "model_columns_missing_in_db": [],
+      "database_columns_missing_in_model": [],
+      "foreign_key_issues": [],
+      "compatible": true,
+      "model": "User",
+      "module": "app.models.user"
+    },
+    {
+      "table": "patients",
+      "table_exists": true,
+      "model_primary_key": [
+        "patient_code"
+      ],
+      "database_primary_key": [
+        "id"
+      ],
+      "primary_key_match": false,
+      "model_columns": [
+        "address",
+        "created_at",
+        "date_of_birth",
+        "email",
+        "full_name",
+        "gender",
+        "national_id",
+        "patient_code",
+        "phone"
+      ],
+      "database_columns": [
+        "address",
+        "created_at",
+        "date_of_birth",
+        "email",
+        "full_name",
+        "gender",
+        "id",
+        "national_id",
+        "patient_code",
+        "phone"
+      ],
+      "model_columns_missing_in_db": [],
+      "database_columns_missing_in_model": [
+        "id"
+      ],
+      "foreign_key_issues": [],
+      "compatible": false,
+      "model": "Patient",
+      "module": "app.models.patient"
+    },
+    {
+      "table": "patient_profiles",
+      "table_exists": true,
+      "model_primary_key": [
+        "id"
+      ],
+      "database_primary_key": [
+        "id"
+      ],
+      "primary_key_match": true,
+      "model_columns": [
+        "avatar_url",
+        "created_at",
+        "emergency_contact_name",
+        "emergency_contact_phone",
+        "family_members_json",
+        "favorite_clinics_json",
+        "favorite_doctors_json",
+        "id",
+        "language",
+        "patient_id",
+        "qr_code",
+        "qr_payload",
+        "timezone",
+        "updated_at"
+      ],
+      "database_columns": [
+        "avatar_url",
+        "created_at",
+        "emergency_contact_name",
+        "emergency_contact_phone",
+        "family_members_json",
+        "favorite_clinics_json",
+        "favorite_doctors_json",
+        "id",
+        "language",
+        "patient_id",
+        "qr_code",
+        "qr_payload",
+        "timezone",
+        "updated_at"
+      ],
+      "model_columns_missing_in_db": [],
+      "database_columns_missing_in_model": [],
+      "foreign_key_issues": [],
+      "compatible": true,
+      "model": "PatientProfile",
+      "module": "app.models.patient_profile"
+    },
+    {
+      "table": "laboratories",
+      "table_exists": true,
+      "model_primary_key": [
+        "id"
+      ],
+      "database_primary_key": [
+        "id"
+      ],
+      "primary_key_match": true,
+      "model_columns": [
+        "address",
+        "code",
+        "created_at",
+        "email",
+        "id",
+        "is_active",
+        "name",
+        "phone"
+      ],
+      "database_columns": [
+        "address",
+        "code",
+        "created_at",
+        "email",
+        "id",
+        "is_active",
+        "name",
+        "phone"
+      ],
+      "model_columns_missing_in_db": [],
+      "database_columns_missing_in_model": [],
+      "foreign_key_issues": [],
+      "compatible": true,
+      "model": "Laboratory",
+      "module": "app.models.laboratory"
+    },
+    {
+      "table": "partners",
+      "table_exists": true,
+      "model_primary_key": [
+        "id"
+      ],
+      "database_primary_key": [
+        "id"
+      ],
+      "primary_key_match": true,
+      "model_columns": [
+        "address",
+        "api_status",
+        "average_result_time_hours",
+        "city",
+        "completed_orders",
+        "created_at",
+        "display_name",
+        "district",
+        "email",
+        "id",
+        "legal_name",
+        "license_number",
+        "partner_code",
+        "partner_type",
+        "phone",
+        "pickup_sla_minutes",
+        "province",
+        "rating",
+        "representative_name",
+        "response_sla_minutes",
+        "review_count",
+        "status",
+        "tax_code",
+        "updated_at",
+        "verification_note",
+        "working_hours_summary"
+      ],
+      "database_columns": [
+        "address",
+        "api_status",
+        "average_result_time_hours",
+        "city",
+        "completed_orders",
+        "created_at",
+        "display_name",
+        "district",
+        "email",
+        "id",
+        "legal_name",
+        "license_number",
+        "partner_code",
+        "partner_type",
+        "phone",
+        "pickup_sla_minutes",
+        "province",
+        "rating",
+        "representative_name",
+        "response_sla_minutes",
+        "review_count",
+        "status",
+        "tax_code",
+        "updated_at",
+        "verification_note",
+        "working_hours_summary"
+      ],
+      "model_columns_missing_in_db": [],
+      "database_columns_missing_in_model": [],
+      "foreign_key_issues": [],
+      "compatible": true,
+      "model": "Partner",
+      "module": "app.models.partner"
+    },
+    {
+      "table": "doctor_profiles",
+      "table_exists": true,
+      "model_primary_key": [
+        "id"
+      ],
+      "database_primary_key": [
+        "id"
+      ],
+      "primary_key_match": true,
+      "model_columns": [
+        "bio",
+        "created_at",
+        "doctor_code",
+        "doctor_id",
+        "email",
+        "favorite_services_json",
+        "full_name",
+        "id",
+        "license_number",
+        "linked_clinics_json",
+        "phone",
+        "specialty_primary",
+        "status",
+        "updated_at"
+      ],
+      "database_columns": [
+        "bio",
+        "created_at",
+        "doctor_code",
+        "doctor_id",
+        "email",
+        "favorite_services_json",
+        "full_name",
+        "id",
+        "license_number",
+        "linked_clinics_json",
+        "phone",
+        "specialty_primary",
+        "status",
+        "updated_at"
+      ],
+      "model_columns_missing_in_db": [],
+      "database_columns_missing_in_model": [],
+      "foreign_key_issues": [],
+      "compatible": true,
+      "model": "DoctorProfile",
+      "module": "app.models.doctor_profile"
+    },
+    {
+      "table": "companies",
+      "table_exists": true,
+      "model_primary_key": [
+        "id"
+      ],
+      "database_primary_key": [
+        "id"
+      ],
+      "primary_key_match": true,
+      "model_columns": [
+        "address",
+        "company_code",
+        "company_name",
+        "contact_person",
+        "created_at",
+        "email",
+        "id",
+        "phone",
+        "status",
+        "tax_code"
+      ],
+      "database_columns": [
+        "address",
+        "company_code",
+        "company_name",
+        "contact_person",
+        "created_at",
+        "email",
+        "id",
+        "phone",
+        "status",
+        "tax_code"
+      ],
+      "model_columns_missing_in_db": [],
+      "database_columns_missing_in_model": [],
+      "foreign_key_issues": [],
+      "compatible": true,
+      "model": "Company",
+      "module": "app.models.company"
+    },
+    {
+      "table": "test_catalogs",
+      "table_exists": true,
+      "model_primary_key": [
+        "id"
+      ],
+      "database_primary_key": [
+        "id"
+      ],
+      "primary_key_match": true,
+      "model_columns": [
+        "category",
+        "code",
+        "created_at",
+        "id",
+        "name",
+        "price",
+        "sample_type"
+      ],
+      "database_columns": [
+        "category",
+        "code",
+        "created_at",
+        "id",
+        "name",
+        "price",
+        "sample_type"
+      ],
+      "model_columns_missing_in_db": [],
+      "database_columns_missing_in_model": [],
+      "foreign_key_issues": [],
+      "compatible": true,
+      "model": "TestCatalog",
+      "module": "app.models.test_catalog"
+    },
+    {
+      "table": "orders",
+      "table_exists": true,
+      "model_primary_key": [
+        "id"
+      ],
+      "database_primary_key": [
+        "id"
+      ],
+      "primary_key_match": true,
+      "model_columns": [
+        "company_id",
+        "contract_id",
+        "created_at",
+        "id",
+        "laboratory_id",
+        "marketplace_booking_id",
+        "order_code",
+        "patient_id",
+        "status",
+        "total_amount"
+      ],
+      "database_columns": [
+        "company_id",
+        "contract_id",
+        "created_at",
+        "id",
+        "laboratory_id",
+        "marketplace_booking_id",
+        "order_code",
+        "patient_id",
+        "status",
+        "total_amount"
+      ],
+      "model_columns_missing_in_db": [],
+      "database_columns_missing_in_model": [],
+      "foreign_key_issues": [],
+      "compatible": true,
+      "model": "Order",
+      "module": "app.models.order"
+    },
+    {
+      "table": "order_items",
+      "table_exists": true,
+      "model_primary_key": [
+        "id"
+      ],
+      "database_primary_key": [
+        "id"
+      ],
+      "primary_key_match": true,
+      "model_columns": [
+        "id",
+        "order_id",
+        "price",
+        "test_catalog_id"
+      ],
+      "database_columns": [
+        "id",
+        "order_id",
+        "price",
+        "test_catalog_id"
+      ],
+      "model_columns_missing_in_db": [],
+      "database_columns_missing_in_model": [],
+      "foreign_key_issues": [],
+      "compatible": true,
+      "model": "OrderItem",
+      "module": "app.models.order_item"
+    },
+    {
+      "table": "sample_collections",
+      "table_exists": true,
+      "model_primary_key": [
+        "id"
+      ],
+      "database_primary_key": [
+        "id"
+      ],
+      "primary_key_match": true,
+      "model_columns": [
+        "collected_at",
+        "collector_id",
+        "collector_name",
+        "created_at",
+        "id",
+        "marketplace_booking_id",
+        "order_id",
+        "sample_tracking_id",
+        "status"
+      ],
+      "database_columns": [
+        "collected_at",
+        "collector_id",
+        "collector_name",
+        "created_at",
+        "id",
+        "marketplace_booking_id",
+        "order_id",
+        "sample_tracking_id",
+        "status"
+      ],
+      "model_columns_missing_in_db": [],
+      "database_columns_missing_in_model": [],
+      "foreign_key_issues": [],
+      "compatible": true,
+      "model": "SampleCollection",
+      "module": "app.models.sample_collection"
+    },
+    {
+      "table": "drivers",
+      "table_exists": true,
+      "model_primary_key": [
+        "id"
+      ],
+      "database_primary_key": [
+        "id"
+      ],
+      "primary_key_match": true,
+      "model_columns": [
+        "active_vehicle_id",
+        "created_at",
+        "driver_code",
+        "email",
+        "full_name",
+        "home_city",
+        "id",
+        "license_number",
+        "ops_status",
+        "phone",
+        "status",
+        "vehicle_no"
+      ],
+      "database_columns": [
+        "active_vehicle_id",
+        "created_at",
+        "driver_code",
+        "email",
+        "full_name",
+        "home_city",
+        "id",
+        "license_number",
+        "ops_status",
+        "phone",
+        "status",
+        "vehicle_no"
+      ],
+      "model_columns_missing_in_db": [],
+      "database_columns_missing_in_model": [],
+      "foreign_key_issues": [],
+      "compatible": true,
+      "model": "Driver",
+      "module": "app.models.driver"
+    },
+    {
+      "table": "shipments",
+      "table_exists": true,
+      "model_primary_key": [
+        "id"
+      ],
+      "database_primary_key": [
+        "id"
+      ],
+      "primary_key_match": true,
+      "model_columns": [
+        "arrived_at",
+        "collector_id",
+        "created_at",
+        "departed_at",
+        "gps_location",
+        "id",
+        "lab_name",
+        "received_at",
+        "received_by",
+        "receiver_note",
+        "sample_count",
+        "shipment_code",
+        "status",
+        "temperature",
+        "transport_box_id",
+        "updated_at"
+      ],
+      "database_columns": [
+        "arrived_at",
+        "collector_id",
+        "created_at",
+        "departed_at",
+        "gps_location",
+        "id",
+        "lab_name",
+        "received_at",
+        "received_by",
+        "receiver_note",
+        "sample_count",
+        "shipment_code",
+        "status",
+        "temperature",
+        "transport_box_id",
+        "updated_at"
+      ],
+      "model_columns_missing_in_db": [],
+      "database_columns_missing_in_model": [],
+      "foreign_key_issues": [],
+      "compatible": true,
+      "model": "Shipment",
+      "module": "app.models.shipment"
+    },
+    {
+      "table": "invoices",
+      "table_exists": true,
+      "model_primary_key": [
+        "id"
+      ],
+      "database_primary_key": [
+        "id"
+      ],
+      "primary_key_match": true,
+      "model_columns": [
+        "billing_status",
+        "company_id",
+        "created_at",
+        "id",
+        "invoice_no",
+        "medical_order_id",
+        "order_id",
+        "partner_id",
+        "payment_status",
+        "total_amount"
+      ],
+      "database_columns": [
+        "billing_status",
+        "company_id",
+        "created_at",
+        "id",
+        "invoice_no",
+        "medical_order_id",
+        "order_id",
+        "partner_id",
+        "payment_status",
+        "total_amount"
+      ],
+      "model_columns_missing_in_db": [],
+      "database_columns_missing_in_model": [],
+      "foreign_key_issues": [],
+      "compatible": true,
+      "model": "Invoice",
+      "module": "app.models.invoice"
+    },
+    {
+      "table": "notifications",
+      "table_exists": true,
+      "model_primary_key": [
+        "id"
+      ],
+      "database_primary_key": [
+        "id"
+      ],
+      "primary_key_match": true,
+      "model_columns": [
+        "body",
+        "created_at",
+        "id",
+        "metadata_json",
+        "notification_code",
+        "priority",
+        "reference_id",
+        "reference_type",
+        "sent_at",
+        "status",
+        "subject",
+        "template_code"
+      ],
+      "database_columns": [
+        "body",
+        "created_at",
+        "id",
+        "metadata_json",
+        "notification_code",
+        "priority",
+        "reference_id",
+        "reference_type",
+        "sent_at",
+        "status",
+        "subject",
+        "template_code"
+      ],
+      "model_columns_missing_in_db": [],
+      "database_columns_missing_in_model": [],
+      "foreign_key_issues": [],
+      "compatible": true,
+      "model": "Notification",
+      "module": "app.models.notification"
+    }
+  ],
+  "database": "sqlite:////Users/mac/dxcon-platform/backend/instance/./demo_seed_test.db"
+}

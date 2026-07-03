@@ -1,6 +1,7 @@
 from flask import Blueprint, redirect, request
 
 from app.models.doctor_profile import DoctorProfile
+from app.models.order import Order
 from app.services.doctor_portal_service import (
     DoctorDashboardService,
     DoctorPatientService,
@@ -8,6 +9,8 @@ from app.services.doctor_portal_service import (
     DoctorReferralService,
 )
 
+
+from app.web.demo_pilot_lib import DEMO_ORDER_PREFIX, safe_query
 
 doctor_portal_v2_web_bp = Blueprint("doctor_portal_v2_web", __name__)
 
@@ -73,6 +76,11 @@ def doctor_dashboard_page():
         return exc.message, exc.status_code
 
     summary = dashboard["summary"]
+    demo_orders = safe_query(Order, filter_like=("order_code", DEMO_ORDER_PREFIX), limit=10)
+    order_rows = "".join(
+        f"<tr><td>{o.order_code}</td><td>{o.patient_id}</td><td>{o.status}</td><td>{o.total_amount or 0}</td></tr>"
+        for o in demo_orders
+    ) or "<tr><td colspan='4'>No demo orders found.</td></tr>"
     return f"""
     <html><head><title>Doctor Dashboard</title><style>{_styles()}</style></head><body>
     <div class="layout">{_sidebar(doctor_id, "/doctor/dashboard")}<div class="content">
@@ -83,6 +91,10 @@ def doctor_dashboard_page():
         <div class="metric"><span>Follow-ups</span><strong>{summary["follow_ups_pending"]}</strong></div>
         <div class="metric"><span>Results</span><strong>{summary["released_results_total"]}</strong></div>
     </div></div>
+    <div class="card"><h2>Recent Demo Orders</h2>
+    <table><tr><th>Order</th><th>Patient Ref</th><th>Status</th><th>Amount</th></tr>{order_rows}</table>
+    <p style="color:#64748b;">Result review remains a placeholder until lab results are seeded for demo orders.</p>
+    </div>
     </div></div></body></html>
     """
 

@@ -1,12 +1,22 @@
 from flask import Blueprint
 
-from app.models.sample_tracking import SampleTracking
-from app.models.sample_event import SampleEvent
+from app.extensions.db import db
+from app.infrastructure.schema_introspection import table_exists_name
+from app.models.order import Order
 from app.models.home_collection import HomeCollection
 from app.models.driver import Driver
 from app.models.transport_box import TransportBox
-from app.models.dispatch_job import DispatchJob
-from app.extensions.db import db
+from app.models.sample_collection import SampleCollection
+from app.models.sample_event import SampleEvent
+from app.models.sample_tracking import SampleTracking
+from app.models.shipment import Shipment
+from app.web.demo_pilot_lib import (
+    DEMO_ORDER_PREFIX,
+    metric_cards,
+    render_pilot_page,
+    safe_query,
+    seeded_summary,
+)
 
 
 logistics_web_bp = Blueprint("logistics_web", __name__)
@@ -27,74 +37,87 @@ def color(status):
 
 @logistics_web_bp.route("/logistics")
 def logistics_dashboard():
-
-    samples = SampleTracking.query.order_by(
-        SampleTracking.updated_at.desc()
-    ).all()
-
+    summary = seeded_summary()
+    notice = ""
     rows = ""
 
-    for s in samples:
-        rows += f"""
-        <tr>
-            <td>{s.sample_code}</td>
-            <td><b style="color:{color(s.status)}">{s.status}</b></td>
-            <td>{s.collector_id or ""}</td>
-            <td>{s.transport_box_id or ""}</td>
-            <td><a href="{s.map_url() or '#'}" target="_blank">Map</a></td>
-            <td>{s.updated_at}</td>
-        </tr>
+    if table_exists_name("sample_trackings"):
+        try:
+            samples = SampleTracking.query.order_by(SampleTracking.updated_at.desc()).limit(20).all()
+            for s in samples:
+                rows += f"""
+                <tr>
+                    <td>{s.sample_code}</td>
+                    <td><b style="color:{color(s.status)}">{s.status}</b></td>
+                    <td>{s.collector_id or ""}</td>
+                    <td>{s.transport_box_id or ""}</td>
+                    <td><a href="{s.map_url() or '#'}" target="_blank">Map</a></td>
+                    <td>{s.updated_at}</td>
+                </tr>
+                """
+        except Exception:
+            rows = ""
+
+    if not rows and table_exists_name("sample_collections"):
+        notice = """
+        <div class="notice">
+            Sample tracking is unavailable. Showing seeded sample collections and shipments instead.
+        </div>
         """
+        collections = safe_query(SampleCollection, limit=20)
+        shipments = safe_query(Shipment, filter_like=("shipment_code", "DEMO-SHP-"), limit=20) if table_exists_name("shipments") else []
+        for item in collections:
+            rows += f"<tr><td>{item.order_id}</td><td>{item.status}</td><td>{item.collector_name or ''}</td><td>collection</td><td>-</td><td>{item.created_at or ''}</td></tr>"
+        for item in shipments:
+            rows += f"<tr><td>{item.shipment_code}</td><td>{item.status}</td><td>{item.collector_id or ''}</td><td>shipment</td><td>-</td><td>{item.created_at or ''}</td></tr>"
+
+    if not rows:
+        notice = """
+        <div class="notice">
+            Logistics tracking tables are empty or unavailable. Showing demo order logistics status instead.
+        </div>
+        """
+        orders = safe_query(Order, filter_like=("order_code", DEMO_ORDER_PREFIX), limit=20)
+        for order in orders:
+            rows += f"<tr><td>{order.order_code}</td><td>{order.status}</td><td>{order.patient_id}</td><td>order</td><td>-</td><td>{order.created_at or ''}</td></tr>"
+
+    if not rows:
+        rows = "<tr><td colspan='6'>No logistics or demo order data found.</td></tr>"
 
     event_rows = ""
+    if table_exists_name("sample_events"):
+        try:
+            events = SampleEvent.query.order_by(SampleEvent.created_at.desc()).limit(15).all()
+            for e in events:
+                event_rows += f"""
+                <div style="border-left:6px solid {color(e.event_type)};background:white;padding:14px;margin-bottom:10px;border-radius:8px;">
+                    <b>{e.event_type}</b><br>{e.note or ""}<br><small>{e.created_at}</small>
+                </div>
+                """
+        except Exception:
+            event_rows = ""
 
-    events = SampleEvent.query.order_by(
-        SampleEvent.created_at.desc()
-    ).limit(30).all()
+    if not event_rows:
+        event_rows = "<p>No timeline events available. Demo orders and collections are listed above.</p>"
 
-    for e in events:
-        event_rows += f"""
-        <div style="border-left:6px solid {color(e.event_type)};background:white;padding:14px;margin-bottom:10px;border-radius:8px;">
-            <b>{e.event_type}</b><br>
-            {e.note or ""}<br>
-            <small>{e.created_at}</small>
-        </div>
-        """
-
-    return f"""
-    <html>
-    <body style="font-family:Arial;background:#f1f5f9;padding:30px;">
-        <h1>DxCon Logistics Dashboard V5</h1>
-
-        <div style="background:white;padding:20px;border-radius:12px;margin-bottom:20px;">
-            <h2>Live Sample Tracking</h2>
-            <table border="1" cellpadding="10" style="width:100%;border-collapse:collapse;">
-                <tr>
-                    <th>Sample</th>
-                    <th>Status</th>
-                    <th>Collector</th>
-                    <th>Box</th>
-                    <th>GPS</th>
-                    <th>Updated</th>
-                </tr>
-                {rows}
-            </table>
-        </div>
-
-        <div style="background:#f8fafc;padding:20px;border-radius:12px;">
-            <h2>Operations Timeline</h2>
-            {event_rows}
-        </div>
-
-        <br>
-        <a href="/logistics/dispatch">Dispatch Center V6</a> |
-        <a href="/logistics/routes">Route Planner</a> |
-        <a href="/logistics/live-map">Live Map</a> |
-        <a href="/iot-box">IoT Box V7</a> |
-        <a href="/dashboard">Dashboard</a>
-    </body>
-    </html>
+    body = f"""
+    <h1>Logistics Dashboard</h1>
+    <p style="color:#475569;">Sample movement, collections, shipments, or order status fallback.</p>
+    {notice}
+    {metric_cards([
+        ("Demo Orders", summary["orders"]),
+        ("Demo Patients", summary["patients"]),
+        ("Demo Tests", summary["test_catalog"]),
+        ("Demo Users", summary["users"]),
+    ])}
+    <div class="card">
+        <h2>Live Logistics View</h2>
+        <table><tr><th>Reference</th><th>Status</th><th>Actor</th><th>Type</th><th>Link</th><th>Updated</th></tr>{rows}</table>
+    </div>
+    <div class="card"><h2>Operations Timeline</h2>{event_rows}</div>
+    <div class="card"><p><a href="/logistics/dispatch">Dispatch Center</a> · <a href="/shipments">Shipments</a> · <a href="/collector">Collector Portal</a></p></div>
     """
+    return render_pilot_page("Logistics Dashboard", body)
 
 
 @logistics_web_bp.route("/logistics/dispatch")

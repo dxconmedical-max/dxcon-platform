@@ -1,6 +1,8 @@
 from flask import Blueprint, redirect, request
 
+from app.models.order import Order
 from app.models.patient import Patient
+from app.web.demo_pilot_lib import DEMO_ORDER_PREFIX, DEMO_PATIENT_PREFIX, safe_query
 from app.services.patient_portal_service import (
     MedicalHistoryService,
     PatientDashboardService,
@@ -156,3 +158,42 @@ def patient_timeline_page():
     <table><tr><th>When</th><th>Type</th><th>Title</th><th>Status</th></tr>{rows or "<tr><td colspan='4'>No events</td></tr>"}</table>
     </div></div></div></body></html>
     """
+
+
+@patient_portal_v2_web_bp.route("/patient/demo")
+def patient_demo_page():
+    from app.web.demo_pilot_lib import metric_cards, render_pilot_page, seeded_summary
+
+    summary = seeded_summary()
+    patients = safe_query(Patient, filter_like=("patient_code", DEMO_PATIENT_PREFIX), limit=10)
+    patient_rows = "".join(
+        f"<tr><td>{p.patient_code}</td><td>{p.full_name}</td>"
+        f"<td><a href='/patient?patient_id={p.patient_code}'>Open Portal</a></td></tr>"
+        for p in patients
+    ) or "<tr><td colspan='3'>No demo patients found.</td></tr>"
+
+    first_patient = patients[0].patient_code if patients else None
+    if first_patient:
+        orders = Order.query.filter_by(patient_id=first_patient).order_by(Order.created_at.desc()).limit(10).all()
+        order_rows = "".join(
+            f"<tr><td>{o.order_code}</td><td>{o.status}</td><td>{o.total_amount or 0}</td></tr>"
+            for o in orders
+        ) or "<tr><td colspan='3'>No orders for first demo patient.</td></tr>"
+    else:
+        order_rows = "<tr><td colspan='3'>No demo patient selected.</td></tr>"
+
+    body = f"""
+    <h1>Patient Portal Demo</h1>
+    <p style="color:#475569;">Browse seeded demo patients and recent orders.</p>
+    {metric_cards([
+        ("Demo Patients", summary["patients"]),
+        ("Demo Orders", summary["orders"]),
+        ("Demo Tests", summary["test_catalog"]),
+        ("Demo Users", summary["users"]),
+    ])}
+    <div class="card"><h2>Demo Patients</h2>
+    <table><tr><th>Code</th><th>Name</th><th>Portal</th></tr>{patient_rows}</table></div>
+    <div class="card"><h2>Recent Orders (first demo patient)</h2>
+    <table><tr><th>Order</th><th>Status</th><th>Amount</th></tr>{order_rows}</table></div>
+    """
+    return render_pilot_page("Patient Portal Demo", body)

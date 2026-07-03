@@ -1,22 +1,14 @@
 from app.extensions.db import db
 from datetime import datetime
-import uuid
 
 
 class Patient(db.Model):
 
     __tablename__ = "patients"
 
-    id = db.Column(
-        db.String(36),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4())
-    )
-
     patient_code = db.Column(
         db.String(50),
-        unique=True,
-        nullable=False
+        primary_key=True,
     )
 
     full_name = db.Column(
@@ -53,9 +45,14 @@ class Patient(db.Model):
         default=datetime.utcnow
     )
 
+    @property
+    def id(self):
+        """Backward-compatible alias; production PK is patient_code."""
+        return self.patient_code
+
     def to_dict(self):
         return {
-            "id": self.id,
+            "id": self.patient_code,
             "patient_code": self.patient_code,
             "full_name": self.full_name,
             "gender": self.gender,

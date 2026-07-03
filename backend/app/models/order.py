@@ -20,7 +20,7 @@ class Order(db.Model):
     )
 
     patient_id = db.Column(
-        db.String(36),
+        db.String(50),
         nullable=False
     )
 

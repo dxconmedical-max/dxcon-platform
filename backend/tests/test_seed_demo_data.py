@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
+os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 
 
 class SeedDemoDataTestCase(unittest.TestCase):
@@ -46,19 +46,22 @@ class SeedDemoDataTestCase(unittest.TestCase):
     def test_schema_helpers_detect_missing_patient_id(self):
         from app import create_app
         from app.extensions.db import db
-        from scripts.demo_seed_lib import fk_target_compatible, inspect_seed_schema, patient_reference_column
+        from app.infrastructure.schema_introspection import (
+            fk_target_compatible,
+            inspect_seed_schema,
+            patient_reference_column,
+        )
 
         self.assertEqual(patient_reference_column({"patient_code", "full_name"}), "patient_code")
-        self.assertEqual(patient_reference_column({"id", "patient_code"}), "id")
 
         app = create_app()
         app.config["TESTING"] = True
         with app.app_context():
             db.create_all()
-            self.assertTrue(fk_target_compatible("patient_profiles", "patient_id", "patients", "id"))
+            self.assertTrue(fk_target_compatible("patient_profiles", "patient_id", "patients", "patient_code"))
             schema = inspect_seed_schema()
             self.assertIn("patients", schema["tables"])
-            self.assertTrue(schema["tables"]["patients"]["has_id"])
+            self.assertEqual(schema["tables"]["patients"]["primary_key"], ["patient_code"])
 
     def test_create_all_guard_blocks_strict_env(self):
         from app import create_app
