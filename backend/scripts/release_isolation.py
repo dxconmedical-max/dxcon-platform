@@ -42,6 +42,10 @@ class ReleaseSpec:
 
 
 RELEASES: tuple[ReleaseSpec, ...] = (
+    ReleaseSpec("critical-audit-fix", "Source Hygiene and Secret Safety", (
+        "backend/scripts/verify_secret_safety.py",
+        ".gitignore",
+    )),
     ReleaseSpec("production-staging-phase-f", "RC3 Production Candidate", (
         "backend/scripts/verify_production_staging_phase_f.py",
     )),
