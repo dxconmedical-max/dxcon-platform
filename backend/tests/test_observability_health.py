@@ -34,10 +34,13 @@ class ObservabilityHealthTestCase(unittest.TestCase):
             self.assertIn(response.status_code, (200, 503), path)
 
     def test_health_components(self):
-        response = self.client.get("/health")
-        payload = response.get_json()
-        self.assertIn("components", payload)
-        self.assertGreaterEqual(len(payload["components"]), 8)
+        required = ("status", "app_env", "database", "redis", "timestamp")
+        for path in ("/health", "/ready", "/live"):
+            response = self.client.get(path)
+            payload = response.get_json()
+            for key in required:
+                self.assertIn(key, payload, path)
+            self.assertIsInstance(payload["timestamp"], str, path)
 
 
 if __name__ == "__main__":
