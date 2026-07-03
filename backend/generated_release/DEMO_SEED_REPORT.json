@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-03T17:55:48.215595+00:00",
-  "mode": "dry_run",
+  "generated_at": "2026-07-03T19:06:41.606599+00:00",
+  "mode": "summary",
   "targets": {
     "super_admin_users": 1,
     "admin_staff_users": 5,
@@ -18,40 +18,20 @@
     "notifications": 10
   },
   "created_counts": {
-    "users": 16,
-    "laboratories": 5,
-    "partners_clinics": 10,
-    "doctor_profiles": 10,
-    "companies": 1,
-    "test_catalog_items": 200,
-    "patients": 100,
-    "orders": 50,
-    "order_items": 50,
-    "sample_collections": 20,
-    "collectors_drivers": 10,
-    "shipments": 20,
-    "invoices": 10,
-    "notifications": 10
+    "users": 0,
+    "patients": 0,
+    "test_catalog": 0,
+    "orders": 0
   },
   "existing_counts": {
     "users": 0,
-    "laboratories": 0,
-    "partners_clinics": 0,
-    "doctor_profiles": 0,
-    "companies": 0,
-    "test_catalog_items": 0,
     "patients": 0,
-    "orders": 0,
-    "order_items": 0,
-    "sample_collections": 0,
-    "collectors_drivers": 0,
-    "shipments": 0,
-    "invoices": 0,
-    "notifications": 0
+    "test_catalog": 0,
+    "orders": 0
   },
   "skipped_models": [],
   "errors": [],
-  "runtime_seconds": 0.252,
+  "runtime_seconds": 0.167,
   "ok": true,
   "demo_accounts": {
     "super_admin": "demo-superadmin@demo.dxcon.test",
@@ -65,5 +45,67 @@
       "DEMO-TST-",
       "DEMO-ORD-"
     ]
+  },
+  "schema": {
+    "tables": {
+      "patients": {
+        "columns": [
+          "address",
+          "created_at",
+          "date_of_birth",
+          "email",
+          "full_name",
+          "gender",
+          "id",
+          "national_id",
+          "patient_code",
+          "phone"
+        ],
+        "has_id": true,
+        "has_patient_code": true
+      },
+      "patient_profiles": {
+        "columns": [
+          "avatar_url",
+          "created_at",
+          "emergency_contact_name",
+          "emergency_contact_phone",
+          "family_members_json",
+          "favorite_clinics_json",
+          "favorite_doctors_json",
+          "id",
+          "language",
+          "patient_id",
+          "qr_code",
+          "qr_payload",
+          "timezone",
+          "updated_at"
+        ],
+        "has_id": true,
+        "has_patient_code": false
+      },
+      "orders": {
+        "columns": [
+          "company_id",
+          "contract_id",
+          "created_at",
+          "id",
+          "laboratory_id",
+          "marketplace_booking_id",
+          "order_code",
+          "patient_id",
+          "status",
+          "total_amount"
+        ],
+        "has_id": true,
+        "has_patient_code": false
+      }
+    },
+    "warnings": []
+  },
+  "create_all": {
+    "executed": true,
+    "app_env": "development",
+    "reason": "--allow-create-all"
   }
 }

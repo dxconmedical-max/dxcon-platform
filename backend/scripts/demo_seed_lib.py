@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from sqlalchemy import inspect as sa_inspect
+from sqlalchemy import inspect as sa_inspect, insert, text
 
 from app.core.passwords import hash_password
 from app.core.roles import ACCOUNTING, ADMIN, COLLECTOR, DOCTOR, LAB, SUPER_ADMIN
@@ -70,9 +70,112 @@ def table_exists(model) -> bool:
         return False
 
 
+def table_exists_name(table_name: str) -> bool:
+    try:
+        inspector = sa_inspect(db.engine)
+        return table_name in inspector.get_table_names()
+    except Exception:
+        return False
+
+
+def get_table_columns(table_name: str) -> set[str]:
+    try:
+        inspector = sa_inspect(db.engine)
+        if table_name not in inspector.get_table_names():
+            return set()
+        return {column["name"] for column in inspector.get_columns(table_name)}
+    except Exception:
+        return set()
+
+
+def columns_exist(table_name: str, *column_names: str) -> bool:
+    columns = get_table_columns(table_name)
+    return bool(columns) and all(name in columns for name in column_names)
+
+
+def fk_target_compatible(source_table: str, fk_column: str, target_table: str, target_column: str) -> bool:
+    if not table_exists_name(source_table) or not table_exists_name(target_table):
+        return False
+    source_columns = get_table_columns(source_table)
+    target_columns = get_table_columns(target_table)
+    return fk_column in source_columns and target_column in target_columns
+
+
+def inspect_seed_schema() -> dict[str, Any]:
+    schema: dict[str, Any] = {"tables": {}, "warnings": []}
+    for table_name in ("patients", "patient_profiles", "orders"):
+        if not table_exists_name(table_name):
+            continue
+        columns = sorted(get_table_columns(table_name))
+        schema["tables"][table_name] = {
+            "columns": columns,
+            "has_id": "id" in columns,
+            "has_patient_code": "patient_code" in columns,
+        }
+    patient_cols = schema.get("tables", {}).get("patients", {}).get("columns", [])
+    profile_cols = schema.get("tables", {}).get("patient_profiles", {}).get("columns", [])
+    if profile_cols and "patient_id" in profile_cols and "id" not in patient_cols:
+        schema["warnings"].append(
+            "patient_profiles.patient_id references patients.id but patients.id is missing"
+        )
+    return schema
+
+
+def patient_seed_required_columns() -> tuple[str, ...]:
+    return ("patient_code", "full_name")
+
+
+def patient_reference_column(table_columns: set[str]) -> str | None:
+    if "id" in table_columns:
+        return "id"
+    if "patient_code" in table_columns:
+        return "patient_code"
+    return None
+
+
 def count_demo_rows(model, field: str, prefix: str) -> int:
     column = getattr(model, field)
     return model.query.filter(column.like(f"{prefix}%")).count()
+
+
+def count_demo_patients(prefix: str) -> int:
+    if not table_exists_name("patients") or not columns_exist("patients", "patient_code"):
+        return 0
+    result = db.session.execute(
+        text("SELECT COUNT(*) FROM patients WHERE patient_code LIKE :prefix"),
+        {"prefix": f"{prefix}%"},
+    ).scalar()
+    return int(result or 0)
+
+
+def demo_patient_exists(code: str) -> bool:
+    row = db.session.execute(
+        text("SELECT 1 FROM patients WHERE patient_code = :code LIMIT 1"),
+        {"code": code},
+    ).first()
+    return row is not None
+
+
+def load_demo_patient_refs() -> list[str]:
+    patient_columns = get_table_columns("patients")
+    ref_column = patient_reference_column(patient_columns)
+    if ref_column is None or not columns_exist("patients", "patient_code"):
+        return []
+    if ref_column == "id":
+        rows = db.session.execute(
+            text(
+                "SELECT id FROM patients WHERE patient_code LIKE :prefix ORDER BY patient_code"
+            ),
+            {"prefix": "DEMO-PAT-%"},
+        ).all()
+    else:
+        rows = db.session.execute(
+            text(
+                "SELECT patient_code FROM patients WHERE patient_code LIKE :prefix ORDER BY patient_code"
+            ),
+            {"prefix": "DEMO-PAT-%"},
+        ).all()
+    return [row[0] for row in rows]
 
 
 def ensure_user(email: str, role: str, *, dry_run: bool, phone: str | None = None):
@@ -94,17 +197,30 @@ def ensure_user(email: str, role: str, *, dry_run: bool, phone: str | None = Non
     return user, True
 
 
-def run_seed(*, dry_run: bool = False, summary_only: bool = False) -> dict:
+def run_seed(
+    *,
+    dry_run: bool = False,
+    summary_only: bool = False,
+    create_all_meta: dict[str, Any] | None = None,
+) -> dict:
     start = time.perf_counter()
     created_counts: dict[str, int] = {}
     existing_counts: dict[str, int] = {}
     skipped_models: list[dict[str, Any]] = []
     errors: list[str] = []
+    schema_snapshot = inspect_seed_schema()
 
     def skip(name: str, reason: str):
         skipped_models.append({"model": name, "skipped": True, "reason": reason})
 
-    def seed_domain(name: str, model_path: str, class_name: str, runner: Callable[[Any], None]):
+    def seed_domain(
+        name: str,
+        model_path: str,
+        class_name: str,
+        runner: Callable[[Any], None],
+        *,
+        required_columns: tuple[str, ...] | None = None,
+    ):
         model, reason = import_model(model_path, class_name)
         if model is None:
             skip(name, reason or "model_not_found")
@@ -112,10 +228,20 @@ def run_seed(*, dry_run: bool = False, summary_only: bool = False) -> dict:
         if not table_exists(model):
             skip(name, "table_not_found")
             return
+        if required_columns:
+            table_columns = get_table_columns(model.__tablename__)
+            missing = [column for column in required_columns if column not in table_columns]
+            if missing:
+                skip(name, f"missing_columns:{','.join(missing)}")
+                return
         try:
             runner(model)
         except Exception as exc:
             errors.append(f"{name}: {exc}")
+
+    if table_exists_name("patient_profiles"):
+        if not fk_target_compatible("patient_profiles", "patient_id", "patients", "id"):
+            skip("patient_profiles", "fk_target_incompatible:patients.id")
 
     def record(name: str, created: int, existing: int):
         created_counts[name] = created
@@ -134,9 +260,25 @@ def run_seed(*, dry_run: bool = False, summary_only: bool = False) -> dict:
                 skip(name, reason or "table_not_found")
                 existing_counts[name] = 0
                 continue
-            existing_counts[name] = count_demo_rows(model, field, prefix)
+            if name == "patients" and not columns_exist(model.__tablename__, *patient_seed_required_columns()):
+                skip(name, "missing_columns:patient_code,full_name")
+                existing_counts[name] = 0
+                continue
+            if name == "patients" and "id" not in get_table_columns(model.__tablename__):
+                existing_counts[name] = count_demo_patients(prefix)
+            else:
+                existing_counts[name] = count_demo_rows(model, field, prefix)
             created_counts[name] = 0
-        report = _build_report("summary", created_counts, existing_counts, skipped_models, errors, start)
+        report = _build_report(
+            "summary",
+            created_counts,
+            existing_counts,
+            skipped_models,
+            errors,
+            start,
+            schema_snapshot=schema_snapshot,
+            create_all_meta=create_all_meta,
+        )
         write_report(report)
         return report
 
@@ -309,38 +451,52 @@ def run_seed(*, dry_run: bool = False, summary_only: bool = False) -> dict:
     # Patients
     def seed_patients(model):
         prefix = "DEMO-PAT-"
-        existing = count_demo_rows(model, "patient_code", prefix)
+        table_columns = get_table_columns(model.__tablename__)
+        ref_column = patient_reference_column(table_columns)
+        if ref_column is None:
+            skip("patients", "missing_columns:patient_code")
+            return
+
+        existing = count_demo_patients(prefix) if "id" not in table_columns else count_demo_rows(model, "patient_code", prefix)
         created = 0
         for index in range(1, TARGETS["patients"] + 1):
             code = demo_code("PAT", index)
-            if model.query.filter_by(patient_code=code).first():
+            exists = demo_patient_exists(code) if "id" not in table_columns else model.query.filter_by(patient_code=code).first()
+            if exists:
                 continue
             if dry_run:
                 created += 1
                 continue
-            db.session.add(
-                model(
-                    patient_code=code,
-                    full_name=f"Demo Patient {index}",
-                    gender="M" if index % 2 else "F",
-                    date_of_birth=f"1990-{(index % 12) + 1:02d}-{(index % 28) + 1:02d}",
-                    phone=f"091000{index:04d}",
-                    email=f"demo-patient-{index:03d}@{DEMO_DOMAIN}",
-                    address=f"{index} Demo Patient Street",
-                )
-            )
+            row = {
+                "patient_code": code,
+                "full_name": f"Demo Patient {index}",
+                "gender": "M" if index % 2 else "F",
+                "date_of_birth": f"1990-{(index % 12) + 1:02d}-{(index % 28) + 1:02d}",
+                "phone": f"091000{index:04d}",
+                "email": f"demo-patient-{index:03d}@{DEMO_DOMAIN}",
+                "address": f"{index} Demo Patient Street",
+            }
+            payload = {key: value for key, value in row.items() if key in table_columns}
+            if "id" in table_columns and "id" not in payload:
+                payload["id"] = demo_code("PID", index)
+            db.session.execute(insert(model.__table__).values(**payload))
             created += 1
         if not dry_run and created:
             db.session.commit()
         record("patients", created, existing)
 
-    seed_domain("patients", "app.models.patient", "Patient", seed_patients)
+    seed_domain(
+        "patients",
+        "app.models.patient",
+        "Patient",
+        seed_patients,
+        required_columns=patient_seed_required_columns(),
+    )
 
     # Orders and order items
     def seed_orders_and_items(order_model):
         from app.models.order_item import OrderItem
         from app.models.laboratory import Laboratory
-        from app.models.patient import Patient
         from app.models.test_catalog import TestCatalog
 
         if not table_exists(OrderItem):
@@ -350,9 +506,14 @@ def run_seed(*, dry_run: bool = False, summary_only: bool = False) -> dict:
         order_prefix = "DEMO-ORD-"
         existing_orders = count_demo_rows(order_model, "order_code", order_prefix)
         created_orders = created_items = 0
-        patients = labs = tests = []
+        if not patient_reference_column(get_table_columns("patients")):
+            skip("orders", "patient_reference_unavailable")
+            return
+
+        patient_refs: list[str] = []
+        labs = tests = []
         if not dry_run:
-            patients = Patient.query.filter(Patient.patient_code.like("DEMO-PAT-%")).order_by(Patient.patient_code).all()
+            patient_refs = load_demo_patient_refs()
             labs = Laboratory.query.filter(Laboratory.code.like("DEMO-LAB-%")).order_by(Laboratory.code).all()
             tests = TestCatalog.query.filter(TestCatalog.code.like("DEMO-TST-%")).order_by(TestCatalog.code).all()
         for index in range(1, TARGETS["orders"] + 1):
@@ -363,14 +524,14 @@ def run_seed(*, dry_run: bool = False, summary_only: bool = False) -> dict:
                 created_orders += 1
                 created_items += 1
                 continue
-            if not patients or not tests:
+            if not patient_refs or not tests:
                 break
-            patient = patients[(index - 1) % len(patients)]
+            patient_ref = patient_refs[(index - 1) % len(patient_refs)]
             lab = labs[(index - 1) % len(labs)] if labs else None
             test = tests[(index - 1) % len(tests)]
             order = order_model(
                 order_code=code,
-                patient_id=patient.id,
+                patient_id=patient_ref,
                 laboratory_id=lab.id if lab else None,
                 status="PENDING",
                 total_amount=float(test.price or 0),
@@ -568,12 +729,31 @@ def run_seed(*, dry_run: bool = False, summary_only: bool = False) -> dict:
     seed_domain("notifications", "app.models.notification", "Notification", seed_notifications)
 
     mode = "dry_run" if dry_run else "apply"
-    report = _build_report(mode, created_counts, existing_counts, skipped_models, errors, start)
+    report = _build_report(
+        mode,
+        created_counts,
+        existing_counts,
+        skipped_models,
+        errors,
+        start,
+        schema_snapshot=schema_snapshot,
+        create_all_meta=create_all_meta,
+    )
     write_report(report)
     return report
 
 
-def _build_report(mode, created_counts, existing_counts, skipped_models, errors, start):
+def _build_report(
+    mode,
+    created_counts,
+    existing_counts,
+    skipped_models,
+    errors,
+    start,
+    *,
+    schema_snapshot: dict[str, Any] | None = None,
+    create_all_meta: dict[str, Any] | None = None,
+):
     return {
         "generated_at": utc_now(),
         "mode": mode,
@@ -585,6 +765,8 @@ def _build_report(mode, created_counts, existing_counts, skipped_models, errors,
         "runtime_seconds": round(time.perf_counter() - start, 3),
         "ok": not errors,
         "demo_accounts": demo_account_summary(),
+        "schema": schema_snapshot or {},
+        "create_all": create_all_meta or {"executed": False, "reason": "not_requested"},
     }
 
 

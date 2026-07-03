@@ -13,7 +13,30 @@ sys.path.insert(0, str(ROOT))
 
 from app import create_app
 from app.extensions.db import db
+from app.infrastructure.production_readiness import app_env, is_strict_env
 from scripts.demo_seed_lib import REPORT_PATH, run_seed
+
+
+def apply_create_all_guard(app, allow_create_all: bool) -> dict:
+    env = app_env(app)
+    if is_strict_env(app):
+        return {
+            "executed": False,
+            "app_env": env,
+            "reason": f"forbidden_in_{env}",
+        }
+    if allow_create_all:
+        db.create_all()
+        return {
+            "executed": True,
+            "app_env": env,
+            "reason": "--allow-create-all",
+        }
+    return {
+        "executed": False,
+        "app_env": env,
+        "reason": "development_requires_--allow-create-all",
+    }
 
 
 def main() -> int:
@@ -22,6 +45,11 @@ def main() -> int:
     group.add_argument("--dry-run", action="store_true", help="Plan seed actions without writing")
     group.add_argument("--apply", action="store_true", help="Apply demo seed data")
     group.add_argument("--summary", action="store_true", help="Summarize existing demo rows")
+    parser.add_argument(
+        "--allow-create-all",
+        action="store_true",
+        help="Allow db.create_all() in development/local only (never production/staging)",
+    )
     args = parser.parse_args()
 
     if not os.getenv("DATABASE_URL"):
@@ -31,17 +59,23 @@ def main() -> int:
     print("\n=== DXCON DEMO DATA SEED ===\n")
     app = create_app()
     with app.app_context():
-        db.create_all()
+        create_all_meta = apply_create_all_guard(app, args.allow_create_all)
         if args.summary:
-            report = run_seed(summary_only=True)
+            report = run_seed(summary_only=True, create_all_meta=create_all_meta)
         elif args.dry_run:
-            report = run_seed(dry_run=True)
+            report = run_seed(dry_run=True, create_all_meta=create_all_meta)
         else:
-            report = run_seed(dry_run=False)
+            report = run_seed(dry_run=False, create_all_meta=create_all_meta)
 
     print(f"Mode: {report['mode']}")
     print(f"Runtime: {report['runtime_seconds']}s")
     print(f"Report: {REPORT_PATH}\n")
+    create_all = report.get("create_all", {})
+    print(
+        "create_all: "
+        f"executed={create_all.get('executed', False)} "
+        f"reason={create_all.get('reason', 'unknown')}"
+    )
     for name, count in sorted(report.get("created_counts", {}).items()):
         existing = report.get("existing_counts", {}).get(name, 0)
         print(f"{name}: created={count} existing={existing}")

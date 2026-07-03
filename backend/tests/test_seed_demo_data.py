@@ -36,6 +36,41 @@ class SeedDemoDataTestCase(unittest.TestCase):
         self.assertNotIn("truncate", lowered)
         self.assertNotIn(".delete()", lowered)
 
+    def test_seed_script_guards_create_all(self):
+        source = Path(ROOT / "scripts" / "seed_demo_data.py").read_text(encoding="utf-8")
+        self.assertIn("apply_create_all_guard", source)
+        self.assertIn("create_all_meta = apply_create_all_guard(app, args.allow_create_all)", source)
+        guard_fn = source.split("def apply_create_all_guard")[1].split("def main")[0]
+        self.assertEqual(guard_fn.count("db.create_all()"), 1)
+
+    def test_schema_helpers_detect_missing_patient_id(self):
+        from app import create_app
+        from app.extensions.db import db
+        from scripts.demo_seed_lib import fk_target_compatible, inspect_seed_schema, patient_reference_column
+
+        self.assertEqual(patient_reference_column({"patient_code", "full_name"}), "patient_code")
+        self.assertEqual(patient_reference_column({"id", "patient_code"}), "id")
+
+        app = create_app()
+        app.config["TESTING"] = True
+        with app.app_context():
+            db.create_all()
+            self.assertTrue(fk_target_compatible("patient_profiles", "patient_id", "patients", "id"))
+            schema = inspect_seed_schema()
+            self.assertIn("patients", schema["tables"])
+            self.assertTrue(schema["tables"]["patients"]["has_id"])
+
+    def test_create_all_guard_blocks_strict_env(self):
+        from app import create_app
+        from scripts.seed_demo_data import apply_create_all_guard
+
+        app = create_app()
+        app.config["APP_ENV"] = "production"
+        with app.app_context():
+            meta = apply_create_all_guard(app, allow_create_all=True)
+        self.assertFalse(meta["executed"])
+        self.assertIn("forbidden", meta["reason"])
+
     def test_dry_run_works(self):
         from app import create_app
         from app.extensions.db import db
