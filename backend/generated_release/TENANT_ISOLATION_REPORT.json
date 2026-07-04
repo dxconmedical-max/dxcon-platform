@@ -1,0 +1,448 @@
+{
+  "generated_at": "2026-07-04T14:43:13.837529+00:00",
+  "phase": "5.4",
+  "sprint": "Tenant Isolation",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 13,
+    "checks_total": 13,
+    "ok": true,
+    "runtime_seconds": 1.548
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "one_platform": {
+      "ok": true,
+      "routes": {
+        "/tenant-isolation": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/tenant-isolation/clinic-a": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/tenant-isolation/clinic-b": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/tenant-isolation/clinic-c": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/tenant-isolation/isolation": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/tenant-isolation/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/tenant-isolation/platform": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/tenant-isolation/clinic-a": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/tenant-isolation/clinic-b": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/tenant-isolation/clinic-c": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/tenant-isolation/isolation": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/tenant-isolation/inventory": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/tenant-isolation/readiness": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 5
+    },
+    "clinic_a": {
+      "ok": true
+    },
+    "clinic_b": {
+      "ok": true
+    },
+    "clinic_c": {
+      "ok": true
+    },
+    "one_platform_api": {
+      "ok": true
+    },
+    "tenant_isolation": {
+      "ok": true
+    },
+    "legacy_tenants_api_preserved": {
+      "ok": true
+    },
+    "legacy_isolation_api_preserved": {
+      "ok": true
+    },
+    "legacy_tenants_web_preserved": {
+      "ok": true
+    }
+  },
+  "readiness": {
+    "features": [
+      "Clinic A",
+      "Clinic B",
+      "Clinic C",
+      "One Platform",
+      "Tenant Isolation"
+    ],
+    "generated_at": "2026-07-04T14:43:13.854757",
+    "phase": "5.4",
+    "platform": "Tenant Isolation",
+    "sections": {
+      "clinic_a": {
+        "isolation": {
+          "business_unit_count": 0,
+          "isolated": true,
+          "isolation_mode": "STRICT",
+          "organization_count": 1,
+          "schema_name": "tenant_clinic_a",
+          "tenant": {
+            "created_at": "2026-07-04T14:43:13.667327",
+            "id": "1e0a69ba-e9cf-4506-976b-c34ceabfefdf",
+            "isolation_mode": "STRICT",
+            "name": "Clinic A \u2014 Downtown",
+            "schema_name": "tenant_clinic_a",
+            "status": "ACTIVE",
+            "tenant_code": "TEN-CLINIC-A"
+          }
+        },
+        "label": "Clinic A",
+        "organizations": [
+          {
+            "created_at": "2026-07-04T14:43:13.669143",
+            "id": "3d523b6f-f25f-4f48-b13b-b358f1b5b69b",
+            "is_active": true,
+            "level": 0,
+            "name": "Clinic A Root Organization",
+            "org_code": "CLN-A-ROOT",
+            "parent_org_id": null,
+            "tenant_id": "1e0a69ba-e9cf-4506-976b-c34ceabfefdf"
+          }
+        ],
+        "platform_header": "X-Tenant-ID",
+        "rbac_roles": [],
+        "read_only": true,
+        "report": "clinic-a",
+        "tenant": {
+          "created_at": "2026-07-04T14:43:13.667327",
+          "id": "1e0a69ba-e9cf-4506-976b-c34ceabfefdf",
+          "isolation_mode": "STRICT",
+          "name": "Clinic A \u2014 Downtown",
+          "schema_name": "tenant_clinic_a",
+          "status": "ACTIVE",
+          "tenant_code": "TEN-CLINIC-A"
+        }
+      },
+      "clinic_b": {
+        "isolation": {
+          "business_unit_count": 0,
+          "isolated": true,
+          "isolation_mode": "STRICT",
+          "organization_count": 1,
+          "schema_name": "tenant_clinic_b",
+          "tenant": {
+            "created_at": "2026-07-04T14:43:13.669677",
+            "id": "1e4d5c5e-cab3-44ff-9473-042d8a62bb9f",
+            "isolation_mode": "STRICT",
+            "name": "Clinic B \u2014 Riverside",
+            "schema_name": "tenant_clinic_b",
+            "status": "ACTIVE",
+            "tenant_code": "TEN-CLINIC-B"
+          }
+        },
+        "label": "Clinic B",
+        "organizations": [
+          {
+            "created_at": "2026-07-04T14:43:13.670282",
+            "id": "05f78388-c9ae-4a0f-bae0-2e789f4f9ea8",
+            "is_active": true,
+            "level": 0,
+            "name": "Clinic B Root Organization",
+            "org_code": "CLN-B-ROOT",
+            "parent_org_id": null,
+            "tenant_id": "1e4d5c5e-cab3-44ff-9473-042d8a62bb9f"
+          }
+        ],
+        "platform_header": "X-Tenant-ID",
+        "rbac_roles": [],
+        "read_only": true,
+        "report": "clinic-b",
+        "tenant": {
+          "created_at": "2026-07-04T14:43:13.669677",
+          "id": "1e4d5c5e-cab3-44ff-9473-042d8a62bb9f",
+          "isolation_mode": "STRICT",
+          "name": "Clinic B \u2014 Riverside",
+          "schema_name": "tenant_clinic_b",
+          "status": "ACTIVE",
+          "tenant_code": "TEN-CLINIC-B"
+        }
+      },
+      "clinic_c": {
+        "isolation": {
+          "business_unit_count": 0,
+          "isolated": true,
+          "isolation_mode": "STRICT",
+          "organization_count": 1,
+          "schema_name": "tenant_clinic_c",
+          "tenant": {
+            "created_at": "2026-07-04T14:43:13.670714",
+            "id": "b8df157a-531f-4b80-bddd-09fcd1d6920f",
+            "isolation_mode": "STRICT",
+            "name": "Clinic C \u2014 North Campus",
+            "schema_name": "tenant_clinic_c",
+            "status": "ACTIVE",
+            "tenant_code": "TEN-CLINIC-C"
+          }
+        },
+        "label": "Clinic C",
+        "organizations": [
+          {
+            "created_at": "2026-07-04T14:43:13.671276",
+            "id": "6bdd6788-2ac6-4403-af1d-1ddc95f463d5",
+            "is_active": true,
+            "level": 0,
+            "name": "Clinic C Root Organization",
+            "org_code": "CLN-C-ROOT",
+            "parent_org_id": null,
+            "tenant_id": "b8df157a-531f-4b80-bddd-09fcd1d6920f"
+          }
+        ],
+        "platform_header": "X-Tenant-ID",
+        "rbac_roles": [],
+        "read_only": true,
+        "report": "clinic-c",
+        "tenant": {
+          "created_at": "2026-07-04T14:43:13.670714",
+          "id": "b8df157a-531f-4b80-bddd-09fcd1d6920f",
+          "isolation_mode": "STRICT",
+          "name": "Clinic C \u2014 North Campus",
+          "schema_name": "tenant_clinic_c",
+          "status": "ACTIVE",
+          "tenant_code": "TEN-CLINIC-C"
+        }
+      },
+      "one_platform": {
+        "architecture": "Clinic A + Clinic B + Clinic C \u2192 One Platform \u2192 Tenant Isolation",
+        "demo_clinics": [
+          {
+            "isolation": {
+              "business_unit_count": 0,
+              "isolated": true,
+              "isolation_mode": "STRICT",
+              "organization_count": 1,
+              "schema_name": "tenant_clinic_a",
+              "tenant": {
+                "created_at": "2026-07-04T14:43:13.667327",
+                "id": "1e0a69ba-e9cf-4506-976b-c34ceabfefdf",
+                "isolation_mode": "STRICT",
+                "name": "Clinic A \u2014 Downtown",
+                "schema_name": "tenant_clinic_a",
+                "status": "ACTIVE",
+                "tenant_code": "TEN-CLINIC-A"
+              }
+            },
+            "key": "clinic-a",
+            "label": "Clinic A",
+            "tenant": {
+              "created_at": "2026-07-04T14:43:13.667327",
+              "id": "1e0a69ba-e9cf-4506-976b-c34ceabfefdf",
+              "isolation_mode": "STRICT",
+              "name": "Clinic A \u2014 Downtown",
+              "schema_name": "tenant_clinic_a",
+              "status": "ACTIVE",
+              "tenant_code": "TEN-CLINIC-A"
+            }
+          },
+          {
+            "isolation": {
+              "business_unit_count": 0,
+              "isolated": true,
+              "isolation_mode": "STRICT",
+              "organization_count": 1,
+              "schema_name": "tenant_clinic_b",
+              "tenant": {
+                "created_at": "2026-07-04T14:43:13.669677",
+                "id": "1e4d5c5e-cab3-44ff-9473-042d8a62bb9f",
+                "isolation_mode": "STRICT",
+                "name": "Clinic B \u2014 Riverside",
+                "schema_name": "tenant_clinic_b",
+                "status": "ACTIVE",
+                "tenant_code": "TEN-CLINIC-B"
+              }
+            },
+            "key": "clinic-b",
+            "label": "Clinic B",
+            "tenant": {
+              "created_at": "2026-07-04T14:43:13.669677",
+              "id": "1e4d5c5e-cab3-44ff-9473-042d8a62bb9f",
+              "isolation_mode": "STRICT",
+              "name": "Clinic B \u2014 Riverside",
+              "schema_name": "tenant_clinic_b",
+              "status": "ACTIVE",
+              "tenant_code": "TEN-CLINIC-B"
+            }
+          },
+          {
+            "isolation": {
+              "business_unit_count": 0,
+              "isolated": true,
+              "isolation_mode": "STRICT",
+              "organization_count": 1,
+              "schema_name": "tenant_clinic_c",
+              "tenant": {
+                "created_at": "2026-07-04T14:43:13.670714",
+                "id": "b8df157a-531f-4b80-bddd-09fcd1d6920f",
+                "isolation_mode": "STRICT",
+                "name": "Clinic C \u2014 North Campus",
+                "schema_name": "tenant_clinic_c",
+                "status": "ACTIVE",
+                "tenant_code": "TEN-CLINIC-C"
+              }
+            },
+            "key": "clinic-c",
+            "label": "Clinic C",
+            "tenant": {
+              "created_at": "2026-07-04T14:43:13.670714",
+              "id": "b8df157a-531f-4b80-bddd-09fcd1d6920f",
+              "isolation_mode": "STRICT",
+              "name": "Clinic C \u2014 North Campus",
+              "schema_name": "tenant_clinic_c",
+              "status": "ACTIVE",
+              "tenant_code": "TEN-CLINIC-C"
+            }
+          }
+        ],
+        "overview": {
+          "audit_records": 0,
+          "background_jobs": 0,
+          "feature_flags": 0,
+          "licenses": 0,
+          "organizations": 3,
+          "primary_tenant": {
+            "created_at": "2026-07-04T14:43:13.667327",
+            "id": "1e0a69ba-e9cf-4506-976b-c34ceabfefdf",
+            "isolation_mode": "STRICT",
+            "name": "Clinic A \u2014 Downtown",
+            "schema_name": "tenant_clinic_a",
+            "status": "ACTIVE",
+            "tenant_code": "TEN-CLINIC-A"
+          },
+          "tenants": 3
+        },
+        "platform": "DxCon Intelligent Diagnostic Services Platform",
+        "read_only": true,
+        "report": "one_platform",
+        "tenant_header": "X-Tenant-ID",
+        "tenants_total": 3
+      },
+      "tenant_isolation": {
+        "checks": [
+          {
+            "detail": "Every tenant uses STRICT isolation_mode.",
+            "id": 1,
+            "status": "PASS",
+            "title": "Strict isolation mode"
+          },
+          {
+            "detail": "Each tenant maps to a dedicated schema_name.",
+            "id": 2,
+            "status": "PASS",
+            "title": "Unique schema namespaces"
+          },
+          {
+            "detail": "Organizations reference valid tenant_id values only.",
+            "id": 3,
+            "status": "PASS",
+            "title": "Organization tenant binding"
+          },
+          {
+            "detail": "Clinic A, Clinic B, and Clinic C tenants are provisioned.",
+            "id": 4,
+            "status": "PASS",
+            "title": "Demo clinic coverage"
+          },
+          {
+            "detail": "Platform resolves tenant context from configured header.",
+            "id": 5,
+            "status": "PASS",
+            "title": "Tenant request header"
+          }
+        ],
+        "checks_passed": 5,
+        "checks_total": 5,
+        "legacy_api": "GET /api/v1/tenants/<tenant_id>/isolation",
+        "matrix": [
+          {
+            "isolated": true,
+            "isolation_mode": "STRICT",
+            "name": "Clinic C \u2014 North Campus",
+            "organization_count": 1,
+            "schema_name": "tenant_clinic_c",
+            "tenant_code": "TEN-CLINIC-C"
+          },
+          {
+            "isolated": true,
+            "isolation_mode": "STRICT",
+            "name": "Clinic B \u2014 Riverside",
+            "organization_count": 1,
+            "schema_name": "tenant_clinic_b",
+            "tenant_code": "TEN-CLINIC-B"
+          },
+          {
+            "isolated": true,
+            "isolation_mode": "STRICT",
+            "name": "Clinic A \u2014 Downtown",
+            "organization_count": 1,
+            "schema_name": "tenant_clinic_a",
+            "tenant_code": "TEN-CLINIC-A"
+          }
+        ],
+        "read_only": true,
+        "report": "tenant_isolation",
+        "strict_isolation_count": 3,
+        "tenants_total": 3
+      }
+    },
+    "sprint": "Tenant Isolation",
+    "status": "OK",
+    "summary": {
+      "demo_clinics": 3,
+      "isolation_checks_passed": 5,
+      "isolation_checks_total": 5,
+      "strict_isolation_count": 3,
+      "tenants_total": 3
+    }
+  }
+}
