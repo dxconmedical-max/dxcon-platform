@@ -26,6 +26,7 @@ from app.web.developer_portal import developer_portal_web_bp
 from app.web.enterprise_analytics import enterprise_analytics_web_bp
 from app.web.security_compliance import security_compliance_web_bp
 from app.web.monitoring_center import monitoring_center_web_bp
+from app.web.backup_recovery import backup_recovery_web_bp
 from app.web.pilot_pages import pilot_pages_bp
 from app.web.finance import finance_web_bp
 
@@ -41,6 +42,7 @@ from app.api.developer_portal.routes import developer_portal_bp
 from app.api.enterprise_analytics.routes import enterprise_analytics_bp
 from app.api.security_compliance.routes import security_compliance_bp
 from app.api.monitoring_center.routes import monitoring_center_bp
+from app.api.backup_recovery.routes import backup_recovery_bp
 from app.api.laboratories.routes import laboratories_bp
 from app.api.test_catalogs.routes import test_catalogs_bp
 from app.api.orders.routes import orders_bp
@@ -215,6 +217,7 @@ def register_blueprints(app):
     app.register_blueprint(enterprise_analytics_bp)
     app.register_blueprint(security_compliance_bp)
     app.register_blueprint(monitoring_center_bp)
+    app.register_blueprint(backup_recovery_bp)
     app.register_blueprint(laboratories_bp)
     app.register_blueprint(test_catalogs_bp)
     app.register_blueprint(orders_bp)
@@ -328,6 +331,7 @@ def register_blueprints(app):
     app.register_blueprint(enterprise_analytics_web_bp)
     app.register_blueprint(security_compliance_web_bp)
     app.register_blueprint(monitoring_center_web_bp)
+    app.register_blueprint(backup_recovery_web_bp)
     app.register_blueprint(pilot_pages_bp)
     app.register_blueprint(home_web_bp)
     app.register_blueprint(ops_bp)

@@ -1,0 +1,341 @@
+{
+  "generated_at": "2026-07-04T14:41:15.196347+00:00",
+  "phase": "5.3",
+  "sprint": "Backup & Disaster Recovery",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 13,
+    "checks_total": 13,
+    "ok": true,
+    "runtime_seconds": 1.657
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "backup_dashboard": {
+      "ok": true,
+      "routes": {
+        "/backup-recovery": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/backup-recovery/scheduler": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/backup-recovery/restore": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/backup-recovery/pitr": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/backup-recovery/runbook": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/backup-recovery/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/backup-recovery/scheduler": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/backup-recovery/restore": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/backup-recovery/pitr": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/backup-recovery/runbook": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/backup-recovery/inventory": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/backup-recovery/readiness": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 5
+    },
+    "backup_scheduler": {
+      "ok": true
+    },
+    "restore_verification": {
+      "ok": true
+    },
+    "pitr_checklist": {
+      "ok": true
+    },
+    "disaster_recovery_runbook": {
+      "ok": true
+    },
+    "backup_inventory": {
+      "ok": true
+    },
+    "restore_dry_run": {
+      "ok": true
+    },
+    "legacy_operations_backups_preserved": {
+      "ok": true
+    },
+    "existing_operations_api_preserved": {
+      "ok": true
+    }
+  },
+  "readiness": {
+    "generated_at": "2026-07-04T14:41:15.181815",
+    "phase": "5.3",
+    "sprint": "Backup & Disaster Recovery",
+    "platform": "Backup & Disaster Recovery",
+    "status": "OK",
+    "summary": {
+      "backups_total": 1,
+      "artifacts_total": 1,
+      "scheduled_jobs": 1,
+      "restore_validations_passed": 1,
+      "pitr_checklist_passed": 4,
+      "pitr_checklist_total": 6,
+      "deployment_scripts_available": 3
+    },
+    "features": [
+      "Backup Scheduler",
+      "Restore Verification",
+      "PITR Checklist",
+      "Disaster Recovery Runbook",
+      "Backup Dashboard"
+    ],
+    "sections": {
+      "scheduler": {
+        "report": "backup_scheduler",
+        "read_only": true,
+        "scheduled_jobs": [
+          {
+            "id": "c0eddafa-5562-463b-b428-d8be833a803d",
+            "job_code": "OPS-BACKUP-NIGHTLY",
+            "name": "Nightly Database Backup",
+            "handler": "backup.database",
+            "cron_expression": "0 2 * * *",
+            "status": "ENABLED",
+            "timeout_seconds": 300,
+            "max_retries": 3,
+            "config_json": "{}",
+            "created_at": "2026-07-04T14:41:15.133900"
+          }
+        ],
+        "default_jobs": [
+          {
+            "job_code": "OPS-BACKUP-NIGHTLY",
+            "name": "Nightly Database Backup",
+            "handler": "backup.database",
+            "cron_expression": "0 2 * * *"
+          }
+        ],
+        "handlers": [
+          "backup.database"
+        ],
+        "backup_types": [
+          "DATABASE",
+          "STORAGE",
+          "FULL"
+        ],
+        "recommended_cron": "0 2 * * *",
+        "api_trigger": "POST /api/v1/operations/backups/run"
+      },
+      "restore": {
+        "report": "restore_verification",
+        "read_only": true,
+        "restore_jobs_total": 0,
+        "validations_total": 1,
+        "validations_passed": 1,
+        "recent_restores": [],
+        "recent_validations": [
+          {
+            "id": "cc7779ae-7ec0-46ea-a058-85e63ef8ae3b",
+            "restore_job_id": null,
+            "validation_code": "VAL-4D5D38BE",
+            "status": "PASSED",
+            "detail_json": "{\"backup_id\": \"594df15b-fb98-4a08-88c2-2e74ccb7964c\", \"artifact_count\": 1}",
+            "created_at": "2026-07-04T14:41:15.138790"
+          }
+        ],
+        "dry_run_api": "POST /api/v1/operations/restores/dry-run"
+      },
+      "pitr": {
+        "report": "pitr_checklist",
+        "read_only": true,
+        "database_engine": "sqlite",
+        "pitr_enabled_config": false,
+        "items": [
+          {
+            "id": 1,
+            "title": "Define RPO and RTO targets",
+            "detail": "Production API RTO 4h / RPO 1h per disaster recovery policy.",
+            "status": "DOCUMENTED"
+          },
+          {
+            "id": 2,
+            "title": "Enable automated base backups",
+            "detail": "Nightly database backup via OPS-BACKUP-NIGHTLY or cloud provider snapshots.",
+            "status": "PASS"
+          },
+          {
+            "id": 3,
+            "title": "Configure WAL / point-in-time recovery",
+            "detail": "Enable WAL archiving on PostgreSQL for PITR (production managed DB).",
+            "status": "MANUAL"
+          },
+          {
+            "id": 4,
+            "title": "Validate backup artifacts",
+            "detail": "Run restore dry-run and checksum validation before pilot go-live.",
+            "status": "PASS"
+          },
+          {
+            "id": 5,
+            "title": "Document retention policy",
+            "detail": "Retain daily backups for at least 30 days.",
+            "status": "PASS"
+          },
+          {
+            "id": 6,
+            "title": "Quarterly DR drill",
+            "detail": "Execute deployment/scripts/restore_postgres_dry_run.sh and verify report.",
+            "status": "SCHEDULED"
+          }
+        ],
+        "items_passed": 4,
+        "items_total": 6
+      },
+      "runbook": {
+        "report": "disaster_recovery_runbook",
+        "read_only": true,
+        "objectives": {
+          "production_api": {
+            "rto_hours": 4,
+            "rpo_hours": 1
+          },
+          "file_storage": {
+            "rto_hours": 8,
+            "rpo_hours": 4
+          }
+        },
+        "scenarios": [
+          {
+            "id": "database_loss",
+            "title": "Database loss",
+            "steps": [
+              "Fail over to standby or restore from latest backup.",
+              "Follow docs/RESTORE.md.",
+              "Validate core tables: users, patients, orders."
+            ],
+            "links": [
+              "/backup-recovery/restore",
+              "/api/v1/operations/backups"
+            ]
+          },
+          {
+            "id": "region_loss",
+            "title": "Region / cluster loss",
+            "steps": [
+              "Provision standby stack from deployment/ manifests.",
+              "Restore PostgreSQL and object storage.",
+              "Update DNS/ingress and run Enterprise sign-off verification."
+            ],
+            "links": [
+              "/backup-recovery/pitr",
+              "/monitoring"
+            ]
+          },
+          {
+            "id": "app_regression",
+            "title": "Application regression",
+            "steps": [
+              "GET /api/v1/operations/deployment/rollback-plan",
+              "Redeploy prior container tag (BUILD_VERSION).",
+              "Confirm smoke and security preflight pass."
+            ],
+            "links": [
+              "/operations/deployment",
+              "/security-compliance"
+            ]
+          }
+        ],
+        "communication": [
+          "Page on-call via Alertmanager.",
+          "Record incident in operations audit trail."
+        ],
+        "docs_available": {
+          "backup": true,
+          "disaster_recovery": true,
+          "restore": true
+        },
+        "deployment_scripts": {
+          "backup_postgres": true,
+          "restore_dry_run": true,
+          "backup_uploads": true
+        },
+        "verification_script": "backend/scripts/verify_backup_recovery.py"
+      },
+      "dashboard": {
+        "report": "backup_dashboard",
+        "read_only": true,
+        "status": "OK",
+        "backups_total": 1,
+        "artifacts_total": 1,
+        "backup_types": [
+          "DATABASE",
+          "STORAGE",
+          "FULL"
+        ],
+        "latest_backups": [
+          {
+            "id": "594df15b-fb98-4a08-88c2-2e74ccb7964c",
+            "backup_code": "BKP-6981AC92",
+            "backup_type": "DATABASE",
+            "status": "COMPLETED",
+            "manifest_json": "{\"backup_type\": \"DATABASE\", \"database_uri_prefix\": \"sqlite\", \"created_at\": \"2026-07-04T14:41:15.134186\", \"tables_estimate\": \"metadata-only\"}",
+            "retention_days": 30,
+            "created_at": "2026-07-04T14:41:15.134694",
+            "artifacts": [
+              {
+                "id": "03627a22-3fc2-4e1f-ab43-2116b0081840",
+                "backup_job_id": "594df15b-fb98-4a08-88c2-2e74ccb7964c",
+                "artifact_code": "ART-C02E4491",
+                "storage_path": "/var/backups/dxcon/BKP-6981AC92.manifest",
+                "checksum": "a6a57708a3afefcf618116848cd354a7a64d647bd770a10aa1b6636e53cbfd5e",
+                "size_bytes": 140,
+                "created_at": "2026-07-04T14:41:15.135195"
+              }
+            ]
+          }
+        ],
+        "scheduled_backup_jobs": 1,
+        "restore_validations_passed": 1,
+        "pitr_items_passed": 4
+      }
+    }
+  }
+}
