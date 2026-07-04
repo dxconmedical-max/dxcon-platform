@@ -53,6 +53,9 @@ def redirect_by_role(role):
     if role == "DOCTOR":
         return redirect("/doctor")
 
+    if role == "RECEPTION":
+        return redirect("/reception")
+
     if role == "COLLECTOR":
         return redirect("/collector")
 

@@ -75,6 +75,23 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _login_session(client, *, role: str | None = None) -> bool:
+    with client.session_transaction() as sess:
+        from app.models.user import User
+
+        user = None
+        if role:
+            user = User.query.filter_by(role=role).first()
+        if not user:
+            user = User.query.filter_by(email=DEMO_LOGIN[0]).first()
+        if not user:
+            return False
+        sess["user_id"] = user.id
+        sess["role"] = user.role
+        sess["email"] = user.email
+    return True
+
+
 def _page_ok(client, route: str, *, login: bool = False) -> dict:
     if login:
         with client.session_transaction() as sess:
@@ -90,6 +107,8 @@ def _page_ok(client, route: str, *, login: bool = False) -> dict:
     ok = response.status_code == 200 and len(body) > 100
     if login and route == "/executive":
         ok = ok and "Executive Dashboard" in body
+    if route == "/reception":
+        ok = ok and "Reception Center" in body
     return {"status_code": response.status_code, "ok": ok, "bytes": len(body)}
 
 
@@ -144,6 +163,8 @@ def main() -> int:
         page_results = {}
         pages_ok = True
         for route in PAGE_ROUTES:
+            if route == "/reception":
+                _login_session(client, role="RECEPTION")
             result = _page_ok(client, route)
             page_results[route] = result
             pages_ok = pages_ok and result["ok"]
@@ -179,6 +200,8 @@ def main() -> int:
             if route not in routes:
                 workflow_status[route] = {"ok": False, "reason": "not_registered"}
                 continue
+            if route == "/reception":
+                _login_session(client, role="RECEPTION")
             result = _page_ok(client, route)
             workflow_status[route] = result
             if not result["ok"]:

@@ -51,6 +51,8 @@ TARGETS = {
     "test_results": 500,
     "home_collections": 80,
     "crm_leads": 60,
+    "clinic_bookings": 20,
+    "reception_queue_entries": 30,
 }
 
 
@@ -716,6 +718,86 @@ def run_seed(
         record("home_collections", created, existing)
 
     seed_domain("home_collections", "app.models.home_collection", "HomeCollection", seed_home_collections)
+
+    def seed_clinic_bookings(model):
+        from datetime import datetime, timedelta
+
+        prefix = "DEMO-BK-"
+        existing = count_demo_rows(model, "booking_code", prefix)
+        created = 0
+        patient_refs = load_demo_patient_refs() if not dry_run else []
+        for index in range(1, TARGETS["clinic_bookings"] + 1):
+            code = demo_code("BK", index)
+            if model.query.filter_by(booking_code=code).first():
+                continue
+            if dry_run:
+                created += 1
+                continue
+            if not patient_refs:
+                break
+            patient_ref = patient_refs[(index - 1) % len(patient_refs)]
+            db.session.add(
+                model(
+                    booking_code=code,
+                    clinic_id=f"demo-clinic-{(index % 5) + 1:03d}",
+                    patient_id=patient_ref,
+                    service_name=f"Demo Consultation {index}",
+                    scheduled_at=datetime.utcnow() + timedelta(hours=index % 8),
+                    status="CONFIRMED" if index % 2 else "PENDING",
+                )
+            )
+            created += 1
+        if not dry_run and created:
+            db.session.commit()
+        record("clinic_bookings", created, existing)
+
+    seed_domain("clinic_bookings", "app.models.clinic_booking", "ClinicBooking", seed_clinic_bookings)
+
+    def seed_reception_queue(model):
+        from datetime import date, datetime
+
+        queue_day = date.today()
+        existing = model.query.filter(model.queue_date == queue_day).count() if hasattr(model, "queue_date") else 0
+        created = 0
+        patient_refs = load_demo_patient_refs() if not dry_run else []
+        statuses = ["WAITING", "CHECKED_IN", "CHECKED_OUT"]
+        visit_types = ["WALK_IN", "APPOINTMENT", "QUICK_REG"]
+        for index in range(1, TARGETS["reception_queue_entries"] + 1):
+            queue_number = f"Q{queue_day.strftime('%Y%m%d')}-{index:03d}"
+            if model.query.filter_by(queue_number=queue_number).first():
+                continue
+            if dry_run:
+                created += 1
+                continue
+            if not patient_refs:
+                break
+            patient_ref = patient_refs[(index - 1) % len(patient_refs)]
+            status = statuses[(index - 1) % len(statuses)]
+            db.session.add(
+                model(
+                    queue_number=queue_number,
+                    queue_date=queue_day,
+                    daily_sequence=index,
+                    patient_id=patient_ref,
+                    visit_type=visit_types[(index - 1) % len(visit_types)],
+                    status=status,
+                    payment_status="PENDING" if index % 3 else "PAID",
+                    checked_in_at=datetime.utcnow() if status in {"CHECKED_IN", "CHECKED_OUT"} else None,
+                    checked_out_at=datetime.utcnow() if status == "CHECKED_OUT" else None,
+                    created_by="demo-seed",
+                )
+            )
+            created += 1
+        if not dry_run and created:
+            db.session.commit()
+        record("reception_queue_entries", created, existing)
+
+    seed_domain(
+        "reception_queue_entries",
+        "app.models.reception_queue_entry",
+        "ReceptionQueueEntry",
+        seed_reception_queue,
+    )
 
     def seed_test_results(model):
         from app.models.order import Order

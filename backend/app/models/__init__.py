@@ -31,6 +31,9 @@ from app.models.payment_webhook import PaymentWebhook
 
 from app.models.home_collection import HomeCollection
 
+from app.models.reception_queue_entry import ReceptionQueueEntry
+from app.models.reception_activity_log import ReceptionActivityLog
+
 from app.models.sample_tracking import SampleTracking
 
 from app.models.result_file import ResultFile
