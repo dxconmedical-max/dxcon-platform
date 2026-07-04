@@ -29,6 +29,7 @@ from app.web.monitoring_center import monitoring_center_web_bp
 from app.web.backup_recovery import backup_recovery_web_bp
 from app.web.tenant_isolation import tenant_isolation_web_bp
 from app.web.production_deployment import production_deployment_web_bp
+from app.web.pilot_status import pilot_status_web_bp
 from app.web.pilot_pages import pilot_pages_bp
 from app.web.finance import finance_web_bp
 
@@ -47,6 +48,7 @@ from app.api.monitoring_center.routes import monitoring_center_bp
 from app.api.backup_recovery.routes import backup_recovery_bp
 from app.api.tenant_isolation.routes import tenant_isolation_bp
 from app.api.production_deployment.routes import production_deployment_bp
+from app.api.pilot_status.routes import pilot_status_bp
 from app.api.laboratories.routes import laboratories_bp
 from app.api.test_catalogs.routes import test_catalogs_bp
 from app.api.orders.routes import orders_bp
@@ -224,6 +226,7 @@ def register_blueprints(app):
     app.register_blueprint(backup_recovery_bp)
     app.register_blueprint(tenant_isolation_bp)
     app.register_blueprint(production_deployment_bp)
+    app.register_blueprint(pilot_status_bp)
     app.register_blueprint(laboratories_bp)
     app.register_blueprint(test_catalogs_bp)
     app.register_blueprint(orders_bp)
@@ -340,6 +343,7 @@ def register_blueprints(app):
     app.register_blueprint(backup_recovery_web_bp)
     app.register_blueprint(tenant_isolation_web_bp)
     app.register_blueprint(production_deployment_web_bp)
+    app.register_blueprint(pilot_status_web_bp)
     app.register_blueprint(pilot_pages_bp)
     app.register_blueprint(home_web_bp)
     app.register_blueprint(ops_bp)

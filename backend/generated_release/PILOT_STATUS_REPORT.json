@@ -1,0 +1,316 @@
+{
+  "generated_at": "2026-07-04T14:50:58.350997+00:00",
+  "phase": "5.6",
+  "sprint": "Pilot Status",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 16,
+    "checks_total": 16,
+    "ok": true,
+    "runtime_seconds": 2.271
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "pilot_status": {
+      "ok": true,
+      "routes": {
+        "/pilot-status": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-status/clinics": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-status/labs": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-status/collectors": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-status/doctors": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-status/orders": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-status/revenue": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-status/alerts": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/pilot-status/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-status/overview": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-status/clinics": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-status/labs": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-status/collectors": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-status/doctors": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-status/orders": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-status/revenue": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-status/alerts": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-status/inventory": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-status/readiness": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 8
+    },
+    "pilot_status_overview": {
+      "ok": true
+    },
+    "active_clinics": {
+      "ok": true
+    },
+    "active_labs": {
+      "ok": true
+    },
+    "collectors_online": {
+      "ok": true
+    },
+    "doctors_online": {
+      "ok": true
+    },
+    "todays_orders": {
+      "ok": true
+    },
+    "todays_revenue": {
+      "ok": true
+    },
+    "alerts": {
+      "ok": true
+    },
+    "legacy_executive_preserved": {
+      "ok": true
+    },
+    "legacy_dashboard_api_preserved": {
+      "ok": true
+    },
+    "legacy_pilot_checklist_preserved": {
+      "ok": true
+    }
+  },
+  "readiness": {
+    "features": [
+      "Pilot Status",
+      "Active Clinics",
+      "Active Labs",
+      "Collectors Online",
+      "Doctors Online",
+      "Today's Orders",
+      "Today's Revenue",
+      "Alerts"
+    ],
+    "generated_at": "2026-07-04T14:50:58.358760",
+    "phase": "5.6",
+    "platform": "Pilot Status",
+    "sections": {
+      "active_clinics": {
+        "clinics": [
+          {
+            "address": null,
+            "clinic_code": "PILOT-CLN-001",
+            "clinic_id": "80335eda-cf71-4c9b-bb2e-e6370323c8bd",
+            "created_at": "2026-07-04T14:50:57.566518",
+            "email": null,
+            "id": "897651cb-6199-4838-af81-a9d0c16f9914",
+            "legal_name": null,
+            "name": "Pilot Clinic Alpha",
+            "partner_id": null,
+            "phone": null,
+            "settings_json": "{}",
+            "status": "ACTIVE",
+            "tax_code": null,
+            "updated_at": "2026-07-04T14:50:57.566520"
+          }
+        ],
+        "count": 1,
+        "read_only": true,
+        "report": "active_clinics"
+      },
+      "active_labs": {
+        "count": 1,
+        "labs": [
+          {
+            "address": null,
+            "code": "PILOT-LAB-001",
+            "email": null,
+            "id": "b4b02eb2-fa75-4b2a-ba28-facdee4aad84",
+            "is_active": true,
+            "name": "Pilot Laboratory",
+            "phone": null
+          }
+        ],
+        "read_only": true,
+        "report": "active_labs"
+      },
+      "alerts": {
+        "alerts": [
+          {
+            "alert_code": "PILOT-ALR-07F869",
+            "alert_type": "OPERATIONS",
+            "id": "5aafc9c3-4d03-410e-9dcc-7a49e1bcd5ee",
+            "message": "Pilot alert sample",
+            "severity": "MEDIUM",
+            "source_id": null,
+            "source_type": null,
+            "status": "OPEN"
+          }
+        ],
+        "legacy_route": "/alerts",
+        "open_count": 1,
+        "read_only": true,
+        "report": "alerts",
+        "severity_counts": {
+          "MEDIUM": 1
+        }
+      },
+      "collectors_online": {
+        "collectors": [
+          {
+            "active_vehicle_id": null,
+            "created_at": "2026-07-04T14:50:57.569653",
+            "driver_code": "PILOT-COL-001",
+            "email": null,
+            "full_name": "Pilot Collector",
+            "home_city": null,
+            "id": "12c68fc8-6f2f-4111-a808-ffa779288134",
+            "license_number": null,
+            "ops_status": "ACTIVE",
+            "phone": null,
+            "status": "ACTIVE",
+            "vehicle_no": null
+          }
+        ],
+        "count": 1,
+        "read_only": true,
+        "report": "collectors_online"
+      },
+      "doctors_online": {
+        "count": 1,
+        "doctors": [],
+        "read_only": true,
+        "report": "doctors_online"
+      },
+      "pilot_status": {
+        "architecture": "Pilot Status \u2192 Active Clinics \u2192 Active Labs \u2192 Collectors Online \u2192 Doctors Online \u2192 Today's Orders \u2192 Today's Revenue \u2192 Alerts",
+        "legacy_routes": [
+          "/executive-v9",
+          "/pilot-checklist",
+          "/api/v1/dashboard/summary"
+        ],
+        "read_only": true,
+        "report": "pilot_status",
+        "status": "OK",
+        "summary": {
+          "active_clinics": 1,
+          "active_labs": 1,
+          "alerts_open": 1,
+          "collectors_online": 1,
+          "doctors_online": 1,
+          "todays_orders": 1,
+          "todays_revenue": 250000.0
+        },
+        "system": {
+          "app_env": "development",
+          "database": "OK",
+          "redis": "DEGRADED",
+          "status": "OK",
+          "timestamp": "2026-07-04T14:50:58.366450+00:00"
+        }
+      },
+      "todays_orders": {
+        "count": 1,
+        "orders": [
+          {
+            "company_id": null,
+            "contract_id": null,
+            "created_at": "2026-07-04T14:50:57.892322",
+            "id": "69eeb320-eba4-4756-bcd7-3c332bd433cf",
+            "laboratory_id": null,
+            "marketplace_booking_id": null,
+            "order_code": "PILOT-ORD-001",
+            "patient_id": "6dbe2235-2aad-4392-a85f-9a060a3ce85f",
+            "status": "PENDING",
+            "total_amount": 250000.0
+          }
+        ],
+        "read_only": true,
+        "report": "todays_orders"
+      },
+      "todays_revenue": {
+        "amount": 250000.0,
+        "currency": "VND",
+        "executive_metrics": {
+          "today_orders": 0,
+          "today_revenue": 0
+        },
+        "read_only": true,
+        "report": "todays_revenue"
+      }
+    },
+    "sprint": "Pilot Status",
+    "status": "OK",
+    "summary": {
+      "active_clinics": 1,
+      "active_labs": 1,
+      "alerts_open": 1,
+      "collectors_online": 1,
+      "doctors_online": 1,
+      "todays_orders": 1,
+      "todays_revenue": 250000.0
+    }
+  }
+}
