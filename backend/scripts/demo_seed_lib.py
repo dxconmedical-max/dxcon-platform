@@ -11,7 +11,7 @@ from typing import Any, Callable
 from sqlalchemy import text
 
 from app.core.passwords import hash_password
-from app.core.roles import ACCOUNTING, ADMIN, COLLECTOR, DOCTOR, LAB, SUPER_ADMIN
+from app.core.roles import ACCOUNTING, ADMIN, COLLECTOR, DOCTOR, LAB, RECEPTION, SUPER_ADMIN
 from app.extensions.db import db
 from app.infrastructure.schema_introspection import (
     columns_exist,
@@ -34,18 +34,23 @@ DEMO_COMPANY_CODE = "DEMO-CMP-001"
 TARGETS = {
     "super_admin_users": 1,
     "admin_staff_users": 5,
-    "doctor_users": 10,
-    "laboratories": 5,
-    "partners_clinics": 10,
+    "reception_users": 3,
+    "doctor_users": 30,
+    "lab_users": 8,
+    "laboratories": 8,
+    "partners_clinics": 20,
     "patients": 100,
     "test_catalog_items": 200,
-    "orders": 50,
-    "order_items": 50,
-    "sample_collections": 20,
-    "collectors_drivers": 10,
-    "shipments": 20,
-    "invoices": 10,
-    "notifications": 10,
+    "orders": 300,
+    "order_items": 600,
+    "sample_collections": 80,
+    "collectors_drivers": 20,
+    "shipments": 40,
+    "invoices": 200,
+    "notifications": 50,
+    "test_results": 500,
+    "home_collections": 80,
+    "crm_leads": 60,
 }
 
 
@@ -212,6 +217,18 @@ def run_seed(
             existing += int(not made)
         for index in range(1, TARGETS["doctor_users"] + 1):
             _, made = ensure_user(demo_email("doctor", index), DOCTOR, dry_run=dry_run, phone=f"090200{index:04d}")
+            created += int(made)
+            existing += int(not made)
+        for index in range(1, TARGETS["reception_users"] + 1):
+            _, made = ensure_user(demo_email("reception", index), RECEPTION, dry_run=dry_run, phone=f"090150{index:04d}")
+            created += int(made)
+            existing += int(not made)
+        for index in range(1, TARGETS["lab_users"] + 1):
+            _, made = ensure_user(demo_email("labuser", index), LAB, dry_run=dry_run, phone=f"090250{index:04d}")
+            created += int(made)
+            existing += int(not made)
+        for index in range(1, TARGETS["collectors_drivers"] + 1):
+            _, made = ensure_user(demo_email("collector", index), COLLECTOR, dry_run=dry_run, phone=f"090350{index:04d}")
             created += int(made)
             existing += int(not made)
         if not dry_run and created:
@@ -430,31 +447,33 @@ def run_seed(
                 continue
             if dry_run:
                 created_orders += 1
-                created_items += 1
+                created_items += 2
                 continue
             if not patient_refs or not tests:
                 break
             patient_ref = patient_refs[(index - 1) % len(patient_refs)]
             lab = labs[(index - 1) % len(labs)] if labs else None
-            test = tests[(index - 1) % len(tests)]
+            test_a = tests[(index - 1) % len(tests)]
+            test_b = tests[(index) % len(tests)]
             order = order_model(
                 order_code=code,
                 patient_id=patient_ref,
                 laboratory_id=model_pk_value(lab) if lab else None,
-                status="PENDING",
-                total_amount=float(test.price or 0),
+                status=["PENDING", "PROCESSING", "COMPLETED"][(index - 1) % 3],
+                total_amount=float((test_a.price or 0) + (test_b.price or 0)),
             )
             db.session.add(order)
             db.session.flush()
-            db.session.add(
-                OrderItem(
-                    order_id=model_pk_value(order),
-                    test_catalog_id=model_pk_value(test),
-                    price=float(test.price or 0),
+            for test in (test_a, test_b):
+                db.session.add(
+                    OrderItem(
+                        order_id=model_pk_value(order),
+                        test_catalog_id=model_pk_value(test),
+                        price=float(test.price or 0),
+                    )
                 )
-            )
+                created_items += 1
             created_orders += 1
-            created_items += 1
         if not dry_run and (created_orders or created_items):
             db.session.commit()
         existing_items = (
@@ -636,6 +655,107 @@ def run_seed(
 
     seed_domain("notifications", "app.models.notification", "Notification", seed_notifications)
 
+    def seed_crm_leads(model):
+        prefix = "DEMO-LEAD-"
+        existing = count_demo_rows(model, "lead_code", prefix)
+        created = 0
+        stages = ["LEAD", "CONTACTED", "APPOINTMENT", "COLLECTED", "LAB", "COMPLETED"]
+        for index in range(1, TARGETS["crm_leads"] + 1):
+            code = demo_code("LEAD", index)
+            if model.query.filter_by(lead_code=code).first():
+                continue
+            if dry_run:
+                created += 1
+                continue
+            db.session.add(
+                model(
+                    lead_code=code,
+                    company_name=f"Demo Prospect {index}",
+                    contact_person=f"Contact {index}",
+                    phone=f"090400{index:04d}",
+                    email=f"demo-lead-{index:03d}@{DEMO_DOMAIN}",
+                    lead_source="PILOT",
+                    pipeline_stage=stages[(index - 1) % len(stages)],
+                    status="OPEN" if index % 3 else "FOLLOW_UP",
+                    estimated_revenue=float(1000 + index * 50),
+                )
+            )
+            created += 1
+        if not dry_run and created:
+            db.session.commit()
+        record("crm_leads", created, existing)
+
+    seed_domain("crm_leads", "app.models.crm_lead", "CrmLead", seed_crm_leads)
+
+    def seed_home_collections(model):
+        existing = model.query.filter(model.patient_id.like("DEMO-PAT-%")).count() if hasattr(model, "patient_id") else 0
+        created = 0
+        patient_refs = load_demo_patient_refs() if not dry_run else []
+        statuses = ["REQUESTED", "ASSIGNED", "COLLECTED", "DELIVERED"]
+        for index in range(1, TARGETS["home_collections"] + 1):
+            if dry_run:
+                created += 1
+                continue
+            if not patient_refs:
+                break
+            patient_ref = patient_refs[(index - 1) % len(patient_refs)]
+            existing_row = model.query.filter_by(patient_id=patient_ref, address=f"{index} Demo Collection Street").first()
+            if existing_row:
+                continue
+            db.session.add(
+                model(
+                    patient_id=patient_ref,
+                    address=f"{index} Demo Collection Street",
+                    scheduled_time=f"2026-07-{(index % 28) + 1:02d} 09:00",
+                    status=statuses[(index - 1) % len(statuses)],
+                )
+            )
+            created += 1
+        if not dry_run and created:
+            db.session.commit()
+        record("home_collections", created, existing)
+
+    seed_domain("home_collections", "app.models.home_collection", "HomeCollection", seed_home_collections)
+
+    def seed_test_results(model):
+        from app.models.order import Order
+        from app.models.order_item import OrderItem
+
+        existing = model.query.count()
+        created = 0
+        if dry_run:
+            record("test_results", TARGETS["test_results"], existing)
+            return
+        items = (
+            OrderItem.query.join(Order, OrderItem.order_id == Order.id)
+            .filter(Order.order_code.like("DEMO-ORD-%"))
+            .order_by(Order.order_code)
+            .limit(TARGETS["test_results"])
+            .all()
+        )
+        flags = ["NORMAL", "NORMAL", "HIGH", "LOW", "CRITICAL"]
+        for index, item in enumerate(items, start=1):
+            if model.query.filter_by(order_item_id=item.id).first():
+                continue
+            approval = "APPROVED" if index % 3 == 0 else "PENDING"
+            db.session.add(
+                model(
+                    order_item_id=item.id,
+                    test_name=f"Demo Test Result {index}",
+                    result_value=str(10 + (index % 20)),
+                    unit="mg/dL",
+                    reference_range="5-20",
+                    flag=flags[index % len(flags)],
+                    approval_status=approval,
+                )
+            )
+            created += 1
+        if created:
+            db.session.commit()
+        record("test_results", created, existing)
+
+    seed_domain("test_results", "app.models.test_result", "TestResult", seed_test_results)
+
     mode = "dry_run" if dry_run else "apply"
     report = _build_report(
         mode,
@@ -682,9 +802,13 @@ def demo_account_summary() -> dict:
     return {
         "super_admin": demo_email("superadmin", 1),
         "admin_staff_pattern": f"demo-admin-01@{DEMO_DOMAIN} .. demo-admin-05@{DEMO_DOMAIN}",
-        "doctor_pattern": f"demo-doctor-01@{DEMO_DOMAIN} .. demo-doctor-10@{DEMO_DOMAIN}",
+        "reception_pattern": f"demo-reception-01@{DEMO_DOMAIN} .. demo-reception-03@{DEMO_DOMAIN}",
+        "doctor_pattern": f"demo-doctor-01@{DEMO_DOMAIN} .. demo-doctor-30@{DEMO_DOMAIN}",
+        "lab_pattern": f"demo-labuser-01@{DEMO_DOMAIN} .. demo-labuser-08@{DEMO_DOMAIN}",
+        "collector_pattern": f"demo-collector-01@{DEMO_DOMAIN} .. demo-collector-20@{DEMO_DOMAIN}",
         "password": DEMO_PASSWORD,
-        "code_prefixes": ["DEMO-LAB-", "DEMO-CLN-", "DEMO-PAT-", "DEMO-TST-", "DEMO-ORD-"],
+        "code_prefixes": ["DEMO-LAB-", "DEMO-CLN-", "DEMO-PAT-", "DEMO-TST-", "DEMO-ORD-", "DEMO-LEAD-"],
+        "phase": "3A",
     }
 
 

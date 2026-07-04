@@ -10,14 +10,8 @@ from app.models.sample_collection import SampleCollection
 from app.models.sample_event import SampleEvent
 from app.models.sample_tracking import SampleTracking
 from app.models.shipment import Shipment
-from app.web.demo_pilot_lib import (
-    DEMO_ORDER_PREFIX,
-    metric_cards,
-    render_pilot_page,
-    render_safe_page,
-    safe_query,
-    seeded_summary,
-)
+from app.web.demo_pilot_lib import render_safe_page
+from app.web.pilot_dashboard_data import build_logistics_body
 
 
 logistics_web_bp = Blueprint("logistics_web", __name__)
@@ -40,96 +34,9 @@ def color(status):
 def logistics_dashboard():
     return render_safe_page(
         "Logistics Dashboard",
-        "Sample movement, collections, shipments, or order status fallback.",
-        _build_logistics_body,
+        "Collectors, cold-chain boxes, pickup queue, and today's routes.",
+        build_logistics_body,
     )
-
-
-def _build_logistics_body() -> str:
-    summary = seeded_summary()
-    notice = ""
-    rows = ""
-
-    if table_exists_name("sample_trackings"):
-        try:
-            samples = SampleTracking.query.order_by(SampleTracking.updated_at.desc()).limit(20).all()
-            for s in samples:
-                map_url = "#"
-                try:
-                    map_url = s.map_url() or "#"
-                except Exception:
-                    map_url = "#"
-                rows += f"""
-                <tr>
-                    <td>{s.sample_code}</td>
-                    <td><b style="color:{color(s.status)}">{s.status}</b></td>
-                    <td>{s.collector_id or ""}</td>
-                    <td>{s.transport_box_id or ""}</td>
-                    <td><a href="{map_url}" target="_blank">Map</a></td>
-                    <td>{s.updated_at or ""}</td>
-                </tr>
-                """
-        except Exception:
-            rows = ""
-
-    if not rows and table_exists_name("sample_collections"):
-        notice = """
-        <div class="notice">
-            Sample tracking is unavailable. Showing seeded sample collections and shipments instead.
-        </div>
-        """
-        collections = safe_query(SampleCollection, limit=20)
-        shipments = safe_query(Shipment, filter_like=("shipment_code", "DEMO-SHP-"), limit=20) if table_exists_name("shipments") else []
-        for item in collections:
-            rows += f"<tr><td>{item.order_id}</td><td>{item.status}</td><td>{item.collector_name or ''}</td><td>collection</td><td>-</td><td>{item.created_at or ''}</td></tr>"
-        for item in shipments:
-            rows += f"<tr><td>{item.shipment_code}</td><td>{item.status}</td><td>{item.collector_id or ''}</td><td>shipment</td><td>-</td><td>{item.created_at or ''}</td></tr>"
-
-    if not rows:
-        notice = """
-        <div class="notice">
-            Logistics tracking tables are empty or unavailable. Showing demo order logistics status instead.
-        </div>
-        """
-        orders = safe_query(Order, filter_like=("order_code", DEMO_ORDER_PREFIX), limit=20)
-        for order in orders:
-            rows += f"<tr><td>{order.order_code}</td><td>{order.status}</td><td>{order.patient_id}</td><td>order</td><td>-</td><td>{order.created_at or ''}</td></tr>"
-
-    if not rows:
-        rows = "<tr><td colspan='6'>No logistics or demo order data found.</td></tr>"
-
-    event_rows = ""
-    if table_exists_name("sample_events"):
-        try:
-            events = SampleEvent.query.order_by(SampleEvent.created_at.desc()).limit(15).all()
-            for e in events:
-                event_rows += f"""
-                <div style="border-left:6px solid {color(e.event_type)};background:white;padding:14px;margin-bottom:10px;border-radius:8px;">
-                    <b>{e.event_type}</b><br>{e.note or ""}<br><small>{e.created_at or ''}</small>
-                </div>
-                """
-        except Exception:
-            event_rows = ""
-
-    if not event_rows:
-        event_rows = "<p class='muted'>No timeline events available. Demo orders and collections are listed above.</p>"
-
-    return f"""
-    {page_header("Logistics Dashboard", "Sample movement, collections, shipments, or order status fallback.")}
-    {notice}
-    {metric_cards([
-        ("Demo Orders", summary["orders"]),
-        ("Demo Patients", summary["patients"]),
-        ("Demo Tests", summary["test_catalog"]),
-        ("Demo Users", summary["users"]),
-    ])}
-    <div class="card">
-        <h2>Live Logistics View</h2>
-        <table><tr><th>Reference</th><th>Status</th><th>Actor</th><th>Type</th><th>Link</th><th>Updated</th></tr>{rows}</table>
-    </div>
-    <div class="card"><h2>Operations Timeline</h2>{event_rows}</div>
-    <div class="card links"><a href="/logistics/dispatch">Dispatch Center</a><a href="/shipments">Shipments</a><a href="/collector">Collector Portal</a></div>
-    """
 
 
 @logistics_web_bp.route("/logistics/dispatch")

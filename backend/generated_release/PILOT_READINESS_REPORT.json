@@ -1,21 +1,22 @@
 {
-  "generated_at": "2026-07-04T07:43:51.307448+00:00",
+  "generated_at": "2026-07-04T10:08:15.182254+00:00",
   "summary": {
     "pilot_readiness_score": 100.0,
     "checks_passed": 5,
     "checks_total": 5,
     "ok": true,
     "failed_routes": [],
-    "runtime_seconds": 1.051
+    "runtime_seconds": 1.226,
+    "phase": "3A"
   },
   "checks": {
     "seed_data": {
       "ok": true,
       "counts": {
-        "users": 16,
+        "users": 67,
         "patients": 100,
         "test_catalog": 200,
-        "orders": 50
+        "orders": 300
       }
     },
     "route_registry": {
@@ -49,7 +50,7 @@
             "database": "OK",
             "redis": "DEGRADED",
             "status": "OK",
-            "timestamp": "2026-07-04T07:43:51.230031+00:00"
+            "timestamp": "2026-07-04T10:08:14.978387+00:00"
           },
           "ok": true
         },
@@ -60,7 +61,7 @@
             "database": "OK",
             "redis": "DEGRADED",
             "status": "OK",
-            "timestamp": "2026-07-04T07:43:51.231383+00:00"
+            "timestamp": "2026-07-04T10:08:14.979442+00:00"
           },
           "ok": true
         }
@@ -71,43 +72,58 @@
       "routes": {
         "/": {
           "status_code": 200,
-          "ok": true
+          "ok": true,
+          "bytes": 3931
         },
         "/executive-v9": {
           "status_code": 200,
-          "ok": true
+          "ok": true,
+          "bytes": 10680
         },
         "/crm-pipeline": {
           "status_code": 200,
-          "ok": true
+          "ok": true,
+          "bytes": 9234
         },
         "/logistics": {
           "status_code": 200,
-          "ok": true
+          "ok": true,
+          "bytes": 9079
         },
         "/reception": {
           "status_code": 200,
-          "ok": true
+          "ok": true,
+          "bytes": 10649
         },
         "/doctor-workbench": {
           "status_code": 200,
-          "ok": true
+          "ok": true,
+          "bytes": 8732
         },
         "/patient-portal": {
           "status_code": 200,
-          "ok": true
+          "ok": true,
+          "bytes": 8971
         },
         "/demo-accounts": {
           "status_code": 200,
-          "ok": true
+          "ok": true,
+          "bytes": 12245
         },
         "/workflow-demo": {
           "status_code": 200,
-          "ok": true
+          "ok": true,
+          "bytes": 9191
         },
         "/pilot-checklist": {
           "status_code": 200,
-          "ok": true
+          "ok": true,
+          "bytes": 6778
+        },
+        "/executive": {
+          "status_code": 200,
+          "ok": true,
+          "bytes": 10680
         }
       }
     },
@@ -116,11 +132,28 @@
       "routes": {
         "/crm-pipeline": {
           "status_code": 200,
-          "ok": true
+          "ok": true,
+          "bytes": 9234
         },
         "/logistics": {
           "status_code": 200,
-          "ok": true
+          "ok": true,
+          "bytes": 9079
+        },
+        "/reception": {
+          "status_code": 200,
+          "ok": true,
+          "bytes": 10649
+        },
+        "/doctor-workbench": {
+          "status_code": 200,
+          "ok": true,
+          "bytes": 8732
+        },
+        "/patient-portal": {
+          "status_code": 200,
+          "ok": true,
+          "bytes": 8971
         }
       }
     }

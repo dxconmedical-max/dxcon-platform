@@ -57,10 +57,77 @@ def pilot_styles() -> str:
     .steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; }
     .step { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; text-align:center; }
     .step strong { display:block; margin-bottom:6px; color:#1e3a8a; }
+    .workflow-path { display:flex; flex-direction:column; align-items:center; gap:0; }
+    .workflow-path.horizontal { flex-direction:row; flex-wrap:wrap; justify-content:center; align-items:stretch; gap:8px; }
+    .workflow-path.horizontal .workflow-arrow { padding:0 6px; }
+    .workflow-step { width:100%; max-width:420px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px 18px; text-align:center; }
+    .workflow-path.horizontal .workflow-step { width:auto; flex:1; min-width:130px; max-width:170px; }
+    .workflow-step.active { border-color:#1e3a8a; background:#eff6ff; box-shadow:0 0 0 2px #bfdbfe; }
+    .workflow-step a { text-decoration:none; color:inherit; display:block; }
+    .workflow-step strong { display:block; margin-bottom:4px; color:#1e3a8a; font-size:15px; }
+    .workflow-step .muted { font-size:12px; line-height:1.4; }
+    .workflow-arrow { color:#94a3b8; font-size:18px; line-height:1; padding:6px 0; }
     .checklist-row { display:flex; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid #e2e8f0; }
     .muted { color:#64748b; }
     .links a { margin-right:14px; }
+    .chart-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+    .chart-card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; }
+    .chart-card h3 { margin:0 0 12px; font-size:14px; color:#1e3a8a; }
+    .bar-chart { display:flex; align-items:flex-end; gap:8px; min-height:120px; }
+    .bar-item { flex:1; text-align:center; font-size:11px; color:#64748b; }
+    .bar { background:linear-gradient(180deg,#3b82f6,#1e3a8a); border-radius:6px 6px 0 0; min-height:8px; margin:0 auto 6px; width:70%; }
+    .pipeline { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:10px; }
+    .pipeline-stage { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; text-align:center; }
+    .pipeline-stage strong { display:block; color:#1e3a8a; margin-bottom:6px; font-size:13px; }
+    .timeline .timeline-step { max-width:480px; }
+    .masked { font-family:monospace; letter-spacing:.08em; }
     """
+
+
+
+def first_demo_order_items_href() -> str:
+    from app.models.order import Order
+
+    orders = safe_query(Order, filter_like=("order_code", DEMO_ORDER_PREFIX), limit=1)
+    if orders:
+        return f"/orders/{orders[0].id}/items"
+    return "/orders"
+
+
+def reception_workflow_steps() -> list[tuple[str, str, str]]:
+    return [
+        ("Reception", "/reception", "Front desk starting point"),
+        ("Patient Search", "/patients", "Find or verify demo patient"),
+        ("Create Order", "/orders/new", "Register a new medical order"),
+        ("Assign Package", first_demo_order_items_href(), "Add tests or package to order"),
+        ("Sample Collection", "/logistics", "Dispatch, pickup, and tracking"),
+        ("Lab", "/lab-operations", "Lab intake and processing"),
+    ]
+
+
+def reception_workflow_path(*, layout: str = "vertical", active: str | None = None) -> str:
+    steps = reception_workflow_steps()
+    parts: list[str] = []
+    horizontal = layout == "horizontal"
+    container_class = "workflow-path horizontal" if horizontal else "workflow-path"
+
+    for index, (label, href, detail) in enumerate(steps):
+        active_class = " active" if active and label == active else ""
+        parts.append(
+            f"""
+            <div class="workflow-step{active_class}">
+                <a href="{href}">
+                    <strong>{label}</strong>
+                    <div class="muted">{detail}</div>
+                </a>
+            </div>
+            """
+        )
+        if index < len(steps) - 1:
+            arrow = "→" if horizontal else "↓"
+            parts.append(f'<div class="workflow-arrow">{arrow}</div>')
+
+    return f'<div class="{container_class}">{"".join(parts)}</div>'
 
 
 def page_header(title: str, subtitle: str) -> str:
@@ -163,16 +230,22 @@ def demo_accounts_by_role() -> dict[str, list[dict[str, str]]]:
         for user in User.query.filter(User.email.like("demo-%")).order_by(User.email).all():
             entry = {"email": user.email, "role": user.role, "password": DEMO_PASSWORD}
             role = (user.role or "").upper()
-            if role in {"SUPER_ADMIN", "ADMIN", "ACCOUNTING"}:
+            if role == "SUPER_ADMIN":
+                accounts["admin"].insert(0, entry)
+            elif role in {"ADMIN", "ACCOUNTING"}:
                 accounts["admin"].append(entry)
             elif role == "DOCTOR":
                 accounts["doctor"].append(entry)
-            elif role in {"LAB", "LABORATORY"}:
+            elif role in {"LAB", "LABORATORY", "LAB_TECHNICIAN"}:
                 accounts["lab"].append(entry)
+            elif role == "RECEPTION":
+                accounts["reception"].append(entry)
             elif role in {"COLLECTOR", "DRIVER"}:
                 accounts["collector"].append(entry)
-    except Exception:
-        pass
+            elif role == "PATIENT":
+                accounts["patient"].append(entry)
+    except Exception as exc:
+        _ = exc
 
     try:
         for lab in safe_query(Laboratory, filter_like=("code", "DEMO-LAB-"), limit=5):
@@ -183,8 +256,8 @@ def demo_accounts_by_role() -> dict[str, list[dict[str, str]]]:
                     "password": DEMO_PASSWORD,
                 }
             )
-    except Exception:
-        pass
+    except Exception as exc:
+        _ = exc
 
     try:
         for driver in safe_query(Driver, filter_like=("driver_code", "DEMO-COL-"), limit=5):
@@ -195,16 +268,17 @@ def demo_accounts_by_role() -> dict[str, list[dict[str, str]]]:
                     "password": DEMO_PASSWORD,
                 }
             )
-    except Exception:
-        pass
+    except Exception as exc:
+        _ = exc
 
-    accounts["reception"].append(
-        {
-            "email": "Use Admin demo account for reception desk pilot",
-            "role": "RECEPTION",
-            "password": DEMO_PASSWORD,
-        }
-    )
+    if not accounts["reception"]:
+        accounts["reception"].append(
+            {
+                "email": "demo-reception-01@demo.dxcon.test",
+                "role": "RECEPTION",
+                "password": DEMO_PASSWORD,
+            }
+        )
 
     try:
         for patient in safe_query(Patient, filter_like=("patient_code", DEMO_PATIENT_PREFIX), limit=5):
@@ -215,8 +289,8 @@ def demo_accounts_by_role() -> dict[str, list[dict[str, str]]]:
                     "password": "Portal via /patient-portal (no shared login required for demo list)",
                 }
             )
-    except Exception:
-        pass
+    except Exception as exc:
+        _ = exc
 
     return accounts
 
@@ -278,11 +352,20 @@ def system_status_cards(status: dict[str, Any]) -> str:
     )
 
 
-def account_table(rows: list[dict[str, str]]) -> str:
+def mask_password(password: str, *, reveal_demo: bool = True) -> str:
+    if reveal_demo and password == DEMO_PASSWORD:
+        return password
+    if len(password) <= 4:
+        return "****"
+    return password[:2] + "****" + password[-2:]
+
+
+def account_table(rows: list[dict[str, str]], *, reveal_demo_passwords: bool = True) -> str:
     if not rows:
         return "<p class='muted'>No demo accounts found for this role.</p>"
-    body = "".join(
-        f"<tr><td>{row['email']}</td><td><span class='badge'>{row['role']}</span></td><td>{row['password']}</td></tr>"
-        for row in rows
-    )
+    body = ""
+    for row in rows:
+        pwd = row.get("password", "")
+        display_pwd = mask_password(pwd, reveal_demo=reveal_demo_passwords) if pwd else "—"
+        body += f"<tr><td>{row['email']}</td><td><span class='badge'>{row['role']}</span></td><td class='masked'>{display_pwd}</td></tr>"
     return f"<table><tr><th>Account</th><th>Role</th><th>Access</th></tr>{body}</table>"

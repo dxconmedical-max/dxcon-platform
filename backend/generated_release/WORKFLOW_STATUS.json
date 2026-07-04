@@ -1,0 +1,47 @@
+{
+  "generated_at": "2026-07-04T10:08:15.182263+00:00",
+  "phase": "3A",
+  "routes": {
+    "/workflow-demo": {
+      "status_code": 200,
+      "ok": true,
+      "bytes": 9191
+    },
+    "/reception": {
+      "status_code": 200,
+      "ok": true,
+      "bytes": 10649
+    },
+    "/orders/new": {
+      "status_code": 200,
+      "ok": true,
+      "bytes": 11108
+    },
+    "/logistics": {
+      "status_code": 200,
+      "ok": true,
+      "bytes": 9079
+    },
+    "/lab-operations": {
+      "status_code": 200,
+      "ok": true,
+      "bytes": 1939
+    },
+    "/doctor-workbench": {
+      "status_code": 200,
+      "ok": true,
+      "bytes": 8732
+    },
+    "/patient-portal": {
+      "status_code": 200,
+      "ok": true,
+      "bytes": 8971
+    },
+    "/notifications": {
+      "status_code": 200,
+      "ok": true,
+      "bytes": 1287
+    }
+  },
+  "score": 100.0
+}

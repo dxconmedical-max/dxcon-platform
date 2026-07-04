@@ -7,11 +7,27 @@ Pilot runbook for DxCon live demo and workflow verification after demo seed data
 - Production/staging: `https://dxcon-ap.onrender.com/`
 - Local: `http://127.0.0.1:5000/`
 
+## Reception → Lab workflow
+
+Primary operational path for pilot walkthroughs (also at `/workflow-demo`):
+
+| Step | Route | Purpose |
+|------|-------|---------|
+| Reception | `/reception` | Front desk starting point |
+| Patient Search | `/patients` | Find or verify demo patient |
+| Create Order | `/orders/new` | Register a new medical order |
+| Assign Package | `/orders/{id}/items` | Add tests or package to order |
+| Sample Collection | `/logistics` | Dispatch, pickup, and tracking |
+| Lab | `/lab-operations` | Lab intake and processing |
+
+Extended path (optional): Result → Notification → Billing via doctor workbench and billing screens.
+
 ## Demo dashboards
 
 | Dashboard | Route |
 |-----------|-------|
 | Landing | `/` |
+| Workflow Demo | `/workflow-demo` |
 | Executive | `/executive-v9` |
 | CRM Pipeline | `/crm-pipeline` |
 | Logistics | `/logistics` |
