@@ -1,0 +1,172 @@
+{
+  "generated_at": "2026-07-04T13:59:22.050223+00:00",
+  "phase": "4.2",
+  "sprint": "AI Clinical Platform",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 21,
+    "checks_total": 21,
+    "ok": true,
+    "runtime_seconds": 1.124
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "ai_clinical_dashboard": {
+      "ok": true,
+      "routes": {
+        "/ai-clinical": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-clinical/providers": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-clinical/prompts": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-clinical/router": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-clinical/interpret": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-clinical/critical": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-clinical/delta": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-clinical/reference-ranges": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-clinical/summary": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-clinical/patient-friendly": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-clinical/review-flags": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-clinical/audit": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-clinical/usage": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-clinical/safety": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/ai-clinical/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/ai-clinical/providers": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/ai-clinical/prompts": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/ai-clinical/router": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/ai-clinical/doctor-review-flag": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/ai-clinical/audit": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/ai-clinical/usage": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/ai-clinical/safety/disclaimer": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "ai_provider_registry": {
+      "ok": true
+    },
+    "prompt_registry": {
+      "ok": true
+    },
+    "model_router": {
+      "ok": true
+    },
+    "result_interpretation": {
+      "ok": "492fb45e-2dbb-4991-b5a1-82b55c717d9e"
+    },
+    "critical_value_detection": {
+      "ok": true
+    },
+    "delta_check": {
+      "ok": true
+    },
+    "reference_range_explanation": {
+      "ok": true
+    },
+    "clinical_summary": {
+      "ok": true
+    },
+    "patient_friendly_explanation": {
+      "ok": true
+    },
+    "doctor_review_flag": {
+      "ok": true
+    },
+    "ai_audit_log": {
+      "ok": true
+    },
+    "ai_usage_metrics": {
+      "ok": true
+    },
+    "phi_redaction": {
+      "ok": true
+    },
+    "safety_disclaimer": {
+      "ok": true
+    },
+    "no_automatic_diagnosis": {
+      "ok": true
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 15
+    },
+    "audit_every_output": {
+      "ok": true
+    }
+  }
+}
