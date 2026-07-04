@@ -1,5 +1,6 @@
 
-from flask import Blueprint, current_app
+from flask import Blueprint
+
 from app.models.order import Order
 from app.models.patient import Patient
 from app.models.test_catalog import TestCatalog
@@ -7,7 +8,8 @@ from app.models.user import User
 from app.web.demo_pilot_lib import (
     DEMO_ORDER_PREFIX,
     metric_cards,
-    render_pilot_page,
+    page_header,
+    render_safe_page,
     safe_query,
     seeded_summary,
     system_status,
@@ -17,8 +19,7 @@ from app.web.demo_pilot_lib import (
 executive_v9_bp = Blueprint("executive_v9", __name__)
 
 
-@executive_v9_bp.route("/executive-v9")
-def executive_v9():
+def _build_executive_body() -> str:
     summary = seeded_summary()
     status = system_status()
     recent_orders = safe_query(Order, filter_like=("order_code", DEMO_ORDER_PREFIX), limit=10)
@@ -28,25 +29,18 @@ def executive_v9():
         for o in recent_orders
     ) or "<tr><td colspan='4'>No demo orders found.</td></tr>"
 
-    try:
-        total_users = User.query.count()
-        total_patients = Patient.query.count()
-        total_tests = TestCatalog.query.count()
-        total_orders = Order.query.count()
-    except Exception:
-        total_users = summary["users"]
-        total_patients = summary["patients"]
-        total_tests = summary["test_catalog"]
-        total_orders = summary["orders"]
+    total_users = safe_query(User)
+    total_patients = safe_query(Patient)
+    total_tests = safe_query(TestCatalog)
+    total_orders = safe_query(Order)
 
-    body = f"""
-    <h1>Executive Dashboard</h1>
-    <p style="color:#475569;">Pilot overview using seeded demo data and live system probes.</p>
+    return f"""
+    {page_header("Executive Dashboard", "Pilot overview using seeded demo data and live system probes.")}
     {metric_cards([
-        ("Total Users", total_users),
-        ("Total Patients", total_patients),
-        ("Test Catalog Items", total_tests),
-        ("Total Orders", total_orders),
+        ("Total Users", len(total_users)),
+        ("Total Patients", len(total_patients)),
+        ("Test Catalog Items", len(total_tests)),
+        ("Total Orders", len(total_orders)),
     ])}
     <div class="card">
         <h2>Seeded Demo Dataset</h2>
@@ -60,11 +54,19 @@ def executive_v9():
     <div class="card">
         <h2>System Status</h2>
         {system_status_cards(status)}
-        <p style="color:#64748b;font-size:13px;">Last probe: {status["timestamp"]}</p>
+        <p class="muted">Last probe: {status["timestamp"]}</p>
     </div>
     <div class="card">
         <h2>Recent Demo Orders</h2>
         <table><tr><th>Order</th><th>Patient Ref</th><th>Status</th><th>Amount</th></tr>{order_rows}</table>
     </div>
     """
-    return render_pilot_page("Executive Dashboard", body)
+
+
+@executive_v9_bp.route("/executive-v9")
+def executive_v9():
+    return render_safe_page(
+        "Executive Dashboard",
+        "Pilot overview using seeded demo data and live system probes.",
+        _build_executive_body,
+    )

@@ -14,6 +14,7 @@ from app.web.demo_pilot_lib import (
     DEMO_ORDER_PREFIX,
     metric_cards,
     render_pilot_page,
+    render_safe_page,
     safe_query,
     seeded_summary,
 )
@@ -37,6 +38,14 @@ def color(status):
 
 @logistics_web_bp.route("/logistics")
 def logistics_dashboard():
+    return render_safe_page(
+        "Logistics Dashboard",
+        "Sample movement, collections, shipments, or order status fallback.",
+        _build_logistics_body,
+    )
+
+
+def _build_logistics_body() -> str:
     summary = seeded_summary()
     notice = ""
     rows = ""
@@ -45,14 +54,19 @@ def logistics_dashboard():
         try:
             samples = SampleTracking.query.order_by(SampleTracking.updated_at.desc()).limit(20).all()
             for s in samples:
+                map_url = "#"
+                try:
+                    map_url = s.map_url() or "#"
+                except Exception:
+                    map_url = "#"
                 rows += f"""
                 <tr>
                     <td>{s.sample_code}</td>
                     <td><b style="color:{color(s.status)}">{s.status}</b></td>
                     <td>{s.collector_id or ""}</td>
                     <td>{s.transport_box_id or ""}</td>
-                    <td><a href="{s.map_url() or '#'}" target="_blank">Map</a></td>
-                    <td>{s.updated_at}</td>
+                    <td><a href="{map_url}" target="_blank">Map</a></td>
+                    <td>{s.updated_at or ""}</td>
                 </tr>
                 """
         except Exception:
@@ -91,18 +105,17 @@ def logistics_dashboard():
             for e in events:
                 event_rows += f"""
                 <div style="border-left:6px solid {color(e.event_type)};background:white;padding:14px;margin-bottom:10px;border-radius:8px;">
-                    <b>{e.event_type}</b><br>{e.note or ""}<br><small>{e.created_at}</small>
+                    <b>{e.event_type}</b><br>{e.note or ""}<br><small>{e.created_at or ''}</small>
                 </div>
                 """
         except Exception:
             event_rows = ""
 
     if not event_rows:
-        event_rows = "<p>No timeline events available. Demo orders and collections are listed above.</p>"
+        event_rows = "<p class='muted'>No timeline events available. Demo orders and collections are listed above.</p>"
 
-    body = f"""
-    <h1>Logistics Dashboard</h1>
-    <p style="color:#475569;">Sample movement, collections, shipments, or order status fallback.</p>
+    return f"""
+    {page_header("Logistics Dashboard", "Sample movement, collections, shipments, or order status fallback.")}
     {notice}
     {metric_cards([
         ("Demo Orders", summary["orders"]),
@@ -115,9 +128,8 @@ def logistics_dashboard():
         <table><tr><th>Reference</th><th>Status</th><th>Actor</th><th>Type</th><th>Link</th><th>Updated</th></tr>{rows}</table>
     </div>
     <div class="card"><h2>Operations Timeline</h2>{event_rows}</div>
-    <div class="card"><p><a href="/logistics/dispatch">Dispatch Center</a> · <a href="/shipments">Shipments</a> · <a href="/collector">Collector Portal</a></p></div>
+    <div class="card links"><a href="/logistics/dispatch">Dispatch Center</a><a href="/shipments">Shipments</a><a href="/collector">Collector Portal</a></div>
     """
-    return render_pilot_page("Logistics Dashboard", body)
 
 
 @logistics_web_bp.route("/logistics/dispatch")

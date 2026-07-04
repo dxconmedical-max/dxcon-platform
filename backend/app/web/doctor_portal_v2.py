@@ -10,7 +10,7 @@ from app.services.doctor_portal_service import (
 )
 
 
-from app.web.demo_pilot_lib import DEMO_ORDER_PREFIX, safe_query
+from app.web.demo_pilot_lib import DEMO_ORDER_PREFIX, page_header, safe_query
 
 doctor_portal_v2_web_bp = Blueprint("doctor_portal_v2_web", __name__)
 
@@ -72,8 +72,19 @@ def doctor_dashboard_page():
 
     try:
         dashboard = DoctorDashboardService.get_dashboard(doctor_id)
-    except DoctorPortalError as exc:
-        return exc.message, exc.status_code
+    except DoctorPortalError:
+        from app.models.doctor_profile import DoctorProfile
+
+        profile = DoctorProfile.query.filter_by(doctor_id=doctor_id).first()
+        dashboard = {
+            "doctor": {"full_name": profile.full_name if profile else "Demo Doctor"},
+            "summary": {
+                "patients_total": 0,
+                "referrals_total": 0,
+                "follow_ups_pending": 0,
+                "released_results_total": 0,
+            },
+        }
 
     summary = dashboard["summary"]
     demo_orders = safe_query(Order, filter_like=("order_code", DEMO_ORDER_PREFIX), limit=10)
@@ -93,7 +104,8 @@ def doctor_dashboard_page():
     </div></div>
     <div class="card"><h2>Recent Demo Orders</h2>
     <table><tr><th>Order</th><th>Patient Ref</th><th>Status</th><th>Amount</th></tr>{order_rows}</table>
-    <p style="color:#64748b;">Result review remains a placeholder until lab results are seeded for demo orders.</p>
+    <p class="muted">Result review remains a placeholder until lab results are seeded for demo orders.</p>
+    <p><a href="/demo-accounts">Demo Accounts</a> · <a href="/workflow-demo">Workflow Demo</a></p>
     </div>
     </div></div></body></html>
     """

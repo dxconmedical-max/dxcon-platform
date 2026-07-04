@@ -18,6 +18,7 @@ from app.web.home import home_web_bp
 from app.web.executive_v9 import executive_v9_bp
 from app.web.crm_v2 import crm_v2_web_bp
 from app.web.reception import reception_web_bp
+from app.web.pilot_pages import pilot_pages_bp
 from app.web.finance import finance_web_bp
 
 from app.api.auth.routes import auth_bp
@@ -293,6 +294,7 @@ def register_blueprints(app):
     app.register_blueprint(crm_v2_web_bp)
     app.register_blueprint(executive_v9_bp)
     app.register_blueprint(reception_web_bp)
+    app.register_blueprint(pilot_pages_bp)
     app.register_blueprint(home_web_bp)
     app.register_blueprint(ops_bp)
     app.register_blueprint(security_api_bp)

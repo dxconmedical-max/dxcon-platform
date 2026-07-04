@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-03T19:57:30.363285+00:00",
-  "mode": "summary",
+  "generated_at": "2026-07-04T07:42:48.941291+00:00",
+  "mode": "dry_run",
   "targets": {
     "super_admin_users": 1,
     "admin_staff_users": 5,
@@ -18,20 +18,40 @@
     "notifications": 10
   },
   "created_counts": {
-    "users": 0,
-    "patients": 0,
-    "test_catalog": 0,
-    "orders": 0
+    "users": 16,
+    "laboratories": 5,
+    "partners_clinics": 10,
+    "doctor_profiles": 10,
+    "companies": 1,
+    "test_catalog_items": 200,
+    "patients": 100,
+    "orders": 50,
+    "order_items": 50,
+    "sample_collections": 20,
+    "collectors_drivers": 10,
+    "shipments": 20,
+    "invoices": 10,
+    "notifications": 10
   },
   "existing_counts": {
-    "users": 16,
-    "patients": 100,
-    "test_catalog": 200,
-    "orders": 50
+    "users": 0,
+    "laboratories": 0,
+    "partners_clinics": 0,
+    "doctor_profiles": 0,
+    "companies": 0,
+    "test_catalog_items": 0,
+    "patients": 0,
+    "orders": 0,
+    "order_items": 0,
+    "sample_collections": 0,
+    "collectors_drivers": 0,
+    "shipments": 0,
+    "invoices": 0,
+    "notifications": 0
   },
   "skipped_models": [],
   "errors": [],
-  "runtime_seconds": 0.184,
+  "runtime_seconds": 0.151,
   "ok": true,
   "demo_accounts": {
     "super_admin": "demo-superadmin@demo.dxcon.test",
@@ -56,15 +76,14 @@
           "email",
           "full_name",
           "gender",
-          "id",
           "national_id",
           "patient_code",
           "phone"
         ],
         "primary_key": [
-          "id"
+          "patient_code"
         ],
-        "has_id": true,
+        "has_id": false,
         "has_patient_code": true
       },
       "patient_profiles": {
@@ -143,11 +162,12 @@
         "has_patient_code": false
       }
     },
-    "warnings": []
+    "warnings": [
+      "patients primary key is patient_code (legacy/production schema)"
+    ]
   },
   "create_all": {
     "executed": false,
-    "app_env": "development",
-    "reason": "development_requires_--allow-create-all"
+    "reason": "not_requested"
   }
 }

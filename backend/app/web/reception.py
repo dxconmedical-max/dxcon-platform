@@ -8,7 +8,8 @@ from app.web.demo_pilot_lib import (
     DEMO_ORDER_PREFIX,
     DEMO_PATIENT_PREFIX,
     metric_cards,
-    render_pilot_page,
+    page_header,
+    render_safe_page,
     safe_query,
     seeded_summary,
     system_status,
@@ -18,8 +19,7 @@ from app.web.demo_pilot_lib import (
 reception_web_bp = Blueprint("reception_web", __name__)
 
 
-@reception_web_bp.route("/reception")
-def reception_dashboard():
+def _build_reception_body() -> str:
     summary = seeded_summary()
     status = system_status()
     patients = safe_query(Patient, filter_like=("patient_code", DEMO_PATIENT_PREFIX), limit=10)
@@ -35,9 +35,8 @@ def reception_dashboard():
         for o in orders
     ) or "<tr><td colspan='4'>No demo orders found.</td></tr>"
 
-    body = f"""
-    <h1>Reception Dashboard</h1>
-    <p style="color:#475569;">Front desk view for demo patients and incoming orders.</p>
+    return f"""
+    {page_header("Reception Dashboard", "Front desk view for demo patients and incoming orders.")}
     {metric_cards([
         ("Demo Patients", summary["patients"]),
         ("Demo Orders", summary["orders"]),
@@ -47,7 +46,7 @@ def reception_dashboard():
     <div class="card">
         <h2>System Status</h2>
         {system_status_cards(status)}
-        <p style="color:#64748b;font-size:13px;">Last probe: {status["timestamp"]}</p>
+        <p class="muted">Last probe: {status["timestamp"]}</p>
     </div>
     <div class="card">
         <h2>Recent Demo Patients</h2>
@@ -57,9 +56,19 @@ def reception_dashboard():
         <h2>Recent Demo Orders</h2>
         <table><tr><th>Order</th><th>Patient Ref</th><th>Status</th><th>Amount</th></tr>{order_rows}</table>
     </div>
-    <div class="card">
-        <h2>Quick Links</h2>
-        <p><a href="/patients">Patient Registry</a> · <a href="/orders">Orders</a> · <a href="/order-lifecycle">Order Lifecycle</a> · <a href="/scheduling">Scheduling</a></p>
+    <div class="card links">
+        <a href="/patients">Patient Registry</a>
+        <a href="/orders">Orders</a>
+        <a href="/order-lifecycle">Order Lifecycle</a>
+        <a href="/demo-accounts">Demo Accounts</a>
     </div>
     """
-    return render_pilot_page("Reception Dashboard", body)
+
+
+@reception_web_bp.route("/reception")
+def reception_dashboard():
+    return render_safe_page(
+        "Reception Dashboard",
+        "Front desk view for demo patients and incoming orders.",
+        _build_reception_body,
+    )

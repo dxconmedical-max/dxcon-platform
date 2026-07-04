@@ -28,8 +28,11 @@ def index():
         ("CRM Pipeline", "/crm-pipeline"),
         ("Logistics Dashboard", "/logistics"),
         ("Reception Dashboard", "/reception"),
-        ("Doctor Workbench", "/doctor/dashboard"),
-        ("Patient Portal Demo", "/patient/demo"),
+        ("Doctor Workbench", "/doctor-workbench"),
+        ("Patient Portal Demo", "/patient-portal"),
+        ("Demo Accounts", "/demo-accounts"),
+        ("Workflow Demo", "/workflow-demo"),
+        ("Pilot Checklist", "/pilot-checklist"),
         ("Collector Portal", "/collector"),
         ("Workflow Health", "/api/v1/workflow/health"),
         ("API Health", "/health"),
@@ -51,7 +54,7 @@ def index():
         <div style="max-width:960px;margin:0 auto;padding:32px 24px;">
             <header style="margin-bottom:24px;">
                 <h1 style="margin:0 0 8px;font-size:32px;">DxCon Platform</h1>
-                <p style="margin:0;color:#475569;">Live demo and pilot readiness landing page</p>
+                <p style="margin:0;color:#475569;">Pilot-ready operational demo landing page</p>
             </header>
 
             <section style="background:white;border-radius:12px;padding:24px;box-shadow:0 4px 16px rgba(15,23,42,.08);margin-bottom:24px;">
@@ -75,6 +78,15 @@ def index():
                     </div>
                 </div>
                 <p style="margin:16px 0 0;color:#64748b;font-size:13px;">Last probe: {timestamp}</p>
+            </section>
+
+            <section style="background:white;border-radius:12px;padding:24px;box-shadow:0 4px 16px rgba(15,23,42,.08);margin-bottom:24px;">
+                <h2 style="margin-top:0;font-size:18px;">Pilot Pages</h2>
+                <ul style="line-height:1.9;padding-left:20px;margin:0;">
+                    <li><a href="/demo-accounts">Demo Accounts</a></li>
+                    <li><a href="/workflow-demo">Workflow Demo</a></li>
+                    <li><a href="/pilot-checklist">Pilot Checklist</a></li>
+                </ul>
             </section>
 
             <section style="background:white;border-radius:12px;padding:24px;box-shadow:0 4px 16px rgba(15,23,42,.08);">

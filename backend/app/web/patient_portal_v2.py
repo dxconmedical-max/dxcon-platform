@@ -2,7 +2,7 @@ from flask import Blueprint, redirect, request
 
 from app.models.order import Order
 from app.models.patient import Patient
-from app.web.demo_pilot_lib import DEMO_ORDER_PREFIX, DEMO_PATIENT_PREFIX, safe_query
+from app.web.demo_pilot_lib import DEMO_ORDER_PREFIX, DEMO_PATIENT_PREFIX, page_header, safe_query
 from app.services.patient_portal_service import (
     MedicalHistoryService,
     PatientDashboardService,
@@ -183,8 +183,7 @@ def patient_demo_page():
         order_rows = "<tr><td colspan='3'>No demo patient selected.</td></tr>"
 
     body = f"""
-    <h1>Patient Portal Demo</h1>
-    <p style="color:#475569;">Browse seeded demo patients and recent orders.</p>
+    {page_header("Patient Portal Demo", "Browse seeded demo patients and recent orders.")}
     {metric_cards([
         ("Demo Patients", summary["patients"]),
         ("Demo Orders", summary["orders"]),

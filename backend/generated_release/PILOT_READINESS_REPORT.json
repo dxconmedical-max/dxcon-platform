@@ -1,0 +1,128 @@
+{
+  "generated_at": "2026-07-04T07:43:51.307448+00:00",
+  "summary": {
+    "pilot_readiness_score": 100.0,
+    "checks_passed": 5,
+    "checks_total": 5,
+    "ok": true,
+    "failed_routes": [],
+    "runtime_seconds": 1.051
+  },
+  "checks": {
+    "seed_data": {
+      "ok": true,
+      "counts": {
+        "users": 16,
+        "patients": 100,
+        "test_catalog": 200,
+        "orders": 50
+      }
+    },
+    "route_registry": {
+      "ok": true,
+      "required": [
+        "/",
+        "/health",
+        "/ready",
+        "/executive",
+        "/executive-v9",
+        "/crm-pipeline",
+        "/logistics",
+        "/reception",
+        "/doctor-workbench",
+        "/doctor/dashboard",
+        "/patient-portal",
+        "/patient/demo",
+        "/demo-accounts",
+        "/workflow-demo",
+        "/pilot-checklist"
+      ],
+      "missing": []
+    },
+    "health_endpoints": {
+      "ok": true,
+      "routes": {
+        "/health": {
+          "status_code": 200,
+          "payload": {
+            "app_env": "development",
+            "database": "OK",
+            "redis": "DEGRADED",
+            "status": "OK",
+            "timestamp": "2026-07-04T07:43:51.230031+00:00"
+          },
+          "ok": true
+        },
+        "/ready": {
+          "status_code": 200,
+          "payload": {
+            "app_env": "development",
+            "database": "OK",
+            "redis": "DEGRADED",
+            "status": "OK",
+            "timestamp": "2026-07-04T07:43:51.231383+00:00"
+          },
+          "ok": true
+        }
+      }
+    },
+    "dashboard_pages": {
+      "ok": true,
+      "routes": {
+        "/": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/executive-v9": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/crm-pipeline": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/logistics": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/reception": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/doctor-workbench": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/patient-portal": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/demo-accounts": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/workflow-demo": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-checklist": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "critical_dashboards": {
+      "ok": true,
+      "routes": {
+        "/crm-pipeline": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/logistics": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    }
+  }
+}
