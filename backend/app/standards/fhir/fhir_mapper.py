@@ -1,6 +1,6 @@
-from app.standards.fhir.fhir_resource import sample_diagnostic_report, sample_service_request
+from app.standards.fhir.fhir_resource import sample_diagnostic_report, sample_patient, sample_service_request
 from app.standards.mapping import StandardsMappingService
-from app.standards.normalizer import normalize_order, normalize_result
+from app.standards.normalizer import normalize_order, normalize_patient, normalize_result
 
 
 def map_order_to_fhir(order_payload):
@@ -45,4 +45,32 @@ def map_result_to_fhir(result_payload):
         "mapping": mapping,
         "diagnostic_report": resource,
         "observation": observation,
+    }
+
+
+def map_patient_to_fhir(patient_payload):
+    normalized = normalize_patient(patient_payload or {})
+    patient_id = normalized.get("patient_id") or "PAT-001"
+    resource = sample_patient(patient_id=patient_id)
+    if normalized.get("name"):
+        parts = str(normalized["name"]).split("^")
+        resource["name"] = [
+            {
+                "family": parts[0] if parts else "Patient",
+                "given": [parts[1]] if len(parts) > 1 else ["Demo"],
+            }
+        ]
+    if normalized.get("gender"):
+        resource["gender"] = str(normalized["gender"]).lower()
+    if normalized.get("birth_date"):
+        resource["birthDate"] = str(normalized["birth_date"]).replace("/", "-")[:10]
+    return {"normalized": normalized, "resource": resource}
+
+
+def map_observation_to_fhir(result_payload):
+    mapped = map_result_to_fhir(result_payload or {})
+    return {
+        "normalized": mapped["normalized"],
+        "mapping": mapped["mapping"],
+        "observation": mapped["observation"],
     }

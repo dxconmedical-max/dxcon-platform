@@ -1,0 +1,125 @@
+{
+  "generated_at": "2026-07-04T14:13:53.752310+00:00",
+  "phase": "4.4",
+  "sprint": "Healthcare Standards Advanced",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 16,
+    "checks_total": 16,
+    "ok": true,
+    "runtime_seconds": 1.208
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "standards_advanced_dashboard": {
+      "ok": true,
+      "routes": {
+        "/standards-advanced": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/standards-advanced/hl7-oru": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/standards-advanced/hl7-orm": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/standards-advanced/hl7-adt": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/standards-advanced/fhir-patient": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/standards-advanced/fhir-diagnostic": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/standards-advanced/fhir-observation": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/standards-advanced/loinc": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/standards-advanced/icd10": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/standards-advanced/audit": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/standards-advanced/sandbox": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/standards-advanced/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/standards-advanced/audit": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/standards-advanced/sandbox/messages": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "hl7_oru_result_export": {
+      "ok": true
+    },
+    "hl7_orm_order_import": {
+      "ok": true
+    },
+    "hl7_adt_patient_import": {
+      "ok": true
+    },
+    "fhir_patient_mapping": {
+      "ok": true
+    },
+    "fhir_diagnostic_report_mapping": {
+      "ok": true
+    },
+    "fhir_observation_mapping": {
+      "ok": true
+    },
+    "loinc_mapping_validation": {
+      "ok": true
+    },
+    "icd10_mapping_validation": {
+      "ok": true
+    },
+    "standards_audit_log": {
+      "ok": true
+    },
+    "integration_sandbox_messages": {
+      "ok": true
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 11
+    },
+    "existing_standards_api_preserved": {
+      "ok": true
+    }
+  }
+}
