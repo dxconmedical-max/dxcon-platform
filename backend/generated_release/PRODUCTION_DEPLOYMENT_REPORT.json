@@ -1,0 +1,632 @@
+{
+  "generated_at": "2026-07-04T14:45:42.307496+00:00",
+  "phase": "5.5",
+  "sprint": "Production Deployment",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 14,
+    "checks_total": 14,
+    "ok": true,
+    "runtime_seconds": 1.477
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "production_dashboard": {
+      "ok": true,
+      "routes": {
+        "/production-deployment": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/production-deployment/docker": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/production-deployment/nginx": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/production-deployment/probes": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/production-deployment/rolling": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/production-deployment/migration": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/production-deployment/release": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/production-deployment/rollback": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/production-deployment/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/production-deployment/docker": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/production-deployment/nginx": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/production-deployment/probes": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/production-deployment/rolling": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/production-deployment/migration": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/production-deployment/release": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/production-deployment/rollback": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/production-deployment/inventory": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/production-deployment/readiness": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 7
+    },
+    "docker_production_profile": {
+      "ok": true
+    },
+    "nginx_production": {
+      "ok": true
+    },
+    "health_probes": {
+      "ok": true
+    },
+    "rolling_deployment": {
+      "ok": true
+    },
+    "zero_downtime_migration": {
+      "ok": true
+    },
+    "release_checklist": {
+      "ok": true
+    },
+    "rollback_checklist": {
+      "ok": true
+    },
+    "legacy_operations_deployment_preserved": {
+      "ok": true
+    },
+    "legacy_deployment_web_preserved": {
+      "ok": true
+    }
+  },
+  "readiness": {
+    "features": [
+      "Docker Production Profile",
+      "Nginx Production",
+      "Health Probes",
+      "Rolling Deployment",
+      "Zero-downtime Migration",
+      "Release Checklist",
+      "Rollback Checklist"
+    ],
+    "generated_at": "2026-07-04T14:45:42.314893",
+    "infrastructure_readiness": {
+      "config_valid": true,
+      "deployment": {
+        "build": {
+          "build_time": "",
+          "environment": "development",
+          "git_sha": "local",
+          "service": "dxcon-api",
+          "version": "2.5.0-dev"
+        },
+        "checks": [
+          {
+            "name": "config_validation",
+            "status": "pass"
+          },
+          {
+            "detail": {
+              "error": "Working outside of application context.\n\nThis typically means that you attempted to use functionality that needed\nthe current application. To solve this, set up an application context\nwith app.app_context(). See the documentation for more information.",
+              "ready": false
+            },
+            "name": "database_migrations",
+            "status": "warn"
+          },
+          {
+            "name": "database_configured",
+            "status": "pass"
+          },
+          {
+            "name": "secret_key",
+            "status": "pass"
+          },
+          {
+            "name": "jwt_secret",
+            "status": "pass"
+          },
+          {
+            "name": "connection_pool",
+            "status": "pass"
+          }
+        ],
+        "ready_for_production": true,
+        "score": 85
+      },
+      "go_live_blockers": {
+        "app_env": "development",
+        "blocker_count": 0,
+        "blockers": [],
+        "cors": {
+          "ok": true,
+          "origins": "*",
+          "strict_env": false,
+          "wildcard_allowed": true
+        },
+        "database": {
+          "configured": true,
+          "dialect": "sqlite",
+          "ok": true,
+          "postgresql_expected": false,
+          "sqlite": true,
+          "sqlite_blocked_in_env": false
+        },
+        "generated_at": "2026-07-04T14:45:42.314886+00:00",
+        "ready": true,
+        "redis": {
+          "mode": "not_configured",
+          "ok": true,
+          "required": false,
+          "status": "DEGRADED"
+        },
+        "smtp": {
+          "blocker": false,
+          "mode": "not_configured",
+          "ok": true,
+          "status": "DEGRADED"
+        },
+        "warning_count": 0,
+        "warnings": []
+      },
+      "issues": [],
+      "ready": true,
+      "runtime_status": "DEGRADED"
+    },
+    "phase": "5.5",
+    "platform": "Production Deployment",
+    "sections": {
+      "docker": {
+        "assets_available": {
+          "deploy_pipeline": true,
+          "deployment_guide": true,
+          "docker_compose_production": true,
+          "docker_compose_staging": true,
+          "dockerfile": true,
+          "gunicorn_conf": true,
+          "k8s_deployment": true,
+          "nginx_conf": true,
+          "nginx_default": true,
+          "production_start": true,
+          "release_checklist": true,
+          "rollback_pipeline": true
+        },
+        "checks": {
+          "app_env_production": true,
+          "compose_exists": true,
+          "dockerfile_exists": true,
+          "healthcheck": true,
+          "non_root_user": true,
+          "production_start": true,
+          "resource_limits": true,
+          "services_complete": true,
+          "stop_grace_period": true
+        },
+        "checks_passed": 9,
+        "checks_total": 9,
+        "compose_file": "docker-compose.production.yml",
+        "dockerfile": "backend/Dockerfile",
+        "missing_services": [],
+        "profile": {
+          "debug": false,
+          "expose_debug_routes": false,
+          "log_level": "INFO",
+          "maintenance_allowed": false,
+          "profile": "production",
+          "rate_limit_enabled": true,
+          "strict_validation": true,
+          "testing": false
+        },
+        "read_only": true,
+        "report": "docker_production_profile",
+        "runtime_profile": "development",
+        "services_expected": [
+          "api",
+          "postgres",
+          "redis",
+          "nginx",
+          "worker",
+          "scheduler"
+        ]
+      },
+      "migration": {
+        "checks": [
+          {
+            "detail": "/ready returns 503 until database migrations are applied.",
+            "id": 1,
+            "status": "PASS",
+            "title": "Readiness gate includes migrations"
+          },
+          {
+            "detail": "STARTUP_VALIDATE_DB runs migration checks on boot in production.",
+            "id": 2,
+            "status": "PASS",
+            "title": "Startup migration validation"
+          },
+          {
+            "detail": "verify_migrations exposes current migration readiness.",
+            "id": 3,
+            "status": "PASS",
+            "title": "Migration status available"
+          },
+          {
+            "detail": "New pods only receive traffic after /ready succeeds.",
+            "id": 4,
+            "status": "PASS",
+            "title": "Rolling deploy with probe gate"
+          },
+          {
+            "detail": "Apply expand/contract migrations before code cutover.",
+            "id": 5,
+            "status": "DOCUMENTED",
+            "title": "Backward-compatible schema changes"
+          }
+        ],
+        "checks_passed": 5,
+        "checks_total": 5,
+        "guide": "docs/DEPLOYMENT.md",
+        "migration_status": {
+          "alembic_present": false,
+          "missing_core_tables": [],
+          "ready": true,
+          "table_count": 304
+        },
+        "read_only": true,
+        "report": "zero_downtime_migration",
+        "startup_validate_db": true
+      },
+      "nginx": {
+        "checks": {
+          "client_max_body_size": true,
+          "default_conf_exists": true,
+          "gzip_enabled": true,
+          "health_route_live": true,
+          "health_route_ready": true,
+          "nginx_conf_exists": true,
+          "proxy_timeouts": true,
+          "reverse_proxy": true,
+          "security_headers": true,
+          "upstream_keepalive": true
+        },
+        "checks_passed": 10,
+        "checks_total": 10,
+        "default_conf": "deployment/nginx/default.conf",
+        "nginx_conf": "deployment/nginx/nginx.conf",
+        "read_only": true,
+        "report": "nginx_production"
+      },
+      "probes": {
+        "compose_healthcheck": true,
+        "docker_healthcheck": true,
+        "health_probe": {
+          "path": "/api/v1/system/health",
+          "payload": {
+            "app_env": "development",
+            "database": "OK",
+            "redis": "DEGRADED",
+            "status": "OK",
+            "timestamp": "2026-07-04T14:45:42.315953+00:00"
+          },
+          "status_code": 200
+        },
+        "kubernetes_liveness": true,
+        "kubernetes_readiness": true,
+        "live_probe": {
+          "path": "/live",
+          "payload": {
+            "app_env": "development",
+            "database": "OK",
+            "redis": "DEGRADED",
+            "status": "OK",
+            "timestamp": "2026-07-04T14:45:42.315283+00:00"
+          },
+          "status_code": 200
+        },
+        "nginx_live_route": true,
+        "probe_paths": [
+          "/live",
+          "/ready",
+          "/api/v1/system/health",
+          "/api/v1/system/liveness"
+        ],
+        "read_only": true,
+        "ready_probe": {
+          "path": "/ready",
+          "payload": {
+            "app_env": "development",
+            "database": "OK",
+            "redis": "DEGRADED",
+            "status": "OK",
+            "timestamp": "2026-07-04T14:45:42.315437+00:00"
+          },
+          "status_code": 200
+        },
+        "report": "health_probes"
+      },
+      "release": {
+        "deployment_current": {
+          "build_sha": null,
+          "build_time": "",
+          "checks": [
+            {
+              "check_code": "DB_CONNECTIVITY",
+              "created_at": "2026-07-04T14:45:42.224812",
+              "deployment_id": "553036d5-399b-48d2-b4d5-d98aa14dc36b",
+              "detail_json": "{\"detail\": \"OK\"}",
+              "id": "95b83295-7aae-497b-87e9-fd88b7188d39",
+              "name": "Database connectivity",
+              "status": "PASSED"
+            },
+            {
+              "check_code": "MIGRATIONS",
+              "created_at": "2026-07-04T14:45:42.224818",
+              "deployment_id": "553036d5-399b-48d2-b4d5-d98aa14dc36b",
+              "detail_json": "{\"detail\": \"OK\"}",
+              "id": "4b7402f6-1fa2-4869-8471-4ce5ac7a4251",
+              "name": "Migration readiness",
+              "status": "PASSED"
+            },
+            {
+              "check_code": "QUEUE_HEALTH",
+              "created_at": "2026-07-04T14:45:42.224823",
+              "deployment_id": "553036d5-399b-48d2-b4d5-d98aa14dc36b",
+              "detail_json": "{\"detail\": \"OK\"}",
+              "id": "967c6f75-311c-4ecf-bf7b-0286445ac49c",
+              "name": "Queue health",
+              "status": "PASSED"
+            },
+            {
+              "check_code": "SECRET_VALIDATION",
+              "created_at": "2026-07-04T14:45:42.226743",
+              "deployment_id": "553036d5-399b-48d2-b4d5-d98aa14dc36b",
+              "detail_json": "{\"detail\": \"secret warnings present\"}",
+              "id": "05af230b-3768-4818-813f-e5d9e4d785db",
+              "name": "Secret validation",
+              "status": "WARNING"
+            },
+            {
+              "check_code": "BACKUP_RECENT",
+              "created_at": "2026-07-04T14:45:42.228673",
+              "deployment_id": "553036d5-399b-48d2-b4d5-d98aa14dc36b",
+              "detail_json": "{\"detail\": \"no backups found\"}",
+              "id": "e10d640c-3b96-44c8-8df3-fc8223c7a7e6",
+              "name": "Recent backup available",
+              "status": "WARNING"
+            }
+          ],
+          "current_version": "2.5.0-dev",
+          "environment": "development",
+          "last_deployment": {
+            "build_sha": "unknown",
+            "build_time": "2026-07-04T14:45:42.223134",
+            "created_at": "2026-07-04T14:45:42.223720",
+            "deployment_code": "DEP-FB24140F",
+            "environment": "development",
+            "id": "553036d5-399b-48d2-b4d5-d98aa14dc36b",
+            "readiness_score": 60.0,
+            "status": "DEGRADED",
+            "version": "2.5.0-dev"
+          },
+          "rollback_plan": {
+            "created_at": "2026-07-04T14:45:42.229804",
+            "deployment_id": "553036d5-399b-48d2-b4d5-d98aa14dc36b",
+            "detail_json": "{\"strategy\": \"metadata-only rollback plan\"}",
+            "id": "16437fd6-3262-4d44-be85-ff4f0d9efda5",
+            "plan_code": "RBK-442537CD",
+            "status": "READY",
+            "target_version": "previous"
+          }
+        },
+        "items": [
+          {
+            "checked": false,
+            "item": "health_check.py"
+          },
+          {
+            "checked": false,
+            "item": "check_db.py"
+          },
+          {
+            "checked": false,
+            "item": "check_production.py"
+          },
+          {
+            "checked": false,
+            "item": "git status clean"
+          },
+          {
+            "checked": false,
+            "item": "git push main"
+          },
+          {
+            "checked": false,
+            "item": "Render deploy success"
+          },
+          {
+            "checked": false,
+            "item": "/monitor OK"
+          },
+          {
+            "checked": false,
+            "item": "/audit OK"
+          },
+          {
+            "checked": false,
+            "item": "/security OK"
+          },
+          {
+            "checked": false,
+            "item": "/finance OK"
+          },
+          {
+            "checked": false,
+            "item": "/executive-v9 OK"
+          }
+        ],
+        "items_total": 11,
+        "legacy_api": "POST /api/v1/operations/deployment/check",
+        "pipeline": "deployment/pipeline/deploy.py",
+        "read_only": true,
+        "report": "release_checklist",
+        "verify_scripts": [
+          "backend/scripts/verify_production_deployment.py",
+          "backend/scripts/verify_staging_stack.py",
+          "deployment/pipeline/verify_deployment.py"
+        ]
+      },
+      "rollback": {
+        "items": [
+          {
+            "id": 1,
+            "item": "Confirm rollback target version / image tag",
+            "required": true
+          },
+          {
+            "id": 2,
+            "item": "GET /api/v1/operations/deployment/rollback-plan",
+            "required": true
+          },
+          {
+            "id": 3,
+            "item": "Run deployment/pipeline/rollback.py (metadata plan)",
+            "required": true
+          },
+          {
+            "id": 4,
+            "item": "Execute restore dry-run if database regression suspected",
+            "required": false
+          },
+          {
+            "id": 5,
+            "item": "Verify /live and /ready after rollback",
+            "required": true
+          },
+          {
+            "id": 6,
+            "item": "Record incident in audit trail",
+            "required": true
+          }
+        ],
+        "legacy_api": "GET /api/v1/operations/deployment/rollback-plan",
+        "pipeline_available": true,
+        "pipeline_script": "deployment/pipeline/rollback.py",
+        "pipeline_steps": [
+          "Validate backup artifacts",
+          "Run restore dry-run",
+          "Deploy previous container image tag (BUILD_VERSION)",
+          "Run post-deployment verification"
+        ],
+        "read_only": true,
+        "report": "rollback_checklist",
+        "rollback_plan": {
+          "deployment": {
+            "build_sha": "unknown",
+            "build_time": "2026-07-04T14:45:42.223134",
+            "created_at": "2026-07-04T14:45:42.223720",
+            "deployment_code": "DEP-FB24140F",
+            "environment": "development",
+            "id": "553036d5-399b-48d2-b4d5-d98aa14dc36b",
+            "readiness_score": 60.0,
+            "status": "DEGRADED",
+            "version": "2.5.0-dev"
+          },
+          "rollback_plan": {
+            "created_at": "2026-07-04T14:45:42.229804",
+            "deployment_id": "553036d5-399b-48d2-b4d5-d98aa14dc36b",
+            "detail_json": "{\"strategy\": \"metadata-only rollback plan\"}",
+            "id": "16437fd6-3262-4d44-be85-ff4f0d9efda5",
+            "plan_code": "RBK-442537CD",
+            "status": "READY",
+            "target_version": "previous"
+          }
+        }
+      },
+      "rolling": {
+        "compose_restart_policy": true,
+        "legacy_api": "GET /api/v1/operations/deployment",
+        "nginx_upstream_keepalive": true,
+        "pipeline_available": true,
+        "pipeline_entrypoint": "deployment/pipeline/deploy.py",
+        "read_only": true,
+        "replicas": 2,
+        "report": "rolling_deployment",
+        "steps": [
+          "Build and tag container image with BUILD_VERSION.",
+          "Run pre-deployment verification (deployment/pipeline/verify_deployment.py pre).",
+          "Apply Kubernetes manifests or docker compose up with health-gated nginx.",
+          "Wait for /ready on all new replicas before draining old pods.",
+          "Run post-deployment verification and smoke tests."
+        ],
+        "strategy": {
+          "max_surge": "default",
+          "max_unavailable": "default",
+          "type": "RollingUpdate"
+        }
+      }
+    },
+    "sprint": "Production Deployment",
+    "status": "OK",
+    "summary": {
+      "deployment_score": 85,
+      "docker_checks_passed": 9,
+      "docker_checks_total": 9,
+      "migration_checks_passed": 5,
+      "migration_checks_total": 5,
+      "nginx_checks_passed": 10,
+      "nginx_checks_total": 10,
+      "runtime_profile": "development"
+    }
+  }
+}
