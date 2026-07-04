@@ -1,0 +1,56 @@
+{
+  "info": {
+    "name": "DxCon Partner API",
+    "description": "Starter Postman collection for DxCon partner integrations. Import /api/v1/openapi.json for full coverage.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "apiKey",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Platform Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/api-platform/health"
+      }
+    },
+    {
+      "name": "OpenAPI Spec",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/openapi.json"
+      }
+    },
+    {
+      "name": "Developer Sandbox Request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-API-Key",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"method\": \"GET\",\n  \"path\": \"/api/v1/api-platform/health\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/developer/sandbox/request"
+      }
+    }
+  ]
+}

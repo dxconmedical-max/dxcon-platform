@@ -1,0 +1,117 @@
+{
+  "generated_at": "2026-07-04T14:21:41.373239+00:00",
+  "phase": "4.5",
+  "sprint": "Partner Developer Portal",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 16,
+    "checks_total": 16,
+    "ok": true,
+    "runtime_seconds": 1.645
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "developer_portal_landing": {
+      "ok": true,
+      "routes": {
+        "/developer": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/developer/api": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/developer/webhooks": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/developer/sandbox": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/developer/onboarding": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/developer-portal/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/developer-portal/status": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/developer-portal/docs": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/developer-portal/sandbox/examples": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/developer-portal/onboarding": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/developer-portal/postman": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/developer-portal/sdk": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 10
+    },
+    "api_documentation_links": {
+      "ok": true
+    },
+    "api_key_instructions": {
+      "ok": true
+    },
+    "sandbox_payload_examples": {
+      "ok": true
+    },
+    "integration_status_page": {
+      "ok": true
+    },
+    "sdk_download_links": {
+      "ok": true
+    },
+    "sdk_python_download": {
+      "ok": true
+    },
+    "postman_collection_link": {
+      "ok": true
+    },
+    "partner_onboarding_checklist": {
+      "ok": true
+    },
+    "developer_sandbox_console": {
+      "ok": true
+    },
+    "webhook_test_console": {
+      "ok": true
+    },
+    "legacy_developer_routes_preserved": {
+      "ok": true
+    },
+    "existing_sandbox_api_preserved": {
+      "ok": true
+    }
+  }
+}

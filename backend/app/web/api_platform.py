@@ -1,6 +1,7 @@
 from flask import Blueprint, current_app, render_template_string
 
 from app.services.api_platform_service import ApiClientService, ApiKeyService, ApiPlatformService
+from app.web.developer_portal_lib import legacy_dev_sidebar
 
 
 api_platform_web_bp = Blueprint("api_platform_web", __name__)
@@ -33,20 +34,6 @@ def _styles():
     code { background: #eef2f7; padding: 2px 4px; }
     </style>
     """
-
-
-def _dev_sidebar(active):
-    links = [
-        ("/developer", "Overview"),
-        ("/developer/api-keys", "API Keys"),
-        ("/developer/routes", "Routes"),
-        ("/developer/sandbox", "Sandbox"),
-        ("/api-docs", "API Docs"),
-    ]
-    items = "".join(
-        f'<a href="{href}" class="{"active" if href == active else ""}">{label}</a>' for href, label in links
-    )
-    return f'<div class="sidebar"><h2>Developer Portal</h2>{items}</div>'
 
 
 DOCS_INDEX = """
@@ -124,19 +111,6 @@ def api_docs_redoc():
     return render_template_string(REDOC_TEMPLATE.format(styles=_styles(), cdn_script=cdn_script))
 
 
-@api_platform_web_bp.route("/developer")
-def developer_home():
-    ApiClientService.ensure_defaults()
-    health = ApiPlatformService.health(current_app._get_current_object())
-    return f"""<!DOCTYPE html><html><head><title>Developer Portal</title>{_styles()}</head><body>
-    <div class="layout">{_dev_sidebar("/developer")}<div class="content">
-    <h1>Developer Portal</h1>
-    <div class="card"><strong>Platform status:</strong> {health["status"]}<br>
-    <strong>Routes:</strong> {health["summary"]["total"]}<br>
-    <strong>Domains:</strong> use <code>/developer/routes</code></div>
-    </div></div></body></html>"""
-
-
 @api_platform_web_bp.route("/developer/api-keys")
 def developer_api_keys():
     ApiClientService.ensure_defaults()
@@ -146,7 +120,7 @@ def developer_api_keys():
         for row in keys["keys"]
     )
     return f"""<!DOCTYPE html><html><head><title>API Keys</title>{_styles()}</head><body>
-    <div class="layout">{_dev_sidebar("/developer/api-keys")}<div class="content">
+    <div class="layout">{legacy_dev_sidebar("/developer/api-keys")}<div class="content">
     <h1>API Keys</h1>
     <table><tr><th>Prefix</th><th>Status</th><th>Client</th></tr>{table or "<tr><td colspan='3'>No keys</td></tr>"}</table>
     </div></div></body></html>"""
@@ -161,20 +135,9 @@ def developer_routes():
         for row in rows
     )
     return f"""<!DOCTYPE html><html><head><title>Routes</title>{_styles()}</head><body>
-    <div class="layout">{_dev_sidebar("/developer/routes")}<div class="content">
+    <div class="layout">{legacy_dev_sidebar("/developer/routes")}<div class="content">
     <h1>Route Catalog</h1>
     <div class="card">Showing first 50 of {inventory['inventory']['count']} routes</div>
     <table><tr><th>Methods</th><th>Path</th><th>Blueprint</th></tr>{table}</table>
     </div></div></body></html>"""
 
-
-@api_platform_web_bp.route("/developer/sandbox")
-def developer_sandbox():
-    return f"""<!DOCTYPE html><html><head><title>Sandbox</title>{_styles()}</head><body>
-    <div class="layout">{_dev_sidebar("/developer/sandbox")}<div class="content">
-    <h1>Developer Sandbox</h1>
-    <div class="card">
-    <p>Send test requests with:</p>
-    <pre>POST /api/v1/developer/sandbox/request
-{{ "method": "GET", "path": "/api/v1/api-platform/health" }}</pre>
-    </div></div></div></body></html>"""
