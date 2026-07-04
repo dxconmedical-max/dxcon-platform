@@ -11,6 +11,11 @@ class LISAdapter(DemoAdapter):
     vendor_label = "Demo LIS"
 
 
+class EMRAdapter(DemoAdapter):
+    adapter_type = "EMR"
+    vendor_label = "Demo EMR"
+
+
 class ERPAdapter(DemoAdapter):
     adapter_type = "ERP"
     vendor_label = "Demo ERP"
@@ -44,6 +49,7 @@ class AIAdapter(DemoAdapter):
 ADAPTER_CLASSES = {
     "HIS": HISAdapter,
     "LIS": LISAdapter,
+    "EMR": EMRAdapter,
     "ERP": ERPAdapter,
     "CRM": CRMAdapter,
     "INSURANCE": InsuranceAdapter,

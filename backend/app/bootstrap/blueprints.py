@@ -18,6 +18,7 @@ from app.web.home import home_web_bp
 from app.web.executive_v9 import executive_v9_bp
 from app.web.crm_v2 import crm_v2_web_bp
 from app.web.reception import reception_web_bp
+from app.web.integration_hub import integration_hub_web_bp
 from app.web.pilot_pages import pilot_pages_bp
 from app.web.finance import finance_web_bp
 
@@ -25,6 +26,7 @@ from app.api.auth.routes import auth_bp
 from app.api.admin.routes import admin_bp
 from app.api.patients.routes import patients_bp
 from app.api.reception.routes import reception_bp
+from app.api.integration_hub.routes import integration_hub_bp
 from app.api.laboratories.routes import laboratories_bp
 from app.api.test_catalogs.routes import test_catalogs_bp
 from app.api.orders.routes import orders_bp
@@ -191,6 +193,7 @@ def register_blueprints(app):
     app.register_blueprint(admin_bp)
     app.register_blueprint(patients_bp)
     app.register_blueprint(reception_bp)
+    app.register_blueprint(integration_hub_bp)
     app.register_blueprint(laboratories_bp)
     app.register_blueprint(test_catalogs_bp)
     app.register_blueprint(orders_bp)
@@ -296,6 +299,7 @@ def register_blueprints(app):
     app.register_blueprint(crm_v2_web_bp)
     app.register_blueprint(executive_v9_bp)
     app.register_blueprint(reception_web_bp)
+    app.register_blueprint(integration_hub_web_bp)
     app.register_blueprint(pilot_pages_bp)
     app.register_blueprint(home_web_bp)
     app.register_blueprint(ops_bp)

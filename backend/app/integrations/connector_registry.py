@@ -17,6 +17,9 @@ class ConnectorRegistry:
         defaults = [
             ("CONN-HIS", "HIS Connector", "HIS"),
             ("CONN-LIS", "LIS Connector", "LIS"),
+            ("CONN-EMR", "EMR Connector", "EMR"),
+            ("CONN-ERP", "ERP Connector", "ERP"),
+            ("CONN-INSURANCE", "Insurance Connector", "INSURANCE"),
             ("CONN-PAYMENT", "Payment Connector", "PAYMENT"),
         ]
         for code, name, adapter_type in defaults:

@@ -1,0 +1,174 @@
+{
+  "generated_at": "2026-07-04T13:56:02.278954+00:00",
+  "phase": "4.1",
+  "sprint": "Integration Hub",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 14,
+    "checks_total": 14,
+    "ok": true,
+    "runtime_seconds": 1.637
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "integration_center_dashboard": {
+      "ok": true,
+      "routes": {
+        "/integration-hub": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/integration-hub/connectors": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/integration-hub/adapters": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/integration-hub/webhooks": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/integration-hub/api-keys": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/integration-hub/retry-queue": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/integration-hub/dead-letters": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/integration-hub/audit": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/integration-hub/sandbox": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/integration-hub/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/integration-hub/connectors": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/integration-hub/adapters": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/integration-hub/webhooks": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/integration-hub/api-keys": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/integration-hub/retry-queue": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/integration-hub/dead-letters": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/integration-hub/audit": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "connector_registry": {
+      "ok": true,
+      "count": 6
+    },
+    "adapter_registry": {
+      "ok": true,
+      "adapters": [
+        "AI",
+        "CRM",
+        "EMR",
+        "ERP",
+        "HIS",
+        "INSURANCE",
+        "LIS",
+        "NOTIFICATION",
+        "PAYMENT"
+      ],
+      "missing": []
+    },
+    "webhook_manager": {
+      "ok": true
+    },
+    "api_key_manager": {
+      "ok": true
+    },
+    "retry_queue": {
+      "ok": true
+    },
+    "dead_letter_queue": {
+      "ok": true
+    },
+    "sandbox_test_endpoint": {
+      "ok": true,
+      "status_code": 200
+    },
+    "integration_audit_log": {
+      "ok": true,
+      "count": 16
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 15,
+      "supported_adapters": [
+        "HIS",
+        "LIS",
+        "EMR",
+        "ERP",
+        "INSURANCE",
+        "PAYMENT"
+      ]
+    },
+    "adapter_sandbox_matrix": {
+      "ok": true,
+      "adapters": {
+        "HIS": {
+          "ok": true
+        },
+        "LIS": {
+          "ok": true
+        },
+        "EMR": {
+          "ok": true
+        },
+        "ERP": {
+          "ok": true
+        },
+        "INSURANCE": {
+          "ok": true
+        },
+        "PAYMENT": {
+          "ok": true
+        }
+      }
+    }
+  }
+}

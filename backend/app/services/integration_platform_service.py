@@ -429,6 +429,27 @@ class SandboxService:
         return AdapterManager.receive("PAYMENT", payload)
 
     @staticmethod
+    def emr_record(data):
+        AdapterManager.initialize()
+        AdapterManager.connect("EMR")
+        payload = data or {"record_id": "SANDBOX-EMR", "status": "SIGNED"}
+        return AdapterManager.receive("EMR", payload)
+
+    @staticmethod
+    def erp_order(data):
+        AdapterManager.initialize()
+        AdapterManager.connect("ERP")
+        payload = data or {"order_id": "SANDBOX-ERP", "status": "POSTED"}
+        return AdapterManager.send("ERP", payload)
+
+    @staticmethod
+    def insurance_claim(data):
+        AdapterManager.initialize()
+        AdapterManager.connect("INSURANCE")
+        payload = data or {"claim_id": "SANDBOX-CLM", "status": "APPROVED"}
+        return AdapterManager.send("INSURANCE", payload)
+
+    @staticmethod
     def webhook_test(data):
         IntegrationPlatformService.ensure_defaults()
         webhook = WebhookEndpoint.query.first()
