@@ -1,0 +1,407 @@
+{
+  "generated_at": "2026-07-04T14:54:07.939232+00:00",
+  "phase": "5.7",
+  "sprint": "Release Management",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 14,
+    "checks_total": 14,
+    "ok": true,
+    "runtime_seconds": 1.618
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "release_dashboard": {
+      "ok": true,
+      "routes": {
+        "/release-management": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/release-management/environment": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/release-management/version": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/release-management/notes": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/release-management/migration": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/release-management/health": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/release-management/rollback": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/release-management/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/release-management/environment": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/release-management/version": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/release-management/notes": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/release-management/migration": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/release-management/health": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/release-management/rollback": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/release-management/inventory": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/release-management/readiness": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 6
+    },
+    "environment": {
+      "ok": true
+    },
+    "version": {
+      "ok": true
+    },
+    "release_notes": {
+      "ok": true
+    },
+    "migration_status": {
+      "ok": true
+    },
+    "health": {
+      "ok": true
+    },
+    "rollback": {
+      "ok": true
+    },
+    "legacy_operations_deployment_preserved": {
+      "ok": true
+    },
+    "legacy_system_health_preserved": {
+      "ok": true
+    },
+    "legacy_production_deployment_preserved": {
+      "ok": true
+    }
+  },
+  "readiness": {
+    "features": [
+      "Environment",
+      "Version",
+      "Release Notes",
+      "Migration Status",
+      "Health",
+      "Rollback"
+    ],
+    "generated_at": "2026-07-04T14:54:07.951493",
+    "phase": "5.7",
+    "platform": "Release Management",
+    "sections": {
+      "environment": {
+        "app_env": "development",
+        "database_uri_prefix": "sqlite",
+        "deployment_score": 85,
+        "feature_flags_count": 6,
+        "legacy_api": "GET /api/v1/infrastructure/config",
+        "provider": "local",
+        "read_only": true,
+        "ready_for_production": true,
+        "report": "environment",
+        "runtime_profile": "development",
+        "settings": {
+          "debug": true,
+          "expose_debug_routes": true,
+          "log_level": "DEBUG",
+          "maintenance_allowed": true,
+          "profile": "development",
+          "rate_limit_enabled": false,
+          "strict_validation": false,
+          "testing": false
+        }
+      },
+      "health": {
+        "deployment_score": 85,
+        "health": {
+          "path": "/api/v1/system/health",
+          "payload": {
+            "app_env": "development",
+            "database": "OK",
+            "redis": "DEGRADED",
+            "status": "OK",
+            "timestamp": "2026-07-04T14:54:07.954141+00:00"
+          },
+          "status_code": 200
+        },
+        "infrastructure_status": "DEGRADED",
+        "live": {
+          "path": "/live",
+          "payload": {
+            "app_env": "development",
+            "database": "OK",
+            "redis": "DEGRADED",
+            "status": "OK",
+            "timestamp": "2026-07-04T14:54:07.953479+00:00"
+          },
+          "status_code": 200
+        },
+        "probe_paths": [
+          "/live",
+          "/ready",
+          "/api/v1/system/health",
+          "/api/v1/system/liveness"
+        ],
+        "read_only": true,
+        "ready": {
+          "path": "/ready",
+          "payload": {
+            "app_env": "development",
+            "database": "OK",
+            "redis": "DEGRADED",
+            "status": "OK",
+            "timestamp": "2026-07-04T14:54:07.953660+00:00"
+          },
+          "status_code": 200
+        },
+        "report": "health"
+      },
+      "migration": {
+        "checks": [
+          {
+            "detail": "users, patients, orders available in schema.",
+            "id": 1,
+            "status": "PASS",
+            "title": "Core tables present"
+          },
+          {
+            "detail": "alembic_version table present when migrations configured.",
+            "id": 2,
+            "status": "MANUAL",
+            "title": "Alembic tracking"
+          },
+          {
+            "detail": "STARTUP_VALIDATE_DB runs migration checks on boot.",
+            "id": 3,
+            "status": "PASS",
+            "title": "Startup validation"
+          }
+        ],
+        "checks_passed": 2,
+        "checks_total": 3,
+        "legacy_api": "GET /api/v1/system/ready",
+        "migration": {
+          "alembic_present": false,
+          "error": "Working outside of application context.\n\nThis typically means that you attempted to use functionality that needed\nthe current application. To solve this, set up an application context\nwith app.app_context(). See the documentation for more information.",
+          "missing_core_tables": [],
+          "ready": true,
+          "table_count": 304
+        },
+        "missing_core_tables": [],
+        "read_only": true,
+        "report": "migration_status",
+        "status": "READY",
+        "table_count": 304
+      },
+      "release_notes": {
+        "current_version": "2.5.0-dev",
+        "deployment_guide": "docs/DEPLOYMENT.md",
+        "notes": [
+          {
+            "generated_at": "2026-07-04T14:24:28.336007+00:00",
+            "summary": "RC1 readiness score 100.0%",
+            "title": "Release Candidate 1",
+            "version": "v1.0.0-rc1"
+          },
+          {
+            "generated_at": "2026-07-04T14:50:58.350997+00:00",
+            "summary": "Verify score 100.0% \u00b7 16/16 checks",
+            "title": "Pilot Status",
+            "version": "Phase 5.6"
+          },
+          {
+            "generated_at": "2026-07-04T14:45:42.307496+00:00",
+            "summary": "Verify score 100.0% \u00b7 14/14 checks",
+            "title": "Production Deployment",
+            "version": "Phase 5.5"
+          },
+          {
+            "generated_at": "2026-07-04T14:43:13.837529+00:00",
+            "summary": "Verify score 100.0% \u00b7 13/13 checks",
+            "title": "Tenant Isolation",
+            "version": "Phase 5.4"
+          },
+          {
+            "generated_at": "2026-07-04T14:41:15.196347+00:00",
+            "summary": "Verify score 100.0% \u00b7 13/13 checks",
+            "title": "Backup & Disaster Recovery",
+            "version": "Phase 5.3"
+          },
+          {
+            "generated_at": "2026-07-04T14:37:51.323331+00:00",
+            "summary": "Verify score 100.0% \u00b7 16/16 checks",
+            "title": "Monitoring Center",
+            "version": "Phase 5.2"
+          },
+          {
+            "generated_at": "2026-07-04T14:34:07.623876+00:00",
+            "summary": "Verify score 100.0% \u00b7 19/19 checks",
+            "title": "Security & Compliance",
+            "version": "Phase 5.1"
+          },
+          {
+            "generated_at": "2026-07-04T14:54:07.952864",
+            "summary": "Active platform build tracked via BUILD_VERSION and GIT_SHA.",
+            "title": "Current Build",
+            "version": "2.5.0-dev"
+          }
+        ],
+        "read_only": true,
+        "report": "release_notes",
+        "sources": {
+          "rc1_checklist": true,
+          "rc1_report": true
+        }
+      },
+      "rollback": {
+        "items": [
+          {
+            "id": 1,
+            "item": "Capture current BUILD_VERSION and GIT_SHA",
+            "required": true
+          },
+          {
+            "id": 2,
+            "item": "GET /api/v1/operations/deployment/rollback-plan",
+            "required": true
+          },
+          {
+            "id": 3,
+            "item": "Run deployment/pipeline/rollback.py",
+            "required": true
+          },
+          {
+            "id": 4,
+            "item": "Verify /live and /ready after rollback",
+            "required": true
+          },
+          {
+            "id": 5,
+            "item": "Confirm migration compatibility for target version",
+            "required": true
+          }
+        ],
+        "legacy_api": "GET /api/v1/operations/deployment/rollback-plan",
+        "pipeline_available": true,
+        "pipeline_script": "deployment/pipeline/rollback.py",
+        "pipeline_steps": [
+          "Validate backup artifacts",
+          "Run restore dry-run",
+          "Deploy previous container image tag (BUILD_VERSION)",
+          "Run post-deployment verification"
+        ],
+        "read_only": true,
+        "related_hub": "/production-deployment/rollback",
+        "report": "rollback",
+        "rollback_plan": {
+          "deployment": {
+            "build_sha": "unknown",
+            "build_time": "2026-07-04T14:54:07.801462",
+            "created_at": "2026-07-04T14:54:07.802494",
+            "deployment_code": "DEP-33019E69",
+            "environment": "development",
+            "id": "cc6e61ce-1ca6-4ba9-ac5d-abc95aeeb521",
+            "readiness_score": 60.0,
+            "status": "DEGRADED",
+            "version": "2.5.0-dev"
+          },
+          "rollback_plan": {
+            "created_at": "2026-07-04T14:54:07.808388",
+            "deployment_id": "cc6e61ce-1ca6-4ba9-ac5d-abc95aeeb521",
+            "detail_json": "{\"strategy\": \"metadata-only rollback plan\"}",
+            "id": "e8022133-c9c1-4859-8431-f09e82143e38",
+            "plan_code": "RBK-F542B850",
+            "status": "READY",
+            "target_version": "previous"
+          }
+        }
+      },
+      "version": {
+        "build_env_vars": [
+          "BUILD_VERSION",
+          "GIT_SHA",
+          "BUILD_TIME",
+          "APP_ENV"
+        ],
+        "build_time": "",
+        "environment": "development",
+        "git_sha": "local",
+        "last_deployment": {
+          "build_sha": "unknown",
+          "build_time": "2026-07-04T14:54:07.801462",
+          "created_at": "2026-07-04T14:54:07.802494",
+          "deployment_code": "DEP-33019E69",
+          "environment": "development",
+          "id": "cc6e61ce-1ca6-4ba9-ac5d-abc95aeeb521",
+          "readiness_score": 60.0,
+          "status": "DEGRADED",
+          "version": "2.5.0-dev"
+        },
+        "read_only": true,
+        "report": "version",
+        "service": "dxcon-api",
+        "version": "2.5.0-dev"
+      }
+    },
+    "sprint": "Release Management",
+    "status": "OK",
+    "summary": {
+      "environment": "development",
+      "git_sha": "local",
+      "health_status": "OK",
+      "migration_checks_passed": 2,
+      "migration_status": "READY",
+      "release_notes_count": 8,
+      "runtime_profile": "development",
+      "version": "2.5.0-dev"
+    }
+  }
+}
