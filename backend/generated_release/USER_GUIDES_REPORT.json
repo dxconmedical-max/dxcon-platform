@@ -1,0 +1,427 @@
+{
+  "generated_at": "2026-07-04T15:04:28.086871+00:00",
+  "phase": "5.8",
+  "sprint": "User Guides",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 16,
+    "checks_total": 16,
+    "ok": true,
+    "runtime_seconds": 2.301
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "user_guides_dashboard": {
+      "ok": true,
+      "routes": {
+        "/user-guides": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/user-guides/reception": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/user-guides/collector": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/user-guides/lab": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/user-guides/doctor": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/user-guides/admin": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/user-guides/video": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/user-guides/faq": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/user-guides/checklist": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/user-guides/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/user-guides/reception": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/user-guides/collector": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/user-guides/lab": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/user-guides/doctor": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/user-guides/admin": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/user-guides/video": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/user-guides/faq": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/user-guides/checklist": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/user-guides/inventory": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/user-guides/readiness": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 8
+    },
+    "reception_guide": {
+      "ok": true
+    },
+    "collector_guide": {
+      "ok": true
+    },
+    "lab_guide": {
+      "ok": true
+    },
+    "doctor_guide": {
+      "ok": true
+    },
+    "admin_guide": {
+      "ok": true
+    },
+    "video_link": {
+      "ok": true
+    },
+    "faq": {
+      "ok": true
+    },
+    "checklist": {
+      "ok": true
+    },
+    "legacy_pilot_checklist_preserved": {
+      "ok": true
+    },
+    "legacy_demo_accounts_preserved": {
+      "ok": true
+    },
+    "legacy_workflow_demo_preserved": {
+      "ok": true
+    }
+  },
+  "readiness": {
+    "features": [
+      "Reception Guide",
+      "Collector Guide",
+      "Lab Guide",
+      "Doctor Guide",
+      "Admin Guide",
+      "Video Link",
+      "FAQ",
+      "Checklist"
+    ],
+    "generated_at": "2026-07-04T15:04:28.090314",
+    "phase": "5.8",
+    "platform": "User Guides",
+    "sections": {
+      "admin": {
+        "demo_accounts": [],
+        "read_only": true,
+        "report": "admin",
+        "routes": [
+          "/executive-v9",
+          "/pilot-status",
+          "/monitoring",
+          "/security-compliance",
+          "/demo-accounts"
+        ],
+        "steps": [
+          "Monitor pilot operations at /pilot-status and /executive-v9.",
+          "Verify health and alerts in /monitoring.",
+          "Review security posture at /security-compliance.",
+          "Use /demo-accounts for pilot login references.",
+          "Run release verification before go-live promotion."
+        ],
+        "summary": "Platform oversight, pilot dashboards, security, and release readiness.",
+        "title": "Admin Guide"
+      },
+      "checklist": {
+        "items": [
+          {
+            "item": "Review Reception Guide",
+            "required": true,
+            "route": "/user-guides/reception"
+          },
+          {
+            "item": "Review Collector Guide",
+            "required": true,
+            "route": "/user-guides/collector"
+          },
+          {
+            "item": "Review Lab Guide",
+            "required": true,
+            "route": "/user-guides/lab"
+          },
+          {
+            "item": "Review Doctor Guide",
+            "required": true,
+            "route": "/user-guides/doctor"
+          },
+          {
+            "item": "Review Admin Guide",
+            "required": true,
+            "route": "/user-guides/admin"
+          },
+          {
+            "item": "Watch workflow demo",
+            "required": true,
+            "route": "/workflow-demo"
+          },
+          {
+            "item": "Read FAQ",
+            "required": false,
+            "route": "/user-guides/faq"
+          },
+          {
+            "item": "Confirm demo seed data",
+            "required": true,
+            "status": "MISSING"
+          },
+          {
+            "item": "System health probe",
+            "required": true,
+            "status": "OK"
+          },
+          {
+            "item": "Legacy pilot checklist",
+            "required": false,
+            "route": "/pilot-checklist"
+          }
+        ],
+        "items_total": 10,
+        "legacy_route": "/pilot-checklist",
+        "read_only": true,
+        "report": "checklist",
+        "seed_ok": false,
+        "system_status": {
+          "app_env": "development",
+          "database": "OK",
+          "redis": "DEGRADED",
+          "status": "OK",
+          "timestamp": "2026-07-04T15:04:28.099742+00:00"
+        }
+      },
+      "collector": {
+        "demo_accounts": [],
+        "read_only": true,
+        "report": "collector",
+        "routes": [
+          "/logistics",
+          "/collector",
+          "/logistics/dispatch",
+          "/iot-box"
+        ],
+        "steps": [
+          "Review assigned pickups on the Logistics Dashboard at /logistics.",
+          "Accept jobs in the Collector Portal at /collector.",
+          "Scan sample boxes and confirm temperature on /iot-box.",
+          "Start trip and update shipment status through dispatch.",
+          "Hand off specimens to the receiving laboratory."
+        ],
+        "summary": "Field sample collection, cold-chain transport, and chain-of-custody scans.",
+        "title": "Collector Guide"
+      },
+      "doctor": {
+        "demo_accounts": [],
+        "read_only": true,
+        "report": "doctor",
+        "routes": [
+          "/doctor-workbench",
+          "/doctor/dashboard",
+          "/doctor/results",
+          "/workflow-demo"
+        ],
+        "steps": [
+          "Open Doctor Workbench at /doctor-workbench.",
+          "Review pending and critical results.",
+          "Approve or reject results with clinical comments.",
+          "Release approved reports to the patient portal.",
+          "Confirm patient notification delivery."
+        ],
+        "summary": "Pending review queue, clinical sign-off, and patient report release.",
+        "title": "Doctor Guide"
+      },
+      "faq": {
+        "categories": [
+          "Access",
+          "Admin",
+          "Clinical",
+          "Collector",
+          "Pilot",
+          "Reception"
+        ],
+        "count": 6,
+        "items": [
+          {
+            "answer": "Seeded demo staff accounts use password DemoPass123!. See /demo-accounts for emails.",
+            "category": "Access",
+            "id": 1,
+            "question": "What is the demo staff password?"
+          },
+          {
+            "answer": "Use /reception for the front desk queue, then /patients and /orders/new.",
+            "category": "Reception",
+            "id": 2,
+            "question": "Where do I start a patient walk-in?"
+          },
+          {
+            "answer": "Open /logistics for the queue, then /collector to accept and start trips.",
+            "category": "Collector",
+            "id": 3,
+            "question": "How does a collector accept a pickup?"
+          },
+          {
+            "answer": "Lab validates at /lab-operations, doctor approves at /doctor-workbench, patient views at /patient-portal.",
+            "category": "Clinical",
+            "id": 4,
+            "question": "How are lab results released to patients?"
+          },
+          {
+            "answer": "Use /pilot-checklist for Phase 3A readiness and /user-guides/checklist for role training.",
+            "category": "Pilot",
+            "id": 5,
+            "question": "Where is the pilot readiness checklist?"
+          },
+          {
+            "answer": "SUPER_ADMIN and ADMIN roles access executive, monitoring, and security hubs.",
+            "category": "Admin",
+            "id": 6,
+            "question": "Who can access admin dashboards?"
+          }
+        ],
+        "read_only": true,
+        "report": "faq"
+      },
+      "lab": {
+        "demo_accounts": [],
+        "read_only": true,
+        "report": "lab",
+        "routes": [
+          "/lab-operations",
+          "/lab-worklist",
+          "/results",
+          "/result-files"
+        ],
+        "steps": [
+          "Open Lab Operations at /lab-operations for intake queue.",
+          "Accession specimens and update worklist status.",
+          "Upload analyzer or manual results via /result-files.",
+          "Validate results and flag critical values.",
+          "Release verified results to the doctor review queue."
+        ],
+        "summary": "Specimen accession, processing, result upload, and validation.",
+        "title": "Lab Guide"
+      },
+      "reception": {
+        "demo_accounts": [
+          {
+            "email": "demo-reception-01@demo.dxcon.test",
+            "password": "DemoPass123!",
+            "role": "RECEPTION"
+          }
+        ],
+        "read_only": true,
+        "report": "reception",
+        "routes": [
+          "/reception",
+          "/patients",
+          "/orders/new",
+          "/crm-pipeline"
+        ],
+        "steps": [
+          "Open the Reception Dashboard at /reception.",
+          "Search or register the patient in /patients.",
+          "Create a medical order at /orders/new and assign tests.",
+          "Collect payment and confirm invoice status.",
+          "Schedule home collection or direct the patient to sample pickup."
+        ],
+        "summary": "Front desk registration, appointments, orders, and payment collection.",
+        "title": "Reception Guide"
+      },
+      "video": {
+        "count": 3,
+        "primary": "/workflow-demo",
+        "read_only": true,
+        "report": "video_links",
+        "videos": [
+          {
+            "description": "Interactive timeline from registration through notification.",
+            "id": "workflow-demo",
+            "title": "End-to-End Workflow Walkthrough",
+            "type": "interactive",
+            "url": "/workflow-demo"
+          },
+          {
+            "description": "Executive dashboard tour for pilot stakeholders.",
+            "id": "pilot-overview",
+            "title": "Pilot Platform Overview",
+            "type": "dashboard",
+            "url": "/executive-v9"
+          },
+          {
+            "description": "Written operations reference in docs/OPERATIONS.md.",
+            "id": "operations-doc",
+            "title": "Operations Runbook",
+            "type": "documentation",
+            "url": "/docs/OPERATIONS.md"
+          }
+        ]
+      }
+    },
+    "sprint": "User Guides",
+    "status": "WARN",
+    "summary": {
+      "checklist_items": 10,
+      "faq_count": 6,
+      "role_guides": 5,
+      "video_count": 3
+    }
+  }
+}
