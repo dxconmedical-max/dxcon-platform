@@ -1,0 +1,160 @@
+{
+  "generated_at": "2026-07-04T14:30:32.706680+00:00",
+  "phase": "4.6",
+  "sprint": "Enterprise Analytics Expansion",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 17,
+    "checks_total": 17,
+    "ok": true,
+    "runtime_seconds": 1.77
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "enterprise_analytics_dashboard": {
+      "ok": true,
+      "routes": {
+        "/enterprise-analytics": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/enterprise-analytics/revenue": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/enterprise-analytics/lab-sla": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/enterprise-analytics/collectors": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/enterprise-analytics/partners": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/enterprise-analytics/tat": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/enterprise-analytics/rejections": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/enterprise-analytics/critical": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/enterprise-analytics/ai": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/enterprise-analytics/integrations": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/enterprise-analytics/export": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/enterprise-analytics/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/enterprise-analytics/revenue": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/enterprise-analytics/lab-sla": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/enterprise-analytics/collector-sla": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/enterprise-analytics/partners": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/enterprise-analytics/turnaround-time": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/enterprise-analytics/rejections": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/enterprise-analytics/critical-results": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/enterprise-analytics/ai-usage": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/enterprise-analytics/integration-failures": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/enterprise-analytics/export": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 11
+    },
+    "revenue_analytics": {
+      "ok": true
+    },
+    "lab_sla_analytics": {
+      "ok": true
+    },
+    "collector_sla_analytics": {
+      "ok": true
+    },
+    "partner_performance": {
+      "ok": true
+    },
+    "turnaround_time_analytics": {
+      "ok": true
+    },
+    "sample_rejection_analytics": {
+      "ok": true
+    },
+    "critical_result_analytics": {
+      "ok": true
+    },
+    "ai_usage_analytics": {
+      "ok": true
+    },
+    "integration_failure_analytics": {
+      "ok": true
+    },
+    "executive_kpi_export": {
+      "ok": true
+    },
+    "executive_kpi_export_csv": {
+      "ok": true
+    },
+    "existing_reporting_api_preserved": {
+      "ok": true
+    }
+  }
+}
