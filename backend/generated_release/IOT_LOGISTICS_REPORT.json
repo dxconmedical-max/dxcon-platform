@@ -1,0 +1,155 @@
+{
+  "generated_at": "2026-07-04T14:05:41.443020+00:00",
+  "phase": "4.3",
+  "sprint": "IoT Cold Chain Logistics",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 19,
+    "checks_total": 19,
+    "ok": true,
+    "runtime_seconds": 1.134
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "logistics_iot_dashboard": {
+      "ok": true,
+      "routes": {
+        "/iot-logistics": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/iot-logistics/devices": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/iot-logistics/cold-boxes": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/iot-logistics/adapters": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/iot-logistics/alerts": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/iot-logistics/timeline": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/iot-logistics/chain-of-custody": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/iot-logistics/offline-buffer": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/iot-logistics/device-health": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/iot-logistics/ingest": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/iot-logistics/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/iot-logistics/devices": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/iot-logistics/cold-boxes": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/iot-logistics/adapters": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/iot-logistics/alerts": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/iot-logistics/chain-of-custody": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/iot-logistics/offline-buffer": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/iot-logistics/cold-chain/status": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "iot_device_registry": {
+      "ok": true
+    },
+    "cold_box_registry": {
+      "ok": true
+    },
+    "device_adapter_pattern": {
+      "ok": true,
+      "adapters": [
+        "DEMO_SENSOR",
+        "GENERIC",
+        "VENDOR_GATEWAY"
+      ]
+    },
+    "temperature_event": {
+      "ok": true
+    },
+    "gps_event": {
+      "ok": true
+    },
+    "shock_event": {
+      "ok": true
+    },
+    "chain_of_custody": {
+      "ok": true
+    },
+    "sensor_alert": {
+      "ok": true
+    },
+    "route_timeline": {
+      "ok": true
+    },
+    "temperature_breach_detection": {
+      "ok": true
+    },
+    "offline_device_event_buffer": {
+      "ok": true
+    },
+    "offline_buffer_sync": {
+      "ok": true
+    },
+    "device_health": {
+      "ok": true
+    },
+    "device_ingestion_api": {
+      "ok": true
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 14
+    }
+  }
+}

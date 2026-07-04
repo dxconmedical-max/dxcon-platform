@@ -197,6 +197,7 @@ from app.models.shock_event import ShockEvent
 from app.models.battery_event import BatteryEvent
 from app.models.gps_reading import GPSReading
 from app.models.cold_chain_alert import ColdChainAlert
+from app.models.iot_offline_event_buffer import IoTOfflineEventBuffer
 from app.models.federation_core import (
     FederatedLab,
     FederationProvider,

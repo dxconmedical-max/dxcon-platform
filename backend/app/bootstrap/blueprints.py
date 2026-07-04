@@ -20,6 +20,7 @@ from app.web.crm_v2 import crm_v2_web_bp
 from app.web.reception import reception_web_bp
 from app.web.integration_hub import integration_hub_web_bp
 from app.web.ai_clinical import ai_clinical_web_bp
+from app.web.iot_logistics import iot_logistics_web_bp
 from app.web.pilot_pages import pilot_pages_bp
 from app.web.finance import finance_web_bp
 
@@ -29,6 +30,7 @@ from app.api.patients.routes import patients_bp
 from app.api.reception.routes import reception_bp
 from app.api.integration_hub.routes import integration_hub_bp
 from app.api.ai_clinical.routes import ai_clinical_bp
+from app.api.iot_logistics.routes import iot_logistics_bp
 from app.api.laboratories.routes import laboratories_bp
 from app.api.test_catalogs.routes import test_catalogs_bp
 from app.api.orders.routes import orders_bp
@@ -197,6 +199,7 @@ def register_blueprints(app):
     app.register_blueprint(reception_bp)
     app.register_blueprint(integration_hub_bp)
     app.register_blueprint(ai_clinical_bp)
+    app.register_blueprint(iot_logistics_bp)
     app.register_blueprint(laboratories_bp)
     app.register_blueprint(test_catalogs_bp)
     app.register_blueprint(orders_bp)
@@ -304,6 +307,7 @@ def register_blueprints(app):
     app.register_blueprint(reception_web_bp)
     app.register_blueprint(integration_hub_web_bp)
     app.register_blueprint(ai_clinical_web_bp)
+    app.register_blueprint(iot_logistics_web_bp)
     app.register_blueprint(pilot_pages_bp)
     app.register_blueprint(home_web_bp)
     app.register_blueprint(ops_bp)
