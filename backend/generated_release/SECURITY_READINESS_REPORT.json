@@ -1,0 +1,440 @@
+{
+  "generated_at": "2026-07-04T14:34:07.623876+00:00",
+  "phase": "5.1",
+  "sprint": "Security & Compliance",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 19,
+    "checks_total": 19,
+    "ok": true,
+    "runtime_seconds": 1.509
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "security_dashboard": {
+      "ok": true,
+      "routes": {
+        "/security-compliance": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/security-compliance/secrets": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/security-compliance/api-keys": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/security-compliance/jwt": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/security-compliance/rbac": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/security-compliance/audit": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/security-compliance/timeline": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/security-compliance/failed-logins": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/security-compliance/ip-whitelist": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/security-compliance/rate-limits": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/security-compliance/phi-access": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/security-compliance/compliance": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/security-compliance/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/security-compliance/secrets": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/security-compliance/api-keys": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/security-compliance/jwt": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/security-compliance/rbac": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/security-compliance/audit": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/security-compliance/timeline": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/security-compliance/failed-logins": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/security-compliance/ip-whitelist": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/security-compliance/rate-limits": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/security-compliance/phi-access": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/security-compliance/compliance": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/security-compliance/readiness": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 12
+    },
+    "secret_management_audit": {
+      "ok": true
+    },
+    "api_key_rotation": {
+      "ok": true
+    },
+    "jwt_audit": {
+      "ok": true
+    },
+    "rbac_permission_matrix": {
+      "ok": true
+    },
+    "audit_log_viewer": {
+      "ok": true
+    },
+    "security_event_timeline": {
+      "ok": true
+    },
+    "failed_login_analytics": {
+      "ok": true
+    },
+    "ip_whitelist_framework": {
+      "ok": true
+    },
+    "rate_limit_dashboard": {
+      "ok": true
+    },
+    "phi_access_audit": {
+      "ok": true
+    },
+    "compliance_report": {
+      "ok": true
+    },
+    "api_key_rotation_action": {
+      "ok": true,
+      "skipped": "no active key"
+    },
+    "legacy_audit_center_preserved": {
+      "ok": true
+    },
+    "existing_admin_security_preserved": {
+      "ok": true
+    }
+  },
+  "readiness": {
+    "generated_at": "2026-07-04T14:34:07.606494",
+    "phase": "5.1",
+    "sprint": "Security & Compliance",
+    "platform": "Security & Compliance",
+    "status": "OK",
+    "summary": {
+      "secrets_tracked": 0,
+      "api_keys_total": 0,
+      "keys_needing_rotation": 0,
+      "active_jwt_sessions": 0,
+      "rbac_roles": 9,
+      "audit_entries": 1,
+      "security_events": 1,
+      "failed_login_attempts": 0,
+      "ip_whitelist_rules": 3,
+      "rate_limit_max": 120,
+      "phi_access_entries": 0,
+      "readiness_score": 100.0
+    },
+    "features": [
+      "Security Dashboard",
+      "Secret Management Audit",
+      "API Key Rotation",
+      "JWT Audit",
+      "RBAC Permission Matrix",
+      "Audit Log Viewer",
+      "Security Event Timeline",
+      "Failed Login Analytics",
+      "IP Whitelist Framework",
+      "Rate Limit Dashboard",
+      "PHI Access Audit",
+      "Compliance Report"
+    ],
+    "compliance": {
+      "report": "compliance_report",
+      "read_only": true,
+      "generated_at": "2026-07-04T14:34:07.600665",
+      "checks_passed": 8,
+      "checks_total": 8,
+      "readiness_score": 100.0,
+      "sections": {
+        "secret_management": {
+          "report": "secret_management_audit",
+          "read_only": true,
+          "secrets_total": 0,
+          "secrets": [],
+          "checks": [
+            {
+              "id": "vault",
+              "label": "Secrets stored with masking in admin UI",
+              "status": "PASS"
+            },
+            {
+              "id": "rotation",
+              "label": "Secret rotation policy documented",
+              "status": "WARN"
+            },
+            {
+              "id": "env",
+              "label": "Production secrets loaded from environment",
+              "status": "PASS"
+            }
+          ]
+        },
+        "api_key_rotation": {
+          "report": "api_key_rotation",
+          "rotation_policy_days": 90,
+          "keys_total": 0,
+          "keys_needing_rotation": 0,
+          "keys": []
+        },
+        "jwt_sessions": {
+          "report": "jwt_audit",
+          "read_only": true,
+          "summary": {
+            "active": 0,
+            "revoked": 0,
+            "expired": 0,
+            "total": 0
+          },
+          "sessions": [],
+          "notes": [
+            "Access tokens are stateless JWTs.",
+            "Refresh token records track session lifecycle and revocation."
+          ]
+        },
+        "rbac_matrix": {
+          "report": "rbac_permission_matrix",
+          "read_only": true,
+          "platform_roles": {
+            "ACCOUNTING": [
+              "billing.read",
+              "billing.write",
+              "payments.read"
+            ],
+            "ADMIN": [
+              "reports.read",
+              "security.read",
+              "security.write",
+              "users.read",
+              "users.write"
+            ],
+            "COLLECTOR": [
+              "collections.read",
+              "collections.write"
+            ],
+            "DOCTOR": [
+              "patients.read",
+              "referrals.write",
+              "results.read"
+            ],
+            "LAB": [
+              "results.read",
+              "results.write",
+              "samples.read"
+            ],
+            "PATIENT": [
+              "profile.read",
+              "profile.write",
+              "results.read"
+            ],
+            "SUPER_ADMIN": [
+              "billing.read",
+              "billing.write",
+              "collections.read",
+              "collections.write",
+              "patients.read",
+              "payments.read",
+              "profile.read",
+              "profile.write",
+              "referrals.write",
+              "reports.read",
+              "results.read",
+              "results.write",
+              "samples.read",
+              "security.read",
+              "security.write",
+              "users.read",
+              "users.write"
+            ]
+          },
+          "enterprise_roles": [
+            {
+              "id": "319fdef6-1399-431d-b894-87f2ee4313ed",
+              "tenant_id": "2bf52e16-e86e-42bc-b48f-5ea799f8d247",
+              "role_code": "ROLE-ADMIN",
+              "name": "Enterprise Admin",
+              "permissions_json": "[\"admin:*\", \"tenant:manage\", \"audit:read\"]",
+              "is_active": true,
+              "created_at": "2026-07-04T14:34:07.524930",
+              "permissions": [
+                "admin:*",
+                "tenant:manage",
+                "audit:read"
+              ]
+            },
+            {
+              "id": "c30c27c8-66ca-4386-91d8-07dce01ec8c6",
+              "tenant_id": "2bf52e16-e86e-42bc-b48f-5ea799f8d247",
+              "role_code": "ROLE-ANALYST",
+              "name": "Lab Analyst",
+              "permissions_json": "[\"lab:read\", \"results:write\"]",
+              "is_active": true,
+              "created_at": "2026-07-04T14:34:07.524935",
+              "permissions": [
+                "lab:read",
+                "results:write"
+              ]
+            }
+          ],
+          "role_count": 9
+        },
+        "rate_limits": {
+          "report": "rate_limit_dashboard",
+          "read_only": true,
+          "enabled": true,
+          "max_requests": 120,
+          "window_seconds": 60,
+          "exempt_paths": [
+            "/api/v1/system/build",
+            "/api/v1/system/health",
+            "/api/v1/system/live",
+            "/api/v1/system/metrics",
+            "/api/v1/system/ready",
+            "/api/v1/system/version"
+          ],
+          "security_headers_enabled": true,
+          "security_headers": [
+            "X-Content-Type-Options",
+            "X-Frame-Options",
+            "X-XSS-Protection",
+            "Referrer-Policy",
+            "Content-Security-Policy",
+            "Permissions-Policy"
+          ]
+        },
+        "ip_whitelist": {
+          "report": "ip_whitelist_framework",
+          "read_only": true,
+          "enabled": false,
+          "enforcement_mode": "monitor",
+          "rules_total": 3,
+          "rules": [
+            {
+              "cidr": "10.0.0.0/8",
+              "label": "Corporate VPN",
+              "enabled": true,
+              "source": "framework_default"
+            },
+            {
+              "cidr": "172.16.0.0/12",
+              "label": "Private network",
+              "enabled": true,
+              "source": "framework_default"
+            },
+            {
+              "cidr": "127.0.0.1/32",
+              "label": "Local development",
+              "enabled": true,
+              "source": "framework_default"
+            }
+          ],
+          "pilot_guidance": [
+            "Set IP_WHITELIST_ENABLED=true for pilot environments.",
+            "Provide partner CIDR blocks via IP_WHITELIST_CIDRS.",
+            "Start in monitor mode before enforce mode."
+          ]
+        },
+        "failed_logins": {
+          "report": "failed_login_analytics",
+          "read_only": true,
+          "failed_access_attempts": 0,
+          "auth_audit_entries": 0,
+          "security_events": 0,
+          "top_source_ips": [],
+          "recent_failures": []
+        },
+        "phi_access": {
+          "report": "phi_access_audit",
+          "read_only": true,
+          "phi_audit_entries": 0,
+          "phi_access_entries": 0,
+          "object_types_tracked": [
+            "PATIENT",
+            "Patient",
+            "MedicalOrder",
+            "LabResult",
+            "TestResult",
+            "ResultFile",
+            "InterpretationResult",
+            "Sample"
+          ],
+          "audit_logs": [],
+          "access_history": []
+        }
+      },
+      "export_history": [],
+      "pilot_ready": true
+    }
+  }
+}

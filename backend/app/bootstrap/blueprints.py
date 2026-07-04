@@ -24,6 +24,7 @@ from app.web.iot_logistics import iot_logistics_web_bp
 from app.web.standards_advanced import standards_advanced_web_bp
 from app.web.developer_portal import developer_portal_web_bp
 from app.web.enterprise_analytics import enterprise_analytics_web_bp
+from app.web.security_compliance import security_compliance_web_bp
 from app.web.pilot_pages import pilot_pages_bp
 from app.web.finance import finance_web_bp
 
@@ -37,6 +38,7 @@ from app.api.iot_logistics.routes import iot_logistics_bp
 from app.api.standards_advanced.routes import standards_advanced_bp
 from app.api.developer_portal.routes import developer_portal_bp
 from app.api.enterprise_analytics.routes import enterprise_analytics_bp
+from app.api.security_compliance.routes import security_compliance_bp
 from app.api.laboratories.routes import laboratories_bp
 from app.api.test_catalogs.routes import test_catalogs_bp
 from app.api.orders.routes import orders_bp
@@ -209,6 +211,7 @@ def register_blueprints(app):
     app.register_blueprint(standards_advanced_bp)
     app.register_blueprint(developer_portal_bp)
     app.register_blueprint(enterprise_analytics_bp)
+    app.register_blueprint(security_compliance_bp)
     app.register_blueprint(laboratories_bp)
     app.register_blueprint(test_catalogs_bp)
     app.register_blueprint(orders_bp)
@@ -320,6 +323,7 @@ def register_blueprints(app):
     app.register_blueprint(standards_advanced_web_bp)
     app.register_blueprint(developer_portal_web_bp)
     app.register_blueprint(enterprise_analytics_web_bp)
+    app.register_blueprint(security_compliance_web_bp)
     app.register_blueprint(pilot_pages_bp)
     app.register_blueprint(home_web_bp)
     app.register_blueprint(ops_bp)
