@@ -1,0 +1,476 @@
+{
+  "generated_at": "2026-07-05T04:53:50.159294+00:00",
+  "phase": "5.12",
+  "sprint": "Release Control",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 15,
+    "checks_total": 15,
+    "ok": true,
+    "runtime_seconds": 1.59
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "release_control_dashboard": {
+      "ok": true,
+      "routes": {
+        "/release-control": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/release-control/history": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/release-control/version-compare": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/release-control/migration": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/release-control/rollback": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/release-control/deployment": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/release-control/audit": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/release-control/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/release-control/history": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/release-control/version-compare": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/release-control/migration": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/release-control/rollback": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/release-control/deployment": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/release-control/audit": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/release-control/readiness": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 6
+    },
+    "release_history": {
+      "ok": true
+    },
+    "version_compare": {
+      "ok": true
+    },
+    "migration": {
+      "ok": true
+    },
+    "rollback": {
+      "ok": true
+    },
+    "deployment": {
+      "ok": true
+    },
+    "audit": {
+      "ok": true
+    },
+    "legacy_release_management_preserved": {
+      "ok": true
+    },
+    "legacy_production_deployment_preserved": {
+      "ok": true
+    },
+    "legacy_release_management_api_preserved": {
+      "ok": true
+    },
+    "legacy_rollback_plan_route_preserved": {
+      "ok": true
+    }
+  },
+  "readiness": {
+    "features": [
+      "Release History",
+      "Version Compare",
+      "Migration",
+      "Rollback",
+      "Deployment",
+      "Audit"
+    ],
+    "generated_at": "2026-07-05T04:53:50.166081",
+    "legacy_routes": [
+      "/release-management",
+      "/production-deployment",
+      "/api/v1/release-management/dashboard",
+      "/api/v1/operations/deployment/rollback-plan"
+    ],
+    "phase": "5.12",
+    "platform": "Release Control",
+    "sections": {
+      "audit": {
+        "audit_entries": [],
+        "audit_entries_total": 0,
+        "deployment_records_included": 0,
+        "legacy_hub": "/security-compliance/audit",
+        "platform_audit_matched": 0,
+        "read_only": true,
+        "report": "release_audit"
+      },
+      "deployment": {
+        "build_sha": null,
+        "current_version": "2.5.0-dev",
+        "deploy_pipeline": null,
+        "deployment_checks": [],
+        "environment": "development",
+        "last_deployment": null,
+        "legacy_api": "GET /api/v1/operations/deployment/current",
+        "read_only": true,
+        "report": "deployment_metrics",
+        "rollback_plan_available": false,
+        "rolling_checks_passed": null,
+        "rolling_checks_total": null,
+        "rolling_strategy": {
+          "max_surge": "default",
+          "max_unavailable": "default",
+          "type": "RollingUpdate"
+        },
+        "version_info": {
+          "build_time": "",
+          "git_sha": "local",
+          "version": "2.5.0-dev"
+        }
+      },
+      "history": {
+        "deployments_total": 0,
+        "entries": [
+          {
+            "build_sha": null,
+            "environment": "platform",
+            "generated_at": "2026-07-05T04:53:48.300337+00:00",
+            "label": "Operations Runbooks",
+            "readiness_score": 100.0,
+            "sequence": 1,
+            "source_file": "OPERATIONS_RUNBOOKS_REPORT.json",
+            "status": "OK",
+            "type": "verify_report",
+            "version": "Phase 5.11"
+          },
+          {
+            "build_sha": null,
+            "environment": "platform",
+            "generated_at": "2026-07-05T04:53:46.537738+00:00",
+            "label": "AI Operations",
+            "readiness_score": 100.0,
+            "sequence": 2,
+            "source_file": "AI_OPERATIONS_REPORT.json",
+            "status": "OK",
+            "type": "verify_report",
+            "version": "Phase 5.10"
+          },
+          {
+            "build_sha": null,
+            "environment": "platform",
+            "generated_at": "2026-07-05T04:53:44.599983+00:00",
+            "label": "Executive Metrics",
+            "readiness_score": 100.0,
+            "sequence": 3,
+            "source_file": "EXECUTIVE_METRICS_REPORT.json",
+            "status": "OK",
+            "type": "verify_report",
+            "version": "Phase 5.9"
+          },
+          {
+            "build_sha": null,
+            "environment": "platform",
+            "generated_at": "2026-07-05T04:51:38.832716+00:00",
+            "label": "RC1",
+            "readiness_score": null,
+            "sequence": 4,
+            "source_file": "RC1_REPORT.json",
+            "status": "OK",
+            "type": "verify_report",
+            "version": "v1.0.0-rc1"
+          },
+          {
+            "build_sha": null,
+            "environment": "platform",
+            "generated_at": "2026-07-04T14:54:07.939232+00:00",
+            "label": "Release Management",
+            "readiness_score": 100.0,
+            "sequence": 5,
+            "source_file": "RELEASE_MANAGEMENT_REPORT.json",
+            "status": "OK",
+            "type": "verify_report",
+            "version": "Phase 5.7"
+          },
+          {
+            "build_sha": null,
+            "environment": "platform",
+            "generated_at": "2026-07-04T14:50:58.350997+00:00",
+            "label": "Pilot Status",
+            "readiness_score": 100.0,
+            "sequence": 6,
+            "source_file": "PILOT_STATUS_REPORT.json",
+            "status": "OK",
+            "type": "verify_report",
+            "version": "Phase 5.6"
+          },
+          {
+            "build_sha": null,
+            "environment": "platform",
+            "generated_at": "2026-07-04T14:45:42.307496+00:00",
+            "label": "Production Deployment",
+            "readiness_score": 100.0,
+            "sequence": 7,
+            "source_file": "PRODUCTION_DEPLOYMENT_REPORT.json",
+            "status": "OK",
+            "type": "verify_report",
+            "version": "Phase 5.5"
+          },
+          {
+            "build_sha": null,
+            "environment": "platform",
+            "generated_at": "2026-07-04T14:41:15.196347+00:00",
+            "label": "Backup & Disaster Recovery",
+            "readiness_score": 100.0,
+            "sequence": 8,
+            "source_file": "BACKUP_RECOVERY_REPORT.json",
+            "status": "OK",
+            "type": "verify_report",
+            "version": "Phase 5.3"
+          },
+          {
+            "build_sha": null,
+            "environment": "platform",
+            "generated_at": "2026-07-04T14:37:51.323331+00:00",
+            "label": "Monitoring Center",
+            "readiness_score": 100.0,
+            "sequence": 9,
+            "source_file": "MONITORING_CENTER_REPORT.json",
+            "status": "OK",
+            "type": "verify_report",
+            "version": "Phase 5.2"
+          },
+          {
+            "build_sha": null,
+            "environment": "platform",
+            "generated_at": "2026-07-04T14:34:07.623876+00:00",
+            "label": "Security & Compliance",
+            "readiness_score": 100.0,
+            "sequence": 10,
+            "source_file": "SECURITY_READINESS_REPORT.json",
+            "status": "OK",
+            "type": "verify_report",
+            "version": "Phase 5.1"
+          },
+          {
+            "build_sha": null,
+            "environment": "platform",
+            "generated_at": "2026-07-01T12:28:12.261334+00:00",
+            "label": "GA",
+            "readiness_score": null,
+            "sequence": 11,
+            "source_file": "GA_REPORT.json",
+            "status": "OK",
+            "type": "verify_report",
+            "version": "v1.0.0-ga-candidate"
+          },
+          {
+            "build_sha": null,
+            "environment": "platform",
+            "generated_at": "2026-07-01T10:13:48.407884+00:00",
+            "label": "RC2",
+            "readiness_score": null,
+            "sequence": 12,
+            "source_file": "RC2_REPORT.json",
+            "status": "OK",
+            "type": "verify_report",
+            "version": "v1.0.0-rc2"
+          }
+        ],
+        "entries_total": 12,
+        "read_only": true,
+        "report": "release_history",
+        "reports_total": 12
+      },
+      "migration": {
+        "checks": [
+          {
+            "detail": "users, patients, orders available in schema.",
+            "id": 1,
+            "status": "PASS",
+            "title": "Core tables present"
+          },
+          {
+            "detail": "alembic_version table present when migrations configured.",
+            "id": 2,
+            "status": "MANUAL",
+            "title": "Alembic tracking"
+          },
+          {
+            "detail": "STARTUP_VALIDATE_DB runs migration checks on boot.",
+            "id": 3,
+            "status": "PASS",
+            "title": "Startup validation"
+          }
+        ],
+        "checks_passed": 2,
+        "checks_total": 3,
+        "legacy_api": "GET /api/v1/system/ready",
+        "migration": {
+          "alembic_present": false,
+          "error": "Working outside of application context.\n\nThis typically means that you attempted to use functionality that needed\nthe current application. To solve this, set up an application context\nwith app.app_context(). See the documentation for more information.",
+          "missing_core_tables": [],
+          "ready": true,
+          "table_count": 304
+        },
+        "missing_core_tables": [],
+        "read_only": true,
+        "report": "migration_metrics",
+        "status": "READY",
+        "table_count": 304
+      },
+      "rollback": {
+        "items": [
+          {
+            "id": 1,
+            "item": "Capture current BUILD_VERSION and GIT_SHA",
+            "required": true
+          },
+          {
+            "id": 2,
+            "item": "GET /api/v1/operations/deployment/rollback-plan",
+            "required": true
+          },
+          {
+            "id": 3,
+            "item": "Run deployment/pipeline/rollback.py",
+            "required": true
+          },
+          {
+            "id": 4,
+            "item": "Verify /live and /ready after rollback",
+            "required": true
+          },
+          {
+            "id": 5,
+            "item": "Confirm migration compatibility for target version",
+            "required": true
+          }
+        ],
+        "legacy_api": "GET /api/v1/operations/deployment/rollback-plan",
+        "pipeline_available": true,
+        "pipeline_script": "deployment/pipeline/rollback.py",
+        "pipeline_steps": [
+          "Validate backup artifacts",
+          "Run restore dry-run",
+          "Deploy previous container image tag (BUILD_VERSION)",
+          "Run post-deployment verification"
+        ],
+        "read_only": true,
+        "related_hub": "/production-deployment/rollback",
+        "report": "rollback_metrics",
+        "rollback_plan": 0
+      },
+      "version_compare": {
+        "baseline": {
+          "build_time": null,
+          "environment": "development",
+          "git_sha": null,
+          "migration_status": "READY",
+          "version": "v1.0.0-rc1"
+        },
+        "baseline_source": "RC1_REPORT.json",
+        "current": {
+          "build_time": "",
+          "environment": "development",
+          "git_sha": "local",
+          "migration_status": "READY",
+          "version": "2.5.0-dev"
+        },
+        "differences": [
+          {
+            "baseline": "v1.0.0-rc1",
+            "changed": true,
+            "current": "2.5.0-dev",
+            "field": "version"
+          },
+          {
+            "baseline": null,
+            "changed": true,
+            "current": "local",
+            "field": "git_sha"
+          },
+          {
+            "baseline": null,
+            "changed": true,
+            "current": "",
+            "field": "build_time"
+          },
+          {
+            "baseline": "development",
+            "changed": false,
+            "current": "development",
+            "field": "environment"
+          },
+          {
+            "baseline": "READY",
+            "changed": false,
+            "current": "READY",
+            "field": "migration_status"
+          }
+        ],
+        "fields_changed": 3,
+        "rc1_score": 100.0,
+        "read_only": true,
+        "report": "version_compare"
+      }
+    },
+    "sprint": "Release Control",
+    "status": "OK",
+    "summary": {
+      "audit_entries": 0,
+      "deployments_total": 0,
+      "fields_changed": 3,
+      "history_entries": 12,
+      "last_deployment_status": null,
+      "migration_checks_passed": 2,
+      "migration_status": "READY"
+    }
+  }
+}
