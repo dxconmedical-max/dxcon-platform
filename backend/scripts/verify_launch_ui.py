@@ -41,6 +41,20 @@ def _routes_from_file(path: Path) -> list[str]:
     return list(dict.fromkeys(routes))
 
 
+STYLED_ROUTES = (
+    "/login",
+    "/home",
+    "/app/executive",
+    "/app/reception",
+    "/app/doctor",
+    "/app/lab",
+    "/app/collector",
+    "/app/patient",
+    "/app/system",
+)
+
+CSS_MARKER = "css/dxcon.css"
+
 WEB_ROUTES = _routes_from_file(ROOT / "app" / "web" / "launch_ui.py")
 
 
@@ -61,6 +75,10 @@ def _login_admin(client):
     return True
 
 
+def _has_stylesheet(html_text: str) -> bool:
+    return CSS_MARKER in (html_text or "")
+
+
 def _page_ok(client, path: str, *, follow: bool = True) -> bool:
     response = client.get(path, follow_redirects=follow)
     if path in {"/health", "/ready"}:
@@ -75,7 +93,7 @@ def main() -> int:
     sys.path.insert(0, str(ROOT))
     os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 
-    print("\n=== DXCON LAUNCH UI SPRINT 1 VERIFY ===\n")
+    print("\n=== DXCON LAUNCH UI VERIFY ===\n")
     start = time.perf_counter()
     checks: dict[str, dict] = {}
 
@@ -144,10 +162,35 @@ def main() -> int:
 
         login_html = client.get("/login").get_data(as_text=True)
         checks["login_shell"] = {
-            "ok": "launch-login-card" in login_html and "Sign in" in login_html,
+            "ok": "launch-login-card" in login_html and "Sign in" in login_html and _has_stylesheet(login_html),
         }
         checks["marketing_shell"] = {
-            "ok": "launch-marketing-hero" in client.get("/home").get_data(as_text=True),
+            "ok": "launch-marketing-hero" in client.get("/home").get_data(as_text=True)
+            and _has_stylesheet(client.get("/home").get_data(as_text=True)),
+        }
+
+        css_response = client.get("/static/css/dxcon.css")
+        css_text = css_response.get_data(as_text=True)
+        checks["static_css_asset"] = {
+            "ok": css_response.status_code == 200 and ".launch-login-wrap" in css_text,
+            "status_code": css_response.status_code,
+        }
+
+        styled_results = {}
+        for path in STYLED_ROUTES:
+            if path == "/login":
+                page_html = login_html
+            elif path == "/home":
+                page_html = client.get("/home").get_data(as_text=True)
+            else:
+                page_html = client.get(path, follow_redirects=True).get_data(as_text=True)
+            styled_results[path] = {
+                "ok": _has_stylesheet(page_html),
+                "status_code": 200 if page_html else 0,
+            }
+        checks["stylesheet_links"] = {
+            "ok": all(item["ok"] for item in styled_results.values()),
+            "routes": styled_results,
         }
 
         passed = sum(1 for item in checks.values() if item.get("ok"))
@@ -155,13 +198,14 @@ def main() -> int:
         elapsed = round(time.perf_counter() - start, 2)
 
         report = {
-            "sprint": "Launch UI Sprint 1",
+            "sprint": "Launch UI Hotfix - Visual Product Polish",
             "generated_at": utc_now(),
             "elapsed_seconds": elapsed,
             "checks": checks,
             "routes": {
                 "public": list(PUBLIC_ROUTES),
                 "app": list(APP_ROUTES),
+                "styled": list(STYLED_ROUTES),
                 "launch_ui_blueprint": WEB_ROUTES,
             },
             "summary": {

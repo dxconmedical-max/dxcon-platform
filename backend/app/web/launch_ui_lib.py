@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import html
-import json
+from pathlib import Path
 from typing import Any
 
 from flask import current_app, session, url_for
@@ -11,6 +11,8 @@ from flask import current_app, session, url_for
 from app.infrastructure.production_health import health_payload
 from app.services.reporting_service import _safe
 from app.web.demo_pilot_lib import DEMO_PASSWORD, demo_accounts_by_role
+
+CSS_ASSET = "css/dxcon.css"
 
 APP_NAV = (
     ("Executive", "/app/executive", "EXEC"),
@@ -32,76 +34,18 @@ DEMO_ROLE_HINTS = {
 }
 
 
-def launch_css() -> str:
-    return """
-    :root {
-      --bg: #0b1220;
-      --panel: #111827;
-      --panel-2: #1f2937;
-      --border: #334155;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --brand: #0ea5e9;
-      --brand-2: #14b8a6;
-      --ok: #22c55e;
-      --warn: #f59e0b;
-      --bad: #ef4444;
-      --sidebar: 260px;
-    }
-    * { box-sizing: border-box; }
-    body.launch-ui { margin:0; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background:#f1f5f9; color:#0f172a; }
-    a { color: inherit; text-decoration: none; }
-    .launch-public { min-height:100vh; background: linear-gradient(135deg,#0f172a 0%,#134e4a 100%); color:white; }
-    .launch-public-inner { max-width:1100px; margin:0 auto; padding:32px 20px 64px; }
-    .launch-login-wrap { min-height:100vh; display:grid; place-items:center; background:linear-gradient(135deg,#0f172a,#1e3a8a); padding:24px; }
-    .launch-login-card { width:100%; max-width:440px; background:white; border-radius:20px; padding:32px; box-shadow:0 25px 50px rgba(0,0,0,.25); }
-    .launch-brand { display:flex; align-items:center; gap:12px; margin-bottom:24px; }
-    .launch-brand-mark { width:44px; height:44px; border-radius:12px; background:linear-gradient(135deg,var(--brand),var(--brand-2)); display:grid; place-items:center; color:white; font-weight:800; }
-    .launch-brand h1 { margin:0; font-size:22px; }
-    .launch-brand p { margin:2px 0 0; color:#64748b; font-size:13px; }
-    .launch-field { width:100%; padding:12px 14px; border:1px solid #cbd5e1; border-radius:10px; margin-bottom:12px; font-size:15px; }
-    .launch-btn { width:100%; padding:12px 16px; border:none; border-radius:10px; background:linear-gradient(135deg,#0284c7,#0d9488); color:white; font-weight:700; cursor:pointer; font-size:15px; }
-    .launch-btn-secondary { background:#e2e8f0; color:#0f172a; margin-top:10px; display:inline-block; text-align:center; }
-    .launch-error { color:#b91c1c; background:#fef2f2; border:1px solid #fecaca; padding:10px 12px; border-radius:10px; margin-bottom:12px; font-size:14px; }
-    .launch-hint { font-size:13px; color:#64748b; line-height:1.6; }
-    .launch-role-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:16px 0; }
-    .launch-role-chip { border:1px solid #e2e8f0; border-radius:10px; padding:10px; font-size:12px; background:#f8fafc; cursor:pointer; }
-    .launch-role-chip strong { display:block; color:#0f172a; margin-bottom:4px; }
-    .launch-shell { display:grid; grid-template-columns: var(--sidebar) 1fr; min-height:100vh; }
-    .launch-sidebar { background:var(--bg); color:var(--text); padding:20px 16px; border-right:1px solid var(--border); }
-    .launch-sidebar .brand { display:flex; gap:10px; align-items:center; margin-bottom:24px; }
-    .launch-sidebar .brand-mark { width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,var(--brand),var(--brand-2)); display:grid; place-items:center; font-weight:800; }
-    .launch-sidebar nav a { display:block; padding:10px 12px; border-radius:10px; color:var(--muted); margin-bottom:4px; font-size:14px; }
-    .launch-sidebar nav a.active, .launch-sidebar nav a:hover { background:var(--panel-2); color:white; }
-    .launch-main { display:flex; flex-direction:column; min-width:0; }
-    .launch-topbar { background:white; border-bottom:1px solid #e2e8f0; padding:14px 20px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; }
-    .launch-topbar h2 { margin:0; font-size:20px; }
-    .launch-badges { display:flex; flex-wrap:wrap; gap:8px; }
-    .launch-badge { font-size:12px; font-weight:700; padding:6px 10px; border-radius:999px; background:#eff6ff; color:#1d4ed8; }
-    .launch-badge.ok { background:#ecfdf5; color:#047857; }
-    .launch-badge.warn { background:#fffbeb; color:#b45309; }
-    .launch-content { padding:20px; flex:1; }
-    .launch-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; }
-    .launch-grid-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px; }
-    .launch-card { background:white; border:1px solid #e2e8f0; border-radius:16px; padding:18px; box-shadow:0 4px 14px rgba(15,23,42,.04); margin-bottom:16px; }
-    .launch-card h3 { margin:0 0 12px; font-size:16px; }
-    .launch-metric label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#64748b; margin-bottom:6px; font-weight:700; }
-    .launch-metric strong { font-size:28px; color:#0f172a; }
-    .launch-chart { height:140px; border-radius:12px; background:linear-gradient(180deg,#eff6ff,#f8fafc); border:1px dashed #cbd5e1; display:grid; place-items:center; color:#64748b; font-size:13px; }
-    .launch-table { width:100%; border-collapse:collapse; font-size:14px; }
-    .launch-table th, .launch-table td { padding:10px 8px; border-bottom:1px solid #e2e8f0; text-align:left; }
-    .launch-table th { color:#64748b; font-size:12px; text-transform:uppercase; }
-    .launch-section-title { margin:0 0 14px; font-size:18px; }
-    .launch-marketing-hero { padding:48px 0 32px; }
-    .launch-marketing-hero h1 { font-size:42px; margin:0 0 12px; max-width:720px; line-height:1.1; }
-    .launch-marketing-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-top:28px; }
-    .launch-marketing-card { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:22px; }
-    .launch-cta { display:inline-block; margin-top:24px; padding:14px 22px; border-radius:12px; background:white; color:#0f172a; font-weight:800; }
-    @media (max-width: 900px) {
-      .launch-shell { grid-template-columns: 1fr; }
-      .launch-sidebar { position:sticky; top:0; z-index:10; }
-    }
-    """
+def css_stylesheet_link() -> str:
+    css_path = Path(__file__).resolve().parents[1] / "static" / CSS_ASSET
+    version = int(css_path.stat().st_mtime) if css_path.exists() else 1
+    href = url_for("static", filename=CSS_ASSET, v=version)
+    return f'<link rel="stylesheet" href="{html.escape(href)}">'
+
+
+def page_head(title: str) -> str:
+    return (
+        f'<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+        f"<title>{html.escape(title)} · DxCon</title>{css_stylesheet_link()}"
+    )
 
 
 def _status_class(status: str) -> str:
@@ -161,9 +105,9 @@ def safe_platform_stats() -> dict[str, Any]:
 
 
 def render_page(title: str, body: str, *, public: bool = False) -> str:
-    css = launch_css()
+    head = page_head(title)
     if public:
-        return f"""<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(title)} · DxCon</title><style>{css}</style></head><body class="launch-ui">{body}</body></html>"""
+        return f"<!DOCTYPE html><html><head>{head}</head><body class=\"launch-ui\">{body}</body></html>"
     ctx = shell_context()
     nav_items = []
     for label, href, _ in APP_NAV:
@@ -175,10 +119,10 @@ def render_page(title: str, body: str, *, public: bool = False) -> str:
     <span class="launch-badge">{html.escape(str(ctx['environment']))}</span>
     <span class="launch-badge {_status_class(ctx['health_status'])}">Health {html.escape(str(ctx['health_status']))}</span>
     """
-    return f"""<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{html.escape(title)} · DxCon</title><style>{css}</style></head>
+    return f"""<!DOCTYPE html><html><head>{head}</head>
     <body class="launch-ui"><div class="launch-shell">
     <aside class="launch-sidebar"><div class="brand"><div class="brand-mark">Dx</div><div><strong>DxCon</strong><div style="font-size:12px;color:#94a3b8;">Healthcare Platform</div></div></div>
-    <nav>{nav_html}<a href="/home">Marketing</a><a href="/healthcare-ecosystem">Enterprise</a><a href="/logout">Logout</a></nav></aside>
+    <nav>{nav_html}<a class="launch-nav-muted" href="/home">Marketing</a><a class="launch-nav-muted" href="/healthcare-ecosystem">Enterprise</a><a class="launch-nav-muted" href="/logout">Logout</a></nav></aside>
     <div class="launch-main"><header class="launch-topbar"><h2>{html.escape(title)}</h2><div class="launch-badges">{badges}</div></header>
     <main class="launch-content">{body}</main></div></div></body></html>"""
 
@@ -216,7 +160,10 @@ def render_login_page(error: str = "", role_hint: str = "") -> str:
         if not email:
             email = DEMO_ROLE_HINTS.get(label, f"demo-{key}@{DEMO_ROLE_HINTS.get('ADMIN', 'admin@demo.dxcon.test').split('@')[-1]}")
         chips.append(
-            f'<a class="launch-role-chip" href="/login?role={html.escape(label)}"><strong>{html.escape(label)}</strong>{html.escape(email)}</a>'
+            f'<a class="launch-role-card" href="/login?role={html.escape(label)}">'
+            f"<strong>{html.escape(label)}</strong>"
+            f"<span>{html.escape(email)}</span>"
+            f"<em>Use demo account</em></a>"
         )
     hint_role = role_hint.upper() if role_hint else "ADMIN"
     hint_email = DEMO_ROLE_HINTS.get(hint_role, "admin@demo.dxcon.test")
@@ -226,10 +173,10 @@ def render_login_page(error: str = "", role_hint: str = "") -> str:
                 hint_email = account.get("email", hint_email)
                 break
     error_html = f'<div class="launch-error">{html.escape(error)}</div>' if error else ""
-    css = launch_css()
-    return f"""<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login · DxCon</title><style>{css}</style></head>
+    head = page_head("Login")
+    return f"""<!DOCTYPE html><html><head>{head}</head>
     <body class="launch-ui"><div class="launch-login-wrap"><div class="launch-login-card">
-      <div class="launch-brand"><div class="launch-brand-mark">Dx</div><div><h1>DxCon Platform</h1><p>Sign in to your workspace</p></div></div>
+      <div class="launch-brand"><div class="launch-brand-mark">Dx</div><div><h1>DxCon Platform</h1><p>Sign in to your healthcare workspace</p></div></div>
       {error_html}
       <form method="POST" action="/login">
         <input class="launch-field" name="email" type="email" placeholder="Email" value="{html.escape(hint_email)}" required>
@@ -238,8 +185,12 @@ def render_login_page(error: str = "", role_hint: str = "") -> str:
       </form>
       <a class="launch-btn launch-btn-secondary" href="/app/executive">Continue to demo dashboard</a>
       <p class="launch-hint" style="margin-top:16px;">Demo password: <code>{html.escape(DEMO_PASSWORD)}</code></p>
+      <p class="launch-hint" style="margin-bottom:8px;font-weight:700;color:#334155;">Quick demo roles</p>
       <div class="launch-role-grid">{''.join(chips)}</div>
-      <p class="launch-hint"><a href="/home">Public marketing site</a> · <a href="/demo-landing">Legacy pilot landing</a></p>
+      <div class="launch-footer-actions">
+        <a class="launch-btn-outline" href="/home">Marketing site</a>
+        <a class="launch-btn-outline" href="/demo-landing">Legacy landing</a>
+      </div>
     </div></div></body></html>"""
 
 
@@ -298,7 +249,7 @@ def doctor_dashboard_body() -> str:
         + table_section("Critical results", ["Patient", "Marker", "Value"], [["Demo Patient 3", "Glucose", "Critical high"]])
         + table_section("Patient timeline", ["Time", "Event"], [["08:00", "Sample collected"], ["10:00", "Result received"]])
         + '<div class="launch-card"><h3>AI interpretation (advisory)</h3><p>Human review required before release. Connect <code>/intelligent-healthcare</code> for live AI output.</p></div>'
-        + '<div class="launch-card"><h3>Approve / release</h3><p>Placeholder actions — use legacy <a href="/doctor-workbench">doctor workbench</a> for full workflow.</p></div>'
+        + '<div class="launch-card"><h3>Approve / release</h3><p>Placeholder actions — open legacy <a class="launch-btn-outline" href="/doctor-workbench">doctor workbench</a> for full workflow.</p></div>'
     )
 
 

@@ -1,7 +1,7 @@
 {
-  "sprint": "Launch UI Sprint 1",
-  "generated_at": "2026-07-05T06:52:25.601415+00:00",
-  "elapsed_seconds": 1.79,
+  "sprint": "Launch UI Hotfix - Visual Product Polish",
+  "generated_at": "2026-07-05T07:12:50.635254+00:00",
+  "elapsed_seconds": 1.62,
   "checks": {
     "route_registry": {
       "ok": true,
@@ -90,6 +90,51 @@
     },
     "marketing_shell": {
       "ok": true
+    },
+    "static_css_asset": {
+      "ok": true,
+      "status_code": 200
+    },
+    "stylesheet_links": {
+      "ok": true,
+      "routes": {
+        "/login": {
+          "ok": true,
+          "status_code": 200
+        },
+        "/home": {
+          "ok": true,
+          "status_code": 200
+        },
+        "/app/executive": {
+          "ok": true,
+          "status_code": 200
+        },
+        "/app/reception": {
+          "ok": true,
+          "status_code": 200
+        },
+        "/app/doctor": {
+          "ok": true,
+          "status_code": 200
+        },
+        "/app/lab": {
+          "ok": true,
+          "status_code": 200
+        },
+        "/app/collector": {
+          "ok": true,
+          "status_code": 200
+        },
+        "/app/patient": {
+          "ok": true,
+          "status_code": 200
+        },
+        "/app/system": {
+          "ok": true,
+          "status_code": 200
+        }
+      }
     }
   },
   "routes": {
@@ -109,6 +154,17 @@
       "/app/system",
       "/executive-v10"
     ],
+    "styled": [
+      "/login",
+      "/home",
+      "/app/executive",
+      "/app/reception",
+      "/app/doctor",
+      "/app/lab",
+      "/app/collector",
+      "/app/patient",
+      "/app/system"
+    ],
     "launch_ui_blueprint": [
       "/",
       "/home",
@@ -123,8 +179,8 @@
     ]
   },
   "summary": {
-    "passed": 7,
-    "total": 7,
+    "passed": 9,
+    "total": 9,
     "ok": true
   }
 }

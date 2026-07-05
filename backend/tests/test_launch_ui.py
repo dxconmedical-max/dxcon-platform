@@ -53,6 +53,7 @@ class LaunchUiTestCase(unittest.TestCase):
         body = response.get_data(as_text=True)
         self.assertIn("launch-marketing-hero", body)
         self.assertIn("DxCon", body)
+        self.assertIn("css/dxcon.css", body)
 
     def test_login_page_shell(self):
         response = self.client.get("/login")
@@ -60,6 +61,12 @@ class LaunchUiTestCase(unittest.TestCase):
         body = response.get_data(as_text=True)
         self.assertIn("launch-login-card", body)
         self.assertIn("Sign in", body)
+        self.assertIn("css/dxcon.css", body)
+
+    def test_static_stylesheet_served(self):
+        response = self.client.get("/static/css/dxcon.css")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(".launch-login-wrap", response.get_data(as_text=True))
 
     def test_role_dashboards(self):
         routes = (
@@ -75,7 +82,9 @@ class LaunchUiTestCase(unittest.TestCase):
         for path in routes:
             response = self.client.get(path)
             self.assertEqual(response.status_code, 200, path)
-            self.assertIn("launch-shell", response.get_data(as_text=True), path)
+            body = response.get_data(as_text=True)
+            self.assertIn("launch-shell", body, path)
+            self.assertIn("css/dxcon.css", body, path)
 
     def test_health_probes(self):
         for path in ("/health", "/ready"):
