@@ -40,6 +40,14 @@ from app.web.pilot_toolkit import pilot_toolkit_web_bp
 from app.web.readiness_pack import readiness_pack_web_bp
 from app.web.multi_tenant_foundation import multi_tenant_foundation_web_bp
 from app.web.marketplace_platform import marketplace_platform_web_bp
+from app.web.ai_copilot import ai_copilot_web_bp
+from app.web.mobile_platform import mobile_platform_web_bp
+from app.web.device_gateway import device_gateway_web_bp
+from app.web.voice_platform import voice_platform_web_bp
+from app.web.data_warehouse import data_warehouse_web_bp
+from app.web.population_health import population_health_web_bp
+from app.web.white_label import white_label_web_bp
+from app.web.federation_platform import federation_platform_web_bp
 from app.web.pilot_pages import pilot_pages_bp
 from app.web.finance import finance_web_bp
 
@@ -69,6 +77,14 @@ from app.api.pilot_toolkit.routes import pilot_toolkit_bp
 from app.api.readiness_pack.routes import readiness_pack_bp
 from app.api.multi_tenant_foundation.routes import multi_tenant_foundation_bp
 from app.api.marketplace_platform.routes import marketplace_platform_bp
+from app.api.ai_copilot.routes import ai_copilot_bp
+from app.api.mobile_platform.routes import mobile_platform_bp
+from app.api.device_gateway.routes import device_gateway_bp
+from app.api.voice_platform.routes import voice_platform_bp
+from app.api.data_warehouse.routes import data_warehouse_bp
+from app.api.population_health.routes import population_health_bp
+from app.api.white_label.routes import white_label_bp
+from app.api.federation_platform.routes import federation_platform_bp
 from app.api.laboratories.routes import laboratories_bp
 from app.api.test_catalogs.routes import test_catalogs_bp
 from app.api.orders.routes import orders_bp
@@ -257,6 +273,14 @@ def register_blueprints(app):
     app.register_blueprint(readiness_pack_bp)
     app.register_blueprint(multi_tenant_foundation_bp)
     app.register_blueprint(marketplace_platform_bp)
+    app.register_blueprint(ai_copilot_bp)
+    app.register_blueprint(mobile_platform_bp)
+    app.register_blueprint(device_gateway_bp)
+    app.register_blueprint(voice_platform_bp)
+    app.register_blueprint(data_warehouse_bp)
+    app.register_blueprint(population_health_bp)
+    app.register_blueprint(white_label_bp)
+    app.register_blueprint(federation_platform_bp)
     app.register_blueprint(laboratories_bp)
     app.register_blueprint(test_catalogs_bp)
     app.register_blueprint(orders_bp)
@@ -384,6 +408,14 @@ def register_blueprints(app):
     app.register_blueprint(readiness_pack_web_bp)
     app.register_blueprint(multi_tenant_foundation_web_bp)
     app.register_blueprint(marketplace_platform_web_bp)
+    app.register_blueprint(ai_copilot_web_bp)
+    app.register_blueprint(mobile_platform_web_bp)
+    app.register_blueprint(device_gateway_web_bp)
+    app.register_blueprint(voice_platform_web_bp)
+    app.register_blueprint(data_warehouse_web_bp)
+    app.register_blueprint(population_health_web_bp)
+    app.register_blueprint(white_label_web_bp)
+    app.register_blueprint(federation_platform_web_bp)
     app.register_blueprint(pilot_pages_bp)
     app.register_blueprint(home_web_bp)
     app.register_blueprint(ops_bp)
