@@ -1,0 +1,432 @@
+{
+  "generated_at": "2026-07-05T04:53:52.728981+00:00",
+  "phase": "5.13",
+  "sprint": "Pilot Toolkit",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 18,
+    "checks_total": 18,
+    "ok": true,
+    "runtime_seconds": 2.284
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "pilot_toolkit_dashboard": {
+      "ok": true,
+      "routes": {
+        "/pilot-toolkit": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-toolkit/demo-accounts": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-toolkit/demo-data": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-toolkit/postman": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-toolkit/swagger": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-toolkit/workflow": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-toolkit/pdf": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-toolkit/qr": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/pilot-toolkit/reports": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/pilot-toolkit/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-toolkit/demo-accounts": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-toolkit/demo-data": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-toolkit/postman": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-toolkit/swagger": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-toolkit/workflow": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-toolkit/pdf": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-toolkit/qr": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-toolkit/reports": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/pilot-toolkit/readiness": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 8
+    },
+    "demo_accounts": {
+      "ok": true
+    },
+    "demo_data": {
+      "ok": true
+    },
+    "postman": {
+      "ok": true
+    },
+    "swagger": {
+      "ok": true
+    },
+    "workflow": {
+      "ok": true
+    },
+    "pdf": {
+      "ok": true
+    },
+    "qr": {
+      "ok": true
+    },
+    "reports": {
+      "ok": true
+    },
+    "legacy_demo_accounts_preserved": {
+      "ok": true
+    },
+    "legacy_workflow_demo_preserved": {
+      "ok": true
+    },
+    "legacy_swagger_ui_preserved": {
+      "ok": true
+    },
+    "legacy_reports_preserved": {
+      "ok": true
+    },
+    "legacy_developer_portal_postman_preserved": {
+      "ok": true
+    }
+  },
+  "readiness": {
+    "features": [
+      "Demo Accounts",
+      "Demo Data",
+      "Postman",
+      "Swagger",
+      "Workflow",
+      "PDF",
+      "QR",
+      "Reports"
+    ],
+    "generated_at": "2026-07-05T04:53:52.749428",
+    "legacy_routes": [
+      "/demo-accounts",
+      "/workflow-demo",
+      "/developer-portal",
+      "/api-docs/swagger",
+      "/reports"
+    ],
+    "phase": "5.13",
+    "platform": "Pilot Toolkit",
+    "sections": {
+      "demo_accounts": {
+        "accounts_by_role": {
+          "admin": [],
+          "collector": [],
+          "doctor": [],
+          "lab": [],
+          "patient": [],
+          "reception": [
+            {
+              "email": "demo-reception-01@demo.dxcon.test",
+              "password": "DemoPass123!",
+              "role": "RECEPTION"
+            }
+          ]
+        },
+        "accounts_total": 1,
+        "demo_password": "DemoPass123!",
+        "login_route": "/login",
+        "read_only": true,
+        "report": "demo_accounts",
+        "totals_by_role": {
+          "admin": 0,
+          "collector": 0,
+          "doctor": 0,
+          "lab": 0,
+          "patient": 0,
+          "reception": 1
+        },
+        "web_route": "/demo-accounts"
+      },
+      "demo_data": {
+        "docs": "backend/docs/DEMO_SEED_DATA.md",
+        "prefixes": {
+          "orders": "DEMO-ORD-",
+          "patients": "DEMO-PAT-",
+          "tests": "DEMO-TST-",
+          "users": "demo-"
+        },
+        "read_only": true,
+        "report": "demo_data",
+        "seed_api": "POST /api/v1/seeds/demo-operations",
+        "seed_report_available": true,
+        "seed_report_summary": null,
+        "seeded_summary": {
+          "orders": 0,
+          "patients": 0,
+          "test_catalog": 0,
+          "users": 0
+        },
+        "system_status": {
+          "app_env": "development",
+          "database": "OK",
+          "redis": "DEGRADED",
+          "status": "OK",
+          "timestamp": "2026-07-05T04:53:52.753546+00:00"
+        }
+      },
+      "pdf": {
+        "demo_orders": [],
+        "demo_orders_total": 0,
+        "legacy_hub": "/reports",
+        "orders_with_results": 0,
+        "pdf_route_pattern": "/results/report/<order_id>/pdf",
+        "read_only": true,
+        "report": "pdf"
+      },
+      "postman": {
+        "collection_available": true,
+        "collection_items": 3,
+        "collection_path": "backend/generated_api/postman_collection.json",
+        "collection_url": "/api/v1/developer-portal/postman",
+        "instructions": [
+          "Download the Postman collection JSON from the link above.",
+          "Import into Postman via File \u2192 Import.",
+          "Set the baseUrl variable to your DxCon environment.",
+          "Alternatively import /api/v1/openapi.json directly for full route coverage."
+        ],
+        "legacy_hub": "/developer-portal/postman",
+        "openapi_import": "/api/v1/openapi.json",
+        "read_only": true,
+        "report": "postman"
+      },
+      "qr": {
+        "boxes_total": 0,
+        "qr_route_pattern": "/boxes/<box_id>/qr",
+        "read_only": true,
+        "related_routes": [
+          "/transport-boxes",
+          "/logistics-v2",
+          "/iot-box"
+        ],
+        "report": "qr",
+        "transport_boxes": []
+      },
+      "reports": {
+        "api_routes": [
+          "/api/v1/reports/kpi",
+          "/api/v1/reports/revenue",
+          "/api/v1/reports/operations",
+          "/api/v1/reports/partners",
+          "/api/v1/reports/collectors"
+        ],
+        "executive_dashboard": {
+          "kpi": {
+            "daily_bookings": 0,
+            "invoices_paid": 0,
+            "orders_total": 0,
+            "period_end": "2026-07-05T04:53:52.758837",
+            "period_start": "2026-06-05T04:53:52.758837",
+            "results_total": 0,
+            "revenue_total": 0.0,
+            "samples_total": 0
+          },
+          "period_end": "2026-07-05T04:53:52.758837",
+          "period_start": "2026-06-05T04:53:52.758837",
+          "report": "executive_dashboard",
+          "revenue": {
+            "gross_revenue": 0,
+            "invoices_paid": 0,
+            "invoices_refunded": 0,
+            "invoices_total": 0,
+            "payment_total": 0,
+            "period_end": "2026-07-05T04:53:52.761707",
+            "period_start": "2026-06-05T04:53:52.761707",
+            "report": "revenue_summary"
+          },
+          "sla_compliance_rate": 0.0,
+          "top_collectors": [],
+          "top_partners": []
+        },
+        "kpi_summary": {
+          "daily_bookings": 0,
+          "invoices_paid": 0,
+          "orders_total": 0,
+          "period_end": "2026-07-05T04:53:52.755203",
+          "period_start": "2026-06-05T04:53:52.755203",
+          "results_total": 0,
+          "revenue_total": 0.0,
+          "samples_total": 0
+        },
+        "read_only": true,
+        "report": "reports",
+        "revenue_summary": {
+          "gross_revenue": 0,
+          "invoices_paid": 0,
+          "invoices_refunded": 0,
+          "invoices_total": 0,
+          "payment_total": 0,
+          "period_end": "2026-07-05T04:53:52.758380",
+          "period_start": "2026-06-05T04:53:52.758380",
+          "report": "revenue_summary"
+        },
+        "web_routes": [
+          "/reports",
+          "/reports/executive",
+          "/reports/operations"
+        ]
+      },
+      "swagger": {
+        "docs_index": "/api-docs",
+        "files": {
+          "openapi_json": true,
+          "openapi_yaml": true
+        },
+        "legacy_routes": [
+          "/api-docs/swagger",
+          "/api-docs/redoc",
+          "/developer-portal"
+        ],
+        "openapi_json": "/api/v1/openapi.json",
+        "openapi_yaml": "/api/v1/openapi.yaml",
+        "read_only": true,
+        "redoc": "/api-docs/redoc",
+        "report": "swagger",
+        "swagger_ui": "/api-docs/swagger"
+      },
+      "workflow": {
+        "read_only": true,
+        "report": "workflow",
+        "steps": [
+          {
+            "detail": "Patient registered at reception",
+            "label": "Registration",
+            "route": "/reception",
+            "step": 1
+          },
+          {
+            "detail": "Medical order created",
+            "label": "Order",
+            "route": "/orders/new",
+            "step": 2
+          },
+          {
+            "detail": "Invoice and payment status",
+            "label": "Payment",
+            "route": "/orders",
+            "step": 3
+          },
+          {
+            "detail": "Sample pickup scheduled",
+            "label": "Collection",
+            "route": "/logistics",
+            "step": 4
+          },
+          {
+            "detail": "Cold-chain transport",
+            "label": "Transport",
+            "route": "/logistics/dispatch",
+            "step": 5
+          },
+          {
+            "detail": "Lab processing",
+            "label": "Laboratory",
+            "route": "/lab-operations",
+            "step": 6
+          },
+          {
+            "detail": "Result verification",
+            "label": "Verification",
+            "route": "/doctor-workbench",
+            "step": 7
+          },
+          {
+            "detail": "Doctor sign-off",
+            "label": "Doctor Approval",
+            "route": "/doctor/results",
+            "step": 8
+          },
+          {
+            "detail": "Report released to patient",
+            "label": "Release",
+            "route": "/patient-portal",
+            "step": 9
+          },
+          {
+            "detail": "Patient notified",
+            "label": "Notification",
+            "route": "/notifications",
+            "step": 10
+          }
+        ],
+        "steps_total": 10,
+        "timeline": "Registration \u2192 Order \u2192 Payment \u2192 Collection \u2192 Transport \u2192 Laboratory \u2192 Verification \u2192 Doctor Approval \u2192 Release \u2192 Notification",
+        "web_route": "/workflow-demo"
+      }
+    },
+    "sprint": "Pilot Toolkit",
+    "status": "WARN",
+    "summary": {
+      "demo_accounts_total": 1,
+      "demo_orders": 0,
+      "demo_patients": 0,
+      "pdf_samples": 0,
+      "postman_available": true,
+      "qr_boxes": 0,
+      "swagger_available": true,
+      "workflow_steps": 10
+    }
+  }
+}
