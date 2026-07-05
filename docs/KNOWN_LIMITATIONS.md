@@ -1,10 +1,17 @@
 # DxCon Known Limitations
 
-**Phase 5 Sprint 5.14 · Pilot / staging context**
+**Phase 10 · Enterprise v1.0.0-rc1**
 
-This document records intentional gaps and deferred work for the current platform release. It does not block pilot demos but must be reviewed before production cutover with real patient data.
+This document records intentional gaps and deferred work for the v1.0 release candidate. Review before production cutover with real patient data.
 
 ---
+
+## Phase 10 Scaffold Modules
+
+- **DxCon Pharmacy** — formulary and dispensing integration planned for v2.
+- **DxCon Insurance** — claims adjudication scaffold only.
+- **Support Center** — ticket workflow scaffold; use email escalation for RC1.
+- **Certification Center** — program definitions only; exams not yet automated.
 
 ## Security & Access
 

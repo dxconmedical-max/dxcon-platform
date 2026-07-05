@@ -1,8 +1,19 @@
 # DxCon Platform Roadmap v2
 
-**Phase 5 Sprint 5.14 · Post-pilot expansion plan**
+**Phase 10 · Enterprise v1.0.0-rc1 complete — Healthcare Ecosystem hub delivered**
 
-Roadmap v2 builds on Phase 3A pilot delivery and Phase 4–5 enterprise hubs. Priorities align with [`ENGINEERING_BACKLOG.md`](ENGINEERING_BACKLOG.md).
+---
+
+## Completed (Phase 10 — Enterprise v1.0 RC)
+
+| Phase | Hub | Status |
+|-------|-----|--------|
+| 10 | Healthcare Ecosystem | ✅ |
+| 9 | Regional Cloud Platform | ✅ |
+| 8 | Intelligent Healthcare Platform | ✅ |
+| 7.1–7.10 | Multi-tenant · Marketplace · Copilot · Mobile · Device · Voice · DW · Population · White Label · Federation | ✅ |
+
+**Release candidate tag:** `v1.0.0-rc1`
 
 ---
 
