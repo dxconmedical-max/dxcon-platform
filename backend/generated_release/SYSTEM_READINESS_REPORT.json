@@ -1,150 +1,427 @@
 {
-  "report": "system_readiness_report",
-  "read_only": true,
-  "generated_at": "2026-07-05T04:53:54.486700",
-  "phase": "5.14",
-  "sprint": "Readiness Pack",
-  "summary": {
-    "score": 66.7,
-    "checks_passed": 4,
-    "checks_total": 6,
-    "ok": false,
-    "system_status": "OK",
-    "database": "OK",
-    "redis": "DEGRADED"
+  "generated_at": "2026-07-05T05:56:37.969819",
+  "release": {
+    "version": "1.0.0-rc1",
+    "tag": "v1.0.0-rc1",
+    "codename": "Healthcare Ecosystem",
+    "phase": "10",
+    "commercial_release": true
   },
-  "checks": {
-    "application_health": {
-      "name": "application_health",
-      "status": "DEGRADED",
-      "ok": false
+  "phase": "10",
+  "platform": "DxCon Enterprise",
+  "system_readiness": {
+    "generated_at": "2026-07-05T05:56:37.939601",
+    "phase": "10",
+    "platform": "Healthcare Ecosystem",
+    "release": {
+      "version": "1.0.0-rc1",
+      "tag": "v1.0.0-rc1",
+      "codename": "Healthcare Ecosystem",
+      "phase": "10",
+      "commercial_release": true
     },
-    "database_health": {
-      "name": "database_health",
-      "status": "OK",
-      "ok": true
+    "status": "OK",
+    "summary": {
+      "ecosystem_modules": 25,
+      "enterprise_docs": 12,
+      "enterprise_docs_total": 12,
+      "license_tiers": 3,
+      "scaffold_modules": 4
     },
-    "redis_health": {
-      "name": "redis_health",
-      "status": "DEGRADED",
-      "ok": true
+    "features": [
+      "DxCon Lab",
+      "DxCon Clinic",
+      "DxCon Home",
+      "DxCon Pharmacy",
+      "DxCon Insurance",
+      "DxCon AI",
+      "DxCon Cloud",
+      "DxCon Marketplace",
+      "Partner Portal",
+      "Customer Portal",
+      "Enterprise Governance",
+      "Architecture Board",
+      "Release Board",
+      "Medical Governance",
+      "Security Governance",
+      "AI Governance",
+      "Enterprise Audit",
+      "Customer Success Portal",
+      "Training Center",
+      "Certification Center",
+      "Release Manager",
+      "License Manager",
+      "Commercial Readiness",
+      "Support Center",
+      "Knowledge Base"
+    ],
+    "enterprise_docs": {
+      "system_architecture": "docs/SYSTEM_ARCHITECTURE.md",
+      "operations_guide": "docs/OPERATIONS_GUIDE.md",
+      "deployment_guide": "docs/DEPLOYMENT_GUIDE.md",
+      "support_guide": "docs/SUPPORT_GUIDE.md",
+      "customer_guide": "docs/CUSTOMER_GUIDE.md",
+      "partner_guide": "docs/PARTNER_GUIDE.md",
+      "go_live_runbook": "docs/GO_LIVE_RUNBOOK.md",
+      "backup_runbook": "docs/BACKUP_RUNBOOK.md",
+      "restore_runbook": "docs/RESTORE_RUNBOOK.md",
+      "rollback_runbook": "docs/ROLLBACK_RUNBOOK.md",
+      "known_limitations": "docs/KNOWN_LIMITATIONS.md",
+      "roadmap_v2": "docs/ROADMAP_v2.md"
     },
-    "release_health": {
-      "name": "release_health",
-      "status": "OK",
-      "ok": true
-    },
-    "migration": {
-      "name": "migration",
-      "status": "READY",
-      "ok": true
-    },
-    "health_probes": {
-      "name": "health_probes",
-      "status": "OK",
-      "ok": false
+    "sections": {
+      "commercial_readiness": {
+        "report": "commercial_readiness",
+        "readiness_pack": {},
+        "route": "/readiness-pack"
+      },
+      "release_manager": {
+        "report": "release_manager",
+        "release": {
+          "version": "1.0.0-rc1",
+          "tag": "v1.0.0-rc1",
+          "codename": "Healthcare Ecosystem",
+          "phase": "10",
+          "commercial_release": true
+        },
+        "route": "/release-control",
+        "version": {
+          "report": "version",
+          "read_only": true,
+          "version": "2.5.0-dev",
+          "git_sha": "local",
+          "build_time": "",
+          "service": "dxcon-api",
+          "environment": "development",
+          "last_deployment": null,
+          "build_env_vars": [
+            "BUILD_VERSION",
+            "GIT_SHA",
+            "BUILD_TIME",
+            "APP_ENV"
+          ]
+        }
+      },
+      "security_governance": {
+        "report": "security_governance",
+        "dashboard": {
+          "platform": "Security & Compliance",
+          "phase": "5.1",
+          "sprint": "Security & Compliance",
+          "status": "OK",
+          "read_only": true,
+          "summary": {
+            "secrets_tracked": 0,
+            "api_keys_total": 0,
+            "keys_needing_rotation": 0,
+            "active_jwt_sessions": 0,
+            "rbac_roles": 9,
+            "audit_entries": 1,
+            "security_events": 1,
+            "failed_login_attempts": 0,
+            "ip_whitelist_rules": 3,
+            "rate_limit_max": 120,
+            "phi_access_entries": 0,
+            "readiness_score": 100.0
+          },
+          "features": [
+            "Security Dashboard",
+            "Secret Management Audit",
+            "API Key Rotation",
+            "JWT Audit",
+            "RBAC Permission Matrix",
+            "Audit Log Viewer",
+            "Security Event Timeline",
+            "Failed Login Analytics",
+            "IP Whitelist Framework",
+            "Rate Limit Dashboard",
+            "PHI Access Audit",
+            "Compliance Report"
+          ]
+        },
+        "compliance": {
+          "report": "compliance_report",
+          "read_only": true,
+          "generated_at": "2026-07-05T05:56:37.956102",
+          "checks_passed": 8,
+          "checks_total": 8,
+          "readiness_score": 100.0,
+          "sections": {
+            "secret_management": {
+              "report": "secret_management_audit",
+              "read_only": true,
+              "secrets_total": 0,
+              "secrets": [],
+              "checks": [
+                {
+                  "id": "vault",
+                  "label": "Secrets stored with masking in admin UI",
+                  "status": "PASS"
+                },
+                {
+                  "id": "rotation",
+                  "label": "Secret rotation policy documented",
+                  "status": "WARN"
+                },
+                {
+                  "id": "env",
+                  "label": "Production secrets loaded from environment",
+                  "status": "PASS"
+                }
+              ]
+            },
+            "api_key_rotation": {
+              "report": "api_key_rotation",
+              "rotation_policy_days": 90,
+              "keys_total": 0,
+              "keys_needing_rotation": 0,
+              "keys": []
+            },
+            "jwt_sessions": {
+              "report": "jwt_audit",
+              "read_only": true,
+              "summary": {
+                "active": 0,
+                "revoked": 0,
+                "expired": 0,
+                "total": 0
+              },
+              "sessions": [],
+              "notes": [
+                "Access tokens are stateless JWTs.",
+                "Refresh token records track session lifecycle and revocation."
+              ]
+            },
+            "rbac_matrix": {
+              "report": "rbac_permission_matrix",
+              "read_only": true,
+              "platform_roles": {
+                "ACCOUNTING": [
+                  "billing.read",
+                  "billing.write",
+                  "payments.read"
+                ],
+                "ADMIN": [
+                  "reports.read",
+                  "security.read",
+                  "security.write",
+                  "users.read",
+                  "users.write"
+                ],
+                "COLLECTOR": [
+                  "collections.read",
+                  "collections.write"
+                ],
+                "DOCTOR": [
+                  "patients.read",
+                  "referrals.write",
+                  "results.read"
+                ],
+                "LAB": [
+                  "results.read",
+                  "results.write",
+                  "samples.read"
+                ],
+                "PATIENT": [
+                  "profile.read",
+                  "profile.write",
+                  "results.read"
+                ],
+                "SUPER_ADMIN": [
+                  "billing.read",
+                  "billing.write",
+                  "collections.read",
+                  "collections.write",
+                  "patients.read",
+                  "payments.read",
+                  "profile.read",
+                  "profile.write",
+                  "referrals.write",
+                  "reports.read",
+                  "results.read",
+                  "results.write",
+                  "samples.read",
+                  "security.read",
+                  "security.write",
+                  "users.read",
+                  "users.write"
+                ]
+              },
+              "enterprise_roles": [
+                {
+                  "id": "9fda57bd-efa8-478a-99ae-18935e841c31",
+                  "tenant_id": "c3f9618e-50eb-4663-b190-e86e4b427e77",
+                  "role_code": "ROLE-ADMIN",
+                  "name": "Enterprise Admin",
+                  "permissions_json": "[\"admin:*\", \"tenant:manage\", \"audit:read\"]",
+                  "is_active": true,
+                  "created_at": "2026-07-05T05:56:37.643331",
+                  "permissions": [
+                    "admin:*",
+                    "tenant:manage",
+                    "audit:read"
+                  ]
+                },
+                {
+                  "id": "36acf5bd-cbe1-4a8e-b253-139816ff3a5f",
+                  "tenant_id": "c3f9618e-50eb-4663-b190-e86e4b427e77",
+                  "role_code": "ROLE-ANALYST",
+                  "name": "Lab Analyst",
+                  "permissions_json": "[\"lab:read\", \"results:write\"]",
+                  "is_active": true,
+                  "created_at": "2026-07-05T05:56:37.643337",
+                  "permissions": [
+                    "lab:read",
+                    "results:write"
+                  ]
+                }
+              ],
+              "role_count": 9
+            },
+            "rate_limits": {
+              "report": "rate_limit_dashboard",
+              "read_only": true,
+              "enabled": true,
+              "max_requests": 120,
+              "window_seconds": 60,
+              "exempt_paths": [
+                "/api/v1/system/build",
+                "/api/v1/system/health",
+                "/api/v1/system/live",
+                "/api/v1/system/metrics",
+                "/api/v1/system/ready",
+                "/api/v1/system/version"
+              ],
+              "security_headers_enabled": true,
+              "security_headers": [
+                "X-Content-Type-Options",
+                "X-Frame-Options",
+                "X-XSS-Protection",
+                "Referrer-Policy",
+                "Content-Security-Policy",
+                "Permissions-Policy"
+              ]
+            },
+            "ip_whitelist": {
+              "report": "ip_whitelist_framework",
+              "read_only": true,
+              "enabled": false,
+              "enforcement_mode": "monitor",
+              "rules_total": 3,
+              "rules": [
+                {
+                  "cidr": "10.0.0.0/8",
+                  "label": "Corporate VPN",
+                  "enabled": true,
+                  "source": "framework_default"
+                },
+                {
+                  "cidr": "172.16.0.0/12",
+                  "label": "Private network",
+                  "enabled": true,
+                  "source": "framework_default"
+                },
+                {
+                  "cidr": "127.0.0.1/32",
+                  "label": "Local development",
+                  "enabled": true,
+                  "source": "framework_default"
+                }
+              ],
+              "pilot_guidance": [
+                "Set IP_WHITELIST_ENABLED=true for pilot environments.",
+                "Provide partner CIDR blocks via IP_WHITELIST_CIDRS.",
+                "Start in monitor mode before enforce mode."
+              ]
+            },
+            "failed_logins": {
+              "report": "failed_login_analytics",
+              "read_only": true,
+              "failed_access_attempts": 0,
+              "auth_audit_entries": 0,
+              "security_events": 0,
+              "top_source_ips": [],
+              "recent_failures": []
+            },
+            "phi_access": {
+              "report": "phi_access_audit",
+              "read_only": true,
+              "phi_audit_entries": 0,
+              "phi_access_entries": 0,
+              "object_types_tracked": [
+                "PATIENT",
+                "Patient",
+                "MedicalOrder",
+                "LabResult",
+                "TestResult",
+                "ResultFile",
+                "InterpretationResult",
+                "Sample"
+              ],
+              "audit_logs": [],
+              "access_history": []
+            }
+          },
+          "export_history": [],
+          "pilot_ready": true
+        }
+      },
+      "ai_governance": {
+        "report": "ai_governance",
+        "policy": {
+          "advisory_only": true,
+          "automatic_diagnosis": false,
+          "human_review_required": true,
+          "clinical_disclaimer": "This output is advisory only and does not constitute a medical diagnosis. Human clinical review is required before any clinical action.",
+          "postgresql_only": true,
+          "backward_compatible": true,
+          "destructive_migrations": false
+        },
+        "compliance_notes": [
+          "All AI outputs are advisory-only",
+          "Doctor review required before clinical action",
+          "PHI redacted before external LLM calls",
+          "Prompt and inference audit logged",
+          "Blocked patterns prevent auto-diagnosis language"
+        ]
+      },
+      "dxcon_ai": {
+        "report": "dxcon_ai",
+        "product": "DxCon AI",
+        "route": "/intelligent-healthcare",
+        "api": "/api/v1/intelligent-healthcare/dashboard",
+        "governance": {
+          "advisory_only": true,
+          "automatic_diagnosis": false,
+          "human_review_required": true,
+          "clinical_disclaimer": "This output is advisory only and does not constitute a medical diagnosis. Human clinical review is required before any clinical action.",
+          "postgresql_only": true,
+          "backward_compatible": true,
+          "destructive_migrations": false
+        },
+        "status": "READY"
+      },
+      "dxcon_cloud": {
+        "report": "dxcon_cloud",
+        "product": "DxCon Cloud",
+        "route": "/regional-cloud",
+        "api": "/api/v1/regional-cloud/dashboard",
+        "governance": {
+          "backward_compatible": true,
+          "destructive_migrations": false,
+          "postgresql_only": true,
+          "multi_region_ready": true,
+          "data_residency_aware": true
+        },
+        "status": "READY"
+      }
     }
   },
-  "seeded_summary": {
-    "users": 0,
-    "patients": 0,
-    "test_catalog": 0,
-    "orders": 0
+  "regional_readiness": {
+    "phase": "9",
+    "status": "OK"
   },
-  "health_probes": {
-    "report": "health_probes",
-    "read_only": true,
-    "probe_paths": [
-      "/live",
-      "/ready",
-      "/api/v1/system/health",
-      "/api/v1/system/liveness"
-    ],
-    "live_probe": {
-      "path": "/live",
-      "status_code": 200,
-      "payload": {
-        "app_env": "development",
-        "database": "OK",
-        "redis": "DEGRADED",
-        "timestamp": "2026-07-05T04:53:54.435820+00:00",
-        "status": "OK"
-      }
-    },
-    "ready_probe": {
-      "path": "/ready",
-      "status_code": 200,
-      "payload": {
-        "app_env": "development",
-        "database": "OK",
-        "redis": "DEGRADED",
-        "timestamp": "2026-07-05T04:53:54.435949+00:00",
-        "status": "OK"
-      }
-    },
-    "health_probe": {
-      "path": "/api/v1/system/health",
-      "status_code": 200,
-      "payload": {
-        "app_env": "development",
-        "database": "OK",
-        "redis": "DEGRADED",
-        "timestamp": "2026-07-05T04:53:54.436473+00:00",
-        "status": "OK"
-      }
-    },
-    "docker_healthcheck": true,
-    "compose_healthcheck": true,
-    "kubernetes_readiness": true,
-    "kubernetes_liveness": true,
-    "nginx_live_route": true
-  },
-  "migration": {
-    "report": "migration_status",
-    "read_only": true,
-    "status": "READY",
-    "migration": {
-      "ready": true,
-      "error": "Working outside of application context.\n\nThis typically means that you attempted to use functionality that needed\nthe current application. To solve this, set up an application context\nwith app.app_context(). See the documentation for more information.",
-      "alembic_present": false,
-      "table_count": 304,
-      "missing_core_tables": []
-    },
-    "table_count": 304,
-    "missing_core_tables": [],
-    "checks": [
-      {
-        "id": 1,
-        "title": "Core tables present",
-        "detail": "users, patients, orders available in schema.",
-        "status": "PASS"
-      },
-      {
-        "id": 2,
-        "title": "Alembic tracking",
-        "detail": "alembic_version table present when migrations configured.",
-        "status": "MANUAL"
-      },
-      {
-        "id": 3,
-        "title": "Startup validation",
-        "detail": "STARTUP_VALIDATE_DB runs migration checks on boot.",
-        "status": "PASS"
-      }
-    ],
-    "checks_passed": 2,
-    "checks_total": 3,
-    "legacy_api": "GET /api/v1/system/ready"
-  },
-  "stored_report_available": true,
-  "stored_report_generated_at": "2026-07-05T04:51:27.021473",
-  "stored_summary": {
-    "score": 66.7,
-    "checks_passed": 4,
-    "checks_total": 6,
-    "ok": false,
-    "system_status": "OK",
-    "database": "OK",
-    "redis": "DEGRADED"
-  }
+  "docs_complete": true,
+  "backward_compatible": true,
+  "destructive_migrations": false
 }

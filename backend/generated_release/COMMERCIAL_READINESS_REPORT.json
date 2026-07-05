@@ -1,0 +1,72 @@
+{
+  "generated_at": "2026-07-05T05:56:37.988848",
+  "release": {
+    "version": "1.0.0-rc1",
+    "tag": "v1.0.0-rc1",
+    "codename": "Healthcare Ecosystem",
+    "phase": "10",
+    "commercial_release": true
+  },
+  "phase": "10",
+  "commercial_ready": true,
+  "license_tiers": [
+    {
+      "tier": "PILOT",
+      "modules": [
+        "Lab",
+        "Clinic",
+        "Home"
+      ],
+      "seats": 25
+    },
+    {
+      "tier": "PROFESSIONAL",
+      "modules": [
+        "Lab",
+        "Clinic",
+        "Home",
+        "Marketplace",
+        "AI"
+      ],
+      "seats": 100
+    },
+    {
+      "tier": "ENTERPRISE",
+      "modules": [
+        "DxCon Lab",
+        "DxCon Clinic",
+        "DxCon Home",
+        "DxCon Pharmacy",
+        "DxCon Insurance",
+        "DxCon AI",
+        "DxCon Cloud",
+        "DxCon Marketplace"
+      ],
+      "seats": "unlimited"
+    }
+  ],
+  "readiness_pack": {
+    "report": "readiness_pack_dashboard",
+    "read_only": true,
+    "status": "WARN",
+    "system_score": 66.7,
+    "security_score": 100.0,
+    "pilot_score": 100.0,
+    "checklist_remaining": 11,
+    "artifacts_present": 6
+  },
+  "products_ready": [
+    "Lab",
+    "Clinic",
+    "Home",
+    "AI",
+    "Cloud",
+    "Marketplace"
+  ],
+  "products_scaffold": [
+    "Pharmacy",
+    "Insurance",
+    "Support Center",
+    "Certification"
+  ]
+}

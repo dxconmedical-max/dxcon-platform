@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-07-05T05:56:38.004809",
+  "title": "DxCon Enterprise v1.0 Release Candidate",
+  "tag": "v1.0.0-rc1",
+  "phase": "10",
+  "modules": 25,
+  "reports": [
+    "SYSTEM_READINESS_REPORT.json",
+    "GO_LIVE_REPORT.json",
+    "COMMERCIAL_READINESS_REPORT.json",
+    "ENTERPRISE_CERTIFICATION_REPORT.json",
+    "HEALTHCARE_ECOSYSTEM_REPORT.json"
+  ],
+  "next_steps": [
+    "Pilot sign-off",
+    "Production PostgreSQL cutover",
+    "Tag v1.0.0 GA"
+  ]
+}

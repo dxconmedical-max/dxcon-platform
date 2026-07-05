@@ -1,0 +1,177 @@
+{
+  "generated_at": "2026-07-05T05:56:37.969853",
+  "release": {
+    "version": "1.0.0-rc1",
+    "tag": "v1.0.0-rc1",
+    "codename": "Healthcare Ecosystem",
+    "phase": "10",
+    "commercial_release": true
+  },
+  "phase": "10",
+  "go_live_ready": true,
+  "runbooks": {
+    "go_live": "docs/GO_LIVE_RUNBOOK.md",
+    "backup": "docs/BACKUP_RUNBOOK.md",
+    "restore": "docs/RESTORE_RUNBOOK.md",
+    "rollback": "docs/ROLLBACK_RUNBOOK.md"
+  },
+  "release_board": {
+    "report": "release_board",
+    "history": {
+      "report": "release_history",
+      "read_only": true,
+      "entries_total": 12,
+      "deployments_total": 0,
+      "reports_total": 12,
+      "entries": [
+        {
+          "type": "verify_report",
+          "version": "Phase 5.11",
+          "label": "Operations Runbooks",
+          "status": "OK",
+          "environment": "platform",
+          "generated_at": "2026-07-05T04:53:48.300337+00:00",
+          "readiness_score": 100.0,
+          "build_sha": null,
+          "source_file": "OPERATIONS_RUNBOOKS_REPORT.json",
+          "sequence": 1
+        },
+        {
+          "type": "verify_report",
+          "version": "Phase 5.10",
+          "label": "AI Operations",
+          "status": "OK",
+          "environment": "platform",
+          "generated_at": "2026-07-05T04:53:46.537738+00:00",
+          "readiness_score": 100.0,
+          "build_sha": null,
+          "source_file": "AI_OPERATIONS_REPORT.json",
+          "sequence": 2
+        },
+        {
+          "type": "verify_report",
+          "version": "Phase 5.9",
+          "label": "Executive Metrics",
+          "status": "OK",
+          "environment": "platform",
+          "generated_at": "2026-07-05T04:53:44.599983+00:00",
+          "readiness_score": 100.0,
+          "build_sha": null,
+          "source_file": "EXECUTIVE_METRICS_REPORT.json",
+          "sequence": 3
+        },
+        {
+          "type": "verify_report",
+          "version": "v1.0.0-rc1",
+          "label": "RC1",
+          "status": "OK",
+          "environment": "platform",
+          "generated_at": "2026-07-05T04:51:38.832716+00:00",
+          "readiness_score": null,
+          "build_sha": null,
+          "source_file": "RC1_REPORT.json",
+          "sequence": 4
+        },
+        {
+          "type": "verify_report",
+          "version": "Phase 5.7",
+          "label": "Release Management",
+          "status": "OK",
+          "environment": "platform",
+          "generated_at": "2026-07-04T14:54:07.939232+00:00",
+          "readiness_score": 100.0,
+          "build_sha": null,
+          "source_file": "RELEASE_MANAGEMENT_REPORT.json",
+          "sequence": 5
+        },
+        {
+          "type": "verify_report",
+          "version": "Phase 5.6",
+          "label": "Pilot Status",
+          "status": "OK",
+          "environment": "platform",
+          "generated_at": "2026-07-04T14:50:58.350997+00:00",
+          "readiness_score": 100.0,
+          "build_sha": null,
+          "source_file": "PILOT_STATUS_REPORT.json",
+          "sequence": 6
+        },
+        {
+          "type": "verify_report",
+          "version": "Phase 5.5",
+          "label": "Production Deployment",
+          "status": "OK",
+          "environment": "platform",
+          "generated_at": "2026-07-04T14:45:42.307496+00:00",
+          "readiness_score": 100.0,
+          "build_sha": null,
+          "source_file": "PRODUCTION_DEPLOYMENT_REPORT.json",
+          "sequence": 7
+        },
+        {
+          "type": "verify_report",
+          "version": "Phase 5.3",
+          "label": "Backup & Disaster Recovery",
+          "status": "OK",
+          "environment": "platform",
+          "generated_at": "2026-07-04T14:41:15.196347+00:00",
+          "readiness_score": 100.0,
+          "build_sha": null,
+          "source_file": "BACKUP_RECOVERY_REPORT.json",
+          "sequence": 8
+        },
+        {
+          "type": "verify_report",
+          "version": "Phase 5.2",
+          "label": "Monitoring Center",
+          "status": "OK",
+          "environment": "platform",
+          "generated_at": "2026-07-04T14:37:51.323331+00:00",
+          "readiness_score": 100.0,
+          "build_sha": null,
+          "source_file": "MONITORING_CENTER_REPORT.json",
+          "sequence": 9
+        },
+        {
+          "type": "verify_report",
+          "version": "Phase 5.1",
+          "label": "Security & Compliance",
+          "status": "OK",
+          "environment": "platform",
+          "generated_at": "2026-07-04T14:34:07.623876+00:00",
+          "readiness_score": 100.0,
+          "build_sha": null,
+          "source_file": "SECURITY_READINESS_REPORT.json",
+          "sequence": 10
+        }
+      ]
+    },
+    "current_version": {
+      "report": "version",
+      "read_only": true,
+      "version": "2.5.0-dev",
+      "git_sha": "local",
+      "build_time": "",
+      "service": "dxcon-api",
+      "environment": "development",
+      "last_deployment": null,
+      "build_env_vars": [
+        "BUILD_VERSION",
+        "GIT_SHA",
+        "BUILD_TIME",
+        "APP_ENV"
+      ]
+    },
+    "target_tag": "v1.0.0-rc1"
+  },
+  "commercial_readiness": {
+    "report": "commercial_readiness",
+    "readiness_pack": {},
+    "route": "/readiness-pack"
+  },
+  "health_probes": [
+    "/live",
+    "/ready",
+    "/api/v1/system/health"
+  ]
+}

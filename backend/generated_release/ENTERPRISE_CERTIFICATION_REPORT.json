@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-07-05T05:56:37.988850",
+  "release": {
+    "version": "1.0.0-rc1",
+    "tag": "v1.0.0-rc1",
+    "codename": "Healthcare Ecosystem",
+    "phase": "10",
+    "commercial_release": true
+  },
+  "phase": "10",
+  "certification_status": "CANDIDATE",
+  "recommended_tag": "v1.0.0-rc1",
+  "governance": {
+    "medical": "medical_governance",
+    "security": "security_governance",
+    "ai": "ai_governance",
+    "enterprise": "enterprise_governance"
+  },
+  "validation": {
+    "compile": "required",
+    "unit_test": "required",
+    "integration_test": "verify_healthcare_ecosystem.py",
+    "pilot_verification": "verify_pilot_readiness.py"
+  },
+  "known_limitations": "docs/KNOWN_LIMITATIONS.md",
+  "roadmap": "docs/ROADMAP_v2.md"
+}
