@@ -1,0 +1,1211 @@
+{
+  "generated_at": "2026-07-05T04:53:54.656517+00:00",
+  "phase": "5.14",
+  "sprint": "Readiness Pack",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 16,
+    "checks_total": 16,
+    "ok": true,
+    "runtime_seconds": 1.628
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "documentation_files": {
+      "ok": true,
+      "files": {
+        "KNOWN_LIMITATIONS.md": true,
+        "ROADMAP_v2.md": true
+      }
+    },
+    "generated_artifacts": {
+      "ok": true,
+      "files": {
+        "SYSTEM_READINESS_REPORT.json": true,
+        "SECURITY_READINESS_REPORT.json": true,
+        "PILOT_READINESS_REPORT.json": true,
+        "GO_LIVE_CHECKLIST.json": true
+      }
+    },
+    "auth": {
+      "ok": true
+    },
+    "readiness_pack_dashboard": {
+      "ok": true,
+      "routes": {
+        "/readiness-pack": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/readiness-pack/system": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/readiness-pack/security": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/readiness-pack/pilot": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/readiness-pack/go-live-checklist": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/readiness-pack/limitations": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/readiness-pack/roadmap": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/readiness-pack/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/readiness-pack/system": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/readiness-pack/security": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/readiness-pack/pilot": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/readiness-pack/go-live-checklist": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/readiness-pack/limitations": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/readiness-pack/roadmap": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/readiness-pack/inventory": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/readiness-pack/readiness": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 6
+    },
+    "system_readiness": {
+      "ok": true
+    },
+    "security_readiness": {
+      "ok": true
+    },
+    "pilot_readiness": {
+      "ok": true
+    },
+    "go_live_checklist": {
+      "ok": true
+    },
+    "known_limitations": {
+      "ok": true
+    },
+    "roadmap_v2": {
+      "ok": true
+    },
+    "legacy_pilot_checklist_preserved": {
+      "ok": true
+    },
+    "legacy_security_compliance_preserved": {
+      "ok": true
+    },
+    "legacy_monitoring_preserved": {
+      "ok": true
+    }
+  },
+  "readiness": {
+    "features": [
+      "SYSTEM_READINESS_REPORT.json",
+      "SECURITY_READINESS_REPORT.json",
+      "PILOT_READINESS_REPORT.json",
+      "GO_LIVE_CHECKLIST.json",
+      "KNOWN_LIMITATIONS.md",
+      "ROADMAP_v2.md"
+    ],
+    "generated_at": "2026-07-05T04:53:54.666699",
+    "legacy_routes": [
+      "/pilot-checklist",
+      "/security-compliance",
+      "/monitoring",
+      "/production-deployment/checklist"
+    ],
+    "phase": "5.14",
+    "platform": "Readiness Pack",
+    "sections": {
+      "go_live_checklist": {
+        "deployment_current": {
+          "build_sha": null,
+          "build_time": "",
+          "current_version": "2.5.0-dev",
+          "environment": "development",
+          "last_deployment": null
+        },
+        "exists": true,
+        "filename": "GO_LIVE_CHECKLIST.json",
+        "items": [
+          {
+            "checked": false,
+            "item": "health_check.py"
+          },
+          {
+            "checked": false,
+            "item": "check_db.py"
+          },
+          {
+            "checked": false,
+            "item": "check_production.py"
+          },
+          {
+            "checked": false,
+            "item": "git status clean"
+          },
+          {
+            "checked": false,
+            "item": "git push main"
+          },
+          {
+            "checked": false,
+            "item": "Render deploy success"
+          },
+          {
+            "checked": false,
+            "item": "/monitor OK"
+          },
+          {
+            "checked": false,
+            "item": "/audit OK"
+          },
+          {
+            "checked": false,
+            "item": "/security OK"
+          },
+          {
+            "checked": false,
+            "item": "/finance OK"
+          },
+          {
+            "checked": false,
+            "item": "/executive-v9 OK"
+          }
+        ],
+        "items_checked": 0,
+        "items_remaining": 11,
+        "items_total": 11,
+        "legacy_route": "/pilot-checklist",
+        "read_only": true,
+        "report": "go_live_checklist_report",
+        "verify_scripts": [
+          "backend/scripts/verify_production_deployment.py",
+          "backend/scripts/verify_staging_stack.py",
+          "deployment/pipeline/verify_deployment.py"
+        ]
+      },
+      "known_limitations": {
+        "content": "# DxCon Known Limitations\n\n**Phase 5 Sprint 5.14 \u00b7 Pilot / staging context**\n\nThis document records intentional gaps and deferred work for the current platform release. It does not block pilot demos but must be reviewed before production cutover with real patient data.\n\n---\n\n## Security & Access\n\n- Some logistics and collector API routes may operate without JWT enforcement in development; production must enable full auth (see `ENGINEERING_BACKLOG.md` BL-P0-001).\n- Public self-registration can accept privileged roles unless restricted by environment policy (BL-P0-002).\n- Demo accounts use a shared password (`DemoPass123!`) \u2014 never reuse in production.\n\n## Infrastructure\n\n- Redis may report `DEGRADED` when not configured; queue features fall back gracefully in SQLite/dev mode.\n- SMTP and external notification providers are optional; email delivery is not guaranteed in local pilot stacks.\n- Object storage defaults to local `STORAGE_PATH`; S3-compatible storage required for multi-node production.\n\n## Data & Schema\n\n- SQLite is supported for tests and verify scripts; production expects PostgreSQL with migrations verified at startup.\n- Demo seed data uses prefixed codes (`DEMO-ORD-*`, `DEMO-PAT-*`); do not mix with production patient records.\n- Some legacy `orders` and `medical_orders` tables coexist; reporting hubs aggregate both where applicable.\n\n## AI & Clinical\n\n- AI interpretation outputs require human review before clinical release; not a substitute for licensed sign-off.\n- Token cost estimates in AI Operations hub are advisory budgeting figures, not billing integration.\n- Prompt versions are versioned in-platform but external LLM provider failover is manual.\n\n## Integrations\n\n- Partner adapter sandbox supports HIS/LIS/EMR/ERP stubs; live hospital integrations need per-site certification.\n- Webhook dead-letter queue requires operator review; no automatic replay in pilot mode.\n- HL7/FHIR advanced standards hub is read-only validation; full bidirectional sync is roadmap work.\n\n## Operations\n\n- Backup jobs may be empty on fresh installs until `POST /api/v1/operations/backups/run` or scheduler seed runs.\n- Rollback plans are metadata-only until a deployment record exists via operations checklist.\n- Generated release reports under `backend/generated_release/` reflect last verify run, not live runtime unless re-run.\n\n## Pilot UX\n\n- PDF report generation requires completed test results on demo orders.\n- QR transport pages display payload text; hardware scanner integration is app-side.\n- Executive and pilot dashboards prefer demo-prefixed datasets when full production volume is absent.\n\n---\n\n## Review Cadence\n\n- Update this file when closing backlog items or before each RC promotion.\n- Cross-check with `ROADMAP_v2.md` and phase verify reports in `/readiness-pack`.\n",
+        "exists": true,
+        "filename": "KNOWN_LIMITATIONS.md",
+        "path": "docs/KNOWN_LIMITATIONS.md",
+        "read_only": true,
+        "report": "known_limitations",
+        "sections": [
+          "Security & Access",
+          "Infrastructure",
+          "Data & Schema",
+          "AI & Clinical",
+          "Integrations",
+          "Operations",
+          "Pilot UX",
+          "Review Cadence"
+        ],
+        "size_bytes": 2811
+      },
+      "pilot": {
+        "checks": {
+          "critical_dashboards": {
+            "ok": true,
+            "routes": {
+              "/crm-pipeline": {
+                "bytes": 9234,
+                "ok": true,
+                "status_code": 200
+              },
+              "/doctor-workbench": {
+                "bytes": 8732,
+                "ok": true,
+                "status_code": 200
+              },
+              "/logistics": {
+                "bytes": 9079,
+                "ok": true,
+                "status_code": 200
+              },
+              "/patient-portal": {
+                "bytes": 8971,
+                "ok": true,
+                "status_code": 200
+              },
+              "/reception": {
+                "bytes": 10649,
+                "ok": true,
+                "status_code": 200
+              }
+            }
+          },
+          "dashboard_pages": {
+            "ok": true,
+            "routes": {
+              "/": {
+                "bytes": 3931,
+                "ok": true,
+                "status_code": 200
+              },
+              "/crm-pipeline": {
+                "bytes": 9234,
+                "ok": true,
+                "status_code": 200
+              },
+              "/demo-accounts": {
+                "bytes": 12245,
+                "ok": true,
+                "status_code": 200
+              },
+              "/doctor-workbench": {
+                "bytes": 8732,
+                "ok": true,
+                "status_code": 200
+              },
+              "/executive": {
+                "bytes": 10680,
+                "ok": true,
+                "status_code": 200
+              },
+              "/executive-v9": {
+                "bytes": 10680,
+                "ok": true,
+                "status_code": 200
+              },
+              "/logistics": {
+                "bytes": 9079,
+                "ok": true,
+                "status_code": 200
+              },
+              "/patient-portal": {
+                "bytes": 8971,
+                "ok": true,
+                "status_code": 200
+              },
+              "/pilot-checklist": {
+                "bytes": 6778,
+                "ok": true,
+                "status_code": 200
+              },
+              "/reception": {
+                "bytes": 10649,
+                "ok": true,
+                "status_code": 200
+              },
+              "/workflow-demo": {
+                "bytes": 9191,
+                "ok": true,
+                "status_code": 200
+              }
+            }
+          },
+          "health_endpoints": {
+            "ok": true,
+            "routes": {
+              "/health": {
+                "ok": true,
+                "payload": {
+                  "app_env": "development",
+                  "database": "OK",
+                  "redis": "DEGRADED",
+                  "status": "OK",
+                  "timestamp": "2026-07-04T10:08:14.978387+00:00"
+                },
+                "status_code": 200
+              },
+              "/ready": {
+                "ok": true,
+                "payload": {
+                  "app_env": "development",
+                  "database": "OK",
+                  "redis": "DEGRADED",
+                  "status": "OK",
+                  "timestamp": "2026-07-04T10:08:14.979442+00:00"
+                },
+                "status_code": 200
+              }
+            }
+          },
+          "route_registry": {
+            "missing": [],
+            "ok": true,
+            "required": [
+              "/",
+              "/health",
+              "/ready",
+              "/executive",
+              "/executive-v9",
+              "/crm-pipeline",
+              "/logistics",
+              "/reception",
+              "/doctor-workbench",
+              "/doctor/dashboard",
+              "/patient-portal",
+              "/patient/demo",
+              "/demo-accounts",
+              "/workflow-demo",
+              "/pilot-checklist"
+            ]
+          },
+          "seed_data": {
+            "counts": {
+              "orders": 300,
+              "patients": 100,
+              "test_catalog": 200,
+              "users": 67
+            },
+            "ok": true
+          }
+        },
+        "exists": true,
+        "filename": "PILOT_READINESS_REPORT.json",
+        "payload": {
+          "checks": {
+            "critical_dashboards": {
+              "ok": true,
+              "routes": {
+                "/crm-pipeline": {
+                  "bytes": 9234,
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/doctor-workbench": {
+                  "bytes": 8732,
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/logistics": {
+                  "bytes": 9079,
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/patient-portal": {
+                  "bytes": 8971,
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/reception": {
+                  "bytes": 10649,
+                  "ok": true,
+                  "status_code": 200
+                }
+              }
+            },
+            "dashboard_pages": {
+              "ok": true,
+              "routes": {
+                "/": {
+                  "bytes": 3931,
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/crm-pipeline": {
+                  "bytes": 9234,
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/demo-accounts": {
+                  "bytes": 12245,
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/doctor-workbench": {
+                  "bytes": 8732,
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/executive": {
+                  "bytes": 10680,
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/executive-v9": {
+                  "bytes": 10680,
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/logistics": {
+                  "bytes": 9079,
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/patient-portal": {
+                  "bytes": 8971,
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/pilot-checklist": {
+                  "bytes": 6778,
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/reception": {
+                  "bytes": 10649,
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/workflow-demo": {
+                  "bytes": 9191,
+                  "ok": true,
+                  "status_code": 200
+                }
+              }
+            },
+            "health_endpoints": {
+              "ok": true,
+              "routes": {
+                "/health": {
+                  "ok": true,
+                  "payload": {
+                    "app_env": "development",
+                    "database": "OK",
+                    "redis": "DEGRADED",
+                    "status": "OK",
+                    "timestamp": "2026-07-04T10:08:14.978387+00:00"
+                  },
+                  "status_code": 200
+                },
+                "/ready": {
+                  "ok": true,
+                  "payload": {
+                    "app_env": "development",
+                    "database": "OK",
+                    "redis": "DEGRADED",
+                    "status": "OK",
+                    "timestamp": "2026-07-04T10:08:14.979442+00:00"
+                  },
+                  "status_code": 200
+                }
+              }
+            },
+            "route_registry": {
+              "missing": [],
+              "ok": true,
+              "required": [
+                "/",
+                "/health",
+                "/ready",
+                "/executive",
+                "/executive-v9",
+                "/crm-pipeline",
+                "/logistics",
+                "/reception",
+                "/doctor-workbench",
+                "/doctor/dashboard",
+                "/patient-portal",
+                "/patient/demo",
+                "/demo-accounts",
+                "/workflow-demo",
+                "/pilot-checklist"
+              ]
+            },
+            "seed_data": {
+              "counts": {
+                "orders": 300,
+                "patients": 100,
+                "test_catalog": 200,
+                "users": 67
+              },
+              "ok": true
+            }
+          },
+          "generated_at": "2026-07-04T10:08:15.182254+00:00",
+          "summary": {
+            "checks_passed": 5,
+            "checks_total": 5,
+            "failed_routes": [],
+            "ok": true,
+            "phase": "3A",
+            "pilot_readiness_score": 100.0,
+            "runtime_seconds": 1.226
+          }
+        },
+        "read_only": true,
+        "report": "pilot_readiness_report",
+        "summary": {
+          "checks_passed": 5,
+          "checks_total": 5,
+          "failed_routes": [],
+          "ok": true,
+          "phase": "3A",
+          "pilot_readiness_score": 100.0,
+          "runtime_seconds": 1.226
+        }
+      },
+      "roadmap_v2": {
+        "content": "# DxCon Platform Roadmap v2\n\n**Phase 5 Sprint 5.14 \u00b7 Post-pilot expansion plan**\n\nRoadmap v2 builds on Phase 3A pilot delivery and Phase 4\u20135 enterprise hubs. Priorities align with [`ENGINEERING_BACKLOG.md`](ENGINEERING_BACKLOG.md).\n\n---\n\n## Completed (Phase 5 Hubs)\n\n| Sprint | Hub | Status |\n|--------|-----|--------|\n| 5.1 | Security & Compliance | \u2705 |\n| 5.2 | Monitoring Center | \u2705 |\n| 5.3 | Backup & DR | \u2705 |\n| 5.4 | Tenant Isolation | \u2705 |\n| 5.5 | Production Deployment | \u2705 |\n| 5.6 | Pilot Status | \u2705 |\n| 5.7 | Release Management | \u2705 |\n| 5.8 | User Guides | \u2705 |\n| 5.9 | Executive Metrics | \u2705 |\n| 5.10 | AI Operations | \u2705 |\n| 5.11 | Operations Runbooks | \u2705 |\n| 5.12 | Release Control | \u2705 |\n| 5.13 | Pilot Toolkit | \u2705 |\n| 5.14 | Readiness Pack | \u2705 |\n\n---\n\n## Q3 \u2014 Production Hardening (P0)\n\n1. **Auth on logistics APIs** \u2014 JWT + role guards on collector, shipment, and QR endpoints.\n2. **Registration lockdown** \u2014 block privileged role self-registration; admin-only provisioning.\n3. **PostgreSQL production path** \u2014 migration verify, connection pooling, read replica readiness.\n4. **Secrets management** \u2014 eliminate default secrets; integrate platform secret store.\n5. **Chain-of-custody audit** \u2014 immutable sample event log with tamper detection.\n\n---\n\n## Q4 \u2014 Scale & Partner Ecosystem (P1)\n\n1. **Multi-clinic tenant GA** \u2014 billing isolation, clinic-branded portals, SLA dashboards.\n2. **Partner API GA** \u2014 rate limits, usage billing, SDK v2, certified adapter catalog.\n3. **Mobile collector v2** \u2014 offline queue, GPS proof-of-delivery, temperature IoT alerts.\n4. **CRM \u2192 order automation** \u2014 lead-to-order conversion without manual re-entry.\n5. **Observability stack** \u2014 Prometheus/Grafana dashboards wired to `/monitoring` probes.\n\n---\n\n## 2027 \u2014 Intelligence & Network (P2)\n\n1. **Clinical decision support v2** \u2014 guideline-linked interpretations with audit trail.\n2. **Predictive logistics** \u2014 dispatch optimizer with traffic and cold-chain risk scoring.\n3. **Doctor network marketplace** \u2014 referral routing, commission ledger, ranking analytics.\n4. **Patient app** \u2014 results, appointments, payments, notification preferences.\n5. **Regulatory export pack** \u2014 HIPAA/GDPR audit bundles from `/security-compliance`.\n\n---\n\n## Deferred / P3\n\n- White-label clinic themes\n- Multi-language patient reports\n- Blockchain sample attestation (evaluate vs. operational cost)\n- Legacy `orders` table deprecation and single order model migration\n\n---\n\n## Success Metrics\n\n| Milestone | Target |\n|-----------|--------|\n| Pilot readiness score | \u2265 95% |\n| Security readiness score | 100% |\n| Production deployment checks | \u2265 90% |\n| API p95 latency (staging) | < 500 ms |\n| Backup restore drill | Quarterly pass |\n\n---\n\n## References\n\n- [`GO_LIVE_RUNBOOK.md`](GO_LIVE_RUNBOOK.md)\n- [`KNOWN_LIMITATIONS.md`](KNOWN_LIMITATIONS.md)\n- [`ENGINEERING_BACKLOG.md`](ENGINEERING_BACKLOG.md)\n- Readiness reports: `/readiness-pack`\n",
+        "exists": true,
+        "filename": "ROADMAP_v2.md",
+        "path": "docs/ROADMAP_v2.md",
+        "read_only": true,
+        "report": "roadmap_v2",
+        "sections": [
+          "Completed (Phase 5 Hubs)",
+          "Q3 \u2014 Production Hardening (P0)",
+          "Q4 \u2014 Scale & Partner Ecosystem (P1)",
+          "2027 \u2014 Intelligence & Network (P2)",
+          "Deferred / P3",
+          "Success Metrics",
+          "References"
+        ],
+        "size_bytes": 2984
+      },
+      "security": {
+        "checks_count": 19,
+        "exists": true,
+        "filename": "SECURITY_READINESS_REPORT.json",
+        "payload": {
+          "checks": {
+            "api_endpoints": {
+              "ok": true,
+              "routes": {
+                "/api/v1/security-compliance/api-keys": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/api/v1/security-compliance/audit": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/api/v1/security-compliance/compliance": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/api/v1/security-compliance/dashboard": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/api/v1/security-compliance/failed-logins": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/api/v1/security-compliance/ip-whitelist": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/api/v1/security-compliance/jwt": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/api/v1/security-compliance/phi-access": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/api/v1/security-compliance/rate-limits": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/api/v1/security-compliance/rbac": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/api/v1/security-compliance/readiness": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/api/v1/security-compliance/secrets": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/api/v1/security-compliance/timeline": {
+                  "ok": true,
+                  "status_code": 200
+                }
+              }
+            },
+            "api_key_rotation": {
+              "ok": true
+            },
+            "api_key_rotation_action": {
+              "ok": true,
+              "skipped": "no active key"
+            },
+            "audit_log_viewer": {
+              "ok": true
+            },
+            "auth": {
+              "ok": true
+            },
+            "compliance_report": {
+              "ok": true
+            },
+            "existing_admin_security_preserved": {
+              "ok": true
+            },
+            "failed_login_analytics": {
+              "ok": true
+            },
+            "feature_coverage": {
+              "features": 12,
+              "ok": true
+            },
+            "ip_whitelist_framework": {
+              "ok": true
+            },
+            "jwt_audit": {
+              "ok": true
+            },
+            "legacy_audit_center_preserved": {
+              "ok": true
+            },
+            "phi_access_audit": {
+              "ok": true
+            },
+            "rate_limit_dashboard": {
+              "ok": true
+            },
+            "rbac_permission_matrix": {
+              "ok": true
+            },
+            "route_registry": {
+              "missing_api": [],
+              "missing_web": [],
+              "ok": true
+            },
+            "secret_management_audit": {
+              "ok": true
+            },
+            "security_dashboard": {
+              "ok": true,
+              "routes": {
+                "/security-compliance": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/security-compliance/api-keys": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/security-compliance/audit": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/security-compliance/compliance": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/security-compliance/failed-logins": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/security-compliance/ip-whitelist": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/security-compliance/jwt": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/security-compliance/phi-access": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/security-compliance/rate-limits": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/security-compliance/rbac": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/security-compliance/secrets": {
+                  "ok": true,
+                  "status_code": 200
+                },
+                "/security-compliance/timeline": {
+                  "ok": true,
+                  "status_code": 200
+                }
+              }
+            },
+            "security_event_timeline": {
+              "ok": true
+            }
+          },
+          "generated_at": "2026-07-04T14:34:07.623876+00:00",
+          "phase": "5.1",
+          "readiness": {
+            "compliance": {
+              "checks_passed": 8,
+              "checks_total": 8,
+              "export_history": [],
+              "generated_at": "2026-07-04T14:34:07.600665",
+              "pilot_ready": true,
+              "read_only": true,
+              "readiness_score": 100.0,
+              "report": "compliance_report",
+              "sections": {
+                "api_key_rotation": {
+                  "keys": [],
+                  "keys_needing_rotation": 0,
+                  "keys_total": 0,
+                  "report": "api_key_rotation",
+                  "rotation_policy_days": 90
+                },
+                "failed_logins": {
+                  "auth_audit_entries": 0,
+                  "failed_access_attempts": 0,
+                  "read_only": true,
+                  "recent_failures": [],
+                  "report": "failed_login_analytics",
+                  "security_events": 0,
+                  "top_source_ips": []
+                },
+                "ip_whitelist": {
+                  "enabled": false,
+                  "enforcement_mode": "monitor",
+                  "pilot_guidance": [
+                    "Set IP_WHITELIST_ENABLED=true for pilot environments.",
+                    "Provide partner CIDR blocks via IP_WHITELIST_CIDRS.",
+                    "Start in monitor mode before enforce mode."
+                  ],
+                  "read_only": true,
+                  "report": "ip_whitelist_framework",
+                  "rules": [
+                    {
+                      "cidr": "10.0.0.0/8",
+                      "enabled": true,
+                      "label": "Corporate VPN",
+                      "source": "framework_default"
+                    },
+                    {
+                      "cidr": "172.16.0.0/12",
+                      "enabled": true,
+                      "label": "Private network",
+                      "source": "framework_default"
+                    },
+                    {
+                      "cidr": "127.0.0.1/32",
+                      "enabled": true,
+                      "label": "Local development",
+                      "source": "framework_default"
+                    }
+                  ],
+                  "rules_total": 3
+                },
+                "jwt_sessions": {
+                  "notes": [
+                    "Access tokens are stateless JWTs.",
+                    "Refresh token records track session lifecycle and revocation."
+                  ],
+                  "read_only": true,
+                  "report": "jwt_audit",
+                  "sessions": [],
+                  "summary": {
+                    "active": 0,
+                    "expired": 0,
+                    "revoked": 0,
+                    "total": 0
+                  }
+                },
+                "phi_access": {
+                  "access_history": [],
+                  "audit_logs": [],
+                  "object_types_tracked": [
+                    "PATIENT",
+                    "Patient",
+                    "MedicalOrder",
+                    "LabResult",
+                    "TestResult",
+                    "ResultFile",
+                    "InterpretationResult",
+                    "Sample"
+                  ],
+                  "phi_access_entries": 0,
+                  "phi_audit_entries": 0,
+                  "read_only": true,
+                  "report": "phi_access_audit"
+                },
+                "rate_limits": {
+                  "enabled": true,
+                  "exempt_paths": [
+                    "/api/v1/system/build",
+                    "/api/v1/system/health",
+                    "/api/v1/system/live",
+                    "/api/v1/system/metrics",
+                    "/api/v1/system/ready",
+                    "/api/v1/system/version"
+                  ],
+                  "max_requests": 120,
+                  "read_only": true,
+                  "report": "rate_limit_dashboard",
+                  "security_headers": [
+                    "X-Content-Type-Options",
+                    "X-Frame-Options",
+                    "X-XSS-Protection",
+                    "Referrer-Policy",
+                    "Content-Security-Policy",
+                    "Permissions-Policy"
+                  ],
+                  "security_headers_enabled": true,
+                  "window_seconds": 60
+                },
+                "rbac_matrix": {
+                  "enterprise_roles": [
+                    {
+                      "created_at": "2026-07-04T14:34:07.524930",
+                      "id": "319fdef6-1399-431d-b894-87f2ee4313ed",
+                      "is_active": true,
+                      "name": "Enterprise Admin",
+                      "permissions": [
+                        "admin:*",
+                        "tenant:manage",
+                        "audit:read"
+                      ],
+                      "permissions_json": "[\"admin:*\", \"tenant:manage\", \"audit:read\"]",
+                      "role_code": "ROLE-ADMIN",
+                      "tenant_id": "2bf52e16-e86e-42bc-b48f-5ea799f8d247"
+                    },
+                    {
+                      "created_at": "2026-07-04T14:34:07.524935",
+                      "id": "c30c27c8-66ca-4386-91d8-07dce01ec8c6",
+                      "is_active": true,
+                      "name": "Lab Analyst",
+                      "permissions": [
+                        "lab:read",
+                        "results:write"
+                      ],
+                      "permissions_json": "[\"lab:read\", \"results:write\"]",
+                      "role_code": "ROLE-ANALYST",
+                      "tenant_id": "2bf52e16-e86e-42bc-b48f-5ea799f8d247"
+                    }
+                  ],
+                  "platform_roles": {
+                    "ACCOUNTING": [
+                      "billing.read",
+                      "billing.write",
+                      "payments.read"
+                    ],
+                    "ADMIN": [
+                      "reports.read",
+                      "security.read",
+                      "security.write",
+                      "users.read",
+                      "users.write"
+                    ],
+                    "COLLECTOR": [
+                      "collections.read",
+                      "collections.write"
+                    ],
+                    "DOCTOR": [
+                      "patients.read",
+                      "referrals.write",
+                      "results.read"
+                    ],
+                    "LAB": [
+                      "results.read",
+                      "results.write",
+                      "samples.read"
+                    ],
+                    "PATIENT": [
+                      "profile.read",
+                      "profile.write",
+                      "results.read"
+                    ],
+                    "SUPER_ADMIN": [
+                      "billing.read",
+                      "billing.write",
+                      "collections.read",
+                      "collections.write",
+                      "patients.read",
+                      "payments.read",
+                      "profile.read",
+                      "profile.write",
+                      "referrals.write",
+                      "reports.read",
+                      "results.read",
+                      "results.write",
+                      "samples.read",
+                      "security.read",
+                      "security.write",
+                      "users.read",
+                      "users.write"
+                    ]
+                  },
+                  "read_only": true,
+                  "report": "rbac_permission_matrix",
+                  "role_count": 9
+                },
+                "secret_management": {
+                  "checks": [
+                    {
+                      "id": "vault",
+                      "label": "Secrets stored with masking in admin UI",
+                      "status": "PASS"
+                    },
+                    {
+                      "id": "rotation",
+                      "label": "Secret rotation policy documented",
+                      "status": "WARN"
+                    },
+                    {
+                      "id": "env",
+                      "label": "Production secrets loaded from environment",
+                      "status": "PASS"
+                    }
+                  ],
+                  "read_only": true,
+                  "report": "secret_management_audit",
+                  "secrets": [],
+                  "secrets_total": 0
+                }
+              }
+            },
+            "features": [
+              "Security Dashboard",
+              "Secret Management Audit",
+              "API Key Rotation",
+              "JWT Audit",
+              "RBAC Permission Matrix",
+              "Audit Log Viewer",
+              "Security Event Timeline",
+              "Failed Login Analytics",
+              "IP Whitelist Framework",
+              "Rate Limit Dashboard",
+              "PHI Access Audit",
+              "Compliance Report"
+            ],
+            "generated_at": "2026-07-04T14:34:07.606494",
+            "phase": "5.1",
+            "platform": "Security & Compliance",
+            "sprint": "Security & Compliance",
+            "status": "OK",
+            "summary": {
+              "active_jwt_sessions": 0,
+              "api_keys_total": 0,
+              "audit_entries": 1,
+              "failed_login_attempts": 0,
+              "ip_whitelist_rules": 3,
+              "keys_needing_rotation": 0,
+              "phi_access_entries": 0,
+              "rate_limit_max": 120,
+              "rbac_roles": 9,
+              "readiness_score": 100.0,
+              "secrets_tracked": 0,
+              "security_events": 1
+            }
+          },
+          "sprint": "Security & Compliance",
+          "summary": {
+            "checks_passed": 19,
+            "checks_total": 19,
+            "ok": true,
+            "runtime_seconds": 1.509,
+            "score": 100.0
+          }
+        },
+        "phase": "5.1",
+        "read_only": true,
+        "report": "security_readiness_report",
+        "sprint": "Security & Compliance",
+        "summary": {
+          "checks_passed": 19,
+          "checks_total": 19,
+          "ok": true,
+          "runtime_seconds": 1.509,
+          "score": 100.0
+        }
+      },
+      "system": {
+        "checks": {
+          "application_health": {
+            "name": "application_health",
+            "ok": false,
+            "status": "DEGRADED"
+          },
+          "database_health": {
+            "name": "database_health",
+            "ok": true,
+            "status": "OK"
+          },
+          "health_probes": {
+            "name": "health_probes",
+            "ok": false,
+            "status": "OK"
+          },
+          "migration": {
+            "name": "migration",
+            "ok": true,
+            "status": "READY"
+          },
+          "redis_health": {
+            "name": "redis_health",
+            "ok": true,
+            "status": "DEGRADED"
+          },
+          "release_health": {
+            "name": "release_health",
+            "ok": true,
+            "status": "OK"
+          }
+        },
+        "generated_at": "2026-07-05T04:53:54.675302",
+        "health_probes": {
+          "compose_healthcheck": true,
+          "docker_healthcheck": true,
+          "health_probe": {
+            "path": "/api/v1/system/health",
+            "payload": {
+              "app_env": "development",
+              "database": "OK",
+              "redis": "DEGRADED",
+              "status": "OK",
+              "timestamp": "2026-07-05T04:53:54.672023+00:00"
+            },
+            "status_code": 200
+          },
+          "kubernetes_liveness": true,
+          "kubernetes_readiness": true,
+          "live_probe": {
+            "path": "/live",
+            "payload": {
+              "app_env": "development",
+              "database": "OK",
+              "redis": "DEGRADED",
+              "status": "OK",
+              "timestamp": "2026-07-05T04:53:54.671422+00:00"
+            },
+            "status_code": 200
+          },
+          "nginx_live_route": true,
+          "probe_paths": [
+            "/live",
+            "/ready",
+            "/api/v1/system/health",
+            "/api/v1/system/liveness"
+          ],
+          "read_only": true,
+          "ready_probe": {
+            "path": "/ready",
+            "payload": {
+              "app_env": "development",
+              "database": "OK",
+              "redis": "DEGRADED",
+              "status": "OK",
+              "timestamp": "2026-07-05T04:53:54.671560+00:00"
+            },
+            "status_code": 200
+          },
+          "report": "health_probes"
+        },
+        "migration": {
+          "checks": [
+            {
+              "detail": "users, patients, orders available in schema.",
+              "id": 1,
+              "status": "PASS",
+              "title": "Core tables present"
+            },
+            {
+              "detail": "alembic_version table present when migrations configured.",
+              "id": 2,
+              "status": "MANUAL",
+              "title": "Alembic tracking"
+            },
+            {
+              "detail": "STARTUP_VALIDATE_DB runs migration checks on boot.",
+              "id": 3,
+              "status": "PASS",
+              "title": "Startup validation"
+            }
+          ],
+          "checks_passed": 2,
+          "checks_total": 3,
+          "legacy_api": "GET /api/v1/system/ready",
+          "migration": {
+            "alembic_present": false,
+            "error": "Working outside of application context.\n\nThis typically means that you attempted to use functionality that needed\nthe current application. To solve this, set up an application context\nwith app.app_context(). See the documentation for more information.",
+            "missing_core_tables": [],
+            "ready": true,
+            "table_count": 304
+          },
+          "missing_core_tables": [],
+          "read_only": true,
+          "report": "migration_status",
+          "status": "READY",
+          "table_count": 304
+        },
+        "phase": "5.14",
+        "read_only": true,
+        "report": "system_readiness_report",
+        "seeded_summary": {
+          "orders": 0,
+          "patients": 0,
+          "test_catalog": 0,
+          "users": 0
+        },
+        "sprint": "Readiness Pack",
+        "stored_report_available": true,
+        "stored_report_generated_at": "2026-07-05T04:53:54.486700",
+        "stored_summary": {
+          "checks_passed": 4,
+          "checks_total": 6,
+          "database": "OK",
+          "ok": false,
+          "redis": "DEGRADED",
+          "score": 66.7,
+          "system_status": "OK"
+        },
+        "summary": {
+          "checks_passed": 4,
+          "checks_total": 6,
+          "database": "OK",
+          "ok": false,
+          "redis": "DEGRADED",
+          "score": 66.7,
+          "system_status": "OK"
+        }
+      }
+    },
+    "sprint": "Readiness Pack",
+    "status": "WARN",
+    "summary": {
+      "artifacts_present": 6,
+      "artifacts_total": 6,
+      "checklist_remaining": 11,
+      "missing_count": 0,
+      "pilot_score": 100.0,
+      "security_score": 100.0,
+      "system_score": 66.7
+    }
+  }
+}

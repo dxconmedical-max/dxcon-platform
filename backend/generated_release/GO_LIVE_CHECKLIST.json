@@ -1,0 +1,62 @@
+{
+  "generated_at": "2026-07-05T04:53:54.489268",
+  "phase": "5.14",
+  "sprint": "Readiness Pack",
+  "summary": {
+    "items_total": 11,
+    "items_checked": 0,
+    "items_remaining": 11,
+    "ok": false
+  },
+  "items": [
+    {
+      "item": "health_check.py",
+      "checked": false
+    },
+    {
+      "item": "check_db.py",
+      "checked": false
+    },
+    {
+      "item": "check_production.py",
+      "checked": false
+    },
+    {
+      "item": "git status clean",
+      "checked": false
+    },
+    {
+      "item": "git push main",
+      "checked": false
+    },
+    {
+      "item": "Render deploy success",
+      "checked": false
+    },
+    {
+      "item": "/monitor OK",
+      "checked": false
+    },
+    {
+      "item": "/audit OK",
+      "checked": false
+    },
+    {
+      "item": "/security OK",
+      "checked": false
+    },
+    {
+      "item": "/finance OK",
+      "checked": false
+    },
+    {
+      "item": "/executive-v9 OK",
+      "checked": false
+    }
+  ],
+  "verify_scripts": [
+    "backend/scripts/verify_production_deployment.py",
+    "backend/scripts/verify_staging_stack.py",
+    "deployment/pipeline/verify_deployment.py"
+  ]
+}

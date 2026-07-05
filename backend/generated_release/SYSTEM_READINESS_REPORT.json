@@ -1,0 +1,150 @@
+{
+  "report": "system_readiness_report",
+  "read_only": true,
+  "generated_at": "2026-07-05T04:53:54.486700",
+  "phase": "5.14",
+  "sprint": "Readiness Pack",
+  "summary": {
+    "score": 66.7,
+    "checks_passed": 4,
+    "checks_total": 6,
+    "ok": false,
+    "system_status": "OK",
+    "database": "OK",
+    "redis": "DEGRADED"
+  },
+  "checks": {
+    "application_health": {
+      "name": "application_health",
+      "status": "DEGRADED",
+      "ok": false
+    },
+    "database_health": {
+      "name": "database_health",
+      "status": "OK",
+      "ok": true
+    },
+    "redis_health": {
+      "name": "redis_health",
+      "status": "DEGRADED",
+      "ok": true
+    },
+    "release_health": {
+      "name": "release_health",
+      "status": "OK",
+      "ok": true
+    },
+    "migration": {
+      "name": "migration",
+      "status": "READY",
+      "ok": true
+    },
+    "health_probes": {
+      "name": "health_probes",
+      "status": "OK",
+      "ok": false
+    }
+  },
+  "seeded_summary": {
+    "users": 0,
+    "patients": 0,
+    "test_catalog": 0,
+    "orders": 0
+  },
+  "health_probes": {
+    "report": "health_probes",
+    "read_only": true,
+    "probe_paths": [
+      "/live",
+      "/ready",
+      "/api/v1/system/health",
+      "/api/v1/system/liveness"
+    ],
+    "live_probe": {
+      "path": "/live",
+      "status_code": 200,
+      "payload": {
+        "app_env": "development",
+        "database": "OK",
+        "redis": "DEGRADED",
+        "timestamp": "2026-07-05T04:53:54.435820+00:00",
+        "status": "OK"
+      }
+    },
+    "ready_probe": {
+      "path": "/ready",
+      "status_code": 200,
+      "payload": {
+        "app_env": "development",
+        "database": "OK",
+        "redis": "DEGRADED",
+        "timestamp": "2026-07-05T04:53:54.435949+00:00",
+        "status": "OK"
+      }
+    },
+    "health_probe": {
+      "path": "/api/v1/system/health",
+      "status_code": 200,
+      "payload": {
+        "app_env": "development",
+        "database": "OK",
+        "redis": "DEGRADED",
+        "timestamp": "2026-07-05T04:53:54.436473+00:00",
+        "status": "OK"
+      }
+    },
+    "docker_healthcheck": true,
+    "compose_healthcheck": true,
+    "kubernetes_readiness": true,
+    "kubernetes_liveness": true,
+    "nginx_live_route": true
+  },
+  "migration": {
+    "report": "migration_status",
+    "read_only": true,
+    "status": "READY",
+    "migration": {
+      "ready": true,
+      "error": "Working outside of application context.\n\nThis typically means that you attempted to use functionality that needed\nthe current application. To solve this, set up an application context\nwith app.app_context(). See the documentation for more information.",
+      "alembic_present": false,
+      "table_count": 304,
+      "missing_core_tables": []
+    },
+    "table_count": 304,
+    "missing_core_tables": [],
+    "checks": [
+      {
+        "id": 1,
+        "title": "Core tables present",
+        "detail": "users, patients, orders available in schema.",
+        "status": "PASS"
+      },
+      {
+        "id": 2,
+        "title": "Alembic tracking",
+        "detail": "alembic_version table present when migrations configured.",
+        "status": "MANUAL"
+      },
+      {
+        "id": 3,
+        "title": "Startup validation",
+        "detail": "STARTUP_VALIDATE_DB runs migration checks on boot.",
+        "status": "PASS"
+      }
+    ],
+    "checks_passed": 2,
+    "checks_total": 3,
+    "legacy_api": "GET /api/v1/system/ready"
+  },
+  "stored_report_available": true,
+  "stored_report_generated_at": "2026-07-05T04:51:27.021473",
+  "stored_summary": {
+    "score": 66.7,
+    "checks_passed": 4,
+    "checks_total": 6,
+    "ok": false,
+    "system_status": "OK",
+    "database": "OK",
+    "redis": "DEGRADED"
+  }
+}
