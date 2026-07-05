@@ -1,0 +1,326 @@
+{
+  "generated_at": "2026-07-05T04:53:44.599983+00:00",
+  "phase": "5.9",
+  "sprint": "Executive Metrics",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 18,
+    "checks_total": 18,
+    "ok": true,
+    "runtime_seconds": 1.996
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "executive_metrics_dashboard": {
+      "ok": true,
+      "routes": {
+        "/executive-metrics": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/executive-metrics/revenue": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/executive-metrics/tat": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/executive-metrics/orders": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/executive-metrics/growth": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/executive-metrics/lab-sla": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/executive-metrics/collector-sla": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/executive-metrics/clinic-ranking": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/executive-metrics/doctor-ranking": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/executive-metrics/revenue-forecast": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/executive-metrics/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/executive-metrics/revenue": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/executive-metrics/tat": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/executive-metrics/orders": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/executive-metrics/growth": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/executive-metrics/lab-sla": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/executive-metrics/collector-sla": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/executive-metrics/clinic-ranking": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/executive-metrics/doctor-ranking": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/executive-metrics/revenue-forecast": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/executive-metrics/readiness": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 9
+    },
+    "revenue": {
+      "ok": true
+    },
+    "tat": {
+      "ok": true
+    },
+    "orders": {
+      "ok": true
+    },
+    "growth": {
+      "ok": true
+    },
+    "lab_sla": {
+      "ok": true
+    },
+    "collector_sla": {
+      "ok": true
+    },
+    "clinic_ranking": {
+      "ok": true
+    },
+    "doctor_ranking": {
+      "ok": true
+    },
+    "revenue_forecast": {
+      "ok": true
+    },
+    "legacy_enterprise_analytics_preserved": {
+      "ok": true
+    },
+    "legacy_executive_v9_preserved": {
+      "ok": true
+    },
+    "legacy_enterprise_analytics_api_preserved": {
+      "ok": true
+    },
+    "legacy_dashboard_summary_preserved": {
+      "ok": true
+    }
+  },
+  "readiness": {
+    "features": [
+      "Revenue",
+      "TAT",
+      "Orders",
+      "Growth",
+      "Lab SLA",
+      "Collector SLA",
+      "Clinic Ranking",
+      "Doctor Ranking",
+      "Revenue Forecast"
+    ],
+    "generated_at": "2026-07-05T04:53:44.628984",
+    "legacy_routes": [
+      "/enterprise-analytics",
+      "/executive-v9",
+      "/api/v1/enterprise-analytics/dashboard",
+      "/api/v1/dashboard/summary"
+    ],
+    "phase": "5.9",
+    "platform": "Executive Metrics",
+    "sections": {
+      "clinic_ranking": {
+        "clinics_ranked": 0,
+        "period_end": "2026-07-05T04:53:44.641397",
+        "period_start": "2026-06-05T04:53:44.641397",
+        "rankings": [],
+        "read_only": true,
+        "report": "clinic_ranking"
+      },
+      "collector_sla": {
+        "active_collectors": 0,
+        "collectors": [],
+        "collectors_sla_compliant": 0,
+        "collectors_total": 0,
+        "period_end": "2026-07-05T04:53:44.640505",
+        "period_start": "2026-06-05T04:53:44.640505",
+        "read_only": true,
+        "report": "collector_sla_metrics",
+        "sla_threshold_percent": 90.0
+      },
+      "doctor_ranking": {
+        "doctors_ranked": 0,
+        "period_end": "2026-07-05T04:53:44.642111",
+        "period_start": "2026-06-05T04:53:44.642111",
+        "rankings": [],
+        "read_only": true,
+        "report": "doctor_ranking"
+      },
+      "growth": {
+        "current_period": {
+          "end": "2026-07-05T04:53:44.635373",
+          "gross_revenue": 0.0,
+          "orders_total": 0,
+          "start": "2026-06-05T04:53:44.635373"
+        },
+        "growth": {
+          "orders_delta": 0,
+          "orders_percent": 0.0,
+          "revenue_delta": 0.0,
+          "revenue_percent": 0.0
+        },
+        "previous_period": {
+          "end": "2026-06-05T04:53:43.635373",
+          "gross_revenue": 0.0,
+          "orders_total": 0,
+          "start": "2026-05-06T04:53:43.635373"
+        },
+        "read_only": true,
+        "report": "growth_metrics"
+      },
+      "lab_sla": {
+        "current_ops": {
+          "average_tat_minutes": 0,
+          "critical_results_open": 0,
+          "pending_samples": 0,
+          "sla_compliance_percent": 0
+        },
+        "period_end": "2026-07-05T04:53:44.638381",
+        "period_start": "2026-06-05T04:53:44.638381",
+        "period_summary": {
+          "accessions_completed": 0,
+          "average_tat_minutes": 0,
+          "sla_breaches": 0,
+          "sla_compliance_percent": 0
+        },
+        "read_only": true,
+        "report": "lab_sla_metrics"
+      },
+      "orders": {
+        "by_status": {},
+        "completed_orders": 0,
+        "orders_total": 0,
+        "pending_orders": 0,
+        "period_end": "2026-07-05T04:53:44.634465",
+        "period_start": "2026-06-05T04:53:44.634465",
+        "read_only": true,
+        "report": "orders_metrics"
+      },
+      "revenue": {
+        "gross_revenue": 0,
+        "invoices_paid": 0,
+        "invoices_refunded": 0,
+        "invoices_total": 0,
+        "payment_total": 0,
+        "period_end": "2026-07-05T04:53:44.628989",
+        "period_start": "2026-06-05T04:53:44.628989",
+        "read_only": true,
+        "report": "revenue_metrics",
+        "top_partners_by_revenue": []
+      },
+      "revenue_forecast": {
+        "forecast": {
+          "combined_estimate": 0.0,
+          "monthly_sales_won": 0.0,
+          "pipeline_opportunities": 0.0,
+          "trend_projection_30d": 0.0
+        },
+        "historical": {
+          "daily_average": 0.0,
+          "gross_revenue": 0.0,
+          "invoices_paid": 0
+        },
+        "methodology": "CRM pipeline plus trailing revenue run-rate",
+        "period_end": "2026-07-05T04:53:44.642627",
+        "period_start": "2026-06-05T04:53:44.642627",
+        "read_only": true,
+        "report": "revenue_forecast"
+      },
+      "tat": {
+        "average_tat_hours": 24.0,
+        "kpi_metrics": {
+          "AI_INTERPRETATION": 0.0,
+          "COLLECTOR_UTILIZATION": 0.0,
+          "CRITICAL_RESULTS": 0.0,
+          "DOCTOR_REVIEW_TIME": 15,
+          "ORDERS": 0,
+          "REVENUE": 0.0,
+          "SAMPLES": 0,
+          "SLA": 0.0,
+          "TAT": 24.0,
+          "TESTS": 0,
+          "TRANSPORT_TIME": 45.0,
+          "pending_reviews": 0
+        },
+        "lab_accession_tat_minutes": 0,
+        "period_end": "2026-07-05T04:53:44.629619",
+        "period_start": "2026-06-05T04:53:44.629619",
+        "read_only": true,
+        "report": "tat_metrics",
+        "results_released": 0
+      }
+    },
+    "sprint": "Executive Metrics",
+    "status": "OK",
+    "summary": {
+      "clinics_ranked": 0,
+      "collector_sla_compliant": 0,
+      "doctors_ranked": 0,
+      "gross_revenue": 0,
+      "lab_sla_compliance_percent": 0,
+      "orders_growth_percent": 0.0,
+      "orders_total": 0,
+      "revenue_forecast_estimate": 0.0,
+      "revenue_growth_percent": 0.0
+    }
+  }
+}
