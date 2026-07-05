@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-07-05T05:52:27.238488+00:00",
+  "phase": "9",
+  "sprint": "Regional Cloud Platform",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 12,
+    "checks_total": 12,
+    "ok": true,
+    "runtime_seconds": 2.552
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "architecture_docs": {
+      "ok": true,
+      "paths": [
+        "docs/architecture/REGIONAL_ARCHITECTURE.md",
+        "docs/architecture/DEPLOYMENT_ARCHITECTURE.md",
+        "docs/COMPLIANCE_GUIDE.md"
+      ]
+    },
+    "auth": {
+      "ok": true
+    },
+    "web_pages": {
+      "ok": true
+    },
+    "api_endpoints": {
+      "ok": true
+    },
+    "feature_coverage": {
+      "ok": true
+    },
+    "governance": {
+      "ok": true
+    },
+    "legacy_production": {
+      "ok": true
+    },
+    "legacy_federation": {
+      "ok": true
+    },
+    "legacy_backup": {
+      "ok": true
+    },
+    "readiness_report": {
+      "ok": true
+    },
+    "deployment_report": {
+      "ok": true
+    }
+  }
+}

@@ -1,0 +1,290 @@
+{
+  "generated_at": "2026-07-05T05:52:27.237642",
+  "phase": "9",
+  "platform": "Regional Cloud Platform",
+  "governance": {
+    "backward_compatible": true,
+    "destructive_migrations": false,
+    "postgresql_only": true,
+    "multi_region_ready": true,
+    "data_residency_aware": true
+  },
+  "deployment": {
+    "report": "regional_deployment",
+    "regions": [
+      {
+        "code": "VN",
+        "name": "Vietnam",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "currency": "VND",
+        "locale": "vi-VN"
+      },
+      {
+        "code": "US",
+        "name": "United States",
+        "timezone": "America/New_York",
+        "currency": "USD",
+        "locale": "en-US"
+      },
+      {
+        "code": "EU",
+        "name": "European Union",
+        "timezone": "Europe/Berlin",
+        "currency": "EUR",
+        "locale": "en-GB"
+      },
+      {
+        "code": "SG",
+        "name": "Singapore",
+        "timezone": "Asia/Singapore",
+        "currency": "SGD",
+        "locale": "en-SG"
+      }
+    ],
+    "docker_profile": {
+      "dockerfile_exists": true,
+      "compose_exists": true,
+      "non_root_user": true,
+      "healthcheck": true,
+      "production_start": true,
+      "app_env_production": true,
+      "stop_grace_period": true,
+      "resource_limits": true,
+      "services_complete": true
+    },
+    "infrastructure_ready": true,
+    "legacy_route": "/production-deployment",
+    "assets": {
+      "dockerfile": true,
+      "docker_compose_production": true,
+      "docker_compose_staging": true,
+      "production_start": true,
+      "gunicorn_conf": true,
+      "nginx_conf": true,
+      "nginx_default": true,
+      "k8s_deployment": true,
+      "deploy_pipeline": true,
+      "rollback_pipeline": true,
+      "deployment_guide": true,
+      "release_checklist": true
+    }
+  },
+  "cloud_abstraction": {
+    "report": "cloud_abstraction_layer",
+    "providers": [
+      "aws",
+      "azure",
+      "gcp",
+      "render",
+      "on_prem"
+    ],
+    "runtime_profile": "development",
+    "deployment_score": 85
+  },
+  "backup": {
+    "report": "multi_region_backup",
+    "scheduler": {
+      "report": "backup_scheduler",
+      "read_only": true,
+      "scheduled_jobs": [
+        {
+          "id": "b2a22249-42cd-45b9-8a1b-f80220468b30",
+          "job_code": "OPS-BACKUP-NIGHTLY",
+          "name": "Nightly Database Backup",
+          "handler": "backup.database",
+          "cron_expression": "0 2 * * *",
+          "status": "ENABLED",
+          "timeout_seconds": 300,
+          "max_retries": 3,
+          "config_json": "{}",
+          "created_at": "2026-07-05T05:52:26.963988"
+        }
+      ],
+      "default_jobs": [
+        {
+          "job_code": "OPS-BACKUP-NIGHTLY",
+          "name": "Nightly Database Backup",
+          "handler": "backup.database",
+          "cron_expression": "0 2 * * *"
+        }
+      ],
+      "handlers": [
+        "backup.database"
+      ],
+      "backup_types": [
+        "DATABASE",
+        "STORAGE",
+        "FULL"
+      ],
+      "recommended_cron": "0 2 * * *",
+      "api_trigger": "POST /api/v1/operations/backups/run"
+    },
+    "regions": [
+      "primary",
+      "dr_secondary"
+    ],
+    "legacy_route": "/backup-recovery"
+  },
+  "disaster_recovery": {
+    "report": "disaster_recovery",
+    "runbook": {
+      "report": "disaster_recovery_runbook",
+      "read_only": true,
+      "objectives": {
+        "production_api": {
+          "rto_hours": 4,
+          "rpo_hours": 1
+        },
+        "file_storage": {
+          "rto_hours": 8,
+          "rpo_hours": 4
+        }
+      },
+      "scenarios": [
+        {
+          "id": "database_loss",
+          "title": "Database loss",
+          "steps": [
+            "Fail over to standby or restore from latest backup.",
+            "Follow docs/RESTORE.md.",
+            "Validate core tables: users, patients, orders."
+          ],
+          "links": [
+            "/backup-recovery/restore",
+            "/api/v1/operations/backups"
+          ]
+        },
+        {
+          "id": "region_loss",
+          "title": "Region / cluster loss",
+          "steps": [
+            "Provision standby stack from deployment/ manifests.",
+            "Restore PostgreSQL and object storage.",
+            "Update DNS/ingress and run Enterprise sign-off verification."
+          ],
+          "links": [
+            "/backup-recovery/pitr",
+            "/monitoring"
+          ]
+        },
+        {
+          "id": "app_regression",
+          "title": "Application regression",
+          "steps": [
+            "GET /api/v1/operations/deployment/rollback-plan",
+            "Redeploy prior container tag (BUILD_VERSION).",
+            "Confirm smoke and security preflight pass."
+          ],
+          "links": [
+            "/operations/deployment",
+            "/security-compliance"
+          ]
+        }
+      ],
+      "communication": [
+        "Page on-call via Alertmanager.",
+        "Record incident in operations audit trail."
+      ],
+      "docs_available": {
+        "backup": true,
+        "disaster_recovery": true,
+        "restore": true
+      },
+      "deployment_scripts": {
+        "backup_postgres": true,
+        "restore_dry_run": true,
+        "backup_uploads": true
+      },
+      "verification_script": "backend/scripts/verify_backup_recovery.py"
+    },
+    "rto_target_minutes": 60,
+    "rpo_target_minutes": 15,
+    "legacy_route": "/backup-recovery"
+  },
+  "providers": [
+    {
+      "id": "aws",
+      "name": "AWS",
+      "services": [
+        "RDS",
+        "S3",
+        "EKS",
+        "CloudWatch"
+      ],
+      "status": "READY"
+    },
+    {
+      "id": "azure",
+      "name": "Azure",
+      "services": [
+        "PostgreSQL",
+        "Blob",
+        "AKS",
+        "Monitor"
+      ],
+      "status": "READY"
+    },
+    {
+      "id": "gcp",
+      "name": "Google Cloud",
+      "services": [
+        "Cloud SQL",
+        "GCS",
+        "GKE",
+        "Operations"
+      ],
+      "status": "READY"
+    },
+    {
+      "id": "render",
+      "name": "Render",
+      "services": [
+        "Web Service",
+        "PostgreSQL",
+        "Redis"
+      ],
+      "status": "READY"
+    },
+    {
+      "id": "on_prem",
+      "name": "On-premise",
+      "services": [
+        "Docker",
+        "Kubernetes",
+        "Bare metal"
+      ],
+      "status": "READY"
+    }
+  ],
+  "regions": [
+    {
+      "code": "VN",
+      "name": "Vietnam",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "currency": "VND",
+      "locale": "vi-VN"
+    },
+    {
+      "code": "US",
+      "name": "United States",
+      "timezone": "America/New_York",
+      "currency": "USD",
+      "locale": "en-US"
+    },
+    {
+      "code": "EU",
+      "name": "European Union",
+      "timezone": "Europe/Berlin",
+      "currency": "EUR",
+      "locale": "en-GB"
+    },
+    {
+      "code": "SG",
+      "name": "Singapore",
+      "timezone": "Asia/Singapore",
+      "currency": "SGD",
+      "locale": "en-SG"
+    }
+  ],
+  "readiness_score": 100
+}
