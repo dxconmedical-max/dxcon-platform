@@ -698,6 +698,17 @@ a {
   color: #64748b;
 }
 
+.launch-inline-form {
+  display: inline-block;
+  margin: 4px 8px 4px 0;
+}
+
+.launch-inline-form .launch-field {
+  max-width: 140px;
+  display: inline-block;
+  margin-right: 6px;
+}
+
 @media (max-width: 900px) {
   .launch-shell {
     grid-template-columns: 1fr;

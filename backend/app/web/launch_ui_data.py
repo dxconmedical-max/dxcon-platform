@@ -171,22 +171,38 @@ def get_recent_patients(limit: int = 10) -> list[dict[str, Any]]:
 
 
 def get_recent_orders(limit: int = 10) -> list[dict[str, Any]]:
+    from app.models.biz_order import BizOrder
     from app.models.order import Order
 
     def fetch():
         rows = []
-        for order in Order.query.order_by(Order.created_at.desc()).limit(limit).all():
+        for order in BizOrder.query.order_by(BizOrder.created_at.desc()).limit(limit).all():
             rows.append(
                 {
                     "id": order.id,
                     "order_code": order.order_code,
-                    "patient_id": order.patient_id,
-                    "patient_name": _patient_name(order.patient_id),
-                    "status": order.status or "PENDING",
+                    "patient_id": order.patient_code,
+                    "patient_name": order.patient_name,
+                    "status": order.status or "draft",
                     "total_amount": order.total_amount or 0,
                     "created_at": order.created_at.strftime("%Y-%m-%d %H:%M") if order.created_at else "—",
+                    "source": "business",
                 }
             )
+        if len(rows) < limit:
+            for order in Order.query.order_by(Order.created_at.desc()).limit(limit - len(rows)).all():
+                rows.append(
+                    {
+                        "id": order.id,
+                        "order_code": order.order_code,
+                        "patient_id": order.patient_id,
+                        "patient_name": _patient_name(order.patient_id),
+                        "status": order.status or "PENDING",
+                        "total_amount": order.total_amount or 0,
+                        "created_at": order.created_at.strftime("%Y-%m-%d %H:%M") if order.created_at else "—",
+                        "source": "legacy",
+                    }
+                )
         return rows
 
     return _safe(fetch, list(_FALLBACK_ORDERS))
@@ -194,15 +210,33 @@ def get_recent_orders(limit: int = 10) -> list[dict[str, Any]]:
 
 def get_recent_tests(limit: int = 10) -> list[dict[str, Any]]:
     from app.models.diagnostic_service import DiagnosticService
+    from app.models.test_catalog import TestCatalog
 
     def fetch():
         rows = []
+        for catalog in TestCatalog.query.limit(limit).all():
+            rows.append(
+                {
+                    "id": catalog.id,
+                    "service_code": catalog.code,
+                    "code": catalog.code,
+                    "name": catalog.name,
+                    "sample_type": catalog.sample_type or "Blood",
+                    "price": catalog.price or 0,
+                    "turnaround_hours": 24,
+                }
+            )
+        if rows:
+            return rows
         for svc in DiagnosticService.query.filter_by(is_active=True).limit(limit).all():
             rows.append(
                 {
+                    "id": svc.id,
                     "service_code": svc.service_code,
+                    "code": svc.service_code,
                     "name": svc.name,
                     "sample_type": svc.sample_type or "Blood",
+                    "price": 0,
                     "turnaround_hours": svc.estimated_turnaround_hours or 24,
                 }
             )
@@ -211,19 +245,23 @@ def get_recent_tests(limit: int = 10) -> list[dict[str, Any]]:
     return _safe(
         fetch,
         [
-            {"service_code": "CBC", "name": "Complete Blood Count", "sample_type": "Blood", "turnaround_hours": 4},
-            {"service_code": "GLU", "name": "Glucose", "sample_type": "Blood", "turnaround_hours": 2},
-            {"service_code": "LIPID", "name": "Lipid Panel", "sample_type": "Blood", "turnaround_hours": 6},
+            {"id": "demo-cbc", "service_code": "CBC", "code": "CBC", "name": "Complete Blood Count", "sample_type": "Blood", "price": 150000, "turnaround_hours": 4},
+            {"id": "demo-glu", "service_code": "GLU", "code": "GLU", "name": "Glucose", "sample_type": "Blood", "price": 80000, "turnaround_hours": 2},
+            {"id": "demo-lipid", "service_code": "LIPID", "code": "LIPID", "name": "Lipid Panel", "sample_type": "Blood", "price": 220000, "turnaround_hours": 6},
         ],
     )
 
 
 def get_recent_reports(limit: int = 10) -> list[dict[str, Any]]:
+    from app.business_engine import service as biz
     from app.models.order_item import OrderItem
     from app.models.order import Order
     from app.models.test_result import TestResult
 
     def fetch():
+        biz_rows = biz.list_reports(limit)
+        if biz_rows:
+            return biz_rows
         rows = []
         for result in TestResult.query.order_by(TestResult.created_at.desc()).limit(limit).all():
             patient_name = "Demo Patient"
@@ -252,9 +290,22 @@ def get_recent_reports(limit: int = 10) -> list[dict[str, Any]]:
 
 
 def get_recent_collections(limit: int = 10) -> list[dict[str, Any]]:
+    from app.business_engine import service as biz
     from app.models.sample_tracking import SampleTracking
 
     def fetch():
+        biz_rows = biz.list_collections(limit)
+        if biz_rows:
+            return [
+                {
+                    "job_code": row.get("sample_code") or row.get("order_code"),
+                    "patient_name": row.get("patient_name", "Patient"),
+                    "address": row.get("pickup_address", "—"),
+                    "status": row.get("status", "assigned").upper(),
+                    "eta": "45m",
+                }
+                for row in biz_rows
+            ]
         rows = []
         for sample in SampleTracking.query.order_by(SampleTracking.updated_at.desc()).limit(limit).all():
             rows.append(
@@ -272,10 +323,17 @@ def get_recent_collections(limit: int = 10) -> list[dict[str, Any]]:
 
 
 def get_finance_summary() -> dict[str, Any]:
+    from app.business_engine import service as biz
     from app.models.invoice import Invoice
     from app.models.payment import Payment
 
     def fetch():
+        biz_summary = biz.finance_summary()
+        if biz_summary.get("invoice_total", 0) > 0:
+            return {
+                **biz_summary,
+                "payment_methods": ["cash", "card", "bank_transfer"],
+            }
         invoices = Invoice.query.limit(500).all()
         payments = Payment.query.limit(500).all()
         paid = sum(1 for inv in invoices if (inv.payment_status or "").upper() in {"PAID", "SETTLED"})
@@ -357,23 +415,14 @@ def get_sample_report_key() -> str:
 
 
 def get_patient_detail(patient_key: str) -> dict[str, Any]:
+    from app.business_engine import service as biz
     from app.models.patient import Patient
 
     def fetch():
         patient = Patient.query.filter_by(patient_code=patient_key).first()
         if not patient:
             return None
-        orders = get_recent_orders(20)
-        patient_orders = [o for o in orders if o.get("patient_id") == patient_key]
-        return {
-            "patient_code": patient.patient_code,
-            "full_name": patient.full_name,
-            "phone": patient.phone or "—",
-            "gender": patient.gender or "—",
-            "email": patient.email or "—",
-            "address": patient.address or "—",
-            "orders": patient_orders[:5],
-        }
+        return biz.patient_to_detail(patient)
 
     fallback = next((p for p in _FALLBACK_PATIENTS if p["patient_code"] == patient_key), _FALLBACK_PATIENTS[0])
     result = _safe(fetch, None)
@@ -386,9 +435,15 @@ def get_patient_detail(patient_key: str) -> dict[str, Any]:
 
 
 def get_order_detail(order_key: str) -> dict[str, Any]:
+    from app.business_engine import service as biz
+    from app.business_engine.service import BusinessEngineError
     from app.models.order import Order
 
     def fetch():
+        try:
+            return biz.order_to_detail(order_key)
+        except BusinessEngineError:
+            pass
         order = Order.query.filter(
             (Order.order_code == order_key) | (Order.id == order_key)
         ).first()
@@ -408,6 +463,7 @@ def get_order_detail(order_key: str) -> dict[str, Any]:
                 ("In lab", "—"),
                 ("Report", "Pending"),
             ],
+            "source": "legacy",
         }
 
     fallback = next((o for o in _FALLBACK_ORDERS if o["order_code"] == order_key), _FALLBACK_ORDERS[0])
@@ -426,9 +482,15 @@ def get_order_detail(order_key: str) -> dict[str, Any]:
 
 
 def get_report_detail(report_key: str) -> dict[str, Any]:
+    from app.business_engine import service as biz
+    from app.business_engine.service import BusinessEngineError
     from app.models.test_result import TestResult
 
     def fetch():
+        try:
+            return biz.result_to_detail(report_key)
+        except BusinessEngineError:
+            pass
         result = TestResult.query.filter_by(id=report_key).first()
         if not result:
             return None
@@ -473,9 +535,13 @@ def get_recent_samples(limit: int = 10) -> list[dict[str, Any]]:
 
 
 def get_recent_invoices(limit: int = 10) -> list[dict[str, Any]]:
+    from app.business_engine import service as biz
     from app.models.invoice import Invoice
 
     def fetch():
+        biz_rows = biz.list_invoices(limit)
+        if biz_rows:
+            return biz_rows
         rows = []
         for invoice in Invoice.query.order_by(Invoice.created_at.desc()).limit(limit).all():
             rows.append(

@@ -1,0 +1,49 @@
+{
+  "sprint": "Production Business Engine Sprint 1",
+  "generated_at": "2026-07-05T08:37:32.211836+00:00",
+  "elapsed_seconds": 0.66,
+  "checks": {
+    "create_patient": {
+      "ok": true,
+      "patient_code": "P-20260705083732-EED367"
+    },
+    "create_order": {
+      "ok": true,
+      "order_code": "ORD-20260705083732-9A9019",
+      "item_count": 1
+    },
+    "mark_paid": {
+      "ok": true,
+      "receipt": "RCT-20260705083732-4EE719"
+    },
+    "create_collection": {
+      "ok": true,
+      "sample_code": "SMP-20260705083732-2D9A85"
+    },
+    "enter_results": {
+      "ok": true,
+      "result_code": "RPT-20260705083732-F21DA8"
+    },
+    "release_report": {
+      "ok": true,
+      "result_code": "RPT-20260705083732-F21DA8"
+    },
+    "final_status_released": {
+      "ok": true,
+      "status": "released"
+    },
+    "audit_logs": {
+      "ok": true,
+      "total": 22,
+      "order_audits": 12
+    }
+  },
+  "summary": {
+    "passed": 8,
+    "total": 8,
+    "ok": true
+  },
+  "sample_order_code": "ORD-20260705083732-9A9019",
+  "sample_patient_code": "P-20260705083732-EED367",
+  "sample_result_code": "RPT-20260705083732-F21DA8"
+}

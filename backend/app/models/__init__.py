@@ -7,6 +7,17 @@ from app.models.laboratory import Laboratory
 
 from app.models.test_catalog import TestCatalog
 
+from app.models.biz_order import (
+    BizCollection,
+    BizInvoice,
+    BizOrder,
+    BizOrderItem,
+    BizPayment,
+    BizResult,
+    BizResultItem,
+    BizWorkflowAudit,
+)
+
 from app.models.order import Order
 
 from app.models.order_item import OrderItem

@@ -261,6 +261,60 @@ def demo_form_card(title: str, fields: list[tuple[str, str]], save_href: str, ca
     )
 
 
+def real_form_card(
+    title: str,
+    action: str,
+    fields: list[tuple[str, str, str]],
+    *,
+    cancel_href: str,
+    submit_label: str = "Save",
+    method: str = "POST",
+) -> str:
+    """Editable form: (name, label, value). Checkbox fields use name test_catalog_id."""
+    inputs = []
+    for name, label, value in fields:
+        if name == "test_catalog_id":
+            inputs.append(
+                f'<label class="launch-form-label"><input type="checkbox" name="test_catalog_id" '
+                f'value="{html.escape(value)}" checked> {html.escape(label)}</label>'
+            )
+        elif name == "note":
+            inputs.append(
+                f'<label class="launch-form-label">{html.escape(label)}</label>'
+                f'<textarea class="launch-field" name="{html.escape(name)}">{html.escape(value)}</textarea>'
+            )
+        else:
+            inputs.append(
+                f'<label class="launch-form-label">{html.escape(label)}</label>'
+                f'<input class="launch-field" name="{html.escape(name)}" value="{html.escape(value)}">'
+            )
+    return (
+        f'<div class="launch-card"><h3>{html.escape(title)}</h3>'
+        f'<form method="{html.escape(method)}" action="{html.escape(action)}">{"".join(inputs)}'
+        f'<div class="launch-footer-actions">'
+        f'<button type="submit" class="launch-btn">{html.escape(submit_label)}</button>'
+        f'<a class="launch-btn-outline" href="{html.escape(cancel_href)}">Cancel</a>'
+        f"</div></form></div>"
+    )
+
+
+def workflow_action_form(action: str, order_ref: str, label: str, fields: list[tuple[str, str, str]] | None = None) -> str:
+    hidden = f'<input type="hidden" name="return_to" value="/app/orders/{html.escape(order_ref)}">'
+    field_html = ""
+    if fields:
+        for name, lbl, val in fields:
+            field_html += (
+                f'<label class="launch-form-label">{html.escape(lbl)}</label>'
+                f'<input class="launch-field" name="{html.escape(name)}" value="{html.escape(val)}">'
+            )
+    return (
+        f'<form method="POST" action="{html.escape(action)}" class="launch-inline-form">'
+        f"{hidden}{field_html}"
+        f'<button type="submit" class="launch-btn launch-btn-sm">{html.escape(label)}</button>'
+        f"</form>"
+    )
+
+
 def safe_patient_rows(limit: int = 8) -> list[list[str]]:
     from app.models.patient import Patient
 

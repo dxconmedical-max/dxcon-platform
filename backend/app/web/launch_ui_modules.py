@@ -36,10 +36,12 @@ from app.web.launch_ui_lib import (
     module_intro,
     query_string_note,
     queue_stage_cards,
+    real_form_card,
     status_badge,
     table_html,
     table_section,
     timeline_section,
+    workflow_action_form,
 )
 
 MODULE_ROUTES: tuple[str, ...] = (
@@ -95,10 +97,20 @@ def patient_detail_body(patient_key: str) -> str:
             status_badge(order.get("status", "PENDING")),
             f"${order.get('total_amount', 0):,.0f}",
         ])
+    invoice_rows = []
+    for inv in patient.get("invoices", []):
+        invoice_rows.append([_h(inv.get("invoice_no", "")), status_badge(inv.get("status", "unpaid"))])
     report_rows = []
-    for label, status in [("CBC", "RELEASED"), ("Lipid panel", "PENDING")]:
-        report_rows.append([label, status_badge(status)])
-    invoice_rows = [[f"INV-{pk[-3:]}", "$45", status_badge("PAID")]]
+    for rep in patient.get("reports", []):
+        rk = _h(rep.get("result_code", rep.get("id", "")))
+        report_rows.append([
+            f'<a href="/app/reports/{rk}">{rk}</a>',
+            status_badge(rep.get("status", "pending")),
+        ])
+    if not report_rows:
+        for label, status in [("CBC", "RELEASED"), ("Lipid panel", "PENDING")]:
+            report_rows.append([label, status_badge(status)])
+    qr = _h(patient.get("qr_payload", f"dxcon:patient:{pk}"))
     return (
         breadcrumbs([("Patients", "/app/patients"), (patient["full_name"], f"/app/patients/{pk}")])
         + metric_cards([
@@ -111,8 +123,7 @@ def patient_detail_body(patient_key: str) -> str:
             ["Address", patient.get("address", "—")],
             ["Phone", patient["phone"]],
         ])
-        + '<div class="launch-card"><h3>QR health card</h3><div class="launch-chart">QR placeholder · '
-        + f'{pk}</div><p class="launch-hint"><a href="/app/patient/qr">Open patient QR</a></p></div>'
+        + f'<div class="launch-card"><h3>QR health card</h3><div class="launch-chart">{qr}</div>'
         + table_html("Order history", ["Order", "Status", "Amount"], order_rows or [])
         + table_html("Report history", ["Report", "Status"], report_rows)
         + table_html("Invoice history", ["Invoice", "Amount", "Status"], invoice_rows)
@@ -121,50 +132,81 @@ def patient_detail_body(patient_key: str) -> str:
             action_button("Check in", "check-in-patient", patient_key, "patient", f"/app/patients/{pk}"),
             action_button("Notify patient", "send-notification", patient_key, "patient", f"/app/patients/{pk}"),
         ])
+        + real_form_card(
+            "Create real order",
+            "/app/business/orders/create",
+            [("patient_code", "Patient code", patient_key)],
+            cancel_href=f"/app/patients/{pk}",
+            submit_label="Create order",
+        )
     )
 
 
 def order_detail_body(order_key: str) -> str:
     order = get_order_detail(order_key)
-    patient_key = order.get("patient_id", "")
+    patient_key = order.get("patient_id") or order.get("patient_code", "")
     pk = _h(patient_key)
     ok = _h(order_key)
     ret = f"/app/orders/{ok}"
+    is_biz = bool(order.get("items")) or order.get("status", "").lower() in {
+        "draft", "payment_pending", "paid", "sampling", "collected", "in_transit",
+        "lab_received", "testing", "pending_review", "approved", "released",
+    }
     stages = [
-        ("Payment", "PAID", "08:05"),
-        ("Collection", "COLLECTED", "09:15"),
-        ("Lab transit", "IN_TRANSIT", "09:45"),
-        ("Testing", "TESTING", "10:30"),
-        ("Report", "PENDING_REVIEW", "—"),
+        ("Payment", order.get("invoice", {}).get("status", "—").upper() if order.get("invoice") else "—", "—"),
+        ("Collection", (order.get("collection") or {}).get("status", "—").upper(), "—"),
+        ("Lab", order.get("status", "—").upper(), "—"),
+        ("Report", (order.get("result") or {}).get("status", "—").upper(), "—"),
     ]
+    test_rows = []
+    for item in order.get("items", []):
+        test_rows.append([_h(item.get("test_name", "")), f"${item.get('line_total', 0):,.0f}"])
+    if not test_rows:
+        test_rows = [["Blood panel", status_badge("TESTING")], ["Glucose", status_badge("QUEUED")]]
+    timeline = order.get("timeline", [])
+    if timeline and isinstance(timeline[0], dict):
+        timeline_pairs = [(t.get("label", ""), t.get("time", "—")) for t in timeline]
+    else:
+        timeline_pairs = timeline or [
+            ("Ordered", "08:00"), ("Sample collected", "09:15"), ("In lab", "10:30"), ("Report", "Pending review"),
+        ]
+    real_actions = ""
+    if is_biz:
+        real_actions = (
+            '<div class="launch-card"><h3>Workflow actions (live)</h3><div class="launch-footer-actions">'
+            + workflow_action_form(f"/app/business/orders/{ok}/mark-paid", ok, "Mark paid", [("payment_method", "Method", "cash")])
+            + workflow_action_form(f"/app/business/orders/{ok}/collection", ok, "Assign collector", [
+                ("collector_name", "Collector", "Demo Collector"),
+                ("pickup_address", "Address", "District 1, HCMC"),
+            ])
+            + workflow_action_form(f"/app/business/orders/{ok}/collect", ok, "Collect sample")
+            + workflow_action_form(f"/app/business/orders/{ok}/receive", ok, "Receive at lab", [("received_by", "Received by", "Lab tech")])
+            + workflow_action_form(f"/app/business/orders/{ok}/enter-results", ok, "Enter results")
+            + workflow_action_form(f"/app/business/orders/{ok}/approve", ok, "Approve", [("doctor_note", "Note", "Reviewed")])
+            + workflow_action_form(f"/app/business/orders/{ok}/release", ok, "Release report")
+            + "</div></div>"
+        )
+    demo_actions = action_button_row([
+        action_button("Mark paid", "mark-paid", order_key, "order", ret),
+        action_button("Assign collector", "assign-collector", order_key, "order", ret),
+        action_button("Receive sample", "receive-sample", order_key, "sample", ret),
+        action_button("Start testing", "start-testing", order_key, "sample", ret),
+        action_button("Approve report", "doctor-approve", order_key, "report", ret, primary=True),
+        action_button("Release report", "release-report", order_key, "report", ret),
+    ])
     return (
         breadcrumbs([("Orders", "/app/orders"), (order["order_code"], ret)])
         + metric_cards([
             ("Status", order["status"]),
-            ("Amount", f"${order['total_amount']:,.0f}"),
+            ("Amount", f"${order.get('total_amount', 0):,.0f}"),
             ("Patient", order["patient_name"]),
         ])
         + f'<div class="launch-card"><h3>Patient summary</h3><p><a href="/app/patients/{pk}">{_h(order["patient_name"])}</a> · Code {pk}</p></div>'
         + workflow_stage_cards(stages)
-        + timeline_section("Workflow timeline", order.get("timeline", []))
-        + table_html("Ordered tests", ["Test", "Status"], [
-            ["Blood panel", status_badge("TESTING")],
-            ["Glucose", status_badge("QUEUED")],
-        ])
-        + table_html("Workflow status", ["Stage", "Status"], [
-            ["Payment", status_badge("PAID")],
-            ["Collection", status_badge("COLLECTED")],
-            ["Lab", status_badge("TESTING")],
-            ["Report", status_badge("PENDING_REVIEW")],
-        ])
-        + action_button_row([
-            action_button("Mark paid", "mark-paid", order_key, "order", ret),
-            action_button("Assign collector", "assign-collector", order_key, "order", ret),
-            action_button("Receive sample", "receive-sample", order_key, "sample", ret),
-            action_button("Start testing", "start-testing", order_key, "sample", ret),
-            action_button("Approve report", "doctor-approve", order_key, "report", ret, primary=True),
-            action_button("Release report", "release-report", order_key, "report", ret),
-        ])
+        + timeline_section("Workflow timeline", timeline_pairs)
+        + table_html("Ordered tests", ["Test", "Amount"] if is_biz else ["Test", "Status"], test_rows)
+        + real_actions
+        + (demo_actions if not is_biz else "")
     )
 
 
@@ -187,7 +229,11 @@ def report_detail_body(report_key: str) -> str:
         + f'<div class="launch-card"><h3>AI interpretation (advisory)</h3><p>{_h(report.get("interpretation", ""))}</p>'
         + '<p class="launch-hint">Human clinician review required before release.</p></div>'
         + '<div class="launch-card launch-alert"><h3>Doctor review</h3><p>Sign-off required for patient portal release. Demo actions below simulate approval workflow.</p></div>'
-        + '<div class="launch-card"><h3>PDF report</h3><div class="launch-chart">PDF preview placeholder · Download disabled in demo</div></div>'
+        + '<div class="launch-card"><h3>PDF report</h3>'
+        + (f'<a class="launch-btn" href="/app/business/reports/{rk}/print" target="_blank">Open HTML/PDF report</a>'
+           if report.get("html_content") else
+           '<div class="launch-chart">Report not released yet</div>')
+        + '</div>'
         + action_button_row([
             action_button("Doctor approve", "doctor-approve", report_key, "report", ret, primary=True),
             action_button("Release to patient", "release-report", report_key, "report", ret),
@@ -226,13 +272,27 @@ def orders_body() -> str:
 
 @_register("New Order", "/app/orders/new")
 def orders_new_body() -> str:
-    patients = get_recent_patients(3)
-    tests = get_recent_tests(3)
+    from app.business_engine.service import ensure_test_catalog_seed
+    from app.extensions.db import db
+
+    ensure_test_catalog_seed()
+    db.session.commit()
+    patients = get_recent_patients(10)
+    tests = get_recent_tests(10)
+    patient_options = []
+    for p in patients:
+        patient_options.append(("patient_code", f"{p['full_name']} ({p['patient_code']})", p["patient_code"]))
+    default_patient = patients[0]["patient_code"] if patients else ""
+    fields = [("patient_code", "Patient code", default_patient), ("discount", "Discount", "0"), ("note", "Note", "")]
+    for test in tests[:5]:
+        label = f"{test['name']} — ${test.get('price', 0):,.0f}"
+        fields.append(("test_catalog_id", label, test.get("id", test.get("code", ""))))
     return (
         back_nav("/app/orders", "Orders")
         + breadcrumbs([("Orders", "/app/orders"), ("New order", "/app/orders/new")])
+        + real_form_card("Create order (live)", "/app/business/orders/create", fields, cancel_href="/app/orders", submit_label="Create order")
         + demo_form_card(
-            "Create order",
+            "Demo preview",
             [
                 ("Patient", patients[0]["full_name"] if patients else "Demo Patient"),
                 ("Test package", tests[0]["name"] if tests else "Blood panel"),
@@ -271,8 +331,23 @@ def patients_new_body() -> str:
     return (
         back_nav("/app/patients", "Patients")
         + breadcrumbs([("Patients", "/app/patients"), ("New registration", "/app/patients/new")])
+        + real_form_card(
+            "Patient registration (live)",
+            "/app/business/patients/create",
+            [
+                ("full_name", "Full name", ""),
+                ("phone", "Phone", ""),
+                ("email", "Email", ""),
+                ("gender", "Gender", ""),
+                ("date_of_birth", "Date of birth", ""),
+                ("national_id", "National ID", ""),
+                ("address", "Address", ""),
+            ],
+            cancel_href="/app/patients",
+            submit_label="Register patient",
+        )
         + demo_form_card(
-            "Patient registration",
+            "Demo preview",
             [
                 ("Full name", "Nguyen Van Demo"),
                 ("Phone", "0901234567"),
