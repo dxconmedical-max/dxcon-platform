@@ -1,0 +1,34 @@
+{
+  "generated_at": "2026-07-05T05:09:46.671959+00:00",
+  "phase": "7.8",
+  "sprint": "Population Health",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 6,
+    "checks_total": 6,
+    "ok": true,
+    "runtime_seconds": 1.224
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "web_pages": {
+      "ok": true
+    },
+    "api_endpoints": {
+      "ok": true
+    },
+    "feature_coverage": {
+      "ok": true
+    },
+    "legacy_0": {
+      "ok": true
+    }
+  }
+}
