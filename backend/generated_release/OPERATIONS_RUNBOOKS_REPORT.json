@@ -1,0 +1,259 @@
+{
+  "generated_at": "2026-07-05T04:53:48.300337+00:00",
+  "phase": "5.11",
+  "sprint": "Operations Runbooks",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 13,
+    "checks_total": 13,
+    "ok": true,
+    "runtime_seconds": 1.472
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "runbook_files": {
+      "ok": true,
+      "missing": [],
+      "expected": [
+        "GO_LIVE_RUNBOOK.md",
+        "BACKUP_RUNBOOK.md",
+        "RESTORE_RUNBOOK.md",
+        "ROLLBACK_RUNBOOK.md",
+        "INCIDENT_RUNBOOK.md"
+      ]
+    },
+    "auth": {
+      "ok": true
+    },
+    "operations_runbooks_dashboard": {
+      "ok": true,
+      "routes": {
+        "/operations-runbooks": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/operations-runbooks/go-live": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/operations-runbooks/backup": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/operations-runbooks/restore": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/operations-runbooks/rollback": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/operations-runbooks/incident": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/operations-runbooks/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/operations-runbooks/go-live": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/operations-runbooks/backup": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/operations-runbooks/restore": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/operations-runbooks/rollback": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/operations-runbooks/incident": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/operations-runbooks/inventory": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/operations-runbooks/readiness": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 5
+    },
+    "go_live": {
+      "ok": true
+    },
+    "backup": {
+      "ok": true
+    },
+    "restore": {
+      "ok": true
+    },
+    "rollback": {
+      "ok": true
+    },
+    "incident": {
+      "ok": true
+    },
+    "legacy_backup_recovery_runbook_preserved": {
+      "ok": true
+    },
+    "legacy_release_management_rollback_preserved": {
+      "ok": true
+    }
+  },
+  "readiness": {
+    "features": [
+      "GO_LIVE_RUNBOOK.md",
+      "BACKUP_RUNBOOK.md",
+      "RESTORE_RUNBOOK.md",
+      "ROLLBACK_RUNBOOK.md",
+      "INCIDENT_RUNBOOK.md"
+    ],
+    "generated_at": "2026-07-05T04:53:48.301404",
+    "legacy_routes": [
+      "/backup-recovery/runbook",
+      "/release-management/rollback",
+      "/monitoring",
+      "docs/RUNBOOK.md"
+    ],
+    "phase": "5.11",
+    "platform": "Operations Runbooks",
+    "sections": {
+      "backup": {
+        "content": "# DxCon Backup Runbook\n\n## Scope\n\n- PostgreSQL database\n- Uploaded files (`STORAGE_PATH` / object storage)\n- Configuration secrets (external secret manager \u2014 not in git)\n\n## Scheduled Backups\n\nDefault cron recommendation: `0 2 * * *` (02:00 UTC daily)\n\nOperations API:\n\n```bash\nGET  /api/v1/operations/backups\nPOST /api/v1/operations/backups/run\n```\n\nHub dashboard: `/backup-recovery`\n\n## Manual Backup Procedure\n\n1. Confirm no restore job in progress: `GET /api/v1/operations/restores`\n2. Trigger database backup:\n   ```bash\n   deployment/scripts/backup_postgres.sh\n   ```\n3. Trigger uploads backup:\n   ```bash\n   deployment/scripts/backup_uploads.sh\n   ```\n4. Validate artifact:\n   ```bash\n   POST /api/v1/operations/backups/<backup_id>/validate\n   ```\n\n## Retention Policy\n\n| Environment | Minimum Retention |\n|-------------|-------------------|\n| Production  | 30 daily backups  |\n| Staging     | 7 daily backups   |\n\nConfigure retention in `deployment/env/` templates.\n\n## Verification\n\n```bash\ncd backend\nDATABASE_URL=sqlite:///:memory: python scripts/verify_backup_recovery.py\npython scripts/backup_restore_lib.py\n```\n\nReport: `backend/generated_release/BACKUP_RECOVERY_REPORT.json`\n\n## Escalation\n\nIf backup job fails twice consecutively, open incident per `docs/INCIDENT_RUNBOOK.md` with severity HIGH.\n\n## Related Docs\n\n- `docs/BACKUP.md`\n- `docs/DISASTER_RECOVERY.md`\n- `/backup-recovery/runbook`\n",
+        "exists": true,
+        "filename": "BACKUP_RUNBOOK.md",
+        "key": "backup",
+        "path": "docs/BACKUP_RUNBOOK.md",
+        "read_only": true,
+        "report": "backup_runbook",
+        "sections": [
+          "Scope",
+          "Scheduled Backups",
+          "Manual Backup Procedure",
+          "Retention Policy",
+          "Verification",
+          "Escalation",
+          "Related Docs"
+        ],
+        "size_bytes": 1410,
+        "summary": "Scheduled and manual backup procedures with retention policy.",
+        "title": "Backup Runbook"
+      },
+      "go_live": {
+        "content": "# DxCon Go-Live Runbook\n\n## Pre-Cutover Checklist\n\n1. Confirm staging sign-off: `backend/scripts/verify_staging_stack.py`\n2. Run enterprise hardening: `backend/scripts/verify_enterprise_hardening_pack10.py`\n3. Verify migrations: `GET /api/v1/system/readiness`\n4. Confirm backup completed: `GET /api/v1/operations/backups`\n5. Review release notes: `/release-management/notes`\n6. Confirm pilot status: `/pilot-status`\n\n## Cutover Steps\n\n1. Enable maintenance window: `POST /api/v1/operations/maintenance/enable`\n2. Deploy production container with `LOG_FORMAT=json` and production env\n3. Run database migrations if required\n4. Verify health probes:\n   - `GET /api/v1/system/health`\n   - `GET /api/v1/system/ready`\n   - `GET /api/v1/system/live`\n5. Run smoke test: `backend/scripts/final_ga_smoke.py`\n6. Disable maintenance: `POST /api/v1/operations/maintenance/disable`\n\n## Post Go-Live Validation\n\n- `/executive-v9` \u2014 executive dashboard loads\n- `/monitoring` \u2014 no critical alerts\n- `/pilot-status` \u2014 clinics, labs, collectors online\n- `/production-deployment/readiness` \u2014 deployment score OK\n\n## Rollback Trigger\n\nRollback if any of the following occur within 30 minutes of cutover:\n\n- Health endpoints not OK for 5 consecutive minutes\n- Error rate above 5% on critical API routes\n- Database migration failure\n- Payment or order pipeline blocked\n\nSee `docs/ROLLBACK_RUNBOOK.md`.\n\n## Contacts\n\n- On-call: Alertmanager route in `deployment/monitoring/alertmanager/alertmanager.yml`\n- Incident process: `docs/INCIDENT_RUNBOOK.md`\n\n## Artifacts\n\n- `backend/generated_release/GO_LIVE_BLOCKERS.json`\n- `backend/generated_release/RC1_REPORT.json`\n- `backend/generated_release/PRODUCTION_DEPLOYMENT_REPORT.json`\n",
+        "exists": true,
+        "filename": "GO_LIVE_RUNBOOK.md",
+        "key": "go_live",
+        "path": "docs/GO_LIVE_RUNBOOK.md",
+        "read_only": true,
+        "report": "go_live_runbook",
+        "sections": [
+          "Pre-Cutover Checklist",
+          "Cutover Steps",
+          "Post Go-Live Validation",
+          "Rollback Trigger",
+          "Contacts",
+          "Artifacts"
+        ],
+        "size_bytes": 1712,
+        "summary": "Pre-cutover checklist, cutover steps, and post go-live validation.",
+        "title": "Go-Live Runbook"
+      },
+      "incident": {
+        "content": "# DxCon Incident Runbook\n\n## Severity Levels\n\n| Level    | Examples                                      | Response Time |\n|----------|-----------------------------------------------|---------------|\n| CRITICAL | API down, data loss, security breach           | 15 minutes    |\n| HIGH     | Backup failure, queue backlog, payment blocked | 30 minutes    |\n| MEDIUM   | Elevated error rate, degraded AI provider      | 2 hours       |\n| LOW      | Non-critical feature degradation               | Next business day |\n\n## Triage Steps\n\n1. **Identify** \u2014 collect `request_id` / trace ID from logs or `/monitoring`\n2. **Classify** \u2014 assign severity and incident type\n3. **Communicate** \u2014 page on-call via Alertmanager\n4. **Mitigate** \u2014 maintenance mode, scale, rollback, or failover\n5. **Resolve** \u2014 fix root cause and validate\n6. **Review** \u2014 post-incident summary within 48 hours\n\n## Quick Diagnostics\n\n```bash\nGET /api/v1/system/health\nGET /api/v1/system/ready\nGET /api/v1/monitoring-center/dashboard\nGET /api/v1/operations/backups\n```\n\nHubs:\n\n- `/monitoring` \u2014 application, queue, database health\n- `/ai-operations/incident-summary` \u2014 AI-specific failures\n- `/backup-recovery` \u2014 backup and restore status\n- `/pilot-status/alerts` \u2014 pilot environment alerts\n\n## Common Scenarios\n\n### API Unavailable\n\n1. Check container/pod status and recent deploys\n2. Review `/monitoring/application-health`\n3. Rollback if tied to recent release (`docs/ROLLBACK_RUNBOOK.md`)\n\n### Database Connectivity\n\n1. `/monitoring/database-health`\n2. Verify connection pool and migration status\n3. Fail over or restore per `docs/RESTORE_RUNBOOK.md`\n\n### Backup Failure\n\n1. `/backup-recovery/scheduler`\n2. Re-run backup manually\n3. Escalate HIGH if two consecutive failures\n\n### AI Provider Degradation\n\n1. `/ai-operations/model-health`\n2. Switch provider or disable AI features temporarily\n3. Review `/ai-operations/incident-summary`\n\n## Maintenance Windows\n\n```bash\nPOST /api/v1/operations/maintenance/schedule\nPOST /api/v1/operations/maintenance/enable\n# perform work\nPOST /api/v1/operations/maintenance/disable\n```\n\n## Escalation\n\n- Primary: on-call rotation (Alertmanager)\n- Secondary: platform engineering lead\n- External: cloud provider support if infrastructure-related\n\n## Post-Incident\n\n1. Update incident record with root cause and timeline\n2. Link to `backend/generated_release/` verification reports\n3. Add action items to engineering backlog\n\n## Related Docs\n\n- `docs/RUNBOOK.md`\n- `docs/DISASTER_RECOVERY.md`\n- `/operations-runbooks`\n",
+        "exists": true,
+        "filename": "INCIDENT_RUNBOOK.md",
+        "key": "incident",
+        "path": "docs/INCIDENT_RUNBOOK.md",
+        "read_only": true,
+        "report": "incident_runbook",
+        "sections": [
+          "Severity Levels",
+          "Triage Steps",
+          "Quick Diagnostics",
+          "Common Scenarios",
+          "Maintenance Windows",
+          "Escalation",
+          "Post-Incident",
+          "Related Docs"
+        ],
+        "size_bytes": 2540,
+        "summary": "Severity levels, triage, diagnostics, and escalation.",
+        "title": "Incident Runbook"
+      },
+      "restore": {
+        "content": "# DxCon Restore Runbook\n\n## Prerequisites\n\n- Validated backup artifact ID\n- Maintenance window approved\n- Rollback plan reviewed (`docs/ROLLBACK_RUNBOOK.md`)\n\n## Step 1 \u2014 Dry Run (Required)\n\nNever skip dry run on production.\n\n```bash\nPOST /api/v1/operations/restores/dry-run\ndeployment/scripts/restore_postgres_dry_run.sh\n```\n\nHub: `/backup-recovery/restore`\n\n## Step 2 \u2014 Enable Maintenance\n\n```bash\nPOST /api/v1/operations/maintenance/enable\n```\n\n## Step 3 \u2014 Stop Workers\n\n1. Scale application replicas to zero or stop container entrypoint\n2. Confirm no active background jobs: `/monitoring/background-jobs`\n\n## Step 4 \u2014 Restore Database\n\n1. Restore PostgreSQL from latest validated backup\n2. Restore uploads/object storage if affected\n3. Record restore job via operations API\n\n## Step 5 \u2014 Validate\n\n```bash\nGET  /api/v1/system/readiness\nGET  /api/v1/system/health\npython backend/scripts/verify_staging_stack.py\npython backend/scripts/smoke_test_staging_stack.py\n```\n\nCore tables to spot-check: `users`, `patients`, `medical_orders`, `invoices`\n\n## Step 6 \u2014 Resume Service\n\n```bash\nPOST /api/v1/operations/maintenance/disable\n```\n\n## Failure Handling\n\nIf restore validation fails:\n\n1. Do not disable maintenance mode\n2. Execute rollback per `docs/ROLLBACK_RUNBOOK.md`\n3. Open incident with severity CRITICAL\n\n## RTO / RPO Targets\n\n| Tier           | RTO    | RPO   |\n|----------------|--------|-------|\n| Production API | 4 hrs  | 1 hr  |\n| File storage   | 8 hrs  | 4 hrs |\n\n## Related Docs\n\n- `docs/RESTORE.md`\n- `docs/DISASTER_RECOVERY.md`\n",
+        "exists": true,
+        "filename": "RESTORE_RUNBOOK.md",
+        "key": "restore",
+        "path": "docs/RESTORE_RUNBOOK.md",
+        "read_only": true,
+        "report": "restore_runbook",
+        "sections": [
+          "Prerequisites",
+          "Step 1 \u2014 Dry Run (Required)",
+          "Step 2 \u2014 Enable Maintenance",
+          "Step 3 \u2014 Stop Workers",
+          "Step 4 \u2014 Restore Database",
+          "Step 5 \u2014 Validate",
+          "Step 6 \u2014 Resume Service",
+          "Failure Handling",
+          "RTO / RPO Targets",
+          "Related Docs"
+        ],
+        "size_bytes": 1556,
+        "summary": "Dry-run, maintenance, restore, and validation workflow.",
+        "title": "Restore Runbook"
+      },
+      "rollback": {
+        "content": "# DxCon Rollback Runbook\n\n## When to Rollback\n\n- Failed deployment health checks after cutover\n- Migration failure that cannot be forward-fixed within RTO\n- Critical regression in orders, billing, or results pipeline\n- Security preflight failure post-deploy\n\n## Pre-Rollback\n\n1. Enable maintenance: `POST /api/v1/operations/maintenance/enable`\n2. Capture current state:\n   - `GET /api/v1/system/version`\n   - `GET /api/v1/system/build`\n   - `GET /api/v1/operations/deployment/rollback-plan`\n3. Notify on-call and stakeholders\n\n## Rollback Procedure\n\n### Application Rollback\n\n1. Redeploy prior container tag (`BUILD_VERSION` from last known good release)\n2. Use deployment pipeline:\n   ```bash\n   python deployment/pipeline/rollback.py\n   ```\n3. Hub reference: `/release-management/rollback`\n\n### Database Rollback\n\nIf migration was applied and is reversible:\n\n1. Run down-migration or restore from pre-deploy backup\n2. Follow `docs/RESTORE_RUNBOOK.md` dry-run first\n\nIf migration is not reversible:\n\n1. Restore database from pre-cutover validated backup\n2. Accept data loss window per RPO\n\n## Post-Rollback Validation\n\n```bash\nGET /api/v1/system/health\nGET /api/v1/system/ready\npython backend/scripts/final_ga_smoke.py\npython backend/scripts/verify_release_management.py\n```\n\n## Artifacts\n\n- `backend/generated_release/ROLLBACK_PACKAGE.json`\n- `backend/generated_release/ROLLBACK_CHECKLIST.json`\n- `deployment/pipeline/rollback.py`\n\n## Communication Template\n\n> Rollback initiated for DxCon [environment]. Reason: [summary]. ETA to restore: [time]. Current status: maintenance mode enabled.\n\n## Related Docs\n\n- `docs/DEPLOYMENT.md`\n- `docs/DISASTER_RECOVERY.md`\n- `/production-deployment/rollback`\n",
+        "exists": true,
+        "filename": "ROLLBACK_RUNBOOK.md",
+        "key": "rollback",
+        "path": "docs/ROLLBACK_RUNBOOK.md",
+        "read_only": true,
+        "report": "rollback_runbook",
+        "sections": [
+          "When to Rollback",
+          "Pre-Rollback",
+          "Rollback Procedure",
+          "Post-Rollback Validation",
+          "Artifacts",
+          "Communication Template",
+          "Related Docs"
+        ],
+        "size_bytes": 1699,
+        "summary": "Application and database rollback with validation artifacts.",
+        "title": "Rollback Runbook"
+      }
+    },
+    "sprint": "Operations Runbooks",
+    "status": "OK",
+    "summary": {
+      "missing_count": 0,
+      "runbooks_present": 5,
+      "runbooks_total": 5
+    }
+  }
+}
