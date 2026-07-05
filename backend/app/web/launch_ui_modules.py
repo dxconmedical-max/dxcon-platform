@@ -52,7 +52,6 @@ MODULE_ROUTES: tuple[str, ...] = (
     "/app/reports",
     "/app/finance",
     "/app/logistics",
-    "/app/reception/queue",
     "/app/ai",
     "/app/samples",
     "/app/samples/accession",
@@ -139,6 +138,21 @@ def patient_detail_body(patient_key: str) -> str:
             cancel_href=f"/app/patients/{pk}",
             submit_label="Create order",
         )
+        + real_form_card(
+            "Edit patient profile",
+            f"/app/business/patients/{pk}/edit",
+            [
+                ("full_name", "Full name", patient.get("full_name", "")),
+                ("phone", "Phone", patient.get("phone", "")),
+                ("email", "Email", patient.get("email", "")),
+                ("gender", "Gender", patient.get("gender", "")),
+                ("date_of_birth", "Date of birth", patient.get("date_of_birth", "")),
+                ("national_id", "National ID", patient.get("national_id", "")),
+                ("address", "Address", patient.get("address", "")),
+            ],
+            cancel_href=f"/app/patients/{pk}",
+            submit_label="Save changes",
+        )
     )
 
 
@@ -172,16 +186,24 @@ def order_detail_body(order_key: str) -> str:
         ]
     real_actions = ""
     if is_biz:
+        barcode = order.get("barcode_value") or (order.get("collection") or {}).get("barcode_value", "")
         real_actions = (
-            '<div class="launch-card"><h3>Workflow actions (live)</h3><div class="launch-footer-actions">'
+            '<div class="launch-card"><h3>Workflow actions (live)</h3>'
+            + (f'<p>Barcode: <strong>{_h(barcode)}</strong> · '
+               f'<a href="/app/business/orders/{ok}/print-request" target="_blank">Print request form</a></p>' if barcode or is_biz else "")
+            + '<div class="launch-footer-actions">'
             + workflow_action_form(f"/app/business/orders/{ok}/mark-paid", ok, "Mark paid", [("payment_method", "Method", "cash")])
             + workflow_action_form(f"/app/business/orders/{ok}/collection", ok, "Assign collector", [
                 ("collector_name", "Collector", "Demo Collector"),
                 ("pickup_address", "Address", "District 1, HCMC"),
             ])
+            + workflow_action_form(f"/app/business/orders/{ok}/accept", ok, "Accept pickup")
             + workflow_action_form(f"/app/business/orders/{ok}/collect", ok, "Collect sample")
+            + workflow_action_form(f"/app/business/orders/{ok}/custody", ok, "Update custody", [("custody_note", "Note", "Sealed at pickup")])
+            + workflow_action_form(f"/app/business/orders/{ok}/in-transit", ok, "Mark in transit")
             + workflow_action_form(f"/app/business/orders/{ok}/receive", ok, "Receive at lab", [("received_by", "Received by", "Lab tech")])
             + workflow_action_form(f"/app/business/orders/{ok}/enter-results", ok, "Enter results")
+            + workflow_action_form(f"/app/business/orders/{ok}/complete-qc", ok, "Complete QC")
             + workflow_action_form(f"/app/business/orders/{ok}/approve", ok, "Approve", [("doctor_note", "Note", "Reviewed")])
             + workflow_action_form(f"/app/business/orders/{ok}/release", ok, "Release report")
             + "</div></div>"
@@ -307,8 +329,24 @@ def orders_new_body() -> str:
 
 @_register("Patients", "/app/patients")
 def patients_body() -> str:
+    from flask import request
+
+    from app.business_engine import service as biz
+
+    query = (request.args.get("q") or "").strip()
+    patients = []
+    if query:
+        for patient in biz.search_patients(query, limit=15):
+            patients.append({
+                "patient_code": patient.patient_code,
+                "full_name": patient.full_name,
+                "phone": patient.phone or "—",
+                "gender": patient.gender or "—",
+            })
+    else:
+        patients = get_recent_patients(15)
     rows = []
-    for patient in get_recent_patients(15):
+    for patient in patients:
         key = _h(patient["patient_code"])
         rows.append([
             key,
@@ -317,10 +355,13 @@ def patients_body() -> str:
             _h(patient["gender"]),
             f'<a class="launch-btn-outline launch-btn-sm" href="/app/patients/{key}">View</a>',
         ])
+    q_val = _h(query)
     return (
         back_nav("/app/executive", "Executive dashboard")
         + module_intro("Patients", "Search and manage patient records.")
-        + '<div class="launch-card"><input class="launch-field" placeholder="Search by name, phone, or patient code"></div>'
+        + f'<div class="launch-card"><form method="GET" action="/app/patients">'
+        + f'<input class="launch-field" name="q" value="{q_val}" placeholder="Search by name, phone, or patient code">'
+        + '<button class="launch-btn launch-btn-sm" type="submit">Search</button></form></div>'
         + table_html("Patient directory", ["Code", "Name", "Phone", "Gender", "Action"], rows)
         + action_grid([("New registration", "/app/patients/new", "Register walk-in patient")])
     )
@@ -426,20 +467,7 @@ def logistics_body() -> str:
     )
 
 
-@_register("Reception Queue", "/app/reception/queue")
-def reception_queue_body() -> str:
-    stages = get_queue_summary()
-    return (
-        back_nav("/app/reception", "Reception")
-        + module_intro("Waiting queue", "Live service desk queue by stage.")
-        + queue_stage_cards(stages)
-        + table_html("Queue detail", ["Token", "Patient", "Stage", "Wait"], [
-            ["Q-101", "Nguyen Van A", status_badge("WAITING"), "12m"],
-            ["Q-102", "Le Van C", status_badge("CHECKED_IN"), "5m"],
-            ["Q-103", "Tran Thi B", status_badge("SAMPLING"), "—"],
-            ["Q-100", "Demo Patient", status_badge("COMPLETED"), "—"],
-        ])
-    )
+# Reception queue moved to reception_workspace_web (Sprint 006)
 
 
 @_register("AI Copilot", "/app/ai")
@@ -586,14 +614,16 @@ def chain_of_custody_body() -> str:
 
 @_register("My Profile", "/app/patient/profile")
 def patient_profile_body() -> str:
-    patients = get_recent_patients(1)
-    patient = patients[0] if patients else {"full_name": "Demo Patient", "patient_code": "P-DEMO-001", "phone": "0901234567", "email": "patient@demo.dxcon.test", "gender": "Male", "address": "District 1"}
+    from app.web.launch_ui_data import get_session_patient_portal
+
+    portal = get_session_patient_portal()
+    patient = portal["patient"]
     return (
         back_nav("/app/patient", "Patient portal")
         + metric_cards([
             ("Name", patient["full_name"]),
             ("Code", patient["patient_code"]),
-            ("Phone", patient["phone"]),
+            ("Phone", patient.get("phone", "—")),
         ])
         + table_section("Contact", ["Field", "Value"], [
             ["Email", patient.get("email", "—")],
@@ -605,8 +635,11 @@ def patient_profile_body() -> str:
 
 @_register("My Orders", "/app/patient/orders")
 def patient_orders_body() -> str:
+    from app.web.launch_ui_data import get_session_patient_portal
+
+    portal = get_session_patient_portal()
     rows = []
-    for order in get_recent_orders(8):
+    for order in portal.get("orders", []):
         key = _h(order["order_code"])
         rows.append([f'<a href="/app/orders/{key}">{key}</a>', _h(order.get("created_at", "—")), status_badge(order["status"])])
     return back_nav("/app/patient", "Patient portal") + table_html("My orders", ["Order", "Date", "Status"], rows)
@@ -614,28 +647,37 @@ def patient_orders_body() -> str:
 
 @_register("My Reports", "/app/patient/reports")
 def patient_reports_body() -> str:
+    from app.web.launch_ui_data import get_session_patient_portal
+
+    portal = get_session_patient_portal()
     rows = []
-    for report in get_recent_reports(8):
-        key = _h(report["id"])
-        rows.append([_h(report["test_name"]), status_badge(report["approval_status"]), f'<a href="/app/reports/{key}">View</a>'])
+    for report in portal.get("released_reports", []):
+        key = _h(report.get("result_code", ""))
+        rows.append([_h(key), status_badge("released"), f'<a href="/app/business/reports/{key}/print" target="_blank">View</a>'])
     return back_nav("/app/patient", "Patient portal") + table_html("My reports", ["Report", "Status", "Action"], rows)
 
 
 @_register("QR Health Card", "/app/patient/qr")
 def patient_qr_body() -> str:
-    patients = get_recent_patients(1)
-    code = patients[0]["patient_code"] if patients else "P-DEMO-001"
+    from app.web.launch_ui_data import get_session_patient_portal
+
+    portal = get_session_patient_portal()
+    qr = portal.get("qr_payload", "")
+    code = portal["patient"]["patient_code"]
     return (
         back_nav("/app/patient", "Patient portal")
-        + f'<div class="launch-card"><h3>QR health card</h3><div class="launch-chart">QR · {_h(code)}</div>'
+        + f'<div class="launch-card"><h3>QR health card</h3><div class="launch-chart">QR · {_h(qr or code)}</div>'
         + "<p class=\"launch-hint\">Show at reception for express check-in.</p></div>"
     )
 
 
 @_register("My Invoices", "/app/patient/invoices")
 def patient_invoices_body() -> str:
+    from app.web.launch_ui_data import get_session_patient_portal
+
+    portal = get_session_patient_portal()
     rows = []
-    for invoice in get_recent_invoices(8):
+    for invoice in portal.get("invoices", []):
         rows.append([_h(invoice["invoice_no"]), f"${invoice['amount']:,.0f}", status_badge(invoice["status"])])
     return back_nav("/app/patient", "Patient portal") + table_html("Invoices", ["Invoice", "Amount", "Status"], rows)
 

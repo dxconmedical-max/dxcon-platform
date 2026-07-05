@@ -1,0 +1,19 @@
+{
+  "report": "PAYMENT_REPORT",
+  "methods": [
+    "cash",
+    "transfer",
+    "qr",
+    "pos",
+    "corporate",
+    "insurance"
+  ],
+  "statuses": [
+    "paid",
+    "pending",
+    "partial",
+    "waived"
+  ],
+  "payments_today": 7,
+  "pending_orders": 0
+}

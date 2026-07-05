@@ -1,0 +1,17 @@
+{
+  "report": "QUEUE_REPORT",
+  "total_today": 6,
+  "by_workflow_status": {
+    "WAITING": 3,
+    "SAMPLING": 3
+  },
+  "statuses": [
+    "WAITING",
+    "CHECKED_IN",
+    "PAYMENT_PENDING",
+    "PAID",
+    "SAMPLING",
+    "COMPLETED",
+    "CANCELLED"
+  ]
+}

@@ -11,7 +11,6 @@ from app.web.launch_ui_lib import (
     executive_dashboard_body,
     lab_dashboard_body,
     patient_dashboard_body,
-    reception_dashboard_body,
     render_marketing_home,
     render_page,
     system_dashboard_body,
@@ -103,12 +102,6 @@ def marketing_home():
 @login_required
 def app_executive():
     return render_page("Executive Dashboard", executive_dashboard_body(), active_nav="/app/executive")
-
-
-@launch_ui_bp.route("/app/reception")
-@login_required
-def app_reception():
-    return render_page("Reception Dashboard", reception_dashboard_body(), active_nav="/app/reception")
 
 
 @launch_ui_bp.route("/app/doctor")

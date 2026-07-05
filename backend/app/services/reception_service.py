@@ -11,7 +11,6 @@ from app.core.audit import write_audit
 from app.extensions.db import db
 from app.infrastructure.schema_introspection import table_exists_name
 from app.models.clinic_booking import ClinicBooking
-from app.models.invoice import Invoice
 from app.models.patient import Patient
 from app.models.reception_activity_log import ReceptionActivityLog
 from app.models.reception_queue_entry import ReceptionQueueEntry
@@ -336,11 +335,16 @@ def get_kpis() -> dict[str, Any]:
     patient_ids = {e.patient_id for e in queue_entries}
     new_registrations = Patient.query.filter(Patient.created_at >= today_start).count()
     pending_payment = sum(1 for e in queue_entries if (e.payment_status or "").upper() == "PENDING")
-    if table_exists_name("invoices"):
+    try:
+        from app.models.biz_order import BizInvoice
+        from app.business_engine.statuses import INVOICE_UNPAID
+
         pending_payment = max(
             pending_payment,
-            Invoice.query.filter(Invoice.payment_status == "UNPAID").count(),
+            BizInvoice.query.filter_by(status=INVOICE_UNPAID).count(),
         )
+    except Exception:
+        db.session.rollback()
     avg_wait_minutes = 0
     completed = [e for e in queue_entries if e.checked_in_at and e.created_at]
     if completed:

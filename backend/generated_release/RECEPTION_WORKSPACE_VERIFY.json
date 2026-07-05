@@ -1,0 +1,67 @@
+{
+  "sprint": "006",
+  "module": "reception_workspace",
+  "timestamp": "2026-07-05T19:48:13.571251+00:00",
+  "elapsed_seconds": 24.87,
+  "passed": 15,
+  "total": 15,
+  "checks": {
+    "patient_registration": {
+      "ok": true,
+      "patient_code": "P-20260705194753-C17676"
+    },
+    "duplicate_detection": {
+      "ok": true
+    },
+    "patient_search": {
+      "ok": true
+    },
+    "order_creation": {
+      "ok": true,
+      "total": 250000.0
+    },
+    "payment": {
+      "ok": true
+    },
+    "invoice": {
+      "ok": true
+    },
+    "barcode": {
+      "ok": true
+    },
+    "print_request_form": {
+      "ok": true
+    },
+    "queue_collection": {
+      "ok": true
+    },
+    "dashboard": {
+      "ok": true,
+      "widgets": 10
+    },
+    "queue": {
+      "ok": true
+    },
+    "audit": {
+      "ok": true,
+      "count": 142
+    },
+    "security": {
+      "ok": true,
+      "forbidden": [
+        "patient.delete",
+        "report.modify_released",
+        "finance.modify_history",
+        "order.delete"
+      ]
+    },
+    "ui": {
+      "ok": true,
+      "reception": true,
+      "queue": true
+    },
+    "api": {
+      "ok": true
+    }
+  }
+}

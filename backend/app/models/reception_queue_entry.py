@@ -23,6 +23,9 @@ class ReceptionQueueEntry(db.Model):
     status = db.Column(db.String(30), nullable=False, default="WAITING", index=True)
     appointment_id = db.Column(db.String(36))
     payment_status = db.Column(db.String(30), nullable=False, default="PENDING")
+    order_id = db.Column(db.String(36), index=True)
+    invoice_id = db.Column(db.String(36))
+    workflow_status = db.Column(db.String(30), nullable=False, default="WAITING", index=True)
     notes = db.Column(db.Text)
     checked_in_at = db.Column(db.DateTime)
     checked_out_at = db.Column(db.DateTime)
@@ -41,6 +44,9 @@ class ReceptionQueueEntry(db.Model):
             "status": self.status,
             "appointment_id": self.appointment_id,
             "payment_status": self.payment_status,
+            "order_id": self.order_id,
+            "invoice_id": self.invoice_id,
+            "workflow_status": self.workflow_status,
             "notes": self.notes,
             "checked_in_at": self.checked_in_at.isoformat() if self.checked_in_at else None,
             "checked_out_at": self.checked_out_at.isoformat() if self.checked_out_at else None,

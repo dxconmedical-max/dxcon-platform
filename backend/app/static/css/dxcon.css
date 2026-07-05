@@ -7,9 +7,9 @@
   --border: #334155;
   --text: #e2e8f0;
   --muted: #94a3b8;
-  --brand: #0ea5e9;
-  --brand-2: #14b8a6;
-  --brand-dark: #0284c7;
+  --brand: #0ea5e9;       /* primary — see docs/BRAND_GUIDELINES.md */
+  --brand-2: #14b8a6;     /* secondary */
+  --brand-dark: #0284c7;  /* primary dark / accent */
   --ok: #22c55e;
   --warn: #f59e0b;
   --bad: #ef4444;
@@ -54,11 +54,129 @@ a {
 }
 
 .launch-marketing-hero h1 {
-  font-size: clamp(28px, 5vw, 42px);
+  font-size: clamp(32px, 6vw, 56px);
   margin: 0 0 12px;
   max-width: 720px;
-  line-height: 1.1;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+}
+
+.launch-marketing-hero .launch-hero-eyebrow {
+  opacity: 0.85;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 13px;
+  margin: 0 0 20px;
+}
+
+.launch-marketing-hero .launch-hero-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.launch-marketing-hero .launch-hero-brand img {
+  height: 48px;
+  width: auto;
+}
+
+.launch-marketing-hero .launch-hero-brand strong {
+  font-size: 28px;
+  font-weight: 800;
   letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.launch-marketing-hero .launch-hero-subtitle {
+  margin: 0 0 8px;
+  font-size: 18px;
+  opacity: 0.9;
+  font-weight: 500;
+  max-width: 640px;
+}
+
+.launch-hero-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.launch-marketing-hero .launch-cta-primary {
+  margin-top: 0;
+}
+
+.launch-cta-ghost {
+  display: inline-block;
+  padding: 14px 22px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  font-weight: 700;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.launch-cta-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.launch-hero-trusted {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.launch-hero-trusted-label {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin: 0 0 16px;
+  font-weight: 600;
+}
+
+.launch-partner-logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.launch-partner-badge {
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+  font-size: 13px;
+  opacity: 0.92;
+}
+
+.launch-partners-section {
+  margin-top: 48px;
+}
+
+.launch-partners-section h2 {
+  margin: 0 0 12px;
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.launch-partners-section .launch-cta-primary {
+  margin-bottom: 8px;
+}
+
+.launch-marketing-hero .launch-hero-lead {
+  max-width: 640px;
+  line-height: 1.7;
+  opacity: 0.88;
+  margin: 0 0 8px;
+  font-size: 17px;
 }
 
 .launch-marketing-grid {
@@ -721,6 +839,33 @@ a {
   }
 
   .launch-role-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Sprint 006 — Reception Operational Workspace */
+.reception-workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(320px, 2fr) minmax(220px, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.reception-search input[type="search"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  margin: 8px 0;
+}
+
+.reception-quick-actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 1100px) {
+  .reception-workspace-grid {
     grid-template-columns: 1fr;
   }
 }
