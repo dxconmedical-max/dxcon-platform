@@ -1,0 +1,2 @@
+code,name,test_code,gender,age_min,age_max,low_value,high_value,unit
+RR-GLU-F,Glucose Fasting Female,GLU,female,18,65,70,99,mg/dL

@@ -17,6 +17,7 @@ from app.models.biz_order import (
     BizResultItem,
     BizWorkflowAudit,
 )
+from app.models.mdm import MdmImportBatch, MdmImportRow, MdmMasterRecord
 
 from app.models.order import Order
 

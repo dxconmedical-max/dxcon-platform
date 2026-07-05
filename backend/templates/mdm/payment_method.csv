@@ -1,0 +1,2 @@
+code,name,method_type,provider,fee_percent,is_online
+CASH,Cash,cash,counter,0,false

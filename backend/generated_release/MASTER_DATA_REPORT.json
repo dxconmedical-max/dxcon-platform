@@ -1,0 +1,105 @@
+{
+  "report": "MASTER_DATA_REPORT",
+  "generated_at": "2026-07-05T11:21:46.723049",
+  "summary": {
+    "records": 59,
+    "active": 56,
+    "inactive": 3,
+    "entity_types": 18,
+    "populated_entity_types": 18
+  },
+  "entities": [
+    {
+      "entity_type": "test_catalog",
+      "label": "Test Catalog",
+      "count": 5
+    },
+    {
+      "entity_type": "test_package",
+      "label": "Test Packages",
+      "count": 3
+    },
+    {
+      "entity_type": "sample_type",
+      "label": "Sample Types",
+      "count": 6
+    },
+    {
+      "entity_type": "tube_type",
+      "label": "Tube Types",
+      "count": 3
+    },
+    {
+      "entity_type": "instrument",
+      "label": "Instruments",
+      "count": 3
+    },
+    {
+      "entity_type": "laboratory",
+      "label": "Laboratories",
+      "count": 3
+    },
+    {
+      "entity_type": "clinic",
+      "label": "Clinics",
+      "count": 3
+    },
+    {
+      "entity_type": "doctor",
+      "label": "Doctors",
+      "count": 3
+    },
+    {
+      "entity_type": "collector",
+      "label": "Collectors",
+      "count": 3
+    },
+    {
+      "entity_type": "department",
+      "label": "Departments",
+      "count": 3
+    },
+    {
+      "entity_type": "insurance",
+      "label": "Insurance",
+      "count": 3
+    },
+    {
+      "entity_type": "price_list",
+      "label": "Price Lists",
+      "count": 3
+    },
+    {
+      "entity_type": "contract",
+      "label": "Contracts",
+      "count": 3
+    },
+    {
+      "entity_type": "payment_method",
+      "label": "Payment Methods",
+      "count": 3
+    },
+    {
+      "entity_type": "reference_range",
+      "label": "Reference Ranges",
+      "count": 3
+    },
+    {
+      "entity_type": "icd10",
+      "label": "ICD-10 Registry",
+      "count": 3
+    },
+    {
+      "entity_type": "loinc",
+      "label": "LOINC Registry",
+      "count": 3
+    },
+    {
+      "entity_type": "notification_template",
+      "label": "Notification Templates",
+      "count": 3
+    }
+  ],
+  "missing_data": [],
+  "duplicates": []
+}

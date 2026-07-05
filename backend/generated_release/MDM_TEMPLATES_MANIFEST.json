@@ -1,0 +1,249 @@
+{
+  "generated_at": "2026-07-05T11:20:59.743857+00:00",
+  "entity_count": 18,
+  "templates": [
+    {
+      "entity_type": "test_catalog",
+      "csv": "templates/mdm/test_catalog.csv",
+      "columns": [
+        "code",
+        "name",
+        "category",
+        "sample_type",
+        "price",
+        "loinc_code",
+        "unit",
+        "turnaround_hours"
+      ],
+      "xlsx": "templates/mdm/test_catalog.xlsx"
+    },
+    {
+      "entity_type": "test_package",
+      "csv": "templates/mdm/test_package.csv",
+      "columns": [
+        "code",
+        "name",
+        "description",
+        "package_price",
+        "test_codes",
+        "status"
+      ],
+      "xlsx": "templates/mdm/test_package.xlsx"
+    },
+    {
+      "entity_type": "sample_type",
+      "csv": "templates/mdm/sample_type.csv",
+      "columns": [
+        "code",
+        "name",
+        "description",
+        "collection_instructions",
+        "storage_temp"
+      ],
+      "xlsx": "templates/mdm/sample_type.xlsx"
+    },
+    {
+      "entity_type": "tube_type",
+      "csv": "templates/mdm/tube_type.csv",
+      "columns": [
+        "code",
+        "name",
+        "color",
+        "additive",
+        "volume_ml",
+        "sample_type_code"
+      ],
+      "xlsx": "templates/mdm/tube_type.xlsx"
+    },
+    {
+      "entity_type": "instrument",
+      "csv": "templates/mdm/instrument.csv",
+      "columns": [
+        "code",
+        "name",
+        "manufacturer",
+        "model",
+        "serial_number",
+        "laboratory_code",
+        "status"
+      ],
+      "xlsx": "templates/mdm/instrument.xlsx"
+    },
+    {
+      "entity_type": "laboratory",
+      "csv": "templates/mdm/laboratory.csv",
+      "columns": [
+        "code",
+        "name",
+        "address",
+        "phone",
+        "email",
+        "accreditation",
+        "tenant_id"
+      ],
+      "xlsx": "templates/mdm/laboratory.xlsx"
+    },
+    {
+      "entity_type": "clinic",
+      "csv": "templates/mdm/clinic.csv",
+      "columns": [
+        "code",
+        "name",
+        "address",
+        "phone",
+        "email",
+        "specialty",
+        "tenant_id"
+      ],
+      "xlsx": "templates/mdm/clinic.xlsx"
+    },
+    {
+      "entity_type": "doctor",
+      "csv": "templates/mdm/doctor.csv",
+      "columns": [
+        "code",
+        "name",
+        "specialty",
+        "license_number",
+        "phone",
+        "email",
+        "clinic_code"
+      ],
+      "xlsx": "templates/mdm/doctor.xlsx"
+    },
+    {
+      "entity_type": "collector",
+      "csv": "templates/mdm/collector.csv",
+      "columns": [
+        "code",
+        "name",
+        "phone",
+        "email",
+        "region",
+        "vehicle_type",
+        "status"
+      ],
+      "xlsx": "templates/mdm/collector.xlsx"
+    },
+    {
+      "entity_type": "department",
+      "csv": "templates/mdm/department.csv",
+      "columns": [
+        "code",
+        "name",
+        "parent_code",
+        "organization_code",
+        "department_type"
+      ],
+      "xlsx": "templates/mdm/department.xlsx"
+    },
+    {
+      "entity_type": "insurance",
+      "csv": "templates/mdm/insurance.csv",
+      "columns": [
+        "code",
+        "name",
+        "payer_type",
+        "contact_phone",
+        "contact_email",
+        "policy_prefix"
+      ],
+      "xlsx": "templates/mdm/insurance.xlsx"
+    },
+    {
+      "entity_type": "price_list",
+      "csv": "templates/mdm/price_list.csv",
+      "columns": [
+        "code",
+        "name",
+        "currency",
+        "effective_from",
+        "effective_to",
+        "contract_code"
+      ],
+      "xlsx": "templates/mdm/price_list.xlsx"
+    },
+    {
+      "entity_type": "contract",
+      "csv": "templates/mdm/contract.csv",
+      "columns": [
+        "code",
+        "name",
+        "party_code",
+        "start_date",
+        "end_date",
+        "contract_type",
+        "discount_percent"
+      ],
+      "xlsx": "templates/mdm/contract.xlsx"
+    },
+    {
+      "entity_type": "payment_method",
+      "csv": "templates/mdm/payment_method.csv",
+      "columns": [
+        "code",
+        "name",
+        "method_type",
+        "provider",
+        "fee_percent",
+        "is_online"
+      ],
+      "xlsx": "templates/mdm/payment_method.xlsx"
+    },
+    {
+      "entity_type": "reference_range",
+      "csv": "templates/mdm/reference_range.csv",
+      "columns": [
+        "code",
+        "name",
+        "test_code",
+        "gender",
+        "age_min",
+        "age_max",
+        "low_value",
+        "high_value",
+        "unit"
+      ],
+      "xlsx": "templates/mdm/reference_range.xlsx"
+    },
+    {
+      "entity_type": "icd10",
+      "csv": "templates/mdm/icd10.csv",
+      "columns": [
+        "code",
+        "name",
+        "category",
+        "chapter",
+        "is_billable"
+      ],
+      "xlsx": "templates/mdm/icd10.xlsx"
+    },
+    {
+      "entity_type": "loinc",
+      "csv": "templates/mdm/loinc.csv",
+      "columns": [
+        "code",
+        "name",
+        "component",
+        "system",
+        "property",
+        "scale",
+        "method"
+      ],
+      "xlsx": "templates/mdm/loinc.xlsx"
+    },
+    {
+      "entity_type": "notification_template",
+      "csv": "templates/mdm/notification_template.csv",
+      "columns": [
+        "code",
+        "name",
+        "channel",
+        "subject",
+        "body_template",
+        "locale"
+      ],
+      "xlsx": "templates/mdm/notification_template.xlsx"
+    }
+  ]
+}

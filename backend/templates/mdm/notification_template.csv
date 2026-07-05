@@ -1,0 +1,2 @@
+code,name,channel,subject,body_template,locale
+RESULT-READY,Result Ready SMS,sms,,Your result for {{test_name}} is ready.,vi

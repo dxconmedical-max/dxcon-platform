@@ -1,0 +1,164 @@
+{
+  "report": "MASTER_DATA_IMPORT_REPORT",
+  "generated_at": "2026-07-05T11:21:46.838517+00:00",
+  "database": "postgresql",
+  "elapsed_seconds": 45.83,
+  "entity_imports": [
+    {
+      "entity_type": "test_catalog",
+      "batch_code": "MDM-20260705112107-77CC76",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "test_package",
+      "batch_code": "MDM-20260705112109-C58D40",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "sample_type",
+      "batch_code": "MDM-20260705112111-F39C70",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "tube_type",
+      "batch_code": "MDM-20260705112112-95F8AD",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "instrument",
+      "batch_code": "MDM-20260705112113-CBE9A7",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "laboratory",
+      "batch_code": "MDM-20260705112117-E40206",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "clinic",
+      "batch_code": "MDM-20260705112119-8A1032",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "doctor",
+      "batch_code": "MDM-20260705112120-E3A097",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "collector",
+      "batch_code": "MDM-20260705112121-B3A732",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "department",
+      "batch_code": "MDM-20260705112123-776543",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "insurance",
+      "batch_code": "MDM-20260705112124-4CC5F9",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "price_list",
+      "batch_code": "MDM-20260705112125-40B33F",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "contract",
+      "batch_code": "MDM-20260705112128-BD1C2B",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "payment_method",
+      "batch_code": "MDM-20260705112131-747C02",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "reference_range",
+      "batch_code": "MDM-20260705112132-C201CB",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "icd10",
+      "batch_code": "MDM-20260705112133-5D9C87",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "loinc",
+      "batch_code": "MDM-20260705112135-EFD577",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    },
+    {
+      "entity_type": "notification_template",
+      "batch_code": "MDM-20260705112137-ECE571",
+      "status": "committed",
+      "committed_rows": 1,
+      "ok": true
+    }
+  ],
+  "checks": {
+    "imports_all_entities": {
+      "ok": true,
+      "passed": 18,
+      "total": 18
+    },
+    "duplicate_detection": {
+      "ok": true,
+      "duplicate_rows": 1,
+      "valid_rows": 0
+    },
+    "rollback": {
+      "ok": true,
+      "status": "inactive"
+    },
+    "dashboard": {
+      "ok": true,
+      "records": 59,
+      "populated": 18
+    },
+    "no_duplicates": {
+      "ok": true,
+      "duplicates": []
+    }
+  },
+  "summary": {
+    "passed": 5,
+    "total": 5,
+    "ok": true
+  }
+}

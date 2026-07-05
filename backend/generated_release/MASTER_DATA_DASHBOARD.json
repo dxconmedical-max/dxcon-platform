@@ -1,0 +1,962 @@
+{
+  "report": "MASTER_DATA_DASHBOARD",
+  "generated_at": "2026-07-05T11:21:46.239383",
+  "totals": {
+    "records": 59,
+    "active": 56,
+    "inactive": 3,
+    "entity_types": 18,
+    "populated_entity_types": 18
+  },
+  "counts_by_entity": [
+    {
+      "entity_type": "test_catalog",
+      "label": "Test Catalog",
+      "count": 5
+    },
+    {
+      "entity_type": "test_package",
+      "label": "Test Packages",
+      "count": 3
+    },
+    {
+      "entity_type": "sample_type",
+      "label": "Sample Types",
+      "count": 6
+    },
+    {
+      "entity_type": "tube_type",
+      "label": "Tube Types",
+      "count": 3
+    },
+    {
+      "entity_type": "instrument",
+      "label": "Instruments",
+      "count": 3
+    },
+    {
+      "entity_type": "laboratory",
+      "label": "Laboratories",
+      "count": 3
+    },
+    {
+      "entity_type": "clinic",
+      "label": "Clinics",
+      "count": 3
+    },
+    {
+      "entity_type": "doctor",
+      "label": "Doctors",
+      "count": 3
+    },
+    {
+      "entity_type": "collector",
+      "label": "Collectors",
+      "count": 3
+    },
+    {
+      "entity_type": "department",
+      "label": "Departments",
+      "count": 3
+    },
+    {
+      "entity_type": "insurance",
+      "label": "Insurance",
+      "count": 3
+    },
+    {
+      "entity_type": "price_list",
+      "label": "Price Lists",
+      "count": 3
+    },
+    {
+      "entity_type": "contract",
+      "label": "Contracts",
+      "count": 3
+    },
+    {
+      "entity_type": "payment_method",
+      "label": "Payment Methods",
+      "count": 3
+    },
+    {
+      "entity_type": "reference_range",
+      "label": "Reference Ranges",
+      "count": 3
+    },
+    {
+      "entity_type": "icd10",
+      "label": "ICD-10 Registry",
+      "count": 3
+    },
+    {
+      "entity_type": "loinc",
+      "label": "LOINC Registry",
+      "count": 3
+    },
+    {
+      "entity_type": "notification_template",
+      "label": "Notification Templates",
+      "count": 3
+    }
+  ],
+  "missing_data": [],
+  "duplicate_records": [],
+  "inactive_records": 3,
+  "import_history": [
+    {
+      "id": "1cdf2707-1628-4dff-bab4-4672507313e4",
+      "batch_code": "MDM-20260705112141-3D6B53",
+      "entity_type": "sample_type",
+      "file_name": "rb.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "rolled_back",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "RB-SAMPLE-60E05D",
+            "name": "Whole Blood",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "description",
+          "collection_instructions",
+          "storage_temp"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify@dxcon.test",
+      "approved_at": "2026-07-05T11:21:42.258925",
+      "committed_by": "verify@dxcon.test",
+      "committed_at": "2026-07-05T11:21:44.065018",
+      "rolled_back_by": "verify@dxcon.test",
+      "rolled_back_at": "2026-07-05T11:21:45.236470",
+      "created_by": "verify@dxcon.test",
+      "created_at": "2026-07-05T11:21:41.729256",
+      "updated_at": "2026-07-05T11:21:45.300095"
+    },
+    {
+      "id": "1ad2b6d1-5cce-4ba5-a73b-f2dc8536c918",
+      "batch_code": "MDM-20260705112141-8EB5FF",
+      "entity_type": "test_catalog",
+      "file_name": "dup2.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 0,
+      "duplicate_rows": 1,
+      "error_rows": 0,
+      "committed_rows": 0,
+      "status": "validated",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-DUP-60E05D",
+            "name": "Complete Blood Count",
+            "status": "duplicate",
+            "errors": [
+              "duplicate code in master data: MDM-DUP-60E05D"
+            ]
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "category",
+          "sample_type",
+          "price",
+          "loinc_code",
+          "unit",
+          "turnaround_hours"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": null,
+      "approved_at": null,
+      "committed_by": null,
+      "committed_at": null,
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify@dxcon.test",
+      "created_at": "2026-07-05T11:21:41.204141",
+      "updated_at": "2026-07-05T11:21:41.334630"
+    },
+    {
+      "id": "d81e7802-e6e9-4dfc-997f-fcb97581a145",
+      "batch_code": "MDM-20260705112139-D7ED0C",
+      "entity_type": "test_catalog",
+      "file_name": "dup.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-DUP-60E05D",
+            "name": "Complete Blood Count",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "category",
+          "sample_type",
+          "price",
+          "loinc_code",
+          "unit",
+          "turnaround_hours"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify@dxcon.test",
+      "approved_at": "2026-07-05T11:21:39.831490",
+      "committed_by": "verify@dxcon.test",
+      "committed_at": "2026-07-05T11:21:40.815879",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify@dxcon.test",
+      "created_at": "2026-07-05T11:21:39.233950",
+      "updated_at": "2026-07-05T11:21:40.866203"
+    },
+    {
+      "id": "994b7de4-c412-4aff-8d8f-c710397a6791",
+      "batch_code": "MDM-20260705112137-ECE571",
+      "entity_type": "notification_template",
+      "file_name": "notification_template.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-NOTIFICA-60E05D",
+            "name": "Result Ready SMS",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "channel",
+          "subject",
+          "body_template",
+          "locale"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:37.706480",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:38.318307",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:37.652724",
+      "updated_at": "2026-07-05T11:21:38.631704"
+    },
+    {
+      "id": "c2f9159b-5fa0-441c-ae61-473179ef7965",
+      "batch_code": "MDM-20260705112135-EFD577",
+      "entity_type": "loinc",
+      "file_name": "loinc.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-LOINC-60E05D",
+            "name": "Glucose [Mass/volume] in Serum or Plasma",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "component",
+          "system",
+          "property",
+          "scale",
+          "method"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:35.706185",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:36.896551",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:35.646643",
+      "updated_at": "2026-07-05T11:21:36.976694"
+    },
+    {
+      "id": "a1ab89e1-6dc1-41fb-bc84-4a7f84c3f3e9",
+      "batch_code": "MDM-20260705112133-5D9C87",
+      "entity_type": "icd10",
+      "file_name": "icd10.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-ICD10-60E05D",
+            "name": "Type 2 diabetes mellitus without complications",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "category",
+          "chapter",
+          "is_billable"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:33.555210",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:34.682281",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:33.505925",
+      "updated_at": "2026-07-05T11:21:34.754188"
+    },
+    {
+      "id": "f9682e61-5c6d-4342-af0f-f4c9a0732b51",
+      "batch_code": "MDM-20260705112132-C201CB",
+      "entity_type": "reference_range",
+      "file_name": "reference_range.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-REFERENC-60E05D",
+            "name": "Glucose Fasting Female",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "test_code",
+          "gender",
+          "age_min",
+          "age_max",
+          "low_value",
+          "high_value",
+          "unit"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:32.118307",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:32.798255",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:32.066029",
+      "updated_at": "2026-07-05T11:21:32.868532"
+    },
+    {
+      "id": "82119bd4-34b8-4a0b-9450-9ad2541abe3f",
+      "batch_code": "MDM-20260705112131-747C02",
+      "entity_type": "payment_method",
+      "file_name": "payment_method.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-PAYMENT--60E05D",
+            "name": "Cash",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "method_type",
+          "provider",
+          "fee_percent",
+          "is_online"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:31.052951",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:31.580960",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:31.002617",
+      "updated_at": "2026-07-05T11:21:31.633186"
+    },
+    {
+      "id": "e053a4f1-ef32-4af0-97d8-2eaebae45feb",
+      "batch_code": "MDM-20260705112128-BD1C2B",
+      "entity_type": "contract",
+      "file_name": "contract.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-CONTRACT-60E05D",
+            "name": "Corporate Wellness Contract",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "party_code",
+          "start_date",
+          "end_date",
+          "contract_type",
+          "discount_percent"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:28.334523",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:30.255076",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:28.278121",
+      "updated_at": "2026-07-05T11:21:30.317802"
+    },
+    {
+      "id": "f4612725-dfbf-4178-ac2d-9437414cadae",
+      "batch_code": "MDM-20260705112125-40B33F",
+      "entity_type": "price_list",
+      "file_name": "price_list.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-PRICE-LI-60E05D",
+            "name": "Standard Price List 2026",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "currency",
+          "effective_from",
+          "effective_to",
+          "contract_code"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:26.160598",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:27.259646",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:25.988775",
+      "updated_at": "2026-07-05T11:21:27.310516"
+    },
+    {
+      "id": "8d011b56-1690-44cc-b225-b25f7a34d612",
+      "batch_code": "MDM-20260705112124-4CC5F9",
+      "entity_type": "insurance",
+      "file_name": "insurance.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-INSURANC-60E05D",
+            "name": "Bao Viet Insurance",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "payer_type",
+          "contact_phone",
+          "contact_email",
+          "policy_prefix"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:24.960212",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:25.442861",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:24.895210",
+      "updated_at": "2026-07-05T11:21:25.500955"
+    },
+    {
+      "id": "770f5c49-9eee-4c7f-86dd-7d4b0ccb197e",
+      "batch_code": "MDM-20260705112123-776543",
+      "entity_type": "department",
+      "file_name": "department.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-DEPARTME-60E05D",
+            "name": "Central Laboratory",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "parent_code",
+          "organization_code",
+          "department_type"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:23.257934",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:23.788302",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:23.131505",
+      "updated_at": "2026-07-05T11:21:24.186733"
+    },
+    {
+      "id": "6987e19d-6fbd-46c4-bbf3-d0c81983a368",
+      "batch_code": "MDM-20260705112121-B3A732",
+      "entity_type": "collector",
+      "file_name": "collector.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-COLLECTO-60E05D",
+            "name": "Collector Team Alpha",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "phone",
+          "email",
+          "region",
+          "vehicle_type",
+          "status"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:21.946758",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:22.645425",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:21.887240",
+      "updated_at": "2026-07-05T11:21:22.702174"
+    },
+    {
+      "id": "d4aca47e-8499-4648-97e1-b81e9976fe9c",
+      "batch_code": "MDM-20260705112120-E3A097",
+      "entity_type": "doctor",
+      "file_name": "doctor.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-DOCTOR-60E05D",
+            "name": "Dr. Nguyen Van A",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "specialty",
+          "license_number",
+          "phone",
+          "email",
+          "clinic_code"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:20.580806",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:21.318226",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:20.519212",
+      "updated_at": "2026-07-05T11:21:21.368203"
+    },
+    {
+      "id": "607e69aa-c2cb-463c-b2c8-251569cb305e",
+      "batch_code": "MDM-20260705112119-8A1032",
+      "entity_type": "clinic",
+      "file_name": "clinic.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-CLINIC-60E05D",
+            "name": "DxCon Partner Clinic",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "address",
+          "phone",
+          "email",
+          "specialty",
+          "tenant_id"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:19.440649",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:20.041682",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:19.370511",
+      "updated_at": "2026-07-05T11:21:20.092664"
+    },
+    {
+      "id": "78b07fa7-c52c-4c8a-8fbc-837cc236b91f",
+      "batch_code": "MDM-20260705112117-E40206",
+      "entity_type": "laboratory",
+      "file_name": "laboratory.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-LABORATO-60E05D",
+            "name": "DxCon HCMC Central Lab",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "address",
+          "phone",
+          "email",
+          "accreditation",
+          "tenant_id"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:17.424475",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:18.402671",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:17.362279",
+      "updated_at": "2026-07-05T11:21:18.559796"
+    },
+    {
+      "id": "ea3c2a26-f114-401a-9ad1-83e6089f77c9",
+      "batch_code": "MDM-20260705112113-CBE9A7",
+      "entity_type": "instrument",
+      "file_name": "instrument.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-INSTRUME-60E05D",
+            "name": "Hematology Analyzer",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "manufacturer",
+          "model",
+          "serial_number",
+          "laboratory_code",
+          "status"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:13.856999",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:14.729650",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:13.745140",
+      "updated_at": "2026-07-05T11:21:14.809567"
+    },
+    {
+      "id": "5fc5deed-306c-40b6-8194-abed6c10aa42",
+      "batch_code": "MDM-20260705112112-95F8AD",
+      "entity_type": "tube_type",
+      "file_name": "tube_type.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-TUBE-TYP-60E05D",
+            "name": "EDTA Tube",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "color",
+          "additive",
+          "volume_ml",
+          "sample_type_code"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:12.887022",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:13.256038",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:12.837265",
+      "updated_at": "2026-07-05T11:21:13.307924"
+    },
+    {
+      "id": "769f736a-b6ca-4a6e-9776-f69d90c9ddf1",
+      "batch_code": "MDM-20260705112111-F39C70",
+      "entity_type": "sample_type",
+      "file_name": "sample_type.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-SAMPLE-T-60E05D",
+            "name": "Whole Blood",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "description",
+          "collection_instructions",
+          "storage_temp"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:11.631220",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:11.998080",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:11.580520",
+      "updated_at": "2026-07-05T11:21:12.064542"
+    },
+    {
+      "id": "442f585e-2d23-40b2-ab19-1c877bde54e7",
+      "batch_code": "MDM-20260705112109-C58D40",
+      "entity_type": "test_package",
+      "file_name": "test_package.csv",
+      "file_format": "csv",
+      "total_rows": 1,
+      "valid_rows": 1,
+      "duplicate_rows": 0,
+      "error_rows": 0,
+      "committed_rows": 1,
+      "status": "committed",
+      "preview": {
+        "sample": [
+          {
+            "row_number": 1,
+            "code": "MDM-TEST-PAC-60E05D",
+            "name": "Executive Health Panel",
+            "status": "valid",
+            "errors": []
+          }
+        ],
+        "columns": [
+          "code",
+          "name",
+          "description",
+          "package_price",
+          "test_codes",
+          "status"
+        ]
+      },
+      "error_summary": null,
+      "approved_by": "verify-mdm@dxcon.test",
+      "approved_at": "2026-07-05T11:21:09.490277",
+      "committed_by": "verify-mdm@dxcon.test",
+      "committed_at": "2026-07-05T11:21:10.628426",
+      "rolled_back_by": null,
+      "rolled_back_at": null,
+      "created_by": "verify-mdm@dxcon.test",
+      "created_at": "2026-07-05T11:21:09.425167",
+      "updated_at": "2026-07-05T11:21:10.921666"
+    }
+  ],
+  "recent_commits": 61,
+  "rolled_back_batches": 3
+}

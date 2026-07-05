@@ -1,0 +1,2 @@
+code,name,category,sample_type,price,loinc_code,unit,turnaround_hours
+CBC,Complete Blood Count,Hematology,BLOOD,150000,58410-2,panel,24
