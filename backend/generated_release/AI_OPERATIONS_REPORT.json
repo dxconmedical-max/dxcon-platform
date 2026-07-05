@@ -1,0 +1,262 @@
+{
+  "generated_at": "2026-07-05T04:53:46.537738+00:00",
+  "phase": "5.10",
+  "sprint": "AI Operations",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 14,
+    "checks_total": 14,
+    "ok": true,
+    "runtime_seconds": 1.601
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "auth": {
+      "ok": true
+    },
+    "ai_operations_dashboard": {
+      "ok": true,
+      "routes": {
+        "/ai-operations": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-operations/incident-summary": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-operations/usage": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-operations/cost": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-operations/accuracy": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-operations/model-health": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ai-operations/prompt-version": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/ai-operations/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/ai-operations/incident-summary": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/ai-operations/usage": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/ai-operations/cost": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/ai-operations/accuracy": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/ai-operations/model-health": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/ai-operations/prompt-version": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/ai-operations/readiness": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 6
+    },
+    "incident_summary": {
+      "ok": true
+    },
+    "usage": {
+      "ok": true
+    },
+    "cost": {
+      "ok": true
+    },
+    "accuracy": {
+      "ok": true
+    },
+    "model_health": {
+      "ok": true
+    },
+    "prompt_version": {
+      "ok": true
+    },
+    "legacy_ai_platform_usage_preserved": {
+      "ok": true
+    },
+    "legacy_ai_platform_prompts_preserved": {
+      "ok": true
+    },
+    "legacy_enterprise_analytics_ai_preserved": {
+      "ok": true
+    }
+  },
+  "readiness": {
+    "features": [
+      "AI Incident Summary",
+      "AI Usage",
+      "AI Cost",
+      "AI Accuracy",
+      "Model Health",
+      "Prompt Version"
+    ],
+    "generated_at": "2026-07-05T04:53:46.546980",
+    "legacy_routes": [
+      "/api/v1/ai-platform/usage",
+      "/api/v1/ai-platform/prompts",
+      "/enterprise-analytics/ai"
+    ],
+    "phase": "5.10",
+    "platform": "AI Operations",
+    "sections": {
+      "accuracy": {
+        "by_status": {},
+        "failure_rate_percent": 0.0,
+        "human_review_completion_percent": 0,
+        "interpretation_rate_percent": 0.0,
+        "jobs_total": 0,
+        "period_end": "2026-07-05T04:53:46.550789",
+        "period_start": "2026-06-05T04:53:46.550789",
+        "read_only": true,
+        "report": "ai_accuracy_metrics",
+        "success_rate_percent": 0.0
+      },
+      "cost": {
+        "by_task_type": [],
+        "period_end": "2026-07-05T04:53:46.550673",
+        "period_start": "2026-06-05T04:53:46.550673",
+        "pricing": {
+          "currency": "USD",
+          "note": "Advisory estimate for pilot budgeting.",
+          "token_cost_per_1k_in": 0.0015,
+          "token_cost_per_1k_out": 0.002
+        },
+        "read_only": true,
+        "report": "ai_cost_metrics",
+        "totals": {
+          "estimated_cost_usd": 0.0,
+          "input_cost_usd": 0.0,
+          "output_cost_usd": 0.0,
+          "requests": 0,
+          "tokens_in": 0,
+          "tokens_out": 0
+        }
+      },
+      "incident_summary": {
+        "audit_events": [],
+        "failed_jobs": [],
+        "incidents": [],
+        "period_end": "2026-07-05T04:53:46.546982",
+        "period_start": "2026-06-05T04:53:46.546982",
+        "read_only": true,
+        "report": "ai_incident_summary",
+        "status": "OK",
+        "summary": {
+          "ai_incidents": 0,
+          "audit_error_events": 0,
+          "failed_inference_jobs": 0
+        }
+      },
+      "model_health": {
+        "models": [],
+        "period_end": "2026-07-05T04:53:46.553621",
+        "period_start": "2026-06-05T04:53:46.553621",
+        "platform_status": "OK",
+        "providers_degraded": 0,
+        "providers_total": 0,
+        "read_only": true,
+        "report": "model_health_metrics"
+      },
+      "prompt_version": {
+        "prompts": [
+          {
+            "active_template_preview": "Provide an advisory summary requiring human review.",
+            "active_version": 1,
+            "metadata": {
+              "author": "system",
+              "status": "active"
+            },
+            "name": "Clinical Summary",
+            "prompt_code": "PROMPT-SUMMARY",
+            "prompt_id": "ae071c40-600f-4712-8ce3-73e0401c646c",
+            "task_type": "summary",
+            "versions_total": 1
+          },
+          {
+            "active_template_preview": "Summarize lab findings for clinician review only. Do not diagnose.",
+            "active_version": 1,
+            "metadata": {
+              "author": "system",
+              "status": "active"
+            },
+            "name": "Result Interpretation",
+            "prompt_code": "PROMPT-INTERPRET",
+            "prompt_id": "dbbc0cc0-56ca-4cfe-bd1f-168deed0f835",
+            "task_type": "interpretation",
+            "versions_total": 1
+          }
+        ],
+        "prompts_total": 2,
+        "read_only": true,
+        "registry_api": "/api/v1/ai-platform/prompts",
+        "report": "prompt_version_metrics"
+      },
+      "usage": {
+        "interpretation_rate_percent": 0.0,
+        "period_end": "2026-07-05T04:53:46.547935",
+        "period_start": "2026-06-05T04:53:46.547935",
+        "read_only": true,
+        "report": "ai_usage_metrics",
+        "usage": {
+          "count": 0,
+          "metrics": [],
+          "totals": {
+            "by_task_type": {},
+            "requests": 0,
+            "tokens_in": 0,
+            "tokens_out": 0
+          }
+        }
+      }
+    },
+    "sprint": "AI Operations",
+    "status": "OK",
+    "summary": {
+      "ai_requests": 0,
+      "estimated_cost_usd": 0.0,
+      "failed_inference_jobs": 0,
+      "prompts_total": 2,
+      "providers_degraded": 0,
+      "success_rate_percent": 0.0
+    }
+  }
+}
