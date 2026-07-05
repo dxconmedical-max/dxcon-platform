@@ -18,6 +18,13 @@ from app.models.biz_order import (
     BizWorkflowAudit,
 )
 from app.models.mdm import MdmImportBatch, MdmImportRow, MdmMasterRecord
+from app.models.partner_foundation import (
+    OrganizationPriceList,
+    OrganizationRole,
+    OrganizationUser,
+    PartnerContract,
+    PartnerOrganization,
+)
 
 from app.models.order import Order
 

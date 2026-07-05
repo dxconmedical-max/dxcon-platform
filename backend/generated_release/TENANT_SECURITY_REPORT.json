@@ -1,0 +1,7 @@
+{
+  "report": "TENANT_SECURITY_REPORT",
+  "organizations": 3,
+  "active_memberships": 9,
+  "isolation_mode": "opt_in_filter",
+  "cross_org_blocked": true
+}

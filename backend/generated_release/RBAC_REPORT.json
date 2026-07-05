@@ -1,0 +1,130 @@
+{
+  "report": "RBAC_REPORT",
+  "roles": [
+    {
+      "id": "c9e036d6-6bc5-4fb0-92d2-26bd75da04b9",
+      "role_code": "ORG_OWNER",
+      "role_name": "Org Owner",
+      "permissions": [
+        "contract.approve",
+        "contract.create",
+        "contract.delete",
+        "contract.update",
+        "contract.view",
+        "data.approve",
+        "data.create",
+        "data.delete",
+        "data.export",
+        "data.import",
+        "data.update",
+        "data.view",
+        "org.create",
+        "org.delete",
+        "org.update",
+        "org.view",
+        "price.create",
+        "price.delete",
+        "price.export",
+        "price.import",
+        "price.update",
+        "price.view",
+        "user.create",
+        "user.delete",
+        "user.invite",
+        "user.update",
+        "user.view"
+      ],
+      "is_active": true
+    },
+    {
+      "id": "43c237ff-d4c8-4aaa-b765-c6868be05e84",
+      "role_code": "CLINIC_ADMIN",
+      "role_name": "Clinic Admin",
+      "permissions": [
+        "contract.create",
+        "contract.update",
+        "contract.view",
+        "data.approve",
+        "data.create",
+        "data.export",
+        "data.update",
+        "data.view",
+        "org.update",
+        "org.view",
+        "price.create",
+        "price.export",
+        "price.update",
+        "price.view",
+        "user.create",
+        "user.invite",
+        "user.update",
+        "user.view"
+      ],
+      "is_active": true
+    },
+    {
+      "id": "4a467364-bf63-4ea4-ad34-6c44d9b7c808",
+      "role_code": "DOCTOR",
+      "role_name": "Doctor",
+      "permissions": [
+        "data.approve",
+        "data.export",
+        "data.update",
+        "data.view",
+        "org.view"
+      ],
+      "is_active": true
+    },
+    {
+      "id": "d0e107b2-2f19-4c79-8312-0337c208b7e2",
+      "role_code": "RECEPTION",
+      "role_name": "Reception",
+      "permissions": [
+        "data.create",
+        "data.export",
+        "data.update",
+        "data.view",
+        "org.view"
+      ],
+      "is_active": true
+    },
+    {
+      "id": "f88c0566-f848-4e1f-a8a0-a2d152acd73a",
+      "role_code": "COLLECTOR",
+      "role_name": "Collector",
+      "permissions": [
+        "data.update",
+        "data.view",
+        "org.view"
+      ],
+      "is_active": true
+    },
+    {
+      "id": "7effa755-bb3b-44b1-9dd5-06b7e674a0d6",
+      "role_code": "FINANCE",
+      "role_name": "Finance",
+      "permissions": [
+        "contract.view",
+        "data.export",
+        "data.view",
+        "org.view",
+        "price.view"
+      ],
+      "is_active": true
+    },
+    {
+      "id": "5fddc467-3faa-42b0-8cf9-edcc94a188dd",
+      "role_code": "VIEWER",
+      "role_name": "Viewer",
+      "permissions": [
+        "data.view",
+        "org.view"
+      ],
+      "is_active": true
+    }
+  ],
+  "global_bypass_roles": [
+    "SUPER_ADMIN",
+    "SYSTEM_ADMIN"
+  ]
+}

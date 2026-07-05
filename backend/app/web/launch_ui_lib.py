@@ -21,12 +21,17 @@ APP_NAV = (
     ("Lab", "/app/lab", "LAB"),
     ("Collector", "/app/collector", "COLLECTOR"),
     ("Patient", "/app/patient", "PATIENT"),
+    ("Master Data", "/app/mdm", "MDM"),
+    ("Administration", "/app/admin/organizations", "ADMIN"),
+    ("Partner", "/app/partner", "PARTNER"),
     ("System", "/app/system", "SYS"),
 )
 
 DEMO_ROLE_DASHBOARDS = {
     "ADMIN": "/app/executive",
     "SUPER_ADMIN": "/app/executive",
+    "SYSTEM_ADMIN": "/app/executive",
+    "MASTER_DATA_ADMIN": "/app/mdm",
     "RECEPTION": "/app/reception",
     "DOCTOR": "/app/doctor",
     "LAB": "/app/lab",
@@ -58,10 +63,20 @@ def css_stylesheet_link() -> str:
     return f'<link rel="stylesheet" href="{html.escape(href)}">'
 
 
+def brand_icon_links() -> str:
+    favicon_svg = url_for("static", filename="branding/favicon.svg")
+    favicon_png = url_for("static", filename="branding/favicon.png")
+    return (
+        f'<link rel="icon" type="image/svg+xml" href="{html.escape(favicon_svg)}">'
+        f'<link rel="icon" type="image/png" href="{html.escape(favicon_png)}">'
+        f'<link rel="apple-touch-icon" href="{url_for("static", filename="branding/app-icon-180.png")}">'
+    )
+
+
 def page_head(title: str) -> str:
     return (
         f'<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-        f"<title>{html.escape(title)} · DxCon</title>{css_stylesheet_link()}"
+        f"<title>{html.escape(title)} · DxCon</title>{brand_icon_links()}{css_stylesheet_link()}"
     )
 
 
@@ -419,22 +434,50 @@ def render_login_page(error: str = "", role_hint: str = "") -> str:
 
 
 def render_marketing_home() -> str:
-    body = """
+    mark_url = url_for("static", filename="branding/dxcon-mark.svg")
+    trusted_partners = (
+        "Metro Health Network",
+        "Pacific Diagnostics",
+        "CareLink Clinics",
+        "VitalPath Labs",
+        "HealthFirst Alliance",
+        "Summit Medical Group",
+    )
+    partner_badges = "".join(
+        f'<span class="launch-partner-badge">{html.escape(name)}</span>' for name in trusted_partners
+    )
+    body = f"""
     <div class="launch-public"><div class="launch-public-inner launch-marketing-hero">
-      <p style="opacity:.85;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">DxCon Healthcare Ecosystem</p>
-      <h1>Diagnostics platform for clinics, labs, home collection, and AI-assisted review.</h1>
-      <p style="max-width:640px;line-height:1.7;opacity:.9;">Enterprise-ready workflows with logistics, integration, marketplace, and regional cloud — human medical review mandatory.</p>
-      <a class="launch-cta" href="/login">Book demo · Sign in</a>
-      <div class="launch-marketing-grid">
-        <div class="launch-marketing-card"><h3>For Clinics</h3><p>Reception, orders, billing, and patient engagement in one shell.</p></div>
-        <div class="launch-marketing-card"><h3>For Labs</h3><p>Sample queue, QC, validation, and released reports.</p></div>
-        <div class="launch-marketing-card"><h3>For Doctors</h3><p>Critical results, timeline, and advisory AI interpretation.</p></div>
-        <div class="launch-marketing-card"><h3>For Patients</h3><p>Orders, reports, invoices, and QR health card.</p></div>
-        <div class="launch-marketing-card"><h3>AI + Logistics</h3><p>Copilots, cold chain, chain of custody, device gateway.</p></div>
-        <div class="launch-marketing-card"><h3>Integration</h3><p>HL7, FHIR, partner APIs, and marketplace services.</p></div>
+      <div class="launch-hero-brand">
+        <img src="{html.escape(mark_url)}" alt="" width="48" height="48">
+        <strong>DxCon</strong>
       </div>
+      <h1>Healthcare Ecosystem</h1>
+      <p class="launch-hero-subtitle">One platform for clinics, labs, doctors, patients, and partners.</p>
+      <div class="launch-hero-cta-row">
+        <a class="launch-cta launch-cta-primary" href="/login/demo?role=ADMIN">Book Demo</a>
+        <a class="launch-cta-ghost" href="#request-quote">Request Quote</a>
+        <a class="launch-cta-ghost" href="/workflow-demo">Video Demo</a>
+      </div>
+      <div class="launch-hero-trusted">
+        <p class="launch-hero-trusted-label">Trusted by…</p>
+        <div class="launch-partner-logos">{partner_badges}</div>
+      </div>
+      <section class="launch-partners-section" id="request-quote">
+        <h2>Partners</h2>
+        <p class="launch-hero-lead">Hospitals, labs, and clinic networks scale operations on DxCon — from order intake to released reports.</p>
+        <a class="launch-cta launch-cta-primary" href="mailto:sales@dxcon.test?subject=DxCon%20Quote%20Request">Request a quote</a>
+        <div class="launch-marketing-grid">
+          <div class="launch-marketing-card"><h3>Hospital Networks</h3><p>Multi-site orders, referrals, and enterprise governance.</p></div>
+          <div class="launch-marketing-card"><h3>Diagnostic Labs</h3><p>Sample queue, QC, validation, and instrument integration.</p></div>
+          <div class="launch-marketing-card"><h3>Clinic Groups</h3><p>Reception, billing, patient engagement, and home collection.</p></div>
+          <div class="launch-marketing-card"><h3>Insurance &amp; Payers</h3><p>Claims-ready workflows and partner revenue analytics.</p></div>
+          <div class="launch-marketing-card"><h3>Home Collection</h3><p>Collector routing, chain of custody, and cold-chain logistics.</p></div>
+          <div class="launch-marketing-card"><h3>API Integrators</h3><p>HL7, FHIR, webhooks, and marketplace services.</p></div>
+        </div>
+      </section>
     </div></div>"""
-    return render_page("DxCon Platform", body, public=True)
+    return render_page("DxCon", body, public=True)
 
 
 def executive_dashboard_body() -> str:
@@ -617,13 +660,16 @@ def collector_dashboard_body() -> str:
 
 def patient_dashboard_body() -> str:
     from app.web.launch_ui_actions import action_button, action_button_row
-    from app.web.launch_ui_data import get_recent_invoices, get_recent_orders, get_recent_reports, get_sample_report_key
+    from app.web.launch_ui_data import get_session_patient_portal
 
-    report_key = get_sample_report_key()
+    portal = get_session_patient_portal()
+    patient = portal["patient"]
+    released = portal.get("released_reports", [])
+    report_key = released[0]["result_code"] if released else "—"
     quick_actions = action_button_row([
-        action_button("View latest report", "release-report", report_key, "report", "/app/patient", primary=True),
-        action_button("Download PDF (demo)", "send-notification", report_key, "report", "/app/patient"),
-        action_button("Pay invoice", "mark-paid", "INV-DEMO-001", "invoice", "/app/patient"),
+        action_button("View latest report", "release-report", report_key, "report", "/app/patient/reports", primary=True),
+        action_button("My profile", "check-in-patient", patient["patient_code"], "patient", "/app/patient/profile"),
+        action_button("Pay invoice", "mark-paid", "INV-DEMO-001", "invoice", "/app/patient/invoices"),
     ])
     actions = action_grid([
         ("My profile", "/app/patient/profile", "Demographics"),
@@ -633,13 +679,12 @@ def patient_dashboard_body() -> str:
         ("Invoices", "/app/patient/invoices", "Billing"),
         ("Notifications", "/app/patient/notifications", "Alerts inbox"),
     ])
-    orders = get_recent_orders(2)
-    reports = get_recent_reports(2)
-    invoices = get_recent_invoices(2)
+    orders = portal.get("orders", [])
+    invoices = portal.get("invoices", [])
     return quick_actions + actions + metric_cards([
         ("Active orders", len(orders)),
-        ("New reports", len(reports)),
-        ("Open invoices", sum(1 for i in invoices if i.get("status", "").upper() != "PAID")),
+        ("Released reports", len(released)),
+        ("Open invoices", sum(1 for i in invoices if i.get("status", "").lower() != "paid")),
     ])
 
 

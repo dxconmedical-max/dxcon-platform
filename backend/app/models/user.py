@@ -39,6 +39,13 @@ class User(db.Model):
         default=True
     )
 
+    organization_id = db.Column(
+        db.String(36),
+        db.ForeignKey("organizations.id"),
+        nullable=True,
+        index=True,
+    )
+
     created_at = db.Column(
         db.DateTime,
         default=datetime.utcnow
@@ -56,6 +63,7 @@ class User(db.Model):
             "email": self.email,
             "phone": self.phone,
             "role": self.role,
+            "organization_id": self.organization_id,
             "is_active": self.is_active,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None

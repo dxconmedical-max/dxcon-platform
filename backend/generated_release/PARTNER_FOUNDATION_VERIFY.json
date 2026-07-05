@@ -1,0 +1,52 @@
+{
+  "sprint": "005",
+  "module": "partner_foundation",
+  "timestamp": "2026-07-05T19:08:49.955736+00:00",
+  "elapsed_seconds": 15.65,
+  "passed": 11,
+  "total": 11,
+  "checks": {
+    "organization_crud": {
+      "ok": true
+    },
+    "partner_users": {
+      "ok": true,
+      "internal_orgs": true
+    },
+    "contracts": {
+      "ok": true
+    },
+    "price_lists": {
+      "ok": true
+    },
+    "rbac": {
+      "ok": true
+    },
+    "permission_matrix": {
+      "ok": true
+    },
+    "partner_dashboards": {
+      "ok": true,
+      "routes": 12
+    },
+    "api": {
+      "ok": true,
+      "routes": 7
+    },
+    "tenant_isolation": {
+      "ok": true
+    },
+    "no_cross_org_access": {
+      "ok": true
+    },
+    "audit_logs": {
+      "ok": true,
+      "count": 5
+    }
+  },
+  "reports": [
+    "/Users/mac/dxcon-platform/backend/generated_release/PARTNER_FOUNDATION_REPORT.json",
+    "/Users/mac/dxcon-platform/backend/generated_release/RBAC_REPORT.json",
+    "/Users/mac/dxcon-platform/backend/generated_release/TENANT_SECURITY_REPORT.json"
+  ]
+}

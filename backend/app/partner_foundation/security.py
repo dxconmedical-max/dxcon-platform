@@ -1,0 +1,4 @@
+"""Partner foundation API security roles."""
+
+PARTNER_READ_ROLES = frozenset({"SUPER_ADMIN", "SYSTEM_ADMIN", "ADMIN", "ORG_OWNER", "CLINIC_ADMIN", "FINANCE", "VIEWER"})
+PARTNER_WRITE_ROLES = frozenset({"SUPER_ADMIN", "SYSTEM_ADMIN", "ADMIN", "ORG_OWNER", "CLINIC_ADMIN"})
