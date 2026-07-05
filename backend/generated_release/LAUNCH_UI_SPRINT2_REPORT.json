@@ -1,5 +1,5 @@
 {
-  "sprint": "Launch UI Sprint 3",
+  "sprint": "Launch UI Sprint 2 - Functional Role Navigation",
   "generated_at": "2026-07-05T08:02:09.094275+00:00",
   "elapsed_seconds": 1.1,
   "checks": {
@@ -470,5 +470,6 @@
     "passed": 16,
     "total": 16,
     "ok": true
-  }
+  },
+  "module_route_count": 23
 }

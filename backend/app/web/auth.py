@@ -2,7 +2,11 @@ from flask import Blueprint, redirect, request, session
 
 from app.models.patient import Patient
 from app.models.user import User
-from app.web.launch_ui_lib import render_login_page
+from app.web.launch_ui_lib import (
+    DEMO_ROLE_HINTS,
+    demo_role_dashboard,
+    render_login_page,
+)
 import bcrypt
 
 auth_web_bp = Blueprint("auth_web", __name__)
@@ -100,9 +104,34 @@ def login_page():
 
             attach_patient_to_session(user)
 
-            return redirect_by_role(user.role)
+            return redirect("/app/executive")
 
     return render_login_page(error=error, role_hint=role_hint)
+
+
+@auth_web_bp.route("/login/demo")
+def demo_login_page():
+    role = (request.args.get("role") or "ADMIN").upper()
+    email = DEMO_ROLE_HINTS.get(role, DEMO_ROLE_HINTS["ADMIN"])
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        user = User.query.filter(User.role == role).first()
+    if not user and role == "ADMIN":
+        user = User.query.filter(User.role.in_(("ADMIN", "SUPER_ADMIN"))).first()
+
+    if user and user.is_active:
+        session["user_id"] = user.id
+        session["role"] = user.role
+        session["email"] = user.email
+        attach_patient_to_session(user)
+    else:
+        session["user_id"] = f"demo-{role.lower()}"
+        session["role"] = role
+        session["email"] = email
+        session["demo_mode"] = True
+
+    return redirect(demo_role_dashboard(role))
 
 
 @auth_web_bp.route("/logout")

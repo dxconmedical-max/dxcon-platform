@@ -503,6 +503,170 @@ a {
   font-size: 18px;
 }
 
+.launch-back {
+  margin: 0 0 16px;
+}
+
+.launch-action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.launch-action-card {
+  display: block;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.launch-action-card:hover {
+  border-color: var(--brand);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.12);
+}
+
+.launch-action-card strong {
+  display: block;
+  font-size: 15px;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.launch-action-card span {
+  display: block;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.launch-action-card em {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-dark);
+}
+
+.launch-module-intro p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.launch-filter-note p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.launch-breadcrumbs {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.launch-breadcrumbs a {
+  color: #0284c7;
+  font-weight: 600;
+}
+
+.launch-breadcrumbs span {
+  color: #94a3b8;
+  margin: 0 6px;
+}
+
+.launch-status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.launch-status-ok {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.launch-status-warn {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.launch-status-bad {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.launch-btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.launch-empty,
+.launch-empty-inline {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.launch-queue-card label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.launch-queue-card strong {
+  font-size: 28px;
+  color: #0f172a;
+}
+
+.launch-timeline {
+  margin: 0;
+  padding-left: 18px;
+  color: #334155;
+}
+
+.launch-timeline li {
+  margin-bottom: 10px;
+}
+
+.launch-timeline strong {
+  display: block;
+  color: #0f172a;
+}
+
+.launch-timeline span {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.launch-form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.launch-alert {
+  border-left: 4px solid #f59e0b;
+  background: #fffbeb;
+}
+
 @media (max-width: 900px) {
   .launch-shell {
     grid-template-columns: 1fr;

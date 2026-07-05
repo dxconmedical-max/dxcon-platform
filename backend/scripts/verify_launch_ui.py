@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify Launch UI Sprint 1 routes and generate LAUNCH_UI_REPORT.json."""
+"""Verify Launch UI routes, styling, and Sprint 2 functional navigation."""
 
 from __future__ import annotations
 
@@ -13,6 +13,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED = ROOT / "generated_release"
 REPORT_PATH = GENERATED / "LAUNCH_UI_REPORT.json"
+SPRINT2_REPORT_PATH = GENERATED / "LAUNCH_UI_SPRINT2_REPORT.json"
+SPRINT3_REPORT_PATH = GENERATED / "LAUNCH_UI_SPRINT3_REPORT.json"
 
 PUBLIC_ROUTES = (
     "/home",
@@ -21,7 +23,7 @@ PUBLIC_ROUTES = (
     "/ready",
 )
 
-APP_ROUTES = (
+ROLE_DASHBOARD_ROUTES = (
     "/app/executive",
     "/app/reception",
     "/app/doctor",
@@ -32,6 +34,23 @@ APP_ROUTES = (
     "/executive-v10",
 )
 
+STYLED_ROUTES = (
+    "/login",
+    "/home",
+    *ROLE_DASHBOARD_ROUTES,
+)
+
+CSS_MARKER = "css/dxcon.css"
+
+ROLE_DEMO_CHECKS = (
+    ("ADMIN", "/app/executive"),
+    ("DOCTOR", "/app/doctor"),
+    ("LAB", "/app/lab"),
+    ("RECEPTION", "/app/reception"),
+    ("COLLECTOR", "/app/collector"),
+    ("PATIENT", "/app/patient"),
+)
+
 
 def _routes_from_file(path: Path) -> list[str]:
     routes: list[str] = []
@@ -39,23 +58,6 @@ def _routes_from_file(path: Path) -> list[str]:
         if '.route("' in line:
             routes.append(line.split('.route("')[1].split('"')[0])
     return list(dict.fromkeys(routes))
-
-
-STYLED_ROUTES = (
-    "/login",
-    "/home",
-    "/app/executive",
-    "/app/reception",
-    "/app/doctor",
-    "/app/lab",
-    "/app/collector",
-    "/app/patient",
-    "/app/system",
-)
-
-CSS_MARKER = "css/dxcon.css"
-
-WEB_ROUTES = _routes_from_file(ROOT / "app" / "web" / "launch_ui.py")
 
 
 def utc_now() -> str:
@@ -69,6 +71,7 @@ def _login_admin(client):
     if not user:
         return False
     with client.session_transaction() as sess:
+        sess.clear()
         sess["user_id"] = user.id
         sess["role"] = user.role
         sess["email"] = user.email
@@ -92,6 +95,8 @@ def _page_ok(client, path: str, *, follow: bool = True) -> bool:
 def main() -> int:
     sys.path.insert(0, str(ROOT))
     os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
+
+    from app.web.launch_ui_modules import MODULE_ROUTES
 
     print("\n=== DXCON LAUNCH UI VERIFY ===\n")
     start = time.perf_counter()
@@ -117,12 +122,14 @@ def main() -> int:
             )
             db.session.commit()
 
+        dashboard_routes = _routes_from_file(ROOT / "app" / "web" / "launch_ui.py")
         routes = {str(r.rule) for r in app.url_map.iter_rules()}
-        missing_web = [r for r in WEB_ROUTES if r not in routes]
+        missing_dashboard = [r for r in dashboard_routes if r not in routes]
+        missing_modules = [r for r in MODULE_ROUTES if r not in routes]
         checks["route_registry"] = {
-            "ok": not missing_web,
-            "missing": missing_web,
-            "registered": WEB_ROUTES,
+            "ok": not missing_dashboard and not missing_modules,
+            "missing_dashboard": missing_dashboard,
+            "missing_modules": missing_modules,
         }
 
         client = app.test_client()
@@ -149,30 +156,44 @@ def main() -> int:
         checks["auth"] = {"ok": _login_admin(client)}
 
         app_results = {}
-        for path in APP_ROUTES:
+        for path in ROLE_DASHBOARD_ROUTES:
             response = client.get(path, follow_redirects=True)
+            body = response.get_data(as_text=True) or ""
             app_results[path] = {
                 "status_code": response.status_code,
-                "ok": response.status_code == 200 and "launch-shell" in (response.get_data(as_text=True) or ""),
+                "ok": response.status_code == 200 and "launch-shell" in body and _has_stylesheet(body),
             }
-        checks["app_pages"] = {
+        checks["role_dashboards"] = {
             "ok": all(item["ok"] for item in app_results.values()),
             "routes": app_results,
+        }
+
+        module_results = {}
+        for path in MODULE_ROUTES:
+            response = client.get(path, follow_redirects=True)
+            body = response.get_data(as_text=True) or ""
+            module_results[path] = {
+                "status_code": response.status_code,
+                "ok": response.status_code == 200 and "launch-shell" in body and _has_stylesheet(body),
+            }
+        checks["module_pages"] = {
+            "ok": all(item["ok"] for item in module_results.values()),
+            "routes": module_results,
         }
 
         login_html = client.get("/login").get_data(as_text=True)
         checks["login_shell"] = {
             "ok": "launch-login-card" in login_html and "Sign in" in login_html and _has_stylesheet(login_html),
         }
+        home_html = client.get("/home").get_data(as_text=True)
         checks["marketing_shell"] = {
-            "ok": "launch-marketing-hero" in client.get("/home").get_data(as_text=True)
-            and _has_stylesheet(client.get("/home").get_data(as_text=True)),
+            "ok": "launch-marketing-hero" in home_html and _has_stylesheet(home_html),
         }
 
         css_response = client.get("/static/css/dxcon.css")
         css_text = css_response.get_data(as_text=True)
         checks["static_css_asset"] = {
-            "ok": css_response.status_code == 200 and ".launch-login-wrap" in css_text,
+            "ok": css_response.status_code == 200 and ".launch-action-card" in css_text,
             "status_code": css_response.status_code,
         }
 
@@ -181,42 +202,132 @@ def main() -> int:
             if path == "/login":
                 page_html = login_html
             elif path == "/home":
-                page_html = client.get("/home").get_data(as_text=True)
+                page_html = home_html
             else:
                 page_html = client.get(path, follow_redirects=True).get_data(as_text=True)
-            styled_results[path] = {
-                "ok": _has_stylesheet(page_html),
-                "status_code": 200 if page_html else 0,
-            }
+            styled_results[path] = {"ok": _has_stylesheet(page_html)}
         checks["stylesheet_links"] = {
             "ok": all(item["ok"] for item in styled_results.values()),
             "routes": styled_results,
+        }
+
+        demo_results = {}
+        for role, target in ROLE_DEMO_CHECKS:
+            with client.session_transaction() as sess:
+                sess.clear()
+            response = client.get(f"/login/demo?role={role}", follow_redirects=False)
+            location = response.headers.get("Location") or ""
+            demo_results[role] = {
+                "ok": response.status_code in {302, 303, 307, 308} and target in location,
+                "location": location,
+            }
+        checks["demo_role_entry"] = {
+            "ok": all(item["ok"] for item in demo_results.values()),
+            "routes": demo_results,
+        }
+
+        demo_exec = client.get("/login/demo?role=ADMIN", follow_redirects=True)
+        checks["demo_dashboard_entry"] = {
+            "ok": demo_exec.status_code == 200 and "/app/executive" in (demo_exec.request.path or ""),
+        }
+
+        from app.web.launch_ui_data import get_demo_counts, get_sample_order_key, get_sample_patient_key, get_sample_report_key
+
+        counts = get_demo_counts()
+        checks["demo_data_layer"] = {
+            "ok": all(k in counts for k in ("patients", "orders", "tests", "revenue", "pending_reports")),
+            "counts": counts,
+        }
+
+        detail_routes = {
+            "patient": f"/app/patients/{get_sample_patient_key()}",
+            "order": f"/app/orders/{get_sample_order_key()}",
+            "report": f"/app/reports/{get_sample_report_key()}",
+        }
+        detail_results = {}
+        page_markers = {
+            "/app/executive": "Recent orders",
+            "/app/patients": "Patient directory",
+            "/app/orders": "Recent orders",
+            "/app/reports": "Report queue",
+            "/app/finance": "Invoices",
+            "/app/ai": "Safety disclaimer",
+            "/app/samples": "Sample queue",
+            "/app/iot": "Cold boxes",
+            detail_routes["patient"]: "Orders timeline",
+            detail_routes["order"]: "Order timeline",
+            detail_routes["report"]: "Report preview",
+        }
+        marker_results = {}
+        for path, marker in page_markers.items():
+            response = client.get(path, follow_redirects=True)
+            body = response.get_data(as_text=True) or ""
+            marker_results[path] = {
+                "ok": response.status_code == 200 and marker in body and _has_stylesheet(body),
+                "status_code": response.status_code,
+                "marker": marker,
+            }
+        for name, path in detail_routes.items():
+            response = client.get(path, follow_redirects=True)
+            body = response.get_data(as_text=True) or ""
+            detail_results[path] = {
+                "ok": response.status_code == 200 and "launch-shell" in body,
+                "status_code": response.status_code,
+            }
+        checks["detail_routes"] = {
+            "ok": all(item["ok"] for item in detail_results.values()),
+            "routes": detail_results,
+        }
+        checks["page_markers"] = {
+            "ok": all(item["ok"] for item in marker_results.values()),
+            "routes": marker_results,
+        }
+
+        no_500_paths = list(MODULE_ROUTES) + list(ROLE_DASHBOARD_ROUTES) + list(detail_routes.values())
+        status_results = {path: client.get(path, follow_redirects=True).status_code for path in no_500_paths}
+        checks["no_server_errors"] = {
+            "ok": all(code == 200 for code in status_results.values()),
+            "status_codes": status_results,
         }
 
         passed = sum(1 for item in checks.values() if item.get("ok"))
         total = len(checks)
         elapsed = round(time.perf_counter() - start, 2)
 
+        summary = {"passed": passed, "total": total, "ok": passed == total}
+        route_payload = {
+            "public": list(PUBLIC_ROUTES),
+            "role_dashboards": list(ROLE_DASHBOARD_ROUTES),
+            "modules": list(MODULE_ROUTES),
+            "detail": detail_routes,
+            "demo_entry": [{"role": r, "target": t} for r, t in ROLE_DEMO_CHECKS],
+        }
+
         report = {
-            "sprint": "Launch UI Hotfix - Visual Product Polish",
+            "sprint": "Launch UI Sprint 3",
             "generated_at": utc_now(),
             "elapsed_seconds": elapsed,
             "checks": checks,
-            "routes": {
-                "public": list(PUBLIC_ROUTES),
-                "app": list(APP_ROUTES),
-                "styled": list(STYLED_ROUTES),
-                "launch_ui_blueprint": WEB_ROUTES,
-            },
-            "summary": {
-                "passed": passed,
-                "total": total,
-                "ok": passed == total,
-            },
+            "routes": route_payload,
+            "demo_counts": counts,
+            "summary": summary,
+        }
+
+        sprint2_report = {
+            **report,
+            "sprint": "Launch UI Sprint 2 - Functional Role Navigation",
+            "module_route_count": len(MODULE_ROUTES),
+        }
+        sprint3_report = {
+            **report,
+            "sprint": "Launch UI Sprint 3 - Real Demo Data and Workflow Pages",
+            "detail_route_count": len(detail_routes),
         }
 
         GENERATED.mkdir(parents=True, exist_ok=True)
         REPORT_PATH.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+        SPRINT2_REPORT_PATH.write_text(json.dumps(sprint2_report, indent=2, default=str), encoding="utf-8")
+        SPRINT3_REPORT_PATH.write_text(json.dumps(sprint3_report, indent=2, default=str), encoding="utf-8")
 
         for name, payload in checks.items():
             print(f"{'PASS' if payload.get('ok') else 'FAIL'}: {name}")
@@ -226,8 +337,10 @@ def main() -> int:
                         print(f"  {key}: {value}")
 
         print(f"\nSummary: {passed}/{total} passed in {elapsed}s")
-        print(f"Report: {REPORT_PATH}\n")
-        return 0 if report["summary"]["ok"] else 1
+        print(f"Report: {REPORT_PATH}")
+        print(f"Sprint 2 report: {SPRINT2_REPORT_PATH}")
+        print(f"Sprint 3 report: {SPRINT3_REPORT_PATH}\n")
+        return 0 if summary["ok"] else 1
 
 
 if __name__ == "__main__":
