@@ -1,0 +1,89 @@
+{
+  "generated_at": "2026-07-05T05:22:18.855853",
+  "phase": "8",
+  "platform": "Intelligent Healthcare Platform",
+  "governance": {
+    "advisory_only": true,
+    "automatic_diagnosis": false,
+    "human_review_required": true,
+    "clinical_disclaimer": "This output is advisory only and does not constitute a medical diagnosis. Human clinical review is required before any clinical action.",
+    "postgresql_only": true,
+    "backward_compatible": true,
+    "destructive_migrations": false
+  },
+  "safety_layer": {
+    "report": "ai_safety_layer",
+    "blocked_patterns": [
+      "definitive diagnosis",
+      "auto-diagnose",
+      "automatic diagnosis",
+      "diagnose without review",
+      "replace physician",
+      "prescribe without review"
+    ],
+    "disclaimer": "This output is advisory only and does not constitute a medical diagnosis. Human clinical review is required before any clinical action.",
+    "sample_check": {
+      "allowed": true,
+      "violations": [],
+      "human_review_required": true
+    }
+  },
+  "medical_guardrails": {
+    "report": "medical_guardrails",
+    "guardrails": {
+      "advisory_only": true,
+      "automatic_diagnosis": false,
+      "human_review_required": true,
+      "clinical_disclaimer": "This output is advisory only and does not constitute a medical diagnosis. Human clinical review is required before any clinical action.",
+      "postgresql_only": true,
+      "backward_compatible": true,
+      "destructive_migrations": false
+    },
+    "blocked_patterns": [
+      "definitive diagnosis",
+      "auto-diagnose",
+      "automatic diagnosis",
+      "diagnose without review",
+      "replace physician",
+      "prescribe without review"
+    ],
+    "enforcement": "AISafetyPolicy"
+  },
+  "phi_redaction": {
+    "report": "phi_redaction",
+    "sample_input": "Patient Nguyen Van A, DOB 1980-01-01, MRN 12345",
+    "redacted": "Patient Nguyen Van A, DOB 1980-01-01, [REDACTED_MRN]"
+  },
+  "hallucination_detection": {
+    "report": "hallucination_detection",
+    "status": "READY",
+    "checks": [
+      "citation_required",
+      "confidence_threshold",
+      "blocked_patterns",
+      "human_review_flag"
+    ],
+    "blocked_patterns": [
+      "definitive diagnosis",
+      "auto-diagnose",
+      "automatic diagnosis",
+      "diagnose without review",
+      "replace physician",
+      "prescribe without review"
+    ]
+  },
+  "human_review_mandatory": true,
+  "automatic_diagnosis_permitted": false,
+  "audit_trail": {
+    "report": "prompt_audit",
+    "audit_entries": 0,
+    "recent": []
+  },
+  "compliance_notes": [
+    "All AI outputs are advisory-only",
+    "Doctor review required before clinical action",
+    "PHI redacted before external LLM calls",
+    "Prompt and inference audit logged",
+    "Blocked patterns prevent auto-diagnosis language"
+  ]
+}

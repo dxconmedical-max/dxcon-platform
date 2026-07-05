@@ -1,0 +1,291 @@
+{
+  "generated_at": "2026-07-05T05:22:18.855848",
+  "phase": "8",
+  "platform": "Intelligent Healthcare Platform",
+  "status": "OK",
+  "policy": {
+    "advisory_only": true,
+    "automatic_diagnosis": false,
+    "human_review_required": true,
+    "clinical_disclaimer": "This output is advisory only and does not constitute a medical diagnosis. Human clinical review is required before any clinical action.",
+    "postgresql_only": true,
+    "backward_compatible": true,
+    "destructive_migrations": false
+  },
+  "summary": {
+    "modules": 31,
+    "providers": 1,
+    "prompts": 2,
+    "audit_entries": 0,
+    "usage_records": 0,
+    "scaffold_modules": 2
+  },
+  "features": [
+    "AI Clinical Platform",
+    "Medical Knowledge Base",
+    "Clinical Rules Engine",
+    "Reference Range Engine",
+    "LOINC Registry",
+    "ICD10 Registry",
+    "SNOMED Mapping Layer",
+    "Drug Knowledge Layer",
+    "Medical OCR Platform",
+    "Voice Clinical Platform",
+    "AI Copilot",
+    "Doctor Copilot",
+    "Reception Copilot",
+    "Collector Copilot",
+    "CEO Copilot",
+    "Predictive Analytics",
+    "Clinical Summary",
+    "Patient-friendly Explanation",
+    "AI Gateway",
+    "LLM Provider Registry",
+    "Prompt Registry",
+    "Prompt Versioning",
+    "AI Safety Layer",
+    "Prompt Audit",
+    "Cost Analytics",
+    "Hallucination Detection",
+    "Model Comparison",
+    "PHI Redaction",
+    "Medical Guardrails",
+    "Clinical Recommendation Engine",
+    "AI Monitoring Dashboard"
+  ],
+  "sections": {
+    "ai_clinical_platform": {
+      "platform": "AI Clinical Platform",
+      "summary": {
+        "providers": 1,
+        "prompts": 2,
+        "audit_entries": 0,
+        "usage_records": 0,
+        "router_tasks": 6
+      },
+      "legacy_route": "/ai-clinical",
+      "advisory_only": true,
+      "human_review_required": true,
+      "clinical_disclaimer": "This output is advisory only and does not constitute a medical diagnosis. Human clinical review is required before any clinical action.",
+      "task_type": "interpretation",
+      "automation_level": "advisory",
+      "report": "ai_clinical_platform",
+      "doctor_review_required": true
+    },
+    "medical_knowledge_base": {
+      "report": "medical_knowledge_base",
+      "guidelines_count": 6,
+      "diseases_count": 2,
+      "rule_chains": 2,
+      "legacy_routes": [
+        "/knowledge",
+        "/api/v1/guidelines",
+        "/api/v1/diseases"
+      ]
+    },
+    "clinical_rules_engine": {
+      "packs": 9,
+      "engine": "ClinicalRuleEngineService",
+      "legacy_route": "/api/v1/ai-cds",
+      "advisory_only": true,
+      "human_review_required": true,
+      "clinical_disclaimer": "This output is advisory only and does not constitute a medical diagnosis. Human clinical review is required before any clinical action.",
+      "task_type": "interpretation",
+      "automation_level": "advisory",
+      "report": "clinical_rules_engine",
+      "doctor_review_required": true
+    },
+    "reference_range_engine": {
+      "report": "reference_range_engine",
+      "ranges_count": 0,
+      "legacy_route": "/api/v1/reference-ranges"
+    },
+    "loinc_registry": {
+      "report": "loinc_registry",
+      "system": {},
+      "sample_validation": {
+        "system": "LOINC",
+        "code": "2345-7",
+        "valid": false,
+        "errors": [
+          "Unknown code 2345-7 in LOINC"
+        ]
+      },
+      "legacy_route": "/standards-advanced/loinc"
+    },
+    "icd10_registry": {
+      "report": "icd10_registry",
+      "sample_validation": {
+        "system": "ICD10",
+        "code": "E11.9",
+        "valid": false,
+        "errors": [
+          "Unknown code E11.9 in ICD10"
+        ]
+      },
+      "legacy_route": "/standards-advanced/icd10"
+    },
+    "snomed_mapping_layer": {
+      "report": "snomed_mapping_layer",
+      "sample_resolution": {
+        "source_type": "LOINC",
+        "source_code": "2345-7",
+        "count": 0,
+        "mappings": []
+      },
+      "mappings_count": 0,
+      "legacy_route": "/api/v1/standards/mappings"
+    },
+    "drug_knowledge_layer": {
+      "report": "drug_knowledge_layer",
+      "status": "SCAFFOLD",
+      "drugs": [
+        {
+          "code": "METFORMIN",
+          "name": "Metformin",
+          "class": "Antidiabetic",
+          "interaction_check": true
+        },
+        {
+          "code": "LISINOPRIL",
+          "name": "Lisinopril",
+          "class": "ACE inhibitor",
+          "interaction_check": true
+        },
+        {
+          "code": "ATORVASTATIN",
+          "name": "Atorvastatin",
+          "class": "Statin",
+          "interaction_check": true
+        }
+      ],
+      "interaction_check": true,
+      "note": "Extend knowledge_engine for full RxNorm integration"
+    },
+    "medical_ocr_platform": {
+      "report": "medical_ocr_platform",
+      "status": "SCAFFOLD",
+      "pipelines": [
+        "lab_requisition",
+        "insurance_card",
+        "prescription",
+        "result_report"
+      ],
+      "human_review_required": true,
+      "phi_redaction_before_storage": true
+    },
+    "voice_clinical_platform": {
+      "voice": {
+        "report": "voice_session",
+        "active_sessions": 0,
+        "status": "SCAFFOLD"
+      },
+      "legacy_route": "/voice-platform",
+      "advisory_only": true,
+      "human_review_required": true,
+      "clinical_disclaimer": "This output is advisory only and does not constitute a medical diagnosis. Human clinical review is required before any clinical action.",
+      "task_type": "summary",
+      "automation_level": "advisory",
+      "report": "voice_clinical_platform",
+      "doctor_review_required": true
+    },
+    "ai_gateway": {
+      "report": "ai_gateway",
+      "providers": 1,
+      "default_routes": {
+        "interpretation": "LOCAL",
+        "summary": "LOCAL",
+        "risk": "LOCAL",
+        "general": "LOCAL"
+      },
+      "legacy_route": "/api/v1/ai-platform"
+    },
+    "ai_safety_layer": {
+      "report": "ai_safety_layer",
+      "blocked_patterns": [
+        "definitive diagnosis",
+        "auto-diagnose",
+        "automatic diagnosis",
+        "diagnose without review",
+        "replace physician",
+        "prescribe without review"
+      ],
+      "disclaimer": "This output is advisory only and does not constitute a medical diagnosis. Human clinical review is required before any clinical action.",
+      "sample_check": {
+        "allowed": true,
+        "violations": [],
+        "human_review_required": true
+      }
+    },
+    "phi_redaction": {
+      "report": "phi_redaction",
+      "sample_input": "Patient Nguyen Van A, DOB 1980-01-01, MRN 12345",
+      "redacted": "Patient Nguyen Van A, DOB 1980-01-01, [REDACTED_MRN]"
+    },
+    "medical_guardrails": {
+      "report": "medical_guardrails",
+      "guardrails": {
+        "advisory_only": true,
+        "automatic_diagnosis": false,
+        "human_review_required": true,
+        "clinical_disclaimer": "This output is advisory only and does not constitute a medical diagnosis. Human clinical review is required before any clinical action.",
+        "postgresql_only": true,
+        "backward_compatible": true,
+        "destructive_migrations": false
+      },
+      "blocked_patterns": [
+        "definitive diagnosis",
+        "auto-diagnose",
+        "automatic diagnosis",
+        "diagnose without review",
+        "replace physician",
+        "prescribe without review"
+      ],
+      "enforcement": "AISafetyPolicy"
+    },
+    "ai_monitoring_dashboard": {
+      "report": "ai_monitoring_dashboard",
+      "usage": {
+        "count": 0,
+        "totals": {
+          "requests": 0,
+          "tokens_in": 0,
+          "tokens_out": 0,
+          "by_task_type": {}
+        },
+        "metrics": []
+      },
+      "operations": {
+        "report": "ai_usage_metrics",
+        "period_start": "2026-06-05T05:22:18.851611",
+        "period_end": "2026-07-05T05:22:18.851611",
+        "read_only": true,
+        "usage": {
+          "count": 0,
+          "totals": {
+            "requests": 0,
+            "tokens_in": 0,
+            "tokens_out": 0,
+            "by_task_type": {}
+          },
+          "metrics": []
+        },
+        "interpretation_rate_percent": 0.0
+      },
+      "legacy_route": "/ai-operations"
+    }
+  },
+  "architecture_docs": [
+    "docs/architecture/AI_ARCHITECTURE.md",
+    "docs/architecture/AI_SEQUENCE_DIAGRAMS.md",
+    "docs/architecture/AI_COMPONENTS.md",
+    "docs/MEDICAL_AI_GUIDE.md"
+  ],
+  "legacy_hubs": [
+    "/ai-clinical",
+    "/ai-copilot",
+    "/ai-operations",
+    "/voice-platform",
+    "/standards-advanced"
+  ]
+}

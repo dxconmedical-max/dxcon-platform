@@ -1,0 +1,58 @@
+{
+  "generated_at": "2026-07-05T05:22:18.861055+00:00",
+  "phase": "8",
+  "sprint": "Intelligent Healthcare Platform",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 12,
+    "checks_total": 12,
+    "ok": true,
+    "runtime_seconds": 1.98
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "architecture_docs": {
+      "ok": true,
+      "paths": [
+        "docs/architecture/AI_ARCHITECTURE.md",
+        "docs/architecture/AI_SEQUENCE_DIAGRAMS.md",
+        "docs/architecture/AI_COMPONENTS.md",
+        "docs/MEDICAL_AI_GUIDE.md"
+      ]
+    },
+    "auth": {
+      "ok": true
+    },
+    "web_pages": {
+      "ok": true
+    },
+    "api_endpoints": {
+      "ok": true
+    },
+    "feature_coverage": {
+      "ok": true
+    },
+    "governance_policy": {
+      "ok": true
+    },
+    "legacy_ai_clinical": {
+      "ok": true
+    },
+    "legacy_ai_copilot": {
+      "ok": true
+    },
+    "legacy_ai_operations": {
+      "ok": true
+    },
+    "readiness_report": {
+      "ok": true
+    },
+    "governance_report": {
+      "ok": true
+    }
+  }
+}
