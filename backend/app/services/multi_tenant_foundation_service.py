@@ -51,10 +51,33 @@ class MultiTenantFoundationError(Exception):
 
 
 def ensure_multi_tenant_foundation() -> dict[str, Any]:
+    _ensure_tenant_columns()
     ensure_demo_clinics()
     _link_operational_entities()
     _ensure_default_org_settings()
     return {"ready": True}
+
+
+def _ensure_tenant_columns() -> None:
+    """Add nullable tenant/org FK columns to existing tables when absent."""
+    from sqlalchemy import inspect, text
+
+    from app.infrastructure.schema_introspection import get_table_columns, table_exists_name
+
+    specs = (
+        ("clinic_profiles", "tenant_id", "VARCHAR(36)"),
+        ("clinic_profiles", "organization_id", "VARCHAR(36)"),
+        ("laboratories", "tenant_id", "VARCHAR(36)"),
+        ("laboratories", "organization_id", "VARCHAR(36)"),
+    )
+    inspector = inspect(db.engine)
+    for table, column, col_type in specs:
+        if not table_exists_name(table):
+            continue
+        if column in get_table_columns(table):
+            continue
+        with db.engine.begin() as conn:
+            conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}"))
 
 
 def _link_operational_entities() -> dict[str, Any]:
