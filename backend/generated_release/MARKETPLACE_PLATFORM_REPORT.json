@@ -1,0 +1,157 @@
+{
+  "generated_at": "2026-07-05T05:02:35.097083+00:00",
+  "phase": "7.2",
+  "sprint": "Marketplace",
+  "summary": {
+    "score": 100.0,
+    "checks_passed": 17,
+    "checks_total": 17,
+    "ok": true,
+    "runtime_seconds": 1.696
+  },
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing_web": [],
+      "missing_api": []
+    },
+    "sdk_guide": {
+      "ok": true,
+      "path": "docs/PLUGIN_SDK_GUIDE.md"
+    },
+    "auth": {
+      "ok": true
+    },
+    "web_pages": {
+      "ok": true,
+      "routes": {
+        "/marketplace-platform": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/marketplace-platform/marketplace": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/marketplace-platform/registry": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/marketplace-platform/manifest": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/marketplace-platform/installer": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/marketplace-platform/versions": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/marketplace-platform/dependencies": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/marketplace-platform/permissions": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/marketplace-platform/sandbox": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/marketplace-platform/health": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "api_endpoints": {
+      "ok": true,
+      "routes": {
+        "/api/v1/marketplace-platform/dashboard": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/marketplace-platform/marketplace": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/marketplace-platform/registry": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/marketplace-platform/manifest": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/marketplace-platform/installer": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/marketplace-platform/versions": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/marketplace-platform/dependencies": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/marketplace-platform/permissions": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/marketplace-platform/sandbox": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/marketplace-platform/health": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/api/v1/marketplace-platform/readiness": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "feature_coverage": {
+      "ok": true,
+      "features": 9
+    },
+    "marketplace": {
+      "ok": true
+    },
+    "plugin_registry": {
+      "ok": true
+    },
+    "plugin_manifest": {
+      "ok": true
+    },
+    "plugin_installer": {
+      "ok": true
+    },
+    "plugin_version": {
+      "ok": true
+    },
+    "plugin_dependency": {
+      "ok": true
+    },
+    "plugin_permission": {
+      "ok": true
+    },
+    "plugin_sandbox": {
+      "ok": true
+    },
+    "plugin_health": {
+      "ok": true
+    },
+    "legacy_marketplace_preserved": {
+      "ok": true
+    },
+    "legacy_plugins_api_preserved": {
+      "ok": true
+    }
+  }
+}
