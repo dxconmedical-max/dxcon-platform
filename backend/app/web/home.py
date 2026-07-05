@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app
+from flask import Blueprint, current_app, redirect
 
 from app.infrastructure.production_health import health_payload
 
@@ -14,8 +14,8 @@ def _status_color(status: str) -> str:
     return "#b91c1c"
 
 
-@home_web_bp.route("/")
-def index():
+@home_web_bp.route("/demo-landing")
+def demo_landing():
     payload, _ = health_payload(current_app._get_current_object())
     status = payload.get("status", "UNKNOWN")
     app_env = payload.get("app_env", "unknown")

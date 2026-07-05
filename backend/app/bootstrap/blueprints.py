@@ -15,6 +15,7 @@ from app.api.ai_v2.routes import ai_interpret_v2_bp
 from app.api.security.routes import security_api_bp
 from app.api.ops.routes import ops_bp
 from app.web.home import home_web_bp
+from app.web.launch_ui import launch_ui_bp
 from app.web.executive_v9 import executive_v9_bp
 from app.web.crm_v2 import crm_v2_web_bp
 from app.web.reception import reception_web_bp
@@ -429,6 +430,7 @@ def register_blueprints(app):
     app.register_blueprint(regional_cloud_web_bp)
     app.register_blueprint(healthcare_ecosystem_web_bp)
     app.register_blueprint(pilot_pages_bp)
+    app.register_blueprint(launch_ui_bp)
     app.register_blueprint(home_web_bp)
     app.register_blueprint(ops_bp)
     app.register_blueprint(security_api_bp)

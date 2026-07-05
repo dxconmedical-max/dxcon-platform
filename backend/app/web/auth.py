@@ -1,9 +1,9 @@
-from flask import Blueprint, request, redirect, session
-import bcrypt
+from flask import Blueprint, redirect, request, session
 
-from app.models.user import User
 from app.models.patient import Patient
-
+from app.models.user import User
+from app.web.launch_ui_lib import render_login_page
+import bcrypt
 
 auth_web_bp = Blueprint("auth_web", __name__)
 
@@ -51,27 +51,31 @@ def attach_patient_to_session(user):
 def redirect_by_role(role):
 
     if role == "DOCTOR":
-        return redirect("/doctor")
+        return redirect("/app/doctor")
 
     if role == "RECEPTION":
-        return redirect("/reception")
+        return redirect("/app/reception")
 
     if role == "COLLECTOR":
-        return redirect("/collector")
+        return redirect("/app/collector")
 
-    if role == "LAB_TECHNICIAN":
-        return redirect("/samples")
+    if role in ("LAB", "LAB_TECHNICIAN"):
+        return redirect("/app/lab")
 
     if role == "PATIENT":
-        return redirect("/my-portal")
+        return redirect("/app/patient")
 
-    return redirect("/dashboard")
+    if role in ("ADMIN", "SUPER_ADMIN"):
+        return redirect("/app/executive")
+
+    return redirect("/app/system")
 
 
 @auth_web_bp.route("/login", methods=["GET", "POST"])
 def login_page():
 
     error = ""
+    role_hint = request.args.get("role", "")
 
     if request.method == "POST":
 
@@ -98,30 +102,7 @@ def login_page():
 
             return redirect_by_role(user.role)
 
-    return f"""
-    <html>
-    <body style="font-family:Arial;background:#f1f5f9;padding:40px;">
-
-        <h1>DxCon Login</h1>
-
-        <p style="color:red;">{error}</p>
-
-        <form method="POST">
-            <input name="email" placeholder="Email" style="padding:10px;width:300px;">
-            <br><br>
-
-            <input name="password" type="password" placeholder="Password" style="padding:10px;width:300px;">
-            <br><br>
-
-            <button type="submit">Login</button>
-        </form>
-
-        <br>
-        <a href="/my-portal">My Patient Portal</a>
-
-    </body>
-    </html>
-    """
+    return render_login_page(error=error, role_hint=role_hint)
 
 
 @auth_web_bp.route("/logout")

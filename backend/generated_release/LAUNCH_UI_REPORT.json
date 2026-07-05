@@ -1,0 +1,130 @@
+{
+  "sprint": "Launch UI Sprint 1",
+  "generated_at": "2026-07-05T06:52:25.601415+00:00",
+  "elapsed_seconds": 1.79,
+  "checks": {
+    "route_registry": {
+      "ok": true,
+      "missing": [],
+      "registered": [
+        "/",
+        "/home",
+        "/app/executive",
+        "/executive-v10",
+        "/app/reception",
+        "/app/doctor",
+        "/app/lab",
+        "/app/collector",
+        "/app/patient",
+        "/app/system"
+      ]
+    },
+    "root_redirect": {
+      "ok": true,
+      "status_code": 302,
+      "location": "/login"
+    },
+    "public_pages": {
+      "ok": true,
+      "routes": {
+        "/home": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/login": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/health": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/ready": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "auth": {
+      "ok": true
+    },
+    "app_pages": {
+      "ok": true,
+      "routes": {
+        "/app/executive": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/app/reception": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/app/doctor": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/app/lab": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/app/collector": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/app/patient": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/app/system": {
+          "status_code": 200,
+          "ok": true
+        },
+        "/executive-v10": {
+          "status_code": 200,
+          "ok": true
+        }
+      }
+    },
+    "login_shell": {
+      "ok": true
+    },
+    "marketing_shell": {
+      "ok": true
+    }
+  },
+  "routes": {
+    "public": [
+      "/home",
+      "/login",
+      "/health",
+      "/ready"
+    ],
+    "app": [
+      "/app/executive",
+      "/app/reception",
+      "/app/doctor",
+      "/app/lab",
+      "/app/collector",
+      "/app/patient",
+      "/app/system",
+      "/executive-v10"
+    ],
+    "launch_ui_blueprint": [
+      "/",
+      "/home",
+      "/app/executive",
+      "/executive-v10",
+      "/app/reception",
+      "/app/doctor",
+      "/app/lab",
+      "/app/collector",
+      "/app/patient",
+      "/app/system"
+    ]
+  },
+  "summary": {
+    "passed": 7,
+    "total": 7,
+    "ok": true
+  }
+}
