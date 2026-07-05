@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-07-05T13:51:41.836175+00:00",
+  "ok": true,
+  "passed": 8,
+  "total": 8,
+  "checks": [
+    {
+      "path": "docs/PROJECT_MANUAL.md",
+      "exists": true,
+      "ok": true,
+      "missing_sections": []
+    },
+    {
+      "path": "docs/PRODUCT_BACKLOG.md",
+      "exists": true,
+      "ok": true,
+      "missing_sections": []
+    },
+    {
+      "path": "docs/RELEASE_PLAN.md",
+      "exists": true,
+      "ok": true,
+      "missing_sections": []
+    },
+    {
+      "path": "docs/LAUNCH_CHECKLIST.md",
+      "exists": true,
+      "ok": true,
+      "missing_sections": []
+    },
+    {
+      "path": "docs/SPRINT_TEMPLATE.md",
+      "exists": true,
+      "ok": true,
+      "missing_sections": []
+    },
+    {
+      "path": "docs/sprints/SPRINT-001-MDM.md",
+      "exists": true,
+      "ok": true,
+      "missing_sections": []
+    },
+    {
+      "path": "docs/sprints/SPRINT-002-LAUNCH-UI.md",
+      "exists": true,
+      "ok": true,
+      "missing_sections": []
+    },
+    {
+      "path": "docs/sprints/SPRINT-003-BUSINESS-STABILIZATION.md",
+      "exists": true,
+      "ok": true,
+      "missing_sections": []
+    }
+  ]
+}
