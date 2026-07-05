@@ -50,6 +50,7 @@ from app.web.white_label import white_label_web_bp
 from app.web.federation_platform import federation_platform_web_bp
 from app.web.intelligent_healthcare import intelligent_healthcare_web_bp
 from app.web.regional_cloud import regional_cloud_web_bp
+from app.web.healthcare_ecosystem import healthcare_ecosystem_web_bp
 from app.web.pilot_pages import pilot_pages_bp
 from app.web.finance import finance_web_bp
 
@@ -89,6 +90,7 @@ from app.api.white_label.routes import white_label_bp
 from app.api.federation_platform.routes import federation_platform_bp
 from app.api.intelligent_healthcare.routes import intelligent_healthcare_bp
 from app.api.regional_cloud.routes import regional_cloud_bp
+from app.api.healthcare_ecosystem.routes import healthcare_ecosystem_bp
 from app.api.laboratories.routes import laboratories_bp
 from app.api.test_catalogs.routes import test_catalogs_bp
 from app.api.orders.routes import orders_bp
@@ -287,6 +289,7 @@ def register_blueprints(app):
     app.register_blueprint(federation_platform_bp)
     app.register_blueprint(intelligent_healthcare_bp)
     app.register_blueprint(regional_cloud_bp)
+    app.register_blueprint(healthcare_ecosystem_bp)
     app.register_blueprint(laboratories_bp)
     app.register_blueprint(test_catalogs_bp)
     app.register_blueprint(orders_bp)
@@ -424,6 +427,7 @@ def register_blueprints(app):
     app.register_blueprint(federation_platform_web_bp)
     app.register_blueprint(intelligent_healthcare_web_bp)
     app.register_blueprint(regional_cloud_web_bp)
+    app.register_blueprint(healthcare_ecosystem_web_bp)
     app.register_blueprint(pilot_pages_bp)
     app.register_blueprint(home_web_bp)
     app.register_blueprint(ops_bp)
