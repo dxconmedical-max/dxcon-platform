@@ -9,7 +9,6 @@ from app.web.launch_ui_lib import (
     collector_dashboard_body,
     doctor_dashboard_body,
     executive_dashboard_body,
-    lab_dashboard_body,
     patient_dashboard_body,
     render_marketing_home,
     render_page,
@@ -108,12 +107,6 @@ def app_executive():
 @login_required
 def app_doctor():
     return render_page("Doctor Workbench", doctor_dashboard_body(), active_nav="/app/doctor")
-
-
-@launch_ui_bp.route("/app/lab")
-@login_required
-def app_lab():
-    return render_page("Lab Dashboard", lab_dashboard_body(), active_nav="/app/lab")
 
 
 @launch_ui_bp.route("/app/collector")

@@ -25,6 +25,13 @@ from app.models.partner_foundation import (
     PartnerContract,
     PartnerOrganization,
 )
+from app.models.lab_lis import (
+    LabAccessionRecord,
+    LISConnector,
+    LISFieldMapping,
+    LISImportBatch,
+    LISImportFailedRow,
+)
 
 from app.models.order import Order
 

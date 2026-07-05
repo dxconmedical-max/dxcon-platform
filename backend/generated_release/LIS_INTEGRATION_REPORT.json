@@ -1,0 +1,15 @@
+{
+  "report": "LIS_INTEGRATION_REPORT",
+  "connectors": 1,
+  "import_batches": 5,
+  "failed_rows": 4,
+  "import_requires_validation": true,
+  "auto_release_disabled": true,
+  "adapters": [
+    "REST_API",
+    "HL7",
+    "SFTP_FILE",
+    "CSV_UPLOAD",
+    "JSON_UPLOAD"
+  ]
+}

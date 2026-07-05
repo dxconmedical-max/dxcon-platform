@@ -1,0 +1,7 @@
+{
+  "report": "LAB_SECURITY_REPORT",
+  "lab_technician_can_receive": true,
+  "lab_technician_cannot_release": true,
+  "imported_never_auto_release": true,
+  "import_requires_validation": true
+}

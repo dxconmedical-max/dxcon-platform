@@ -1,0 +1,12 @@
+{
+  "report": "LAB_WORKSPACE_REPORT",
+  "incoming": 2,
+  "received": 1,
+  "testing": 1,
+  "pending_validation": 1,
+  "pending_review": 3,
+  "released_today": 2,
+  "failed_imports": 4,
+  "abnormal_results": 3,
+  "widgets": 10
+}

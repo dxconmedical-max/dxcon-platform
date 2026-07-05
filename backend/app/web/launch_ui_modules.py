@@ -55,8 +55,6 @@ MODULE_ROUTES: tuple[str, ...] = (
     "/app/ai",
     "/app/samples",
     "/app/samples/accession",
-    "/app/lab/testing",
-    "/app/lab/qc",
     "/app/collections",
     "/app/collections/route",
     "/app/iot",
@@ -511,29 +509,9 @@ def samples_accession_body() -> str:
     )
 
 
-@_register("Lab Testing", "/app/lab/testing")
-def lab_testing_body() -> str:
-    tests = get_recent_tests(5)
-    rows = [[_h(t["name"]), "Sysmex / Cobas", status_badge("TESTING"), _h(str(t["turnaround_hours"]) + "h")] for t in tests]
-    return (
-        back_nav("/app/lab", "Lab dashboard")
-        + module_intro("Testing", "Analyzers and manual bench work in progress.")
-        + table_html("Tests in progress", ["Test", "Instrument", "Status", "TAT"], rows)
-        + '<div class="launch-card"><h3>Result entry</h3><p>Manual result entry placeholder — connect LIS integration for production.</p></div>'
-    )
 
 
-@_register("Lab QC", "/app/lab/qc")
-def lab_qc_body() -> str:
-    return (
-        back_nav("/app/lab", "Lab dashboard")
-        + module_intro("Quality control", "Daily QC with abnormal flag monitoring.")
-        + queue_stage_cards({"passed": 2, "running": 1, "abnormal_flags": 0})
-        + table_html("QC runs", ["Run", "Level", "Status", "Flag"], [
-            ["QC-01", "Normal", status_badge("PASS"), status_badge("OK")],
-            ["QC-02", "High", status_badge("PASS"), status_badge("OK")],
-        ])
-    )
+# Lab testing/QC moved to lab_workspace_web (Sprint 007)
 
 
 @_register("Collections", "/app/collections")

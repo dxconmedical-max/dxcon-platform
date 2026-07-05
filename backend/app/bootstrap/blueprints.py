@@ -12,6 +12,7 @@ from app.api.system.routes import system_bp
 from app.api.mdm.routes import mdm_bp
 from app.api.partner_foundation.routes import partner_foundation_bp
 from app.api.reception_workspace.routes import reception_workspace_bp
+from app.api.lab_workspace.routes import lab_workspace_bp
 from app.api.files.routes import files_bp
 from app.api.ai_platform.routes import ai_platform_bp
 from app.api.ai_v2.routes import ai_interpret_v2_bp
@@ -23,6 +24,7 @@ from app.web.business_ui import business_ui_bp
 from app.web.mdm_admin import mdm_web_bp
 from app.web.partner_foundation_admin import partner_foundation_web_bp
 from app.web.reception_workspace_web import reception_workspace_web_bp
+from app.web.lab_workspace_web import lab_workspace_web_bp
 from app.web.executive_v9 import executive_v9_bp
 from app.web.crm_v2 import crm_v2_web_bp
 from app.web.reception import reception_web_bp
@@ -445,6 +447,8 @@ def register_blueprints(app):
     app.register_blueprint(partner_foundation_bp)
     app.register_blueprint(reception_workspace_web_bp)
     app.register_blueprint(reception_workspace_bp)
+    app.register_blueprint(lab_workspace_web_bp)
+    app.register_blueprint(lab_workspace_bp)
     app.register_blueprint(home_web_bp)
     app.register_blueprint(ops_bp)
     app.register_blueprint(security_api_bp)

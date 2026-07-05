@@ -19,6 +19,7 @@ class BizOrder(db.Model):
     subtotal = db.Column(db.Float, default=0)
     discount = db.Column(db.Float, default=0)
     total_amount = db.Column(db.Float, default=0)
+    barcode_value = db.Column(db.String(100), unique=True)
     note = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -36,6 +37,7 @@ class BizOrder(db.Model):
             "subtotal": self.subtotal,
             "discount": self.discount,
             "total_amount": self.total_amount,
+            "barcode_value": self.barcode_value,
             "note": self.note,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
@@ -132,6 +134,8 @@ class BizCollection(db.Model):
     accession_number = db.Column(db.String(50), unique=True)
     received_by = db.Column(db.String(255))
     received_at = db.Column(db.DateTime)
+    condition_status = db.Column(db.String(30))
+    receive_note = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -148,6 +152,8 @@ class BizCollection(db.Model):
             "accession_number": self.accession_number,
             "received_by": self.received_by,
             "received_at": self.received_at.isoformat() if self.received_at else None,
+            "condition_status": self.condition_status,
+            "receive_note": self.receive_note,
         }
 
 
@@ -164,6 +170,9 @@ class BizResult(db.Model):
     released_at = db.Column(db.DateTime)
     html_content = db.Column(db.Text)
     patient_visible = db.Column(db.Boolean, default=False)
+    workflow_status = db.Column(db.String(30), default="draft")
+    result_source = db.Column(db.String(30), default="manual")
+    import_batch_id = db.Column(db.String(36))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -180,6 +189,9 @@ class BizResult(db.Model):
             "approved_by": self.approved_by,
             "released_at": self.released_at.isoformat() if self.released_at else None,
             "patient_visible": self.patient_visible,
+            "workflow_status": self.workflow_status,
+            "result_source": self.result_source,
+            "import_batch_id": self.import_batch_id,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
         if include_items:
@@ -198,6 +210,10 @@ class BizResultItem(db.Model):
     unit = db.Column(db.String(50))
     reference_range = db.Column(db.String(255))
     flag = db.Column(db.String(20), default="NORMAL")
+    instrument = db.Column(db.String(100))
+    technician = db.Column(db.String(255))
+    result_time = db.Column(db.DateTime)
+    entry_note = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self) -> dict:

@@ -1,0 +1,40 @@
+{
+  "sprint": "007",
+  "passed": 10,
+  "total": 10,
+  "checks": {
+    "receive_sample": {
+      "ok": true,
+      "status": "lab_received"
+    },
+    "accession": {
+      "ok": true
+    },
+    "result_entry": {
+      "ok": true
+    },
+    "abnormal_flag": {
+      "ok": true
+    },
+    "qc_pass": {
+      "ok": true
+    },
+    "lab_validation": {
+      "ok": true
+    },
+    "audit": {
+      "ok": true,
+      "count": 16
+    },
+    "dashboard": {
+      "ok": true
+    },
+    "ui": {
+      "ok": true
+    },
+    "api": {
+      "ok": true
+    }
+  },
+  "elapsed": 24.88
+}
