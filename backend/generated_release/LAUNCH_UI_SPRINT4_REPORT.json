@@ -1,5 +1,5 @@
 {
-  "sprint": "Launch UI Sprint 4",
+  "sprint": "Launch UI Sprint 4 - Demo Actions and Detail Experience",
   "generated_at": "2026-07-05T08:25:43.224120+00:00",
   "elapsed_seconds": 1.21,
   "checks": {
@@ -536,5 +536,6 @@
     "passed": 21,
     "total": 21,
     "ok": true
-  }
+  },
+  "action_route_count": 11
 }

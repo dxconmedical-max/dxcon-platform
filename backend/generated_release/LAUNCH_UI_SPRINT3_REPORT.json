@@ -1,7 +1,7 @@
 {
   "sprint": "Launch UI Sprint 3 - Real Demo Data and Workflow Pages",
-  "generated_at": "2026-07-05T08:02:09.094275+00:00",
-  "elapsed_seconds": 1.1,
+  "generated_at": "2026-07-05T08:25:43.224120+00:00",
+  "elapsed_seconds": 1.21,
   "checks": {
     "route_registry": {
       "ok": true,
@@ -326,17 +326,22 @@
         "/app/patients/P-DEMO-001": {
           "ok": true,
           "status_code": 200,
-          "marker": "Orders timeline"
+          "marker": "Order history"
         },
         "/app/orders/ORD-DEMO-001": {
           "ok": true,
           "status_code": 200,
-          "marker": "Order timeline"
+          "marker": "Workflow actions"
         },
         "/app/reports/RPT-DEMO-001": {
           "ok": true,
           "status_code": 200,
-          "marker": "Report preview"
+          "marker": "Doctor review"
+        },
+        "/app/samples/chain-of-custody": {
+          "ok": true,
+          "status_code": 200,
+          "marker": "Custody scan log"
         }
       }
     },
@@ -378,6 +383,67 @@
         "/app/orders/ORD-DEMO-001": 200,
         "/app/reports/RPT-DEMO-001": 200
       }
+    },
+    "demo_action_routes": {
+      "ok": true,
+      "routes": {
+        "check-in-patient": {
+          "ok": true,
+          "status_code": 200
+        },
+        "create-demo-order": {
+          "ok": true,
+          "status_code": 200
+        },
+        "mark-paid": {
+          "ok": true,
+          "status_code": 200
+        },
+        "assign-collector": {
+          "ok": true,
+          "status_code": 200
+        },
+        "collect-sample": {
+          "ok": true,
+          "status_code": 200
+        },
+        "receive-sample": {
+          "ok": true,
+          "status_code": 200
+        },
+        "start-testing": {
+          "ok": true,
+          "status_code": 200
+        },
+        "complete-qc": {
+          "ok": true,
+          "status_code": 200
+        },
+        "doctor-approve": {
+          "ok": true,
+          "status_code": 200
+        },
+        "release-report": {
+          "ok": true,
+          "status_code": 200
+        },
+        "send-notification": {
+          "ok": true,
+          "status_code": 200
+        }
+      }
+    },
+    "order_detail_actions": {
+      "ok": true
+    },
+    "patient_detail_actions": {
+      "ok": true
+    },
+    "report_detail_actions": {
+      "ok": true
+    },
+    "chain_of_custody_page": {
+      "ok": true
     }
   },
   "routes": {
@@ -467,8 +533,8 @@
     "samples_in_transit": 0
   },
   "summary": {
-    "passed": 16,
-    "total": 16,
+    "passed": 21,
+    "total": 21,
     "ok": true
   },
   "detail_route_count": 3

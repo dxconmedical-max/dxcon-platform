@@ -15,6 +15,7 @@ GENERATED = ROOT / "generated_release"
 REPORT_PATH = GENERATED / "LAUNCH_UI_REPORT.json"
 SPRINT2_REPORT_PATH = GENERATED / "LAUNCH_UI_SPRINT2_REPORT.json"
 SPRINT3_REPORT_PATH = GENERATED / "LAUNCH_UI_SPRINT3_REPORT.json"
+SPRINT4_REPORT_PATH = GENERATED / "LAUNCH_UI_SPRINT4_REPORT.json"
 
 PUBLIC_ROUTES = (
     "/home",
@@ -254,9 +255,10 @@ def main() -> int:
             "/app/ai": "Safety disclaimer",
             "/app/samples": "Sample queue",
             "/app/iot": "Cold boxes",
-            detail_routes["patient"]: "Orders timeline",
-            detail_routes["order"]: "Order timeline",
-            detail_routes["report"]: "Report preview",
+            detail_routes["patient"]: "Order history",
+            detail_routes["order"]: "Workflow actions",
+            detail_routes["report"]: "Doctor review",
+            "/app/samples/chain-of-custody": "Custody scan log",
         }
         marker_results = {}
         for path, marker in page_markers.items():
@@ -290,6 +292,36 @@ def main() -> int:
             "status_codes": status_results,
         }
 
+        from app.web.launch_ui_actions import ACTION_SLUGS
+
+        action_results = {}
+        for slug in ACTION_SLUGS:
+            path = f"/app/actions/{slug}?entity_key=demo&entity_type=entity"
+            response = client.get(path, follow_redirects=True)
+            body = response.get_data(as_text=True) or ""
+            action_results[slug] = {
+                "ok": response.status_code == 200 and "launch-toast-success" in body,
+                "status_code": response.status_code,
+            }
+        checks["demo_action_routes"] = {
+            "ok": all(item["ok"] for item in action_results.values()),
+            "routes": action_results,
+        }
+
+        order_detail = client.get(detail_routes["order"]).get_data(as_text=True)
+        checks["order_detail_actions"] = {
+            "ok": "Workflow actions" in order_detail and "Mark paid" in order_detail,
+        }
+        checks["patient_detail_actions"] = {
+            "ok": "Create new order" in client.get(detail_routes["patient"]).get_data(as_text=True),
+        }
+        checks["report_detail_actions"] = {
+            "ok": "Doctor approve" in client.get(detail_routes["report"]).get_data(as_text=True),
+        }
+        checks["chain_of_custody_page"] = {
+            "ok": "Custody scan log" in client.get("/app/samples/chain-of-custody").get_data(as_text=True),
+        }
+
         passed = sum(1 for item in checks.values() if item.get("ok"))
         total = len(checks)
         elapsed = round(time.perf_counter() - start, 2)
@@ -304,7 +336,7 @@ def main() -> int:
         }
 
         report = {
-            "sprint": "Launch UI Sprint 3",
+            "sprint": "Launch UI Sprint 4",
             "generated_at": utc_now(),
             "elapsed_seconds": elapsed,
             "checks": checks,
@@ -323,11 +355,17 @@ def main() -> int:
             "sprint": "Launch UI Sprint 3 - Real Demo Data and Workflow Pages",
             "detail_route_count": len(detail_routes),
         }
+        sprint4_report = {
+            **report,
+            "sprint": "Launch UI Sprint 4 - Demo Actions and Detail Experience",
+            "action_route_count": len(ACTION_SLUGS),
+        }
 
         GENERATED.mkdir(parents=True, exist_ok=True)
         REPORT_PATH.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
         SPRINT2_REPORT_PATH.write_text(json.dumps(sprint2_report, indent=2, default=str), encoding="utf-8")
         SPRINT3_REPORT_PATH.write_text(json.dumps(sprint3_report, indent=2, default=str), encoding="utf-8")
+        SPRINT4_REPORT_PATH.write_text(json.dumps(sprint4_report, indent=2, default=str), encoding="utf-8")
 
         for name, payload in checks.items():
             print(f"{'PASS' if payload.get('ok') else 'FAIL'}: {name}")
@@ -339,7 +377,8 @@ def main() -> int:
         print(f"\nSummary: {passed}/{total} passed in {elapsed}s")
         print(f"Report: {REPORT_PATH}")
         print(f"Sprint 2 report: {SPRINT2_REPORT_PATH}")
-        print(f"Sprint 3 report: {SPRINT3_REPORT_PATH}\n")
+        print(f"Sprint 3 report: {SPRINT3_REPORT_PATH}")
+        print(f"Sprint 4 report: {SPRINT4_REPORT_PATH}\n")
         return 0 if summary["ok"] else 1
 
 

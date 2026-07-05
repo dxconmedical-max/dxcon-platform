@@ -17,6 +17,7 @@ from app.web.launch_ui_lib import (
     system_dashboard_body,
 )
 from app.web.launch_ui_modules import DETAIL_ROUTE_BUILDERS, MODULE_SPECS
+from app.web.launch_ui_actions import ACTION_SLUGS, handle_demo_action
 
 launch_ui_bp = Blueprint("launch_ui", __name__)
 
@@ -67,6 +68,24 @@ for _pattern, _body_fn in DETAIL_ROUTE_BUILDERS:
     _title = {"patients": "Patient Profile", "orders": "Order Detail", "reports": "Report Detail"}
     label = next(v for k, v in _title.items() if k in _pattern)
     launch_ui_bp.add_url_rule(_pattern, view_func=_detail_view(_pattern, label, _body_fn, _nav))
+
+
+def _action_view(slug: str):
+    @login_required
+    def view():
+        body = handle_demo_action(slug)
+        return render_page("Action complete", body, active_nav="/app/executive")
+
+    view.__name__ = f"launch_action_{slug.replace('-', '_')}"
+    return view
+
+
+for _slug in ACTION_SLUGS:
+    launch_ui_bp.add_url_rule(
+        f"/app/actions/{_slug}",
+        view_func=_action_view(_slug),
+        methods=["GET", "POST"],
+    )
 
 
 @launch_ui_bp.route("/")

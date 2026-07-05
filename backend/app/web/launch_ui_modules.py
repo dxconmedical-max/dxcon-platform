@@ -6,6 +6,11 @@ from typing import Callable
 
 import html as html_module
 
+from app.web.launch_ui_actions import (
+    action_button,
+    action_button_row,
+    workflow_stage_cards,
+)
 from app.web.launch_ui_data import (
     get_finance_summary,
     get_order_detail,
@@ -81,6 +86,7 @@ def _h(value: str) -> str:
 
 def patient_detail_body(patient_key: str) -> str:
     patient = get_patient_detail(patient_key)
+    pk = _h(patient_key)
     order_rows = []
     for order in patient.get("orders", []):
         key = _h(order["order_code"])
@@ -89,57 +95,104 @@ def patient_detail_body(patient_key: str) -> str:
             status_badge(order.get("status", "PENDING")),
             f"${order.get('total_amount', 0):,.0f}",
         ])
+    report_rows = []
+    for label, status in [("CBC", "RELEASED"), ("Lipid panel", "PENDING")]:
+        report_rows.append([label, status_badge(status)])
+    invoice_rows = [[f"INV-{pk[-3:]}", "$45", status_badge("PAID")]]
     return (
-        breadcrumbs([("Patients", "/app/patients"), (patient["full_name"], f"/app/patients/{_h(patient_key)}")])
+        breadcrumbs([("Patients", "/app/patients"), (patient["full_name"], f"/app/patients/{pk}")])
         + metric_cards([
             ("Code", patient["patient_code"]),
             ("Phone", patient["phone"]),
             ("Gender", patient["gender"]),
         ])
-        + table_html("Orders timeline", ["Order", "Status", "Amount"], order_rows or [])
-        + table_section("Reports", ["Report", "Status"], [["CBC", "Released"], ["Lipid", "Pending"]])
-        + table_section("Invoices", ["Invoice", "Amount"], [["INV-01", "$45"]])
+        + table_section("Demographics & contact", ["Field", "Value"], [
+            ["Email", patient.get("email", "—")],
+            ["Address", patient.get("address", "—")],
+            ["Phone", patient["phone"]],
+        ])
+        + '<div class="launch-card"><h3>QR health card</h3><div class="launch-chart">QR placeholder · '
+        + f'{pk}</div><p class="launch-hint"><a href="/app/patient/qr">Open patient QR</a></p></div>'
+        + table_html("Order history", ["Order", "Status", "Amount"], order_rows or [])
+        + table_html("Report history", ["Report", "Status"], report_rows)
+        + table_html("Invoice history", ["Invoice", "Amount", "Status"], invoice_rows)
+        + action_button_row([
+            action_button("Create new order", "create-demo-order", patient_key, "patient", f"/app/patients/{pk}", primary=True),
+            action_button("Check in", "check-in-patient", patient_key, "patient", f"/app/patients/{pk}"),
+            action_button("Notify patient", "send-notification", patient_key, "patient", f"/app/patients/{pk}"),
+        ])
     )
 
 
 def order_detail_body(order_key: str) -> str:
     order = get_order_detail(order_key)
-    patient_key = _h(order.get("patient_id", ""))
+    patient_key = order.get("patient_id", "")
+    pk = _h(patient_key)
+    ok = _h(order_key)
+    ret = f"/app/orders/{ok}"
+    stages = [
+        ("Payment", "PAID", "08:05"),
+        ("Collection", "COLLECTED", "09:15"),
+        ("Lab transit", "IN_TRANSIT", "09:45"),
+        ("Testing", "TESTING", "10:30"),
+        ("Report", "PENDING_REVIEW", "—"),
+    ]
     return (
-        breadcrumbs([("Orders", "/app/orders"), (order["order_code"], f"/app/orders/{_h(order_key)}")])
+        breadcrumbs([("Orders", "/app/orders"), (order["order_code"], ret)])
         + metric_cards([
             ("Status", order["status"]),
             ("Amount", f"${order['total_amount']:,.0f}"),
             ("Patient", order["patient_name"]),
         ])
-        + timeline_section("Order timeline", order.get("timeline", []))
-        + table_section("Ordered tests", ["Test", "Status"], [["Blood panel", "In lab"], ["Glucose", "Queued"]])
-        + table_html("Linked records", ["Area", "Status"], [
+        + f'<div class="launch-card"><h3>Patient summary</h3><p><a href="/app/patients/{pk}">{_h(order["patient_name"])}</a> · Code {pk}</p></div>'
+        + workflow_stage_cards(stages)
+        + timeline_section("Workflow timeline", order.get("timeline", []))
+        + table_html("Ordered tests", ["Test", "Status"], [
+            ["Blood panel", status_badge("TESTING")],
+            ["Glucose", status_badge("QUEUED")],
+        ])
+        + table_html("Workflow status", ["Stage", "Status"], [
             ["Payment", status_badge("PAID")],
-            ["Sample collection", status_badge("COLLECTED")],
-            ["Lab processing", status_badge("TESTING")],
-            ["Report", status_badge("PENDING")],
-            [f'Patient <a href="/app/patients/{patient_key}">{_h(order["patient_name"])}</a>', status_badge("ACTIVE")],
+            ["Collection", status_badge("COLLECTED")],
+            ["Lab", status_badge("TESTING")],
+            ["Report", status_badge("PENDING_REVIEW")],
+        ])
+        + action_button_row([
+            action_button("Mark paid", "mark-paid", order_key, "order", ret),
+            action_button("Assign collector", "assign-collector", order_key, "order", ret),
+            action_button("Receive sample", "receive-sample", order_key, "sample", ret),
+            action_button("Start testing", "start-testing", order_key, "sample", ret),
+            action_button("Approve report", "doctor-approve", order_key, "report", ret, primary=True),
+            action_button("Release report", "release-report", order_key, "report", ret),
         ])
     )
 
 
 def report_detail_body(report_key: str) -> str:
     report = get_report_detail(report_key)
+    rk = _h(report_key)
+    ret = f"/app/reports/{rk}"
+    flag = report.get("flag", "NORMAL")
     return (
-        breadcrumbs([("Reports", "/app/reports"), (report["test_name"], f"/app/reports/{_h(report_key)}")])
+        breadcrumbs([("Reports", "/app/reports"), (report["test_name"], ret)])
         + metric_cards([
             ("Result", f"{report['result_value']} {report.get('unit', '')}".strip()),
             ("Reference", report.get("reference_range", "—")),
-            ("Flag", report.get("flag", "NORMAL")),
+            ("Flag", flag),
         ])
-        + module_intro("Report preview", f"Status: {report.get('approval_status', 'PENDING')}")
+        + module_intro("Result preview", f"Status: {report.get('approval_status', 'PENDING')}")
+        + table_html("Abnormal flags", ["Marker", "Value", "Flag"], [
+            [_h(report["test_name"]), _h(str(report["result_value"])), status_badge(flag)],
+        ])
         + f'<div class="launch-card"><h3>AI interpretation (advisory)</h3><p>{_h(report.get("interpretation", ""))}</p>'
-        + '<p class="launch-hint">Doctor approval required before patient release.</p></div>'
-        + '<div class="launch-footer-actions">'
-        + f'<a class="launch-btn" href="/app/reports/{_h(report_key)}">Approve demo</a>'
-        + f'<a class="launch-btn-outline" href="/app/reports/{_h(report_key)}">Release demo</a>'
-        + "</div>"
+        + '<p class="launch-hint">Human clinician review required before release.</p></div>'
+        + '<div class="launch-card launch-alert"><h3>Doctor review</h3><p>Sign-off required for patient portal release. Demo actions below simulate approval workflow.</p></div>'
+        + '<div class="launch-card"><h3>PDF report</h3><div class="launch-chart">PDF preview placeholder · Download disabled in demo</div></div>'
+        + action_button_row([
+            action_button("Doctor approve", "doctor-approve", report_key, "report", ret, primary=True),
+            action_button("Release to patient", "release-report", report_key, "report", ret),
+            action_button("Send notification", "send-notification", report_key, "notification", ret),
+        ])
     )
 
 
@@ -427,13 +480,31 @@ def iot_body() -> str:
 
 @_register("Chain of Custody", "/app/samples/chain-of-custody")
 def chain_of_custody_body() -> str:
+    stages = [
+        ("Collection", "COMPLETED", "08:15"),
+        ("Packed", "COMPLETED", "08:30"),
+        ("In transit", "IN_TRANSIT", "08:45"),
+        ("Received by lab", "RECEIVED", "10:02"),
+        ("Accessioned", "ACCESSIONED", "10:18"),
+        ("Tested", "TESTING", "11:00"),
+        ("Released", "PENDING", "—"),
+    ]
     return (
         back_nav("/app/collector", "Collector dashboard")
-        + module_intro("Chain of custody", "Barcode scans from collection through lab receipt.")
-        + timeline_section("Scan log", [
-            ("Collected", "08:15 — Collector Demo"),
-            ("In transit", "08:45 — BOX-01"),
-            ("Lab received", "10:02 — Accession desk"),
+        + module_intro("Chain of custody", "End-to-end sample custody with cold chain monitoring.")
+        + workflow_stage_cards(stages)
+        + metric_cards([("Cold box", "BOX-01"), ("Temperature", "4.2°C"), ("Alert", "OK")])
+        + table_html("Custody scan log", ["Event", "Actor", "Time", "Status"], [
+            ["Collected", "Collector Demo", "08:15", status_badge("OK")],
+            ["Packed in cold box", "BOX-01", "08:30", status_badge("OK")],
+            ["In transit", "Route A", "08:45", status_badge("IN_TRANSIT")],
+            ["Lab received", "Accession desk", "10:02", status_badge("RECEIVED")],
+            ["Accessioned", "Lab tech", "10:18", status_badge("ACCESSIONED")],
+            ["Testing started", "Analyzer", "11:00", status_badge("TESTING")],
+        ])
+        + action_button_row([
+            action_button("Collect sample", "collect-sample", "S-DEMO-001", "sample", "/app/samples/chain-of-custody"),
+            action_button("Receive at lab", "receive-sample", "S-DEMO-001", "sample", "/app/samples/chain-of-custody", primary=True),
         ])
     )
 

@@ -135,6 +135,24 @@ class LaunchUiTestCase(unittest.TestCase):
         self.assertIsInstance(get_recent_patients(), list)
         self.assertIsInstance(get_recent_orders(), list)
 
+    def test_demo_action_routes(self):
+        from app.web.launch_ui_actions import ACTION_SLUGS
+
+        for slug in ACTION_SLUGS:
+            response = self.client.get(f"/app/actions/{slug}?entity_key=demo&entity_type=entity")
+            self.assertEqual(response.status_code, 200, slug)
+            body = response.get_data(as_text=True)
+            self.assertIn("launch-toast-success", body, slug)
+            self.assertIn("simulated successfully", body, slug)
+
+    def test_order_detail_has_actions(self):
+        from app.web.launch_ui_data import get_sample_order_key
+
+        path = f"/app/orders/{get_sample_order_key()}"
+        body = self.client.get(path).get_data(as_text=True)
+        self.assertIn("Workflow actions", body)
+        self.assertIn("Mark paid", body)
+
     def test_health_probes(self):
         for path in ("/health", "/ready"):
             response = self.client.get(path)

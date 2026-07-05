@@ -429,14 +429,21 @@ def executive_dashboard_body() -> str:
 
 
 def reception_dashboard_body() -> str:
-    from app.web.launch_ui_data import get_finance_summary, get_recent_orders, get_recent_patients
+    from app.web.launch_ui_actions import action_button, action_button_row
+    from app.web.launch_ui_data import get_finance_summary, get_recent_orders, get_recent_patients, get_sample_patient_key
 
+    patient_key = get_sample_patient_key()
     actions = action_grid([
         ("Search patient", "/app/patients", "Find existing records"),
         ("New registration", "/app/patients/new", "Register walk-in"),
         ("Create order", "/app/orders/new", "New diagnostic order"),
         ("Queue", "/app/reception/queue", "Waiting tokens"),
         ("Pending payment", "/app/finance", "Outstanding invoices"),
+    ])
+    quick_actions = action_button_row([
+        action_button("Check in next patient", "check-in-patient", patient_key, "patient", "/app/reception", primary=True),
+        action_button("Create quick order", "create-demo-order", patient_key, "order", "/app/reception"),
+        action_button("Mark payment received", "mark-paid", "INV-DEMO-001", "invoice", "/app/reception"),
     ])
     patient_rows = []
     for patient in get_recent_patients(4):
@@ -447,7 +454,7 @@ def reception_dashboard_body() -> str:
     for order in get_recent_orders(3):
         key = html.escape(order["order_code"])
         order_rows.append([f'<a href="/app/orders/{key}">{key}</a>', html.escape(order["patient_name"]), status_badge(order["status"])])
-    return actions + (
+    return quick_actions + actions + (
         table_html("Quick patient search", ["Patient", "Phone", "Last visit"], patient_rows)
         + table_html("Today queue snapshot", ["Token", "Patient", "Status"], [
             ["Q-101", "Nguyen Van A", status_badge("WAITING")],
@@ -459,8 +466,14 @@ def reception_dashboard_body() -> str:
 
 
 def doctor_dashboard_body() -> str:
-    from app.web.launch_ui_data import get_recent_reports
+    from app.web.launch_ui_actions import action_button, action_button_row
+    from app.web.launch_ui_data import get_recent_reports, get_sample_report_key
 
+    report_key = get_sample_report_key()
+    quick_actions = action_button_row([
+        action_button("Review critical result", "doctor-approve", report_key, "report", "/app/doctor", primary=True),
+        action_button("Approve report", "doctor-approve", report_key, "report", "/app/doctor"),
+    ])
     actions = action_grid([
         ("Pending review", "/app/reports?status=pending_review", "Results awaiting sign-off"),
         ("Critical results", "/app/reports?critical=1", "High-priority flags"),
@@ -477,12 +490,19 @@ def doctor_dashboard_body() -> str:
             status_badge(report["flag"]),
             f'<a class="launch-btn-outline launch-btn-sm" href="/app/reports/{key}">Review</a>',
         ])
-    return actions + table_html("Pending review", ["Patient", "Test", "Flag", "Action"], review_rows)
+    return quick_actions + actions + table_html("Pending review", ["Patient", "Test", "Flag", "Action"], review_rows)
 
 
 def lab_dashboard_body() -> str:
-    from app.web.launch_ui_data import get_recent_reports, get_recent_samples
+    from app.web.launch_ui_actions import action_button, action_button_row
+    from app.web.launch_ui_data import get_recent_reports, get_recent_samples, get_sample_order_key
 
+    order_key = get_sample_order_key()
+    quick_actions = action_button_row([
+        action_button("Receive sample", "receive-sample", order_key, "sample", "/app/lab", primary=True),
+        action_button("Start testing", "start-testing", order_key, "sample", "/app/lab"),
+        action_button("Complete QC", "complete-qc", "QC-DEMO-01", "qc_run", "/app/lab"),
+    ])
     actions = action_grid([
         ("Sample queue", "/app/samples", "Incoming specimens"),
         ("Accession", "/app/samples/accession", "Receive in lab"),
@@ -501,7 +521,7 @@ def lab_dashboard_body() -> str:
     for report in get_recent_reports(3):
         key = html.escape(report["id"])
         report_rows.append([html.escape(report["test_name"]), status_badge(report["approval_status"]), f'<a href="/app/reports/{key}">Open</a>'])
-    return actions + (
+    return quick_actions + actions + (
         table_html("Sample queue", ["Sample", "Status", "Updated"], sample_rows)
         + table_html("Validation queue", ["Test", "Status", "Action"], report_rows)
         + metric_cards([("QC today", "2 pass"), ("Analyzers", "3 active")])
@@ -509,8 +529,15 @@ def lab_dashboard_body() -> str:
 
 
 def collector_dashboard_body() -> str:
-    from app.web.launch_ui_data import get_demo_counts, get_recent_collections
+    from app.web.launch_ui_actions import action_button, action_button_row
+    from app.web.launch_ui_data import get_demo_counts, get_recent_collections, get_sample_order_key
 
+    order_key = get_sample_order_key()
+    quick_actions = action_button_row([
+        action_button("Accept pickup", "assign-collector", order_key, "collection", "/app/collector", primary=True),
+        action_button("Collect sample", "collect-sample", order_key, "sample", "/app/collector"),
+        action_button("Handover sample", "receive-sample", order_key, "sample", "/app/collector"),
+    ])
     actions = action_grid([
         ("Pickup queue", "/app/collections", "Today's jobs"),
         ("Route", "/app/collections/route", "Optimized stops"),
@@ -527,7 +554,7 @@ def collector_dashboard_body() -> str:
             status_badge(job["status"]),
             html.escape(job["eta"]),
         ])
-    return actions + (
+    return quick_actions + actions + (
         metric_cards([("Samples in transit", counts["samples_in_transit"]), ("Cold boxes", "2 active")])
         + table_html("Pickup queue", ["Job", "Address", "Status", "ETA"], pickup_rows)
         + '<div class="launch-card"><h3>GPS overview</h3><div class="launch-chart">Live map placeholder · <a href="/app/logistics">Open logistics</a></div></div>'
@@ -535,8 +562,15 @@ def collector_dashboard_body() -> str:
 
 
 def patient_dashboard_body() -> str:
-    from app.web.launch_ui_data import get_recent_invoices, get_recent_orders, get_recent_reports
+    from app.web.launch_ui_actions import action_button, action_button_row
+    from app.web.launch_ui_data import get_recent_invoices, get_recent_orders, get_recent_reports, get_sample_report_key
 
+    report_key = get_sample_report_key()
+    quick_actions = action_button_row([
+        action_button("View latest report", "release-report", report_key, "report", "/app/patient", primary=True),
+        action_button("Download PDF (demo)", "send-notification", report_key, "report", "/app/patient"),
+        action_button("Pay invoice", "mark-paid", "INV-DEMO-001", "invoice", "/app/patient"),
+    ])
     actions = action_grid([
         ("My profile", "/app/patient/profile", "Demographics"),
         ("My orders", "/app/patient/orders", "Track diagnostics"),
@@ -548,7 +582,7 @@ def patient_dashboard_body() -> str:
     orders = get_recent_orders(2)
     reports = get_recent_reports(2)
     invoices = get_recent_invoices(2)
-    return actions + metric_cards([
+    return quick_actions + actions + metric_cards([
         ("Active orders", len(orders)),
         ("New reports", len(reports)),
         ("Open invoices", sum(1 for i in invoices if i.get("status", "").upper() != "PAID")),
