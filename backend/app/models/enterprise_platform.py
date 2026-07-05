@@ -249,6 +249,33 @@ class EnterpriseSystemSetting(db.Model):
         }
 
 
+class TenantOrganizationSetting(db.Model):
+    """Per-tenant / per-organization configuration for Phase 7.1."""
+
+    __tablename__ = "tenant_organization_settings"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    tenant_id = db.Column(db.String(36), db.ForeignKey("enterprise_tenants.id"), nullable=False)
+    organization_id = db.Column(db.String(36), db.ForeignKey("enterprise_organizations.id"))
+    setting_key = db.Column(db.String(100), nullable=False)
+    setting_value = db.Column(db.Text)
+    category = db.Column(db.String(50), default="GENERAL")
+    is_secret = db.Column(db.Boolean, default=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "tenant_id": self.tenant_id,
+            "organization_id": self.organization_id,
+            "setting_key": self.setting_key,
+            "setting_value": "***" if self.is_secret else self.setting_value,
+            "category": self.category,
+            "is_secret": bool(self.is_secret),
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
 class EnterpriseAuditRecord(db.Model):
     __tablename__ = "enterprise_audit_records"
 

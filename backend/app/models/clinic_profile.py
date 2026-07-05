@@ -32,6 +32,9 @@ class ClinicProfile(db.Model):
 
     partner_id = db.Column(db.String(36))
 
+    tenant_id = db.Column(db.String(36), db.ForeignKey("enterprise_tenants.id"))
+    organization_id = db.Column(db.String(36), db.ForeignKey("enterprise_organizations.id"))
+
     settings_json = db.Column(db.Text, default="{}")
 
     status = db.Column(db.String(20), default="ACTIVE")
@@ -56,6 +59,8 @@ class ClinicProfile(db.Model):
             "phone": self.phone,
             "address": self.address,
             "partner_id": self.partner_id,
+            "tenant_id": self.tenant_id,
+            "organization_id": self.organization_id,
             "settings_json": self.settings_json,
             "status": self.status,
             "created_at": self.created_at.isoformat() if self.created_at else None,

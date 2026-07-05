@@ -104,6 +104,7 @@ class Config:
 
     TRACE_ID_HEADER = os.getenv("TRACE_ID_HEADER", "X-Trace-ID")
     TENANT_ID_HEADER = os.getenv("TENANT_ID_HEADER", "X-Tenant-ID")
+    ORGANIZATION_ID_HEADER = os.getenv("ORGANIZATION_ID_HEADER", "X-Organization-ID")
 
     REDIS_URL = os.getenv("REDIS_URL", "")
     SMTP_HOST = os.getenv("SMTP_HOST", "")

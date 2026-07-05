@@ -36,6 +36,9 @@ class Laboratory(db.Model):
         db.String(255)
     )
 
+    tenant_id = db.Column(db.String(36), db.ForeignKey("enterprise_tenants.id"))
+    organization_id = db.Column(db.String(36), db.ForeignKey("enterprise_organizations.id"))
+
     is_active = db.Column(
         db.Boolean,
         default=True
@@ -54,5 +57,7 @@ class Laboratory(db.Model):
             "address": self.address,
             "phone": self.phone,
             "email": self.email,
-            "is_active": self.is_active
+            "tenant_id": self.tenant_id,
+            "organization_id": self.organization_id,
+            "is_active": self.is_active,
         }

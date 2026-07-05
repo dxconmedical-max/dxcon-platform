@@ -38,6 +38,7 @@ from app.web.operations_runbooks import operations_runbooks_web_bp
 from app.web.release_control import release_control_web_bp
 from app.web.pilot_toolkit import pilot_toolkit_web_bp
 from app.web.readiness_pack import readiness_pack_web_bp
+from app.web.multi_tenant_foundation import multi_tenant_foundation_web_bp
 from app.web.pilot_pages import pilot_pages_bp
 from app.web.finance import finance_web_bp
 
@@ -65,6 +66,7 @@ from app.api.operations_runbooks.routes import operations_runbooks_bp
 from app.api.release_control.routes import release_control_bp
 from app.api.pilot_toolkit.routes import pilot_toolkit_bp
 from app.api.readiness_pack.routes import readiness_pack_bp
+from app.api.multi_tenant_foundation.routes import multi_tenant_foundation_bp
 from app.api.laboratories.routes import laboratories_bp
 from app.api.test_catalogs.routes import test_catalogs_bp
 from app.api.orders.routes import orders_bp
@@ -251,6 +253,7 @@ def register_blueprints(app):
     app.register_blueprint(release_control_bp)
     app.register_blueprint(pilot_toolkit_bp)
     app.register_blueprint(readiness_pack_bp)
+    app.register_blueprint(multi_tenant_foundation_bp)
     app.register_blueprint(laboratories_bp)
     app.register_blueprint(test_catalogs_bp)
     app.register_blueprint(orders_bp)
@@ -376,6 +379,7 @@ def register_blueprints(app):
     app.register_blueprint(release_control_web_bp)
     app.register_blueprint(pilot_toolkit_web_bp)
     app.register_blueprint(readiness_pack_web_bp)
+    app.register_blueprint(multi_tenant_foundation_web_bp)
     app.register_blueprint(pilot_pages_bp)
     app.register_blueprint(home_web_bp)
     app.register_blueprint(ops_bp)

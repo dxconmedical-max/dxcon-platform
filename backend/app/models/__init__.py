@@ -254,6 +254,7 @@ from app.models.enterprise_platform import (
     EnterpriseSystemSetting,
     EnterpriseTenant,
     EnterpriseUsageMetric,
+    TenantOrganizationSetting,
 )
 from app.models.integration_platform import (
     IntegrationDeadLetter,
