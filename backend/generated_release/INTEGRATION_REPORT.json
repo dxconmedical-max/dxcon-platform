@@ -1,0 +1,54 @@
+{
+  "generated_at": "2026-07-06T16:20:10.956937+00:00",
+  "findings": [
+    {
+      "status": "PASS",
+      "name": "lis_connector_api",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "csv_import",
+      "detail": "LIS CSV import foundation"
+    },
+    {
+      "status": "PASS",
+      "name": "json_import",
+      "detail": "LIS JSON import foundation"
+    },
+    {
+      "status": "WARNING",
+      "name": "rest_connector",
+      "detail": "REST connector stub"
+    },
+    {
+      "status": "WARNING",
+      "name": "hl7_adapter",
+      "detail": "HL7 adapter placeholder"
+    },
+    {
+      "status": "PASS",
+      "name": "webhook_engine",
+      "detail": "Notification event foundation"
+    },
+    {
+      "status": "WARNING",
+      "name": "email_service",
+      "detail": "SMTP not configured"
+    },
+    {
+      "status": "PASS",
+      "name": "storage",
+      "detail": ""
+    }
+  ],
+  "score": {
+    "counts": {
+      "PASS": 5,
+      "WARNING": 3,
+      "FAIL": 0
+    },
+    "score_pct": 81.2,
+    "total": 8
+  }
+}

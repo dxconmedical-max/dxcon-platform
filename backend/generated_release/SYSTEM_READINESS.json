@@ -1,0 +1,15 @@
+{
+  "report": "SYSTEM_READINESS",
+  "status": "PASS",
+  "health": "PASS",
+  "pat_score": {
+    "counts": {
+      "PASS": 15,
+      "WARNING": 0,
+      "FAIL": 0
+    },
+    "score_pct": 100.0,
+    "total": 15
+  },
+  "generated_at": "2026-07-06T16:20:10.972590+00:00"
+}

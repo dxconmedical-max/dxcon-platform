@@ -27,9 +27,14 @@ def _utcnow() -> datetime:
 
 
 def _resolve_doctor_id(actor: str | None = None) -> str:
-    from flask import session
+    try:
+        from flask import has_request_context, session
 
-    return session.get("user_id") or actor or "doctor-system"
+        if has_request_context():
+            return session.get("user_id") or actor or "doctor-system"
+    except RuntimeError:
+        pass
+    return actor or "doctor-system"
 
 
 def dashboard(*, doctor_id: str | None = None, actor: str | None = None) -> dict[str, Any]:

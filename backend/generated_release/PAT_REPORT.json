@@ -1,0 +1,95 @@
+{
+  "phase": "PAT",
+  "generated_at": "2026-07-06T16:20:10.403582+00:00",
+  "findings": [
+    {
+      "status": "PASS",
+      "name": "patient_registration",
+      "detail": "P-20260706162010-4B7666"
+    },
+    {
+      "status": "PASS",
+      "name": "order_creation",
+      "detail": "ORD-20260706162010-46ADD9"
+    },
+    {
+      "status": "PASS",
+      "name": "payment",
+      "detail": "ORD-20260706162010-46ADD9"
+    },
+    {
+      "status": "PASS",
+      "name": "sample_collection",
+      "detail": "ORD-20260706162010-46ADD9"
+    },
+    {
+      "status": "PASS",
+      "name": "barcode",
+      "detail": "BC-SMP-20260706162010-69A03D"
+    },
+    {
+      "status": "PASS",
+      "name": "laboratory_workflow",
+      "detail": "ORD-20260706162010-46ADD9"
+    },
+    {
+      "status": "PASS",
+      "name": "doctor_review",
+      "detail": "RPT-20260706-EB4EA3"
+    },
+    {
+      "status": "PASS",
+      "name": "report_release_patient_visibility",
+      "detail": "RPT-20260706-EB4EA3"
+    },
+    {
+      "status": "PASS",
+      "name": "patient_portal",
+      "detail": "P-20260706162010-4B7666"
+    },
+    {
+      "status": "PASS",
+      "name": "doctor_portal",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "executive_dashboard",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "order_released_status",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "ui_reception",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "ui_doctor",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "ui_executive",
+      "detail": ""
+    }
+  ],
+  "sample": {
+    "patient_code": "P-20260706162010-4B7666",
+    "order_code": "ORD-20260706162010-46ADD9",
+    "report_code": "RPT-20260706-EB4EA3"
+  },
+  "score": {
+    "counts": {
+      "PASS": 15,
+      "WARNING": 0,
+      "FAIL": 0
+    },
+    "score_pct": 100.0,
+    "total": 15
+  }
+}

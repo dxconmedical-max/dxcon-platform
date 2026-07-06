@@ -1,0 +1,55 @@
+{
+  "generated_at": "2026-07-06T16:20:10.937188+00:00",
+  "targets": {
+    "dashboard_ms": 2000,
+    "search_ms": 300,
+    "order_ms": 2000,
+    "preview_ms": 2000,
+    "api_avg_ms": 500
+  },
+  "findings": [
+    {
+      "status": "PASS",
+      "name": "dashboard_latency",
+      "detail": "11ms",
+      "target_ms": 2000,
+      "actual_ms": 10.81
+    },
+    {
+      "status": "PASS",
+      "name": "patient_search_latency",
+      "detail": "4ms",
+      "target_ms": 300
+    },
+    {
+      "status": "PASS",
+      "name": "api_dashboard_latency",
+      "detail": "11ms",
+      "target_ms": 500
+    },
+    {
+      "status": "PASS",
+      "name": "concurrent_100_users",
+      "detail": "{\"workers\": 50, \"requests\": 150, \"avg_ms\": 20.91, \"p95_ms\": 41.17, \"errors\": 0}"
+    },
+    {
+      "status": "PASS",
+      "name": "concurrent_300_users",
+      "detail": "{\"workers\": 50, \"requests\": 150, \"avg_ms\": 22.73, \"p95_ms\": 41.25, \"errors\": 0}"
+    },
+    {
+      "status": "PASS",
+      "name": "concurrent_500_users",
+      "detail": "{\"workers\": 50, \"requests\": 150, \"avg_ms\": 23.01, \"p95_ms\": 50.67, \"errors\": 0}"
+    }
+  ],
+  "score": {
+    "counts": {
+      "PASS": 6,
+      "WARNING": 0,
+      "FAIL": 0
+    },
+    "score_pct": 100.0,
+    "total": 6
+  }
+}

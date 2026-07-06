@@ -1,0 +1,49 @@
+{
+  "generated_at": "2026-07-06T16:20:10.957114+00:00",
+  "findings": [
+    {
+      "status": "PASS",
+      "name": "compose_production",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "database_backup",
+      "detail": "pg_dump procedure documented in BACKUP_RUNBOOK"
+    },
+    {
+      "status": "WARNING",
+      "name": "restore_backup",
+      "detail": "Restore rehearsal placeholder \u2014 run pg_restore in staging"
+    },
+    {
+      "status": "PASS",
+      "name": "file_backup",
+      "detail": "Upload volume in docker-compose.production.yml"
+    },
+    {
+      "status": "PASS",
+      "name": "config_backup",
+      "detail": "Environment profiles in deployment/env/"
+    },
+    {
+      "status": "WARNING",
+      "name": "recovery_time",
+      "detail": "RTO target 4h \u2014 not measured in CI"
+    },
+    {
+      "status": "WARNING",
+      "name": "recovery_point",
+      "detail": "RPO target 1h \u2014 depends on backup schedule"
+    }
+  ],
+  "score": {
+    "counts": {
+      "PASS": 4,
+      "WARNING": 3,
+      "FAIL": 0
+    },
+    "score_pct": 78.6,
+    "total": 7
+  }
+}

@@ -1,161 +1,246 @@
 {
-  "generated_at": "2026-07-04T10:08:15.182254+00:00",
-  "summary": {
-    "pilot_readiness_score": 100.0,
-    "checks_passed": 5,
-    "checks_total": 5,
-    "ok": true,
-    "failed_routes": [],
-    "runtime_seconds": 1.226,
-    "phase": "3A"
+  "generated_at": "2026-07-06T16:20:10.970955+00:00",
+  "pilot_wizard": {
+    "session": {
+      "id": "4bdd6738-aa3a-4cf5-900a-6d8e892eeb06",
+      "organization_name": "Pilot Org",
+      "current_step": "organization",
+      "status": "in_progress",
+      "created_by": "readiness"
+    },
+    "checklist": [
+      {
+        "key": "organization",
+        "label": "Organization setup",
+        "done": false
+      },
+      {
+        "key": "admin_user",
+        "label": "Admin user created",
+        "done": false
+      },
+      {
+        "key": "laboratory",
+        "label": "Laboratory configured",
+        "done": false
+      },
+      {
+        "key": "clinic",
+        "label": "Clinic configured",
+        "done": false
+      },
+      {
+        "key": "master_data",
+        "label": "Master data imported",
+        "done": false
+      },
+      {
+        "key": "test_data",
+        "label": "Test data loaded",
+        "done": false
+      },
+      {
+        "key": "verification",
+        "label": "Verification passed",
+        "done": false
+      }
+    ],
+    "steps": [
+      "organization",
+      "admin_user",
+      "laboratory",
+      "clinic",
+      "master_data",
+      "test_data",
+      "verification"
+    ]
   },
-  "checks": {
-    "seed_data": {
-      "ok": true,
-      "counts": {
-        "users": 67,
-        "patients": 100,
-        "test_catalog": 200,
-        "orders": 300
+  "launch_checklist": {
+    "items": [
+      {
+        "id": "6808bca6-83c8-4524-b5bc-d51ead3f880b",
+        "category": "data",
+        "item_key": "master_data",
+        "label": "Master data seeded",
+        "status": "pending",
+        "verified_at": null,
+        "verified_by": null,
+        "notes": null
+      },
+      {
+        "id": "93d454ce-4508-431a-8f34-d519ea2a29d4",
+        "category": "infrastructure",
+        "item_key": "dns",
+        "label": "DNS records verified",
+        "status": "pending",
+        "verified_at": null,
+        "verified_by": null,
+        "notes": null
+      },
+      {
+        "id": "4e22f363-de20-4f2d-adcb-8ef137a091e4",
+        "category": "infrastructure",
+        "item_key": "domain",
+        "label": "Domain configured",
+        "status": "pending",
+        "verified_at": null,
+        "verified_by": null,
+        "notes": null
+      },
+      {
+        "id": "c0c73c33-80f3-4617-ac04-9071a438bef6",
+        "category": "infrastructure",
+        "item_key": "smtp",
+        "label": "SMTP configured",
+        "status": "pending",
+        "verified_at": null,
+        "verified_by": null,
+        "notes": null
+      },
+      {
+        "id": "9302752d-e893-46a1-9c88-d9d119a8122e",
+        "category": "infrastructure",
+        "item_key": "ssl",
+        "label": "SSL certificate active",
+        "status": "pending",
+        "verified_at": null,
+        "verified_by": null,
+        "notes": null
+      },
+      {
+        "id": "5f753c3f-62f6-49ed-8ee6-ed4928dc0da3",
+        "category": "operations",
+        "item_key": "backup",
+        "label": "Backup schedule active",
+        "status": "pending",
+        "verified_at": null,
+        "verified_by": null,
+        "notes": null
+      },
+      {
+        "id": "4ad96a3a-d721-45a4-b5f4-e9170f65cf54",
+        "category": "operations",
+        "item_key": "monitoring",
+        "label": "Monitoring enabled",
+        "status": "pending",
+        "verified_at": null,
+        "verified_by": null,
+        "notes": null
+      },
+      {
+        "id": "989738d7-d3d4-4146-9e47-8183ab3238f2",
+        "category": "security",
+        "item_key": "pilot_users",
+        "label": "Pilot users provisioned",
+        "status": "pending",
+        "verified_at": null,
+        "verified_by": null,
+        "notes": null
+      },
+      {
+        "id": "79074cdb-1d5f-4a9e-abc2-51e90e356085",
+        "category": "security",
+        "item_key": "security_review",
+        "label": "Security review complete",
+        "status": "pending",
+        "verified_at": null,
+        "verified_by": null,
+        "notes": null
       }
+    ],
+    "passed": 0,
+    "total": 9,
+    "ready": false
+  },
+  "findings": [
+    {
+      "status": "WARNING",
+      "name": "organization",
+      "detail": "checklist item pending manual verification"
     },
-    "route_registry": {
-      "ok": true,
-      "required": [
-        "/",
-        "/health",
-        "/ready",
-        "/executive",
-        "/executive-v9",
-        "/crm-pipeline",
-        "/logistics",
-        "/reception",
-        "/doctor-workbench",
-        "/doctor/dashboard",
-        "/patient-portal",
-        "/patient/demo",
-        "/demo-accounts",
-        "/workflow-demo",
-        "/pilot-checklist"
-      ],
-      "missing": []
+    {
+      "status": "WARNING",
+      "name": "master_data",
+      "detail": "pending"
     },
-    "health_endpoints": {
-      "ok": true,
-      "routes": {
-        "/health": {
-          "status_code": 200,
-          "payload": {
-            "app_env": "development",
-            "database": "OK",
-            "redis": "DEGRADED",
-            "status": "OK",
-            "timestamp": "2026-07-04T10:08:14.978387+00:00"
-          },
-          "ok": true
-        },
-        "/ready": {
-          "status_code": 200,
-          "payload": {
-            "app_env": "development",
-            "database": "OK",
-            "redis": "DEGRADED",
-            "status": "OK",
-            "timestamp": "2026-07-04T10:08:14.979442+00:00"
-          },
-          "ok": true
-        }
-      }
+    {
+      "status": "WARNING",
+      "name": "partner_setup",
+      "detail": "checklist item pending manual verification"
     },
-    "dashboard_pages": {
-      "ok": true,
-      "routes": {
-        "/": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 3931
-        },
-        "/executive-v9": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 10680
-        },
-        "/crm-pipeline": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 9234
-        },
-        "/logistics": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 9079
-        },
-        "/reception": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 10649
-        },
-        "/doctor-workbench": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 8732
-        },
-        "/patient-portal": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 8971
-        },
-        "/demo-accounts": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 12245
-        },
-        "/workflow-demo": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 9191
-        },
-        "/pilot-checklist": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 6778
-        },
-        "/executive": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 10680
-        }
-      }
+    {
+      "status": "WARNING",
+      "name": "admin_user",
+      "detail": "checklist item pending manual verification"
     },
-    "critical_dashboards": {
-      "ok": true,
-      "routes": {
-        "/crm-pipeline": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 9234
-        },
-        "/logistics": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 9079
-        },
-        "/reception": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 10649
-        },
-        "/doctor-workbench": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 8732
-        },
-        "/patient-portal": {
-          "status_code": 200,
-          "ok": true,
-          "bytes": 8971
-        }
-      }
+    {
+      "status": "WARNING",
+      "name": "reception_user",
+      "detail": "checklist item pending manual verification"
+    },
+    {
+      "status": "WARNING",
+      "name": "doctor_user",
+      "detail": "checklist item pending manual verification"
+    },
+    {
+      "status": "WARNING",
+      "name": "laboratory_user",
+      "detail": "checklist item pending manual verification"
+    },
+    {
+      "status": "WARNING",
+      "name": "collectors",
+      "detail": "checklist item pending manual verification"
+    },
+    {
+      "status": "WARNING",
+      "name": "price_list",
+      "detail": "checklist item pending manual verification"
+    },
+    {
+      "status": "WARNING",
+      "name": "contracts",
+      "detail": "checklist item pending manual verification"
+    },
+    {
+      "status": "WARNING",
+      "name": "test_data",
+      "detail": "checklist item pending manual verification"
+    },
+    {
+      "status": "WARNING",
+      "name": "email",
+      "detail": "checklist item pending manual verification"
+    },
+    {
+      "status": "WARNING",
+      "name": "domain",
+      "detail": "pending"
+    },
+    {
+      "status": "WARNING",
+      "name": "ssl",
+      "detail": "pending"
+    },
+    {
+      "status": "WARNING",
+      "name": "smtp",
+      "detail": "pending"
+    },
+    {
+      "status": "WARNING",
+      "name": "storage",
+      "detail": "checklist item pending manual verification"
     }
+  ],
+  "score": {
+    "counts": {
+      "PASS": 0,
+      "WARNING": 16,
+      "FAIL": 0
+    },
+    "score_pct": 50.0,
+    "total": 16
   }
 }

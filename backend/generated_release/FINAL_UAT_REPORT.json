@@ -1,0 +1,172 @@
+{
+  "generated_at": "2026-07-06T16:20:10.404065+00:00",
+  "scenarios": [
+    {
+      "role": "Reception",
+      "scenarios": [
+        "Register patient",
+        "Create order",
+        "Collect payment",
+        "Print barcode",
+        "Queue management"
+      ],
+      "script": "verify_uat_reception.py"
+    },
+    {
+      "role": "Laboratory",
+      "scenarios": [
+        "Receive sample",
+        "Accession",
+        "Enter results",
+        "QC",
+        "Validate"
+      ],
+      "script": "verify_uat_lab.py"
+    },
+    {
+      "role": "Doctor",
+      "scenarios": [
+        "Review queue",
+        "Approve report",
+        "Clinical notes",
+        "Patient search"
+      ],
+      "script": "verify_uat_doctor.py"
+    },
+    {
+      "role": "Patient",
+      "scenarios": [
+        "View reports",
+        "Order history",
+        "Invoices",
+        "QR card"
+      ],
+      "script": "verify_uat_patient.py"
+    },
+    {
+      "role": "Finance",
+      "scenarios": [
+        "Invoice list",
+        "Payment status",
+        "Outstanding balance"
+      ],
+      "script": "verify_release_1.py"
+    },
+    {
+      "role": "CRM",
+      "scenarios": [
+        "Lead pipeline",
+        "Opportunities",
+        "Customers"
+      ],
+      "script": "verify_release_1.py"
+    },
+    {
+      "role": "Executive",
+      "scenarios": [
+        "KPI dashboard",
+        "Revenue trend",
+        "Monitoring"
+      ],
+      "script": "verify_release_1.py"
+    },
+    {
+      "role": "Partner Clinic",
+      "scenarios": [
+        "Partner portal",
+        "Referrals"
+      ],
+      "script": "verify_partner_foundation.py"
+    },
+    {
+      "role": "Partner Doctor",
+      "scenarios": [
+        "Doctor portal",
+        "Assigned patients"
+      ],
+      "script": "verify_portal.py"
+    },
+    {
+      "role": "Corporate Customer",
+      "scenarios": [
+        "Corporate billing placeholder"
+      ],
+      "script": null,
+      "status": "WARNING"
+    },
+    {
+      "role": "Insurance",
+      "scenarios": [
+        "Insurance billing placeholder"
+      ],
+      "script": null,
+      "status": "WARNING"
+    }
+  ],
+  "findings": [
+    {
+      "status": "PASS",
+      "name": "uat_reception",
+      "detail": "Script available: verify_uat_reception.py"
+    },
+    {
+      "status": "PASS",
+      "name": "uat_laboratory",
+      "detail": "Script available: verify_uat_lab.py"
+    },
+    {
+      "status": "PASS",
+      "name": "uat_doctor",
+      "detail": "Script available: verify_uat_doctor.py"
+    },
+    {
+      "status": "PASS",
+      "name": "uat_patient",
+      "detail": "Script available: verify_uat_patient.py"
+    },
+    {
+      "status": "PASS",
+      "name": "uat_finance",
+      "detail": "Script available: verify_release_1.py"
+    },
+    {
+      "status": "PASS",
+      "name": "uat_crm",
+      "detail": "Script available: verify_release_1.py"
+    },
+    {
+      "status": "PASS",
+      "name": "uat_executive",
+      "detail": "Script available: verify_release_1.py"
+    },
+    {
+      "status": "PASS",
+      "name": "uat_partner_clinic",
+      "detail": "Script available: verify_partner_foundation.py"
+    },
+    {
+      "status": "PASS",
+      "name": "uat_partner_doctor",
+      "detail": "Script available: verify_portal.py"
+    },
+    {
+      "status": "WARNING",
+      "name": "uat_corporate_customer",
+      "detail": "Placeholder scenario documented"
+    },
+    {
+      "status": "WARNING",
+      "name": "uat_insurance",
+      "detail": "Placeholder scenario documented"
+    }
+  ],
+  "score": {
+    "counts": {
+      "PASS": 9,
+      "WARNING": 2,
+      "FAIL": 0
+    },
+    "score_pct": 90.9,
+    "total": 11
+  }
+}

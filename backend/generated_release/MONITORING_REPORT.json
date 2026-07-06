@@ -1,0 +1,54 @@
+{
+  "generated_at": "2026-07-06T16:20:10.962921+00:00",
+  "findings": [
+    {
+      "status": "PASS",
+      "name": "health_/health",
+      "detail": "200"
+    },
+    {
+      "status": "PASS",
+      "name": "health_/ready",
+      "detail": "200"
+    },
+    {
+      "status": "PASS",
+      "name": "health_/api/v1/system/health",
+      "detail": "200"
+    },
+    {
+      "status": "PASS",
+      "name": "system_metrics",
+      "detail": "performance endpoint available"
+    },
+    {
+      "status": "PASS",
+      "name": "audit_logs",
+      "detail": "34 records"
+    },
+    {
+      "status": "PASS",
+      "name": "application_logs",
+      "detail": "Structured JSON logging in production"
+    },
+    {
+      "status": "WARNING",
+      "name": "disk_usage",
+      "detail": "Monitor via host/container metrics"
+    },
+    {
+      "status": "WARNING",
+      "name": "memory_cpu",
+      "detail": "Monitor via observability platform"
+    }
+  ],
+  "score": {
+    "counts": {
+      "PASS": 6,
+      "WARNING": 2,
+      "FAIL": 0
+    },
+    "score_pct": 87.5,
+    "total": 8
+  }
+}

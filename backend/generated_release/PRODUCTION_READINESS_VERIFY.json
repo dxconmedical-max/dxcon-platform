@@ -1,0 +1,99 @@
+{
+  "sprint": "010.5",
+  "generated_at": "2026-07-06T16:20:10.972672+00:00",
+  "elapsed_seconds": 2.32,
+  "recommendation": "PRODUCTION READY",
+  "overall_score": 94.3,
+  "phases": {
+    "pat": {
+      "counts": {
+        "PASS": 15,
+        "WARNING": 0,
+        "FAIL": 0
+      },
+      "score_pct": 100.0,
+      "total": 15
+    },
+    "uat": {
+      "counts": {
+        "PASS": 9,
+        "WARNING": 2,
+        "FAIL": 0
+      },
+      "score_pct": 90.9,
+      "total": 11
+    },
+    "performance": {
+      "counts": {
+        "PASS": 6,
+        "WARNING": 0,
+        "FAIL": 0
+      },
+      "score_pct": 100.0,
+      "total": 6
+    },
+    "database": {
+      "counts": {
+        "PASS": 3,
+        "WARNING": 1,
+        "FAIL": 0
+      },
+      "score_pct": 87.5,
+      "total": 4
+    },
+    "security": {
+      "counts": {
+        "PASS": 10,
+        "WARNING": 1,
+        "FAIL": 0
+      },
+      "score_pct": 95.5,
+      "total": 11
+    },
+    "integration": {
+      "counts": {
+        "PASS": 5,
+        "WARNING": 3,
+        "FAIL": 0
+      },
+      "score_pct": 81.2,
+      "total": 8
+    },
+    "backup": {
+      "counts": {
+        "PASS": 4,
+        "WARNING": 3,
+        "FAIL": 0
+      },
+      "score_pct": 78.6,
+      "total": 7
+    },
+    "deployment": {
+      "counts": {
+        "PASS": 8,
+        "WARNING": 1,
+        "FAIL": 0
+      },
+      "score_pct": 94.4,
+      "total": 9
+    },
+    "monitoring": {
+      "counts": {
+        "PASS": 6,
+        "WARNING": 2,
+        "FAIL": 0
+      },
+      "score_pct": 87.5,
+      "total": 8
+    },
+    "pilot": {
+      "counts": {
+        "PASS": 0,
+        "WARNING": 16,
+        "FAIL": 0
+      },
+      "score_pct": 50.0,
+      "total": 16
+    }
+  }
+}

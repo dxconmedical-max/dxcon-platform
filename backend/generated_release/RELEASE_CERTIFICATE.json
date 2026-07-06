@@ -1,0 +1,16 @@
+{
+  "certificate": "RELEASE_CERTIFICATE",
+  "version": "1.0.0-pilot",
+  "status": "PASS",
+  "modules_certified": [
+    "business_engine",
+    "partner_foundation",
+    "reception_workspace",
+    "laboratory_workspace",
+    "reporting_engine",
+    "doctor_portal",
+    "patient_portal",
+    "executive_platform"
+  ],
+  "generated_at": "2026-07-06T16:20:10.972510+00:00"
+}

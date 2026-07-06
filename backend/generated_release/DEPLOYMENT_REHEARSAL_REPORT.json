@@ -1,0 +1,59 @@
+{
+  "generated_at": "2026-07-06T16:20:10.957273+00:00",
+  "findings": [
+    {
+      "status": "PASS",
+      "name": "dockerfile",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "docker_compose",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "nginx_config",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "gunicorn",
+      "detail": "production_start.py api"
+    },
+    {
+      "status": "PASS",
+      "name": "render_ready",
+      "detail": "Dockerfile + health endpoints"
+    },
+    {
+      "status": "PASS",
+      "name": "ci_cd_pipeline",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "health_endpoint",
+      "detail": "/health and /ready"
+    },
+    {
+      "status": "PASS",
+      "name": "rollback_script",
+      "detail": "deployment/pipeline/rollback.py or release-management hub"
+    },
+    {
+      "status": "WARNING",
+      "name": "env_variables",
+      "detail": "Validate REQUIRED_ENVIRONMENT_VARIABLES.md before go-live"
+    }
+  ],
+  "score": {
+    "counts": {
+      "PASS": 8,
+      "WARNING": 1,
+      "FAIL": 0
+    },
+    "score_pct": 94.4,
+    "total": 9
+  }
+}
