@@ -1,0 +1,27 @@
+{
+  "report": "CRM_REPORT",
+  "leads": 0,
+  "opportunities": 0,
+  "pipeline": {
+    "LEAD": 0,
+    "QUALIFICATION": 0,
+    "MEETING": 0,
+    "QUOTATION": 0,
+    "NEGOTIATION": 0,
+    "WON": 0,
+    "LOST": 0
+  },
+  "conversion_rate": 0,
+  "monthly_sales": 0,
+  "top_customers": [],
+  "modules": [
+    "lead",
+    "opportunity",
+    "customer",
+    "contract",
+    "partner",
+    "follow_up",
+    "task",
+    "activity"
+  ]
+}

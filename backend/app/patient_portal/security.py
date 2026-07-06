@@ -1,0 +1,6 @@
+"""Patient portal RBAC — Sprint 009."""
+
+PATIENT_PORTAL_READ_ROLES = frozenset({"PATIENT", "SUPER_ADMIN", "ADMIN"})
+PATIENT_PORTAL_WRITE_ROLES = frozenset({"PATIENT", "SUPER_ADMIN", "ADMIN"})
+
+FORBIDDEN_PATIENT_MUTATE = frozenset({"DOCTOR", "RECEPTION", "LAB"})

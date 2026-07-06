@@ -21,12 +21,22 @@ ROLE_PERMISSIONS = {
         "security.write",
         "reports.read",
         "mdm.read",
+        "executive.read",
+        "crm.read",
+        "finance.read",
+        "audit.read",
     },
     "DOCTOR": {
         "patients.read",
         "results.read",
         "referrals.write",
         "mdm.read",
+        "report.read",
+        "report.approve",
+        "report.release",
+        "report.review",
+        "portal.doctor.read",
+        "portal.doctor.write",
     },
     "LAB": {
         "results.read",
@@ -41,6 +51,8 @@ ROLE_PERMISSIONS = {
         "lab.validate",
         "lis.import",
         "lis.read",
+        "report.read",
+        "report.status.read",
     },
     "COLLECTOR": {
         "collections.read",
@@ -61,6 +73,7 @@ ROLE_PERMISSIONS = {
         "print.barcode",
         "print.invoice",
         "print.request_form",
+        "report.status.read",
     },
     "ACCOUNTING": {
         "billing.read",
@@ -72,6 +85,9 @@ ROLE_PERMISSIONS = {
         "profile.read",
         "profile.write",
         "results.read",
+        "report.released.read",
+        "portal.patient.read",
+        "portal.patient.write",
     },
 }
 

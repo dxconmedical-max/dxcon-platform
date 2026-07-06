@@ -49,8 +49,6 @@ MODULE_ROUTES: tuple[str, ...] = (
     "/app/orders/new",
     "/app/patients",
     "/app/patients/new",
-    "/app/reports",
-    "/app/finance",
     "/app/logistics",
     "/app/ai",
     "/app/samples",
@@ -59,12 +57,6 @@ MODULE_ROUTES: tuple[str, ...] = (
     "/app/collections/route",
     "/app/iot",
     "/app/samples/chain-of-custody",
-    "/app/patient/profile",
-    "/app/patient/orders",
-    "/app/patient/reports",
-    "/app/patient/qr",
-    "/app/patient/invoices",
-    "/app/patient/notifications",
 )
 
 ROLE_DEMO_TARGETS = DEMO_ROLE_DASHBOARDS
@@ -265,7 +257,6 @@ def report_detail_body(report_key: str) -> str:
 DETAIL_ROUTE_BUILDERS = (
     ("/app/patients/<patient_key>", patient_detail_body),
     ("/app/orders/<order_key>", order_detail_body),
-    ("/app/reports/<report_key>", report_detail_body),
 )
 
 
@@ -400,7 +391,7 @@ def patients_new_body() -> str:
     )
 
 
-@_register("Reports", "/app/reports")
+@_register("Reports — moved to reporting_engine_web", "/app/reports-legacy-demo")
 def reports_body() -> str:
     rows = []
     for report in get_recent_reports(12):
@@ -420,7 +411,7 @@ def reports_body() -> str:
     )
 
 
-@_register("Finance", "/app/finance")
+@_register("Finance — legacy demo", "/app/finance-legacy-demo")
 def finance_body() -> str:
     summary = get_finance_summary()
     invoice_rows = []
@@ -590,7 +581,7 @@ def chain_of_custody_body() -> str:
     )
 
 
-@_register("My Profile", "/app/patient/profile")
+@_register("My Profile — legacy demo", "/app/patient-legacy-demo/profile")
 def patient_profile_body() -> str:
     from app.web.launch_ui_data import get_session_patient_portal
 
@@ -611,7 +602,7 @@ def patient_profile_body() -> str:
     )
 
 
-@_register("My Orders", "/app/patient/orders")
+@_register("My Orders — legacy demo", "/app/patient-legacy-demo/orders")
 def patient_orders_body() -> str:
     from app.web.launch_ui_data import get_session_patient_portal
 
@@ -623,7 +614,7 @@ def patient_orders_body() -> str:
     return back_nav("/app/patient", "Patient portal") + table_html("My orders", ["Order", "Date", "Status"], rows)
 
 
-@_register("My Reports", "/app/patient/reports")
+@_register("My Reports — legacy demo", "/app/patient-legacy-demo/reports")
 def patient_reports_body() -> str:
     from app.web.launch_ui_data import get_session_patient_portal
 
@@ -635,7 +626,7 @@ def patient_reports_body() -> str:
     return back_nav("/app/patient", "Patient portal") + table_html("My reports", ["Report", "Status", "Action"], rows)
 
 
-@_register("QR Health Card", "/app/patient/qr")
+@_register("QR Health Card — legacy demo", "/app/patient-legacy-demo/qr")
 def patient_qr_body() -> str:
     from app.web.launch_ui_data import get_session_patient_portal
 
@@ -649,7 +640,7 @@ def patient_qr_body() -> str:
     )
 
 
-@_register("My Invoices", "/app/patient/invoices")
+@_register("My Invoices — legacy demo", "/app/patient-legacy-demo/invoices")
 def patient_invoices_body() -> str:
     from app.web.launch_ui_data import get_session_patient_portal
 
@@ -660,7 +651,7 @@ def patient_invoices_body() -> str:
     return back_nav("/app/patient", "Patient portal") + table_html("Invoices", ["Invoice", "Amount", "Status"], rows)
 
 
-@_register("Notifications", "/app/patient/notifications")
+@_register("Notifications — legacy demo", "/app/patient-legacy-demo/notifications")
 def patient_notifications_body() -> str:
     return (
         back_nav("/app/patient", "Patient portal")

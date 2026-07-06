@@ -1,0 +1,19 @@
+{
+  "report": "FINANCE_REPORT",
+  "revenue_dashboard": {
+    "revenue_mtd": 0.0
+  },
+  "payment_dashboard": {
+    "paid_count": 0,
+    "pending_count": 0
+  },
+  "outstanding_balance": 0.0,
+  "corporate_billing": {
+    "placeholder": true
+  },
+  "insurance_billing": {
+    "placeholder": true
+  },
+  "invoices": 0,
+  "commission_placeholder": true
+}

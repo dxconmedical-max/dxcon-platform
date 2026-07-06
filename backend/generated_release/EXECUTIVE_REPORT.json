@@ -1,0 +1,14 @@
+{
+  "report": "EXECUTIVE_REPORT",
+  "revenue_today": 0.0,
+  "revenue_this_month": 0.0,
+  "orders_today": 0,
+  "orders_this_month": 0,
+  "patients": 0,
+  "doctors": 0,
+  "clinics": 0,
+  "laboratories": 0,
+  "pending_reports": 0,
+  "critical_results": 0,
+  "sample_collections": 0
+}

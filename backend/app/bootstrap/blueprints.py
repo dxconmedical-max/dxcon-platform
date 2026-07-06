@@ -13,6 +13,9 @@ from app.api.mdm.routes import mdm_bp
 from app.api.partner_foundation.routes import partner_foundation_bp
 from app.api.reception_workspace.routes import reception_workspace_bp
 from app.api.lab_workspace.routes import lab_workspace_bp
+from app.api.reporting_engine.routes import reporting_engine_bp
+from app.api.portal_workspace.routes import portal_doctor_bp, portal_patient_bp
+from app.api.executive_platform.routes import executive_platform_bp
 from app.api.files.routes import files_bp
 from app.api.ai_platform.routes import ai_platform_bp
 from app.api.ai_v2.routes import ai_interpret_v2_bp
@@ -25,6 +28,10 @@ from app.web.mdm_admin import mdm_web_bp
 from app.web.partner_foundation_admin import partner_foundation_web_bp
 from app.web.reception_workspace_web import reception_workspace_web_bp
 from app.web.lab_workspace_web import lab_workspace_web_bp
+from app.web.reporting_engine_web import reporting_engine_web_bp
+from app.web.doctor_portal_web import doctor_portal_workspace_web_bp
+from app.web.patient_portal_web import patient_portal_workspace_web_bp
+from app.web.executive_platform_web import executive_platform_web_bp
 from app.web.executive_v9 import executive_v9_bp
 from app.web.crm_v2 import crm_v2_web_bp
 from app.web.reception import reception_web_bp
@@ -439,6 +446,10 @@ def register_blueprints(app):
     app.register_blueprint(regional_cloud_web_bp)
     app.register_blueprint(healthcare_ecosystem_web_bp)
     app.register_blueprint(pilot_pages_bp)
+    app.register_blueprint(reporting_engine_web_bp)
+    app.register_blueprint(executive_platform_web_bp)
+    app.register_blueprint(doctor_portal_workspace_web_bp)
+    app.register_blueprint(patient_portal_workspace_web_bp)
     app.register_blueprint(launch_ui_bp)
     app.register_blueprint(business_ui_bp)
     app.register_blueprint(mdm_web_bp)
@@ -449,6 +460,10 @@ def register_blueprints(app):
     app.register_blueprint(reception_workspace_bp)
     app.register_blueprint(lab_workspace_web_bp)
     app.register_blueprint(lab_workspace_bp)
+    app.register_blueprint(reporting_engine_bp)
+    app.register_blueprint(portal_doctor_bp)
+    app.register_blueprint(portal_patient_bp)
+    app.register_blueprint(executive_platform_bp)
     app.register_blueprint(home_web_bp)
     app.register_blueprint(ops_bp)
     app.register_blueprint(security_api_bp)

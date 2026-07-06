@@ -1,0 +1,7 @@
+{
+  "report": "REPORT_SECURITY_REPORT",
+  "doctor_can_approve": true,
+  "reception_cannot_approve": true,
+  "patient_released_only": true,
+  "auto_release_disabled": true
+}

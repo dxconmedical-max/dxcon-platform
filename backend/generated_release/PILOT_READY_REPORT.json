@@ -1,0 +1,102 @@
+{
+  "report": "PILOT_READY_REPORT",
+  "launch_checklist": {
+    "items": [
+      {
+        "id": "19bd7513-995c-4458-8a2a-ef75a07620ce",
+        "category": "data",
+        "item_key": "master_data",
+        "label": "Master data seeded",
+        "status": "verified",
+        "verified_at": "2026-07-06T07:03:49.723623",
+        "verified_by": "verify",
+        "notes": null
+      },
+      {
+        "id": "13e668bf-7ae7-4b78-a1a5-c597b68d0cc1",
+        "category": "infrastructure",
+        "item_key": "dns",
+        "label": "DNS records verified",
+        "status": "verified",
+        "verified_at": "2026-07-06T07:03:49.724609",
+        "verified_by": "verify",
+        "notes": null
+      },
+      {
+        "id": "8d71c3de-c25c-4d0f-bd48-6d3fa4790933",
+        "category": "infrastructure",
+        "item_key": "domain",
+        "label": "Domain configured",
+        "status": "verified",
+        "verified_at": "2026-07-06T07:03:49.725121",
+        "verified_by": "verify",
+        "notes": null
+      },
+      {
+        "id": "15888896-6791-4058-a870-370dbd89644c",
+        "category": "infrastructure",
+        "item_key": "smtp",
+        "label": "SMTP configured",
+        "status": "pending",
+        "verified_at": null,
+        "verified_by": null,
+        "notes": null
+      },
+      {
+        "id": "4ff9aead-0f9b-4b6b-8304-e2c9086b9c49",
+        "category": "infrastructure",
+        "item_key": "ssl",
+        "label": "SSL certificate active",
+        "status": "pending",
+        "verified_at": null,
+        "verified_by": null,
+        "notes": null
+      },
+      {
+        "id": "4c70c4a1-d451-4b13-b597-ac26b4e19736",
+        "category": "operations",
+        "item_key": "backup",
+        "label": "Backup schedule active",
+        "status": "pending",
+        "verified_at": null,
+        "verified_by": null,
+        "notes": null
+      },
+      {
+        "id": "cbcaee78-664a-425b-89b6-0f9dd7dc5fd2",
+        "category": "operations",
+        "item_key": "monitoring",
+        "label": "Monitoring enabled",
+        "status": "pending",
+        "verified_at": null,
+        "verified_by": null,
+        "notes": null
+      },
+      {
+        "id": "ec2d897b-a3f9-4edd-994a-5e49e7394f61",
+        "category": "security",
+        "item_key": "pilot_users",
+        "label": "Pilot users provisioned",
+        "status": "pending",
+        "verified_at": null,
+        "verified_by": null,
+        "notes": null
+      },
+      {
+        "id": "7e2263af-acbe-4cac-a107-79d5ca6e8d7f",
+        "category": "security",
+        "item_key": "security_review",
+        "label": "Security review complete",
+        "status": "pending",
+        "verified_at": null,
+        "verified_by": null,
+        "notes": null
+      }
+    ],
+    "passed": 3,
+    "total": 9,
+    "ready": false
+  },
+  "pilot_ready": false,
+  "release": "1.0-pilot"
+}

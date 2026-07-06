@@ -11,6 +11,7 @@ from sqlalchemy import or_
 from app.business_engine.audit import write_biz_audit
 from app.business_engine.statuses import (
     COLLECTION_ASSIGNED,
+    COLLECTION_ACCEPTED,
     COLLECTION_COLLECTED,
     COLLECTION_DELIVERED,
     COLLECTION_IN_TRANSIT,
@@ -33,6 +34,7 @@ from app.business_engine.statuses import (
     RESULT_RELEASED,
     RESULT_TESTING,
 )
+from app.core.audit import _table_has_column
 from app.extensions.db import db
 from app.models.biz_order import (
     BizCollection,
@@ -134,17 +136,40 @@ def create_patient(
     code = (patient_code or _code("P")).strip()
     if Patient.query.get(code):
         raise BusinessEngineError(f"Patient code already exists: {code}")
-    patient = Patient(
-        patient_code=code,
-        full_name=full_name.strip(),
-        phone=phone_norm,
-        email=(email or "").strip() or None,
-        gender=(gender or "").strip() or None,
-        date_of_birth=(date_of_birth or "").strip() or None,
-        address=(address or "").strip() or None,
-        national_id=(national_id or "").strip() or None,
-    )
-    db.session.add(patient)
+    phone_norm = _normalize_phone(phone)
+    if _table_has_column("patients", "id"):
+        created_at = _utcnow()
+        db.session.execute(
+            db.text(
+                "INSERT INTO patients (id, patient_code, full_name, gender, date_of_birth, phone, email, address, national_id, created_at) "
+                "VALUES (:id, :patient_code, :full_name, :gender, :date_of_birth, :phone, :email, :address, :national_id, :created_at)"
+            ),
+            {
+                "id": code,
+                "patient_code": code,
+                "full_name": full_name.strip(),
+                "gender": (gender or "").strip() or None,
+                "date_of_birth": (date_of_birth or "").strip() or None,
+                "phone": phone_norm,
+                "email": (email or "").strip() or None,
+                "address": (address or "").strip() or None,
+                "national_id": (national_id or "").strip() or None,
+                "created_at": created_at,
+            },
+        )
+        patient = Patient.query.get(code)
+    else:
+        patient = Patient(
+            patient_code=code,
+            full_name=full_name.strip(),
+            phone=phone_norm,
+            email=(email or "").strip() or None,
+            gender=(gender or "").strip() or None,
+            date_of_birth=(date_of_birth or "").strip() or None,
+            address=(address or "").strip() or None,
+            national_id=(national_id or "").strip() or None,
+        )
+        db.session.add(patient)
     profile = PatientProfile(
         patient_id=code,
         qr_code=code,
@@ -378,6 +403,8 @@ def mark_order_paid(
     elif order.status == ORDER_DRAFT:
         _transition_order(order, ORDER_PAYMENT_PENDING, action="order.submit", actor=actor)
         _transition_order(order, ORDER_PAID, action="order.mark_paid", note=receipt, actor=actor)
+    if not order.barcode_value and _table_has_column("biz_orders", "barcode_value"):
+        order.barcode_value = f"BC-{order.order_code}"
     write_biz_audit(
         action="payment.record",
         entity_type="payment",
@@ -432,11 +459,35 @@ def create_collection_job(
     return collection
 
 
+def accept_collection(order_ref: str, actor: str | None = None) -> BizCollection:
+    order = _get_order(order_ref)
+    collection = BizCollection.query.filter_by(order_id=order.id).first()
+    if not collection:
+        raise BusinessEngineError("Collection job not found")
+    if collection.status != COLLECTION_ASSIGNED:
+        raise BusinessEngineError(f"Cannot accept pickup in status {collection.status}")
+    old = collection.status
+    collection.status = COLLECTION_ACCEPTED
+    collection.updated_at = _utcnow()
+    write_biz_audit(
+        action="collection.accept",
+        entity_type="collection",
+        entity_id=collection.sample_code or order.order_code,
+        old_status=old,
+        new_status=COLLECTION_ACCEPTED,
+        actor=actor,
+    )
+    return collection
+
+
 def collect_sample(order_ref: str, actor: str | None = None) -> BizCollection:
     order = _get_order(order_ref)
     collection = BizCollection.query.filter_by(order_id=order.id).first()
     if not collection:
         raise BusinessEngineError("Collection job not found")
+    if collection.status not in {COLLECTION_ACCEPTED, COLLECTION_ASSIGNED}:
+        raise BusinessEngineError(f"Cannot collect sample in status {collection.status}")
+    old = collection.status
     collection.status = COLLECTION_COLLECTED
     collection.updated_at = _utcnow()
     _transition_order(order, ORDER_COLLECTED, action="collection.collect", actor=actor)
@@ -444,10 +495,33 @@ def collect_sample(order_ref: str, actor: str | None = None) -> BizCollection:
         action="collection.collect",
         entity_type="collection",
         entity_id=collection.sample_code or order.order_code,
-        old_status=COLLECTION_ASSIGNED,
+        old_status=old,
         new_status=COLLECTION_COLLECTED,
         actor=actor,
     )
+    return collection
+
+
+def update_chain_of_custody(
+    order_ref: str,
+    *,
+    custody_note: str,
+    actor: str | None = None,
+) -> BizCollection:
+    if not custody_note or not custody_note.strip():
+        raise BusinessEngineError("custody_note is required")
+    order = _get_order(order_ref)
+    collection = BizCollection.query.filter_by(order_id=order.id).first()
+    if not collection:
+        raise BusinessEngineError("Collection job not found")
+    write_biz_audit(
+        action="collection.custody",
+        entity_type="collection",
+        entity_id=collection.sample_code or order.order_code,
+        note=custody_note.strip(),
+        actor=actor,
+    )
+    collection.updated_at = _utcnow()
     return collection
 
 
@@ -456,6 +530,8 @@ def handover_sample(order_ref: str, actor: str | None = None) -> BizCollection:
     collection = BizCollection.query.filter_by(order_id=order.id).first()
     if not collection:
         raise BusinessEngineError("Collection job not found")
+    if collection.status != COLLECTION_COLLECTED:
+        raise BusinessEngineError(f"Cannot mark in transit in status {collection.status}")
     collection.status = COLLECTION_IN_TRANSIT
     collection.updated_at = _utcnow()
     _transition_order(order, ORDER_IN_TRANSIT, action="collection.in_transit", actor=actor)
@@ -555,12 +631,30 @@ def enter_results(
                 flag=flag,
             )
         )
-    result.status = RESULT_PENDING_REVIEW
+    result.status = RESULT_TESTING
     if order.status == ORDER_LAB_RECEIVED:
         _transition_order(order, ORDER_TESTING, action="lab.start_testing", actor=actor)
-    _transition_order(order, ORDER_PENDING_REVIEW, action="result.enter", actor=actor)
     write_biz_audit(
         action="result.enter",
+        entity_type="result",
+        entity_id=result.result_code,
+        new_status=RESULT_TESTING,
+        actor=actor,
+    )
+    return result
+
+
+def complete_qc(order_ref: str, actor: str | None = None) -> BizResult:
+    order = _get_order(order_ref)
+    if order.status != ORDER_TESTING:
+        raise BusinessEngineError(f"QC complete requires testing status, got {order.status}")
+    result = BizResult.query.filter_by(order_id=order.id).first()
+    if not result or not result.items:
+        raise BusinessEngineError("No result items to QC")
+    result.status = RESULT_PENDING_REVIEW
+    _transition_order(order, ORDER_PENDING_REVIEW, action="lab.qc_complete", actor=actor)
+    write_biz_audit(
+        action="lab.qc_complete",
         entity_type="result",
         entity_id=result.result_code,
         new_status=RESULT_PENDING_REVIEW,
@@ -624,6 +718,23 @@ def render_report_html(result: BizResult, order: BizOrder) -> str:
         f"<table border='1' cellpadding='6'><tr><th>Test</th><th>Result</th><th>Reference</th><th>Flag</th></tr>"
         f"{''.join(rows)}</table>"
         f"<p><em>Clinician note: {result.doctor_note or '—'}</em></p></body></html>"
+    )
+
+
+def render_request_form_html(order: BizOrder) -> str:
+    tests = "".join(
+        f"<li>{item.test_name} ({item.test_code}) — ${item.line_total:,.0f}</li>"
+        for item in order.items
+    )
+    barcode = order.barcode_value or "—"
+    return (
+        f"<html><body><h1>Lab Request Form</h1>"
+        f"<p>Order: {order.order_code}</p>"
+        f"<p>Patient: {order.patient_name} ({order.patient_code})</p>"
+        f"<p>Barcode: {barcode}</p>"
+        f"<ul>{tests}</ul>"
+        f"<p>Total: ${order.total_amount:,.0f}</p>"
+        f"<p><em>Generated by DxCon business engine</em></p></body></html>"
     )
 
 
@@ -739,6 +850,102 @@ def list_reports(limit: int = 20) -> list[dict]:
             "flag": detail["flag"],
         })
     return rows
+
+
+def list_collector_assignments(collector_name: str | None = None, limit: int = 20) -> list[dict]:
+    query = BizCollection.query
+    if collector_name:
+        query = query.filter(BizCollection.collector_name == collector_name.strip())
+    rows = []
+    for collection in query.order_by(BizCollection.created_at.desc()).limit(limit).all():
+        order = BizOrder.query.get(collection.order_id)
+        rows.append({
+            **collection.to_dict(),
+            "order_code": order.order_code if order else "",
+            "patient_name": order.patient_name if order else "",
+            "patient_code": order.patient_code if order else "",
+            "order_status": order.status if order else "",
+        })
+    return rows
+
+
+def list_lab_incoming(limit: int = 20) -> list[dict]:
+    statuses = {ORDER_IN_TRANSIT, ORDER_LAB_RECEIVED, ORDER_TESTING}
+    rows = []
+    for order in BizOrder.query.filter(BizOrder.status.in_(statuses)).order_by(BizOrder.updated_at.desc()).limit(limit):
+        collection = BizCollection.query.filter_by(order_id=order.id).first()
+        rows.append({
+            "order_code": order.order_code,
+            "patient_name": order.patient_name,
+            "status": order.status,
+            "accession_number": collection.accession_number if collection else None,
+            "sample_code": collection.sample_code if collection else None,
+        })
+    return rows
+
+
+def list_pending_doctor_reviews(limit: int = 20) -> list[dict]:
+    rows = []
+    for result in BizResult.query.filter_by(status=RESULT_PENDING_REVIEW).order_by(BizResult.created_at.desc()).limit(limit):
+        detail = result_to_detail(result.result_code)
+        rows.append({
+            "id": result.result_code,
+            "result_code": result.result_code,
+            "order_code": detail["order_code"],
+            "patient_name": detail["patient_name"],
+            "test_name": detail["test_name"],
+            "flag": detail["flag"],
+            "approval_status": result.status,
+        })
+    return rows
+
+
+def get_patient_portal_data(patient_code: str) -> dict:
+    patient = Patient.query.get(patient_code)
+    if not patient:
+        raise BusinessEngineError("Patient not found")
+    profile = PatientProfile.query.filter_by(patient_id=patient_code).first()
+    orders = BizOrder.query.filter_by(patient_code=patient_code).order_by(BizOrder.created_at.desc()).all()
+    invoices = []
+    released_reports = []
+    unreleased_count = 0
+    for order in orders:
+        inv = BizInvoice.query.filter_by(order_id=order.id).first()
+        if inv:
+            payment = BizPayment.query.filter_by(invoice_id=inv.id).first()
+            invoices.append({
+                **inv.to_dict(),
+                "order_code": order.order_code,
+                "payment_method": payment.payment_method if payment else None,
+            })
+        res = BizResult.query.filter_by(order_id=order.id).first()
+        if res:
+            if res.status == RESULT_RELEASED and res.patient_visible:
+                released_reports.append({
+                    **res.to_dict(include_items=False),
+                    "order_code": order.order_code,
+                    "html_content": res.html_content,
+                })
+            elif res.status != RESULT_RELEASED:
+                unreleased_count += 1
+    try:
+        from app.reporting_engine.service import patient_released_reports
+
+        clinical = patient_released_reports(patient_code)
+        seen = {r.get("report_code") or r.get("result_code") for r in released_reports}
+        for cr in clinical:
+            if cr.get("report_code") not in seen:
+                released_reports.append({**cr, "order_code": cr.get("order_code")})
+    except Exception:
+        pass
+    return {
+        "patient": patient.to_dict(),
+        "qr_payload": profile.qr_payload if profile else _qr_payload(patient_code),
+        "orders": [o.to_dict(include_items=False) for o in orders],
+        "invoices": invoices,
+        "released_reports": released_reports,
+        "unreleased_report_count": unreleased_count,
+    }
 
 
 def ensure_test_catalog_seed() -> list[TestCatalog]:

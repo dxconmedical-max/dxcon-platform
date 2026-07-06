@@ -26,6 +26,13 @@ class DoctorNote(db.Model):
 
     note_text = db.Column(db.Text, nullable=False)
 
+    note_type = db.Column(db.String(50), default="clinical")
+    visibility = db.Column(db.String(30), default="internal")
+    order_code = db.Column(db.String(50))
+    report_code = db.Column(db.String(50))
+    follow_up_recommendation = db.Column(db.Text)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
@@ -35,5 +42,10 @@ class DoctorNote(db.Model):
             "patient_id": self.patient_id,
             "lab_result_id": self.lab_result_id,
             "note_text": self.note_text,
+            "note_type": getattr(self, "note_type", None) or "clinical",
+            "visibility": getattr(self, "visibility", None) or "internal",
+            "order_code": getattr(self, "order_code", None),
+            "report_code": getattr(self, "report_code", None),
+            "follow_up_recommendation": getattr(self, "follow_up_recommendation", None),
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

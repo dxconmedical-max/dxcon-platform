@@ -1,0 +1,7 @@
+{
+  "report": "PORTAL_SECURITY_REPORT",
+  "doctor_can_view_patients": true,
+  "patient_cannot_view_unreleased": true,
+  "reception_cannot_release": true,
+  "patient_isolation": true
+}

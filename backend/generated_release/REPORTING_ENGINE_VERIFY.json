@@ -1,0 +1,65 @@
+{
+  "sprint": "008",
+  "passed": 18,
+  "total": 18,
+  "checks": {
+    "pending_review_exists": {
+      "ok": true
+    },
+    "review_queue": {
+      "ok": true
+    },
+    "review_detail": {
+      "ok": true
+    },
+    "start_review": {
+      "ok": true
+    },
+    "approve_report": {
+      "ok": true
+    },
+    "report_hash": {
+      "ok": true
+    },
+    "signature_foundation": {
+      "ok": true
+    },
+    "release_requires_ack": {
+      "ok": true
+    },
+    "critical_alert": {
+      "ok": true
+    },
+    "release_after_approval": {
+      "ok": true
+    },
+    "patient_visible_released": {
+      "ok": true
+    },
+    "patient_hidden_unreleased": {
+      "ok": true,
+      "unreleased_count": 0
+    },
+    "versioning": {
+      "ok": true
+    },
+    "audit_logs": {
+      "ok": true,
+      "count": 26
+    },
+    "ui_review_queue": {
+      "ok": true
+    },
+    "ui_review_detail": {
+      "ok": true
+    },
+    "ui_report_preview": {
+      "ok": true
+    },
+    "api_queue": {
+      "ok": true
+    }
+  },
+  "elapsed": 17.44,
+  "generated_at": "2026-07-06T06:18:17.013813+00:00"
+}

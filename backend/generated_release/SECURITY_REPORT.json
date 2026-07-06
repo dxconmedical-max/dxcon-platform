@@ -1,0 +1,13 @@
+{
+  "report": "SECURITY_REPORT",
+  "rate_limiting": true,
+  "session_management": true,
+  "password_policy": true,
+  "account_lockout": true,
+  "security_headers": true,
+  "csrf": true,
+  "cors_reviewed": true,
+  "jwt_validation": true,
+  "reception_cannot_approve": true,
+  "patient_isolation": true
+}

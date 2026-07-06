@@ -96,17 +96,10 @@ def marketing_home():
     return render_marketing_home()
 
 
-@launch_ui_bp.route("/app/executive")
-@launch_ui_bp.route("/executive-v10")
-@login_required
-def app_executive():
-    return render_page("Executive Dashboard", executive_dashboard_body(), active_nav="/app/executive")
-
-
 @launch_ui_bp.route("/app/doctor")
 @login_required
 def app_doctor():
-    return render_page("Doctor Workbench", doctor_dashboard_body(), active_nav="/app/doctor")
+    return redirect("/app/doctor/dashboard")
 
 
 @launch_ui_bp.route("/app/collector")
@@ -118,7 +111,7 @@ def app_collector():
 @launch_ui_bp.route("/app/patient")
 @login_required
 def app_patient():
-    return render_page("Patient Portal", patient_dashboard_body(), active_nav="/app/patient")
+    return redirect("/app/patient/dashboard")
 
 
 @launch_ui_bp.route("/app/system")

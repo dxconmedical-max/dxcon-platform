@@ -32,6 +32,14 @@ from app.models.lab_lis import (
     LISImportBatch,
     LISImportFailedRow,
 )
+from app.models.clinical_report import (
+    ClinicalReport,
+    CriticalResultAlert,
+    ReportDigitalSignature,
+    ReportNotificationEvent,
+)
+from app.models.portal import PortalFavorite, PortalNotification, PortalQrToken
+from app.models.executive_platform import LaunchChecklistItem, PilotWizardSession, StorageConfig
 
 from app.models.order import Order
 

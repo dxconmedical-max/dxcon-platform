@@ -1,0 +1,54 @@
+{
+  "sprint": "009",
+  "passed": 15,
+  "total": 15,
+  "checks": {
+    "doctor_dashboard": {
+      "ok": true
+    },
+    "patient_search": {
+      "ok": true
+    },
+    "report_visibility": {
+      "ok": true
+    },
+    "patient_dashboard": {
+      "ok": true
+    },
+    "invoice_visibility": {
+      "ok": true
+    },
+    "consent": {
+      "ok": true
+    },
+    "qr": {
+      "ok": true
+    },
+    "notification": {
+      "ok": true
+    },
+    "security": {
+      "ok": true
+    },
+    "audit": {
+      "ok": true
+    },
+    "doctor_login_ui": {
+      "ok": true
+    },
+    "doctor_search_ui": {
+      "ok": true
+    },
+    "patient_login_ui": {
+      "ok": true
+    },
+    "patient_reports_ui": {
+      "ok": true
+    },
+    "api_doctor": {
+      "ok": true
+    }
+  },
+  "elapsed": 23.09,
+  "generated_at": "2026-07-06T06:17:58.162051+00:00"
+}
