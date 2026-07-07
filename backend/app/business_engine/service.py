@@ -34,7 +34,7 @@ from app.business_engine.statuses import (
     RESULT_RELEASED,
     RESULT_TESTING,
 )
-from app.core.audit import _table_has_column
+from app.core.audit import table_has_column
 from app.extensions.db import db
 from app.models.biz_order import (
     BizCollection,
@@ -137,7 +137,7 @@ def create_patient(
     if Patient.query.get(code):
         raise BusinessEngineError(f"Patient code already exists: {code}")
     phone_norm = _normalize_phone(phone)
-    if _table_has_column("patients", "id"):
+    if table_has_column("patients", "id"):
         created_at = _utcnow()
         db.session.execute(
             db.text(
@@ -403,7 +403,7 @@ def mark_order_paid(
     elif order.status == ORDER_DRAFT:
         _transition_order(order, ORDER_PAYMENT_PENDING, action="order.submit", actor=actor)
         _transition_order(order, ORDER_PAID, action="order.mark_paid", note=receipt, actor=actor)
-    if not order.barcode_value and _table_has_column("biz_orders", "barcode_value"):
+    if not order.barcode_value and table_has_column("biz_orders", "barcode_value"):
         order.barcode_value = f"BC-{order.order_code}"
     write_biz_audit(
         action="payment.record",
