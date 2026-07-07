@@ -6,6 +6,8 @@ from typing import Any
 
 from app.services.reporting_service import _safe
 
+from flask import session
+
 FALLBACK_PATIENT_KEY = "P-DEMO-001"
 FALLBACK_ORDER_KEY = "ORD-DEMO-001"
 FALLBACK_REPORT_KEY = "RPT-DEMO-001"
@@ -106,6 +108,29 @@ _FALLBACK_COLLECTIONS = [
         "eta": "1h",
     },
 ]
+
+
+def get_session_patient_portal() -> dict[str, Any]:
+    """Return patient-portal payload for the current session.
+
+    This is used by Launch UI and the Sprint 009 patient portal UI as a safe
+    fallback when real portal APIs are not used.
+    """
+    from app.business_engine import service as biz
+
+    patient_code = session.get("patient_code") or session.get("patient_id") or FALLBACK_PATIENT_KEY
+    payload = _safe(lambda: biz.get_patient_portal_data(patient_code)) or {}
+    if payload:
+        return payload
+    # last resort fallback for demo sessions
+    return {
+        "patient": _FALLBACK_PATIENTS[0],
+        "qr_payload": f"dxcon:patient:{_FALLBACK_PATIENTS[0]['patient_code']}",
+        "orders": _FALLBACK_ORDERS,
+        "invoices": [],
+        "released_reports": [],
+        "unreleased_report_count": 0,
+    }
 
 
 def _patient_name(patient_id: str) -> str:
