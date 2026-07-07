@@ -10,7 +10,12 @@ def table_has_column(table: str, column: str) -> bool:
 
     Use this instead of importing the private `_table_has_column` across modules.
     """
-    return _table_has_column(table, column)
+    try:
+        from app.core.db_introspection import table_has_column as _public
+
+        return _public(db, table, column)
+    except Exception:
+        return _table_has_column(table, column)
 
 
 def _table_has_column(table: str, column: str) -> bool:
@@ -65,7 +70,7 @@ def write_audit(
 ):
     audit_id = str(uuid.uuid4())
     created_at = datetime.utcnow()
-    if _table_has_column("audit_logs", "request_id"):
+    if table_has_column("audit_logs", "request_id"):
         log = AuditLog(
             user_email=user_email,
             action=action,

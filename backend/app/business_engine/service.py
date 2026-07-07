@@ -34,7 +34,7 @@ from app.business_engine.statuses import (
     RESULT_RELEASED,
     RESULT_TESTING,
 )
-from app.core.audit import table_has_column
+from app.core.db_introspection import table_has_column as _table_has_column
 from app.extensions.db import db
 from app.models.biz_order import (
     BizCollection,
@@ -57,6 +57,11 @@ class BusinessEngineError(ValueError):
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
+def table_has_column(table_name: str, column_name: str) -> bool:
+    """Local wrapper around the shared DB introspection helper."""
+    return _table_has_column(db, table_name, column_name)
 
 
 def _code(prefix: str) -> str:

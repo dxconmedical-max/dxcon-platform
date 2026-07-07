@@ -1,0 +1,20 @@
+{
+  "generated_at": "2026-07-07T07:45:50.532152+00:00",
+  "csv_import": {
+    "status": "PASS",
+    "detail": "Supported for pilot"
+  },
+  "manual_entry": {
+    "status": "PASS",
+    "detail": "Supported for pilot"
+  },
+  "hl7_adapter": {
+    "status": "PLANNED",
+    "detail": "Placeholder only"
+  },
+  "rest_connector": {
+    "status": "PLANNED",
+    "detail": "Stub only"
+  },
+  "pilot_blocking": false
+}

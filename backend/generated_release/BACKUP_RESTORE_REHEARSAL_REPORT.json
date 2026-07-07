@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-07-07T07:45:50.528926+00:00",
+  "mode": "dry_run",
+  "findings": [
+    {
+      "status": "WARNING",
+      "name": "database_url",
+      "detail": "missing"
+    },
+    {
+      "status": "WARNING",
+      "name": "postgresql_only",
+      "detail": "non-postgres"
+    },
+    {
+      "status": "WARNING",
+      "name": "pg_dump",
+      "detail": "not found"
+    },
+    {
+      "status": "WARNING",
+      "name": "pg_restore",
+      "detail": "not found"
+    },
+    {
+      "status": "PASS",
+      "name": "dry_run",
+      "detail": "true"
+    }
+  ],
+  "notes": [
+    "Dry-run does not execute pg_dump/pg_restore.",
+    "Run real restore rehearsal in staging only."
+  ]
+}

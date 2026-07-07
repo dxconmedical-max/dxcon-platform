@@ -1,3 +1,5 @@
+import os
+
 from flask import Blueprint, current_app
 
 from app.core.api_response import api_envelope, success_response
@@ -8,6 +10,7 @@ from app.core.metrics import metrics
 from app.core.monitoring import application_metrics
 from app.core.performance_metrics import performance_metrics
 from app.core.startup_checks import run_startup_checks
+from app.notifications.providers.email import EmailProvider
 from app.extensions.db import db
 from app.models.invoice import Invoice
 from app.models.order import Order
@@ -66,12 +69,19 @@ def health():
 
     db_status = "OK"
     overall_status = "OK"
+    email = EmailProvider().health_check()
+    email_dry_run = bool(os.environ.get("EMAIL_DRY_RUN", "").lower() in ("1", "true", "yes"))
 
     try:
         verify_database_connection(app, retries=1, delay_seconds=0)
     except Exception:
         db_status = "ERROR"
         overall_status = "DEGRADED"
+
+    if email.get("status") != "OK":
+        # Email is allowed to be degraded for internal pilot (dry-run or not configured),
+        # but should be visible on /health.
+        overall_status = "DEGRADED" if overall_status == "OK" else overall_status
 
     metrics.set_health_status(overall_status)
     startup = app.extensions.get("dxcon_startup", {}).get("checks") or run_startup_checks(app)
@@ -80,6 +90,7 @@ def health():
         "status": overall_status,
         "service": "DxCon Production",
         "database": db_status,
+        "email": {"dry_run": email_dry_run, **email},
         "build": build_info(),
         "startup": startup,
     }
@@ -114,7 +125,15 @@ def _ready_response():
         verify_database_connection(app, retries=1, delay_seconds=0)
         migration = migration or verify_migrations(app)
         if migration.get("ready"):
-            payload = {"status": "OK", "ready": True, "database": "OK", "migrations": migration}
+            email = EmailProvider().health_check()
+            email_dry_run = bool(os.environ.get("EMAIL_DRY_RUN", "").lower() in ("1", "true", "yes"))
+            payload = {
+                "status": "OK",
+                "ready": True,
+                "database": "OK",
+                "migrations": migration,
+                "email": {"dry_run": email_dry_run, **email},
+            }
             if app.config.get("TESTING"):
                 return payload
             return success_response(payload)[0]

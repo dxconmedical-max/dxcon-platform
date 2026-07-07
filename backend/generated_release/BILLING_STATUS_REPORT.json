@@ -1,0 +1,20 @@
+{
+  "generated_at": "2026-07-07T07:45:50.532582+00:00",
+  "standard_billing": {
+    "status": "PASS",
+    "detail": "Order invoices + payments"
+  },
+  "corporate_billing": {
+    "status": "PLACEHOLDER",
+    "detail": "Coming in Release 2.0"
+  },
+  "insurance_billing": {
+    "status": "PLACEHOLDER",
+    "detail": "Coming in Release 2.0"
+  },
+  "commission": {
+    "status": "PLACEHOLDER",
+    "detail": "Coming in Release 2.0"
+  },
+  "pilot_blocking": false
+}

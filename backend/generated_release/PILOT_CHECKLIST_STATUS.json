@@ -1,0 +1,101 @@
+{
+  "generated_at": "2026-07-07T07:45:50.492445+00:00",
+  "items": [
+    {
+      "key": "domain",
+      "label": "Domain configured",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    },
+    {
+      "key": "ssl",
+      "label": "TLS/SSL certificate active",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    },
+    {
+      "key": "smtp",
+      "label": "SMTP configured or EMAIL_DRY_RUN=true",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    },
+    {
+      "key": "pilot_users",
+      "label": "Pilot users provisioned",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    },
+    {
+      "key": "organization_setup",
+      "label": "Organization configured",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    },
+    {
+      "key": "master_data",
+      "label": "Master data imported",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    },
+    {
+      "key": "price_list",
+      "label": "Price list verified",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    },
+    {
+      "key": "clinic",
+      "label": "Clinic partner configured",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    },
+    {
+      "key": "lab",
+      "label": "Laboratory configured",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    },
+    {
+      "key": "doctors",
+      "label": "Doctor users created",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    },
+    {
+      "key": "collectors",
+      "label": "Collector users created",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    },
+    {
+      "key": "test_patient",
+      "label": "Test patient created",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    },
+    {
+      "key": "test_order",
+      "label": "Test order created",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    },
+    {
+      "key": "test_report",
+      "label": "Test report released",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    },
+    {
+      "key": "backup",
+      "label": "Backup schedule enabled + restore rehearsal",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    },
+    {
+      "key": "support_contact",
+      "label": "Support contact confirmed",
+      "status": "MANUAL",
+      "detail": "manual verification required"
+    }
+  ]
+}

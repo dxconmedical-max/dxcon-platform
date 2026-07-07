@@ -1,0 +1,54 @@
+{
+  "generated_at": "2026-07-07T07:45:50.595617+00:00",
+  "findings": [
+    {
+      "status": "PASS",
+      "name": "audit_import_fix",
+      "detail": "Public helper used; no private cross-module import"
+    },
+    {
+      "status": "WARNING",
+      "name": "smtp_not_configured",
+      "detail": "Set EMAIL_DRY_RUN=true for internal pilot"
+    },
+    {
+      "status": "PASS",
+      "name": "pilot_checklist_generated",
+      "detail": "PILOT_CHECKLIST_STATUS.json generated"
+    },
+    {
+      "status": "PASS",
+      "name": "backup_restore_rehearsal",
+      "detail": "Backup restore rehearsal: PASS (/Users/mac/dxcon-platform/backend/generated_release/BACKUP_RESTORE_REHEARSAL_REPORT.json)\n\n"
+    },
+    {
+      "status": "PASS",
+      "name": "lis_status",
+      "detail": "HL7/REST marked PLANNED"
+    },
+    {
+      "status": "PASS",
+      "name": "billing_status",
+      "detail": "Corporate/insurance marked PLACEHOLDER"
+    },
+    {
+      "status": "WARNING",
+      "name": "tenant_isolation",
+      "detail": "DATABASE_URL not set; run in staging/postgres"
+    },
+    {
+      "status": "PASS",
+      "name": "render_smoke",
+      "detail": "Render smoke: PASS (/Users/mac/dxcon-platform/backend/generated_release/RENDER_SMOKE_TEST_REPORT.json)\n\n"
+    }
+  ],
+  "score": {
+    "counts": {
+      "PASS": 6,
+      "WARNING": 2,
+      "FAIL": 0
+    },
+    "score_pct": 87.5,
+    "total": 8
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-07-07T07:45:50.590730+00:00",
+  "base_url": "",
+  "endpoints": [
+    "/",
+    "/health",
+    "/ready",
+    "/login",
+    "/app/executive"
+  ],
+  "results": {},
+  "findings": [
+    {
+      "status": "WARNING",
+      "name": "base_url",
+      "detail": "Set RENDER_BASE_URL to run external smoke"
+    }
+  ]
+}

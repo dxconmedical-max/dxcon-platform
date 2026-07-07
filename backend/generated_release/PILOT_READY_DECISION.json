@@ -1,0 +1,10 @@
+{
+  "generated_at": "2026-07-07T07:45:50.596064+00:00",
+  "decision": "INTERNAL_PILOT_READY",
+  "internal_pilot_ready": true,
+  "customer_pilot_ready": false,
+  "notes": [
+    "INTERNAL_PILOT_READY allows SMTP DEGRADED with EMAIL_DRY_RUN.",
+    "CUSTOMER_PILOT_READY requires SMTP configured, tenant isolation PASS, and render base URL checks."
+  ]
+}
