@@ -10,7 +10,7 @@ from app.core.web_authz import web_roles_required
 from app.reception_workspace.security import RECEPTION_READ_ROLES
 from app.reception_workspace.service import workspace_dashboard, fast_search_patients
 from app.utils.auth import login_required
-from app.web.launch_ui_lib import metric_cards, render_page, status_badge, table_section
+from app.web.launch_ui_lib import action_grid, metric_cards, render_page, status_badge, table_section
 
 reception_workspace_web_bp = Blueprint("reception_workspace_web", __name__)
 
@@ -70,6 +70,13 @@ def reception_workspace_body() -> str:
             _h(p.get("phone", "")),
         ])
 
+    workspace_actions = action_grid([
+        ("Search patient", "/app/patients", "Find existing records"),
+        ("New registration", "/app/patients/new", "Register walk-in"),
+        ("Create order", "/app/orders/new", "New diagnostic order"),
+        ("Queue", "/app/reception/queue", "Waiting tokens"),
+        ("Pending payment", "/app/finance", "Outstanding invoices"),
+    ])
     quick_actions = """
     <div class="launch-action-row reception-quick-actions">
       <a class="launch-btn launch-btn-sm" href="/app/patients/new">New Patient</a>
@@ -90,6 +97,7 @@ def reception_workspace_body() -> str:
 
     layout = f"""
     <div class="reception-workspace">
+      {workspace_actions}
       {kpi_cards}
       <div class="reception-workspace-grid">
         <div class="reception-col-left">{search_form}{search_results}</div>

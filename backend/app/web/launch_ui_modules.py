@@ -257,6 +257,7 @@ def report_detail_body(report_key: str) -> str:
 DETAIL_ROUTE_BUILDERS = (
     ("/app/patients/<patient_key>", patient_detail_body),
     ("/app/orders/<order_key>", order_detail_body),
+    ("/app/reports/<report_key>", report_detail_body),
 )
 
 

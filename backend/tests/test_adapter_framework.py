@@ -21,9 +21,10 @@ class AdapterFrameworkTestCase(unittest.TestCase):
 
     def test_demo_adapters_register(self):
         types = AdapterRegistry.list_types()
-        self.assertEqual(len(types), 8)
+        self.assertEqual(len(types), 9)
         self.assertIn("HIS", types)
         self.assertIn("LIS", types)
+        self.assertIn("AI", types)
 
     def test_adapter_lifecycle(self):
         connect = AdapterManager.connect("HIS")

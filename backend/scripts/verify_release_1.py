@@ -71,6 +71,7 @@ def main() -> int:
         security_report,
         verify_checklist_item,
     )
+    from app.core.passwords import hash_password
     from app.infrastructure.storage_service import StorageService
     from app.models.audit_log import AuditLog
     from app.models.user import User
@@ -89,7 +90,7 @@ def main() -> int:
 
         admin = User.query.filter(User.role.in_(["SUPER_ADMIN", "ADMIN"])).first()
         if not admin:
-            admin = User(email=f"admin-{uuid.uuid4().hex[:6]}@dxcon.test", role="SUPER_ADMIN", password_hash="x", is_active=True)
+            admin = User(email=f"admin-{uuid.uuid4().hex[:6]}@dxcon.test", role="SUPER_ADMIN", password_hash=hash_password("VerifyOnly123!"), is_active=True)
             db.session.add(admin)
             db.session.commit()
 

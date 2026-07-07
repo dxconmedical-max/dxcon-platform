@@ -44,6 +44,7 @@ class BusinessEngineTestCase(unittest.TestCase):
             order.order_code,
             [{"test_name": order.items[0].test_name, "test_code": order.items[0].test_code, "result_value": "5.0", "reference_range": "4-6"}],
         )
+        biz.complete_qc(order.order_code)
         biz.approve_result(order.order_code, doctor_note="OK")
         biz.release_report(order.order_code)
         db.session.commit()

@@ -10,7 +10,7 @@ from app.core.web_authz import web_roles_required
 from app.doctor_portal.security import DOCTOR_PORTAL_READ_ROLES, DOCTOR_PORTAL_WRITE_ROLES
 from app.doctor_portal.service import dashboard, patient_profile, report_detail, search_patients
 from app.utils.auth import login_required
-from app.web.launch_ui_lib import metric_cards, render_page, status_badge, table_section
+from app.web.launch_ui_lib import action_grid, metric_cards, render_page, status_badge, table_section
 from app.web.portal_layout import DOCTOR_NAV, portal_nav
 
 doctor_portal_workspace_web_bp = Blueprint("doctor_portal_workspace_web", __name__)
@@ -28,6 +28,12 @@ def doctor_dashboard_page():
     w = data["widgets"]
     body = (
         portal_nav(DOCTOR_NAV, "/app/doctor/dashboard")
+        + action_grid([
+            ("Review Queue", "/app/doctor/review", "Pending sign-offs"),
+            ("Patient Search", "/app/doctor/patients", "Find patients"),
+            ("Reports", "/app/reports", "Clinical reports"),
+            ("Critical Results", "/app/reports/critical", "High-priority flags"),
+        ])
         + metric_cards([
             ("Today's Patients", w["todays_patients"]),
             ("Pending Reviews", w["pending_reviews"]),

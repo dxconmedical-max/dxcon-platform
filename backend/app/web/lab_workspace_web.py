@@ -11,7 +11,7 @@ from app.lab_workspace.lis_service import list_connectors, list_failed_imports, 
 from app.lab_workspace.security import LAB_READ_ROLES
 from app.lab_workspace.service import testing_queue, workspace_dashboard
 from app.utils.auth import login_required
-from app.web.launch_ui_lib import metric_cards, render_page, status_badge, table_section
+from app.web.launch_ui_lib import action_grid, metric_cards, render_page, status_badge, table_section
 
 lab_workspace_web_bp = Blueprint("lab_workspace_web", __name__)
 
@@ -80,6 +80,12 @@ def lab_workspace_body() -> str:
     ]
     return (
         _lab_nav("/app/lab")
+        + action_grid([
+            ("Receive Samples", "/app/lab/receive", "Incoming specimens"),
+            ("Testing Queue", "/app/lab/testing", "In-progress tests"),
+            ("Results Entry", "/app/lab/results", "Capture values"),
+            ("Validation", "/app/lab/validation", "QC and release prep"),
+        ])
         + cards
         + '<div class="reception-workspace-grid">'
         + table_section("Incoming Samples", ["Order", "Patient", "Status"], incoming_rows or [["—", "—", status_badge("none")]])

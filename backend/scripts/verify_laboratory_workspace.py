@@ -68,6 +68,7 @@ def main() -> int:
         validate_result,
         workspace_dashboard,
     )
+    from app.core.passwords import hash_password
     from app.models.audit_log import AuditLog
     from app.models.user import User
 
@@ -85,7 +86,7 @@ def main() -> int:
 
         user = User.query.filter(User.role.in_(["LAB", "ADMIN", "SUPER_ADMIN"])).first()
         if not user:
-            user = User(email=f"lab-{run_tag}@dxcon.test", role="LAB", password_hash="x", is_active=True)
+            user = User(email=f"lab-{run_tag}@dxcon.test", role="LAB", password_hash=hash_password("VerifyOnly123!"), is_active=True)
             db.session.add(user)
             db.session.commit()
 

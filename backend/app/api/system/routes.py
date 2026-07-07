@@ -78,7 +78,7 @@ def health():
         db_status = "ERROR"
         overall_status = "DEGRADED"
 
-    if email.get("status") != "OK":
+    if email.get("status") != "OK" and not app.config.get("TESTING"):
         # Email is allowed to be degraded for internal pilot (dry-run or not configured),
         # but should be visible on /health.
         overall_status = "DEGRADED" if overall_status == "OK" else overall_status

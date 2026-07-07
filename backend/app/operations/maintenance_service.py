@@ -1,6 +1,8 @@
 import uuid
 from datetime import datetime, timedelta
 
+from sqlalchemy.exc import SQLAlchemyError
+
 from app.extensions.db import db
 from app.models.operations_platform import MaintenanceWindow
 from app.operations.backup_service import OperationsPlatformError
@@ -35,7 +37,11 @@ class MaintenanceService:
 
     @classmethod
     def is_active(cls):
-        return MaintenanceWindow.query.filter_by(active=True).count() > 0
+        try:
+            return MaintenanceWindow.query.filter_by(active=True).count() > 0
+        except SQLAlchemyError:
+            db.session.rollback()
+            return False
 
     @classmethod
     def enable(cls, data=None):

@@ -65,6 +65,7 @@ def main() -> int:
         receive_sample,
         validate_result,
     )
+    from app.core.passwords import hash_password
     from app.models.audit_log import AuditLog
     from app.models.biz_order import BizCollection, BizOrder
     from app.models.clinical_report import ClinicalReport, CriticalResultAlert, ReportDigitalSignature
@@ -101,13 +102,13 @@ def main() -> int:
 
         doctor = User.query.filter(User.role.in_(["DOCTOR", "ADMIN", "SUPER_ADMIN"])).first()
         if not doctor:
-            doctor = User(email=f"doc-{run_tag}@dxcon.test", role="DOCTOR", password_hash="x", is_active=True)
+            doctor = User(email=f"doc-{run_tag}@dxcon.test", role="DOCTOR", password_hash=hash_password("VerifyOnly123!"), is_active=True)
             db.session.add(doctor)
             db.session.commit()
 
         lab_user = User.query.filter(User.role == "LAB").first()
         if not lab_user:
-            lab_user = User(email=f"lab-{run_tag}@dxcon.test", role="LAB", password_hash="x", is_active=True)
+            lab_user = User(email=f"lab-{run_tag}@dxcon.test", role="LAB", password_hash=hash_password("VerifyOnly123!"), is_active=True)
             db.session.add(lab_user)
             db.session.commit()
 

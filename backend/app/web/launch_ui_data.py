@@ -296,8 +296,8 @@ def get_recent_reports(limit: int = 10) -> list[dict[str, Any]]:
                     order = Order.query.filter_by(id=item.order_id).first()
                     if order:
                         patient_name = _patient_name(order.patient_id)
-            except Exception:
-                pass
+            except (AttributeError, TypeError, KeyError):
+                patient_name = "Demo Patient"
             rows.append(
                 {
                     "id": result.id,

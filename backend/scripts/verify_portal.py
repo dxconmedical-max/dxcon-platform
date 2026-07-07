@@ -40,8 +40,9 @@ def apply_migration(db, name: str) -> None:
         if stmt:
             try:
                 db.session.execute(db.text(stmt))
-            except Exception:
-                pass
+            except Exception as exc:
+                db.session.rollback()
+                continue
     db.session.commit()
 
 
@@ -52,6 +53,7 @@ def main() -> int:
 
     from app import create_app
     from app.business_engine import service as biz
+    from app.core.passwords import hash_password
     from app.extensions.db import db
     from app.models.audit_log import AuditLog
     from app.models.user import User
@@ -83,11 +85,11 @@ def main() -> int:
 
         doctor = User.query.filter(User.role.in_(["DOCTOR", "ADMIN"])).first()
         if not doctor:
-            doctor = User(email=f"doc-{run_tag}@dxcon.test", role="DOCTOR", password_hash="x", is_active=True)
+            doctor = User(email=f"doc-{run_tag}@dxcon.test", role="DOCTOR", password_hash=hash_password("VerifyOnly123!"), is_active=True)
             db.session.add(doctor)
         patient_user = User.query.filter_by(role="PATIENT").first()
         if not patient_user:
-            patient_user = User(email=f"pat-{run_tag}@dxcon.test", role="PATIENT", password_hash="x", is_active=True)
+            patient_user = User(email=f"pat-{run_tag}@dxcon.test", role="PATIENT", password_hash=hash_password("VerifyOnly123!"), is_active=True)
             db.session.add(patient_user)
         db.session.commit()
 

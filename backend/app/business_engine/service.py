@@ -941,7 +941,7 @@ def get_patient_portal_data(patient_code: str) -> dict:
         for cr in clinical:
             if cr.get("report_code") not in seen:
                 released_reports.append({**cr, "order_code": cr.get("order_code")})
-    except Exception:
+    except ImportError:
         pass
     return {
         "patient": patient.to_dict(),

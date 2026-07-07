@@ -22,15 +22,13 @@ population_health_bp = Blueprint("population_health_api", __name__, url_prefix="
 
 @population_health_bp.route("/dashboard", methods=["GET"])
 def population_health_dashboard_api():
-    return dashboard_payload()
+    payload = dashboard_payload()
+    payload["population"] = population_dashboard()
+    return payload
 
 @population_health_bp.route("/registry", methods=["GET"])
 def population_health_disease_registry_api():
     return disease_registry()
-
-@population_health_bp.route("/dashboard", methods=["GET"])
-def population_health_population_dashboard_api():
-    return population_dashboard()
 
 @population_health_bp.route("/risk-groups", methods=["GET"])
 def population_health_risk_groups_api():

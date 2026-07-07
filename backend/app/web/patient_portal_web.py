@@ -23,7 +23,7 @@ from app.patient_portal.service import (
 from app.extensions.db import db
 from app.utils.auth import login_required
 from app.web.launch_ui_data import get_session_patient_portal
-from app.web.launch_ui_lib import metric_cards, render_page, status_badge, table_section
+from app.web.launch_ui_lib import action_grid, metric_cards, render_page, status_badge, table_section
 from app.web.portal_layout import PATIENT_NAV, portal_nav
 
 patient_portal_workspace_web_bp = Blueprint("patient_portal_workspace_web", __name__)
@@ -54,6 +54,12 @@ def patient_dashboard_page():
     w = data.get("widgets", {})
     body = (
         portal_nav(PATIENT_NAV, "/app/patient/dashboard")
+        + action_grid([
+            ("My Reports", "/app/patient/reports", "Released results"),
+            ("Medical History", "/app/patient/history", "Timeline view"),
+            ("Invoices", "/app/patient/invoices", "Billing"),
+            ("Health Card", "/app/patient/qr", "QR access"),
+        ])
         + metric_cards([
             ("Reports", w.get("recent_reports", 0)),
             ("Orders", w.get("recent_orders", 0)),

@@ -122,9 +122,11 @@ def login_session(client, user) -> None:
 
 
 def ensure_user(db, User, *, email: str, role: str) -> Any:
+    from app.core.passwords import hash_password
+
     user = User.query.filter_by(email=email).first()
     if not user:
-        user = User(email=email, role=role, password_hash="x", is_active=True)
+        user = User(email=email, role=role, password_hash=hash_password("VerifyOnly123!"), is_active=True)
         db.session.add(user)
         db.session.commit()
     return user

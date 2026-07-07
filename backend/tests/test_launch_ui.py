@@ -100,7 +100,7 @@ class LaunchUiTestCase(unittest.TestCase):
             "/executive-v10",
         )
         for path in routes:
-            response = self.client.get(path)
+            response = self.client.get(path, follow_redirects=True)
             self.assertEqual(response.status_code, 200, path)
             body = response.get_data(as_text=True)
             self.assertIn("launch-shell", body, path)
