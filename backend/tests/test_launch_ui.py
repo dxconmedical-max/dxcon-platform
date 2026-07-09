@@ -55,19 +55,26 @@ class LaunchUiTestCase(unittest.TestCase):
         self.assertIn("launch-marketing-hero", body)
         self.assertIn("DxCon", body)
         self.assertIn("css/dxcon.css", body)
+        self.assertIn("Book demo", body)
+        self.assertIn("Contact sales", body)
 
     def test_login_page_shell(self):
+        self.app.config["DEMO_MODE"] = True
+        with self.client.session_transaction() as sess:
+            sess.clear()
         response = self.client.get("/login")
         self.assertEqual(response.status_code, 200)
         body = response.get_data(as_text=True)
         self.assertIn("launch-login-card", body)
         self.assertIn("Sign in", body)
         self.assertIn("css/dxcon.css", body)
+        self.assertIn("Remember me", body)
         self.assertIn("/login/demo?role=", body)
 
     def test_demo_role_entry_routes(self):
+        self.app.config["DEMO_MODE"] = True
         cases = (
-            ("ADMIN", "/app/executive"),
+            ("ADMIN", "/app/admin"),
             ("DOCTOR", "/app/doctor"),
             ("LAB", "/app/lab"),
             ("RECEPTION", "/app/reception"),

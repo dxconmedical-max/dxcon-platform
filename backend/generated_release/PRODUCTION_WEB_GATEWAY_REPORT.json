@@ -1,0 +1,85 @@
+{
+  "generated_at": "2026-07-09T16:40:33.691347+00:00",
+  "sprint": "011-production-web-gateway",
+  "checks": {
+    "login_page": {
+      "ok": true,
+      "status": 200
+    },
+    "landing_page": {
+      "ok": true,
+      "status": 200
+    },
+    "workspace_routes": {
+      "ok": true,
+      "routes": {
+        "/app": {
+          "status": 200,
+          "ok": true
+        },
+        "/app/admin": {
+          "status": 200,
+          "ok": true
+        },
+        "/app/executive": {
+          "status": 200,
+          "ok": true
+        },
+        "/app/reception": {
+          "status": 200,
+          "ok": true
+        },
+        "/app/doctor": {
+          "status": 200,
+          "ok": true
+        },
+        "/app/lab": {
+          "status": 200,
+          "ok": true
+        },
+        "/app/collector": {
+          "status": 200,
+          "ok": true
+        },
+        "/app/clinic": {
+          "status": 200,
+          "ok": true
+        },
+        "/app/patient": {
+          "status": 200,
+          "ok": true
+        }
+      }
+    },
+    "role_routing_map": {
+      "ok": true,
+      "count": 16,
+      "sample": {
+        "SUPER_ADMIN": "/app/admin",
+        "DOCTOR": "/app/doctor",
+        "PATIENT": "/app/patient"
+      }
+    },
+    "api_base_url_configured": {
+      "ok": true,
+      "value": "https://api.dxcon.com.vn"
+    },
+    "api_client_js": {
+      "ok": true
+    },
+    "domain_docs": {
+      "ok": true,
+      "path": "/Users/mac/dxcon-platform/docs/DOMAIN_SETUP_DXCON.md"
+    }
+  },
+  "external_api_health": {
+    "url": "https://api.dxcon.com.vn/health",
+    "result": {
+      "ok": true,
+      "status": 200,
+      "sample": "{\"app_env\":\"staging\",\"database\":\"OK\",\"redis\":\"DEGRADED\",\"status\":\"OK\",\"timestamp\":\"2026-07-09T16:40:33.735962+00:00\"}\n"
+    },
+    "status": "PASS"
+  },
+  "ok": true
+}

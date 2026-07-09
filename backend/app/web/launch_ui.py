@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flask import Blueprint, redirect
+from flask import Blueprint, redirect, request
 
 from app.utils.auth import login_required
 from app.web.launch_ui_lib import (
@@ -16,6 +16,8 @@ from app.web.launch_ui_lib import (
 )
 from app.web.launch_ui_modules import DETAIL_ROUTE_BUILDERS, MODULE_SPECS
 from app.web.launch_ui_actions import ACTION_SLUGS, handle_demo_action
+from app.web_gateway.config import public_entry_path
+from app.web_gateway.landing import render_production_landing
 
 launch_ui_bp = Blueprint("launch_ui", __name__)
 
@@ -88,12 +90,12 @@ for _slug in ACTION_SLUGS:
 
 @launch_ui_bp.route("/")
 def root_redirect():
-    return redirect("/login")
+    return redirect(public_entry_path())
 
 
 @launch_ui_bp.route("/home")
 def marketing_home():
-    return render_marketing_home()
+    return render_production_landing()
 
 
 @launch_ui_bp.route("/app/doctor")

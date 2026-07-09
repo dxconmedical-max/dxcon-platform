@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-07-09T16:40:33.691375+00:00",
+  "configuration": {
+    "public_site_url": "https://dxcon.com.vn",
+    "web_app_url": "https://app.dxcon.com.vn",
+    "api_base_url": "https://api.dxcon.com.vn",
+    "demo_mode": true,
+    "supported_domains": [
+      "dxcon.com.vn",
+      "www.dxcon.com.vn",
+      "app.dxcon.com.vn",
+      "admin.dxcon.com.vn",
+      "doctor.dxcon.com.vn",
+      "patient.dxcon.com.vn",
+      "lab.dxcon.com.vn",
+      "clinic.dxcon.com.vn",
+      "collector.dxcon.com.vn",
+      "api.dxcon.com.vn"
+    ],
+    "legacy_api_host": "dxcon-ap.onrender.com",
+    "cors_origins": "*"
+  },
+  "supported_domains": [
+    "dxcon.com.vn",
+    "www.dxcon.com.vn",
+    "app.dxcon.com.vn",
+    "admin.dxcon.com.vn",
+    "doctor.dxcon.com.vn",
+    "patient.dxcon.com.vn",
+    "lab.dxcon.com.vn",
+    "clinic.dxcon.com.vn",
+    "collector.dxcon.com.vn",
+    "api.dxcon.com.vn"
+  ],
+  "legacy_api_host": "dxcon-ap.onrender.com"
+}

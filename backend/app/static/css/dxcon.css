@@ -869,3 +869,90 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* Sprint 011 — Production web gateway */
+.launch-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.launch-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.launch-topbar-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.launch-topbar-org {
+  color: #64748b;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+.launch-user-menu summary {
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+}
+.launch-user-menu-panel {
+  position: absolute;
+  right: 16px;
+  margin-top: 8px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  min-width: 180px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+.launch-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+  font-size: 14px;
+}
+.launch-public-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.launch-public-links {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.launch-public-links a {
+  color: #334155;
+  text-decoration: none;
+}
+.launch-marketing-section {
+  padding: 32px 24px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+.launch-feature-list {
+  margin: 12px 0 0 20px;
+  color: #475569;
+}
+.launch-public-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 24px;
+  border-top: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 14px;
+}
+.launch-cta-sm {
+  padding: 8px 14px;
+  font-size: 14px;
+}

@@ -135,3 +135,10 @@ class Config:
     AI_PLATFORM_DEFAULT_MODEL = os.getenv("AI_PLATFORM_DEFAULT_MODEL", "local-advisory-v1")
     AI_INFERENCE_ASYNC = os.getenv("AI_INFERENCE_ASYNC", "true").lower() in {"1", "true", "yes", "on"}
     AI_SAFETY_ENFORCED = os.getenv("AI_SAFETY_ENFORCED", "true").lower() in {"1", "true", "yes", "on"}
+
+    # Sprint 011 — Production web gateway
+    PUBLIC_SITE_URL = os.getenv("PUBLIC_SITE_URL", "https://dxcon.com.vn")
+    WEB_APP_URL = os.getenv("WEB_APP_URL", "https://app.dxcon.com.vn")
+    API_BASE_URL = os.getenv("API_BASE_URL", "https://api.dxcon.com.vn")
+    DEMO_MODE = os.getenv("DEMO_MODE", "false").lower() in {"1", "true", "yes", "on"}
+    REMEMBER_ME_DAYS = int(os.getenv("REMEMBER_ME_DAYS", "14"))

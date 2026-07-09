@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 64" role="img" aria-label="DxCon">
+  <defs>
+    <linearGradient id="dxg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#14b8a6"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="8" width="48" height="48" rx="14" fill="url(#dxg)"/>
+  <text x="24" y="40" text-anchor="middle" font-family="Inter,Segoe UI,sans-serif" font-size="20" font-weight="700" fill="#ffffff">Dx</text>
+  <text x="62" y="42" font-family="Inter,Segoe UI,sans-serif" font-size="28" font-weight="700" fill="#0f172a">DxCon</text>
+  <text x="62" y="56" font-family="Inter,Segoe UI,sans-serif" font-size="11" font-weight="500" fill="#64748b" letter-spacing="0.12em">DIAGNOSTICS PLATFORM</text>
+</svg>

@@ -32,6 +32,7 @@ from app.web.reporting_engine_web import reporting_engine_web_bp
 from app.web.doctor_portal_web import doctor_portal_workspace_web_bp
 from app.web.patient_portal_web import patient_portal_workspace_web_bp
 from app.web.executive_platform_web import executive_platform_web_bp
+from app.web.production_gateway_web import production_gateway_web_bp
 from app.web.executive_v9 import executive_v9_bp
 from app.web.crm_v2 import crm_v2_web_bp
 from app.web.reception import reception_web_bp
@@ -448,6 +449,7 @@ def register_blueprints(app):
     app.register_blueprint(pilot_pages_bp)
     app.register_blueprint(reporting_engine_web_bp)
     app.register_blueprint(executive_platform_web_bp)
+    app.register_blueprint(production_gateway_web_bp)
     app.register_blueprint(doctor_portal_workspace_web_bp)
     app.register_blueprint(patient_portal_workspace_web_bp)
     app.register_blueprint(launch_ui_bp)

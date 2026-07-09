@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import json
 from pathlib import Path
 from typing import Any
 
@@ -22,22 +23,28 @@ APP_NAV = (
     ("Collector", "/app/collector", "COLLECTOR"),
     ("Patient", "/app/patient", "PATIENT"),
     ("Master Data", "/app/mdm", "MDM"),
+    ("Operations", "/app/operations", "OPS"),
     ("Administration", "/app/admin/organizations", "ADMIN"),
     ("Partner", "/app/partner", "PARTNER"),
     ("System", "/app/system", "SYS"),
 )
 
 DEMO_ROLE_DASHBOARDS = {
-    "ADMIN": "/app/executive",
-    "SUPER_ADMIN": "/app/executive",
-    "SYSTEM_ADMIN": "/app/executive",
+    "ADMIN": "/app/admin",
+    "SUPER_ADMIN": "/app/admin",
+    "DXCON_ADMIN": "/app/admin",
+    "SYSTEM_ADMIN": "/app/admin",
+    "EXECUTIVE": "/app/executive",
     "MASTER_DATA_ADMIN": "/app/mdm",
     "RECEPTION": "/app/reception",
     "DOCTOR": "/app/doctor",
+    "PARTNER_DOCTOR": "/app/doctor",
     "LAB": "/app/lab",
+    "LAB_MANAGER": "/app/lab",
     "LAB_TECHNICIAN": "/app/lab",
     "COLLECTOR": "/app/collector",
     "DRIVER": "/app/collector",
+    "CLINIC_OWNER": "/app/clinic",
     "PATIENT": "/app/patient",
 }
 
@@ -54,6 +61,22 @@ DEMO_ROLE_HINTS = {
     "LAB": "lab@demo.dxcon.test",
     "PATIENT": "patient@demo.dxcon.test",
 }
+
+
+def gateway_runtime_scripts() -> str:
+    from app.web_gateway.config import api_base_url, demo_mode_enabled, public_site_url, web_app_url
+
+    cfg = {
+        "apiBaseUrl": api_base_url(),
+        "publicSiteUrl": public_site_url(),
+        "webAppUrl": web_app_url(),
+        "demoMode": demo_mode_enabled(),
+    }
+    js_href = url_for("static", filename="js/dxcon-api-client.js")
+    return (
+        f"<script>window.__DXCON_CONFIG__={json.dumps(cfg)};</script>"
+        f'<script src="{html.escape(js_href)}"></script>'
+    )
 
 
 def css_stylesheet_link() -> str:
@@ -77,6 +100,7 @@ def page_head(title: str) -> str:
     return (
         f'<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
         f"<title>{html.escape(title)} · DxCon</title>{brand_icon_links()}{css_stylesheet_link()}"
+        f"{gateway_runtime_scripts()}"
     )
 
 
@@ -136,26 +160,55 @@ def safe_platform_stats() -> dict[str, Any]:
     }
 
 
-def render_page(title: str, body: str, *, public: bool = False, active_nav: str = "") -> str:
+def render_page(
+    title: str,
+    body: str,
+    *,
+    public: bool = False,
+    active_nav: str = "",
+    breadcrumbs: list[tuple[str, str]] | None = None,
+) -> str:
     head = page_head(title)
     if public:
-        return f"<!DOCTYPE html><html><head>{head}</head><body class=\"launch-ui\">{body}</body></html>"
+        return f'<!DOCTYPE html><html><head>{head}</head><body class="launch-ui">{body}</body></html>'
     ctx = shell_context()
+    from app.web_gateway.config import is_production_env
+
     nav_items = []
     for label, href, _ in APP_NAV:
         active = "active" if active_nav == href or (not active_nav and title.startswith(label)) else ""
         nav_items.append(f'<a class="{active}" href="{href}">{html.escape(label)}</a>')
     nav_html = "\n".join(nav_items)
+    env_badge = ""
+    if not is_production_env():
+        env_badge = f'<span class="launch-badge">{html.escape(str(ctx["environment"]))}</span>'
+    breadcrumb_html = ""
+    if breadcrumbs:
+        breadcrumb_html = breadcrumbs_nav(breadcrumbs)
+    user_email = html.escape(ctx["user_email"])
+    topbar_tools = f"""
+    <div class="launch-topbar-tools">
+      <span class="launch-topbar-org" title="Organization switcher (coming soon)">Org: Default</span>
+      <button type="button" class="launch-topbar-notify" title="Notifications (coming soon)" aria-label="Notifications">🔔</button>
+      <details class="launch-user-menu">
+        <summary>{user_email}</summary>
+        <div class="launch-user-menu-panel">
+          <span class="launch-badge">{html.escape(ctx['user_role'])}</span>
+          <a href="/logout">Logout</a>
+        </div>
+      </details>
+    </div>
+    """
     badges = f"""
     <span class="launch-badge">{html.escape(ctx['user_role'])}</span>
-    <span class="launch-badge">{html.escape(str(ctx['environment']))}</span>
+    {env_badge}
     <span class="launch-badge {_status_class(ctx['health_status'])}">Health {html.escape(str(ctx['health_status']))}</span>
     """
     return f"""<!DOCTYPE html><html><head>{head}</head>
     <body class="launch-ui"><div class="launch-shell">
     <aside class="launch-sidebar"><div class="brand"><div class="brand-mark">Dx</div><div><strong>DxCon</strong><div style="font-size:12px;color:#94a3b8;">Healthcare Platform</div></div></div>
-    <nav>{nav_html}<a class="launch-nav-muted" href="/home">Marketing</a><a class="launch-nav-muted" href="/login">Login</a><a class="launch-nav-muted" href="/logout">Logout</a></nav></aside>
-    <div class="launch-main"><header class="launch-topbar"><h2>{html.escape(title)}</h2><div class="launch-badges">{badges}</div></header>
+    <nav>{nav_html}<a class="launch-nav-muted" href="/home">Marketing</a><a class="launch-nav-muted" href="/logout">Logout</a></nav></aside>
+    <div class="launch-main"><header class="launch-topbar"><div><h2>{html.escape(title)}</h2>{breadcrumb_html}</div><div class="launch-topbar-right">{topbar_tools}<div class="launch-badges">{badges}</div></div></header>
     <main class="launch-content">{body}</main></div></div></body></html>"""
 
 
@@ -389,21 +442,28 @@ def safe_sample_rows(limit: int = 8) -> list[list[str]]:
     return _safe(fetch, [["S-001", "CBC", "Queued", "Today"], ["S-002", "Chem", "Testing", "Today"]])
 
 
-def render_login_page(error: str = "", role_hint: str = "") -> str:
+def breadcrumbs_nav(items: list[tuple[str, str]]) -> str:
+    return breadcrumbs(items)
+
+
+def render_login_page(error: str = "", role_hint: str = "", expired: bool = False) -> str:
+    from app.web_gateway.config import demo_mode_enabled, public_site_url
+
     roles = demo_accounts_by_role()
     chips = []
-    for key, entries in roles.items():
-        account = entries[0] if entries else {}
-        label = key.upper() if key != "admin" else "ADMIN"
-        email = account.get("email") if isinstance(account, dict) else ""
-        if not email:
-            email = DEMO_ROLE_HINTS.get(label, f"demo-{key}@{DEMO_ROLE_HINTS.get('ADMIN', 'admin@demo.dxcon.test').split('@')[-1]}")
-        chips.append(
-            f'<a class="launch-role-card" href="/login/demo?role={html.escape(label)}">'
-            f"<strong>{html.escape(label)}</strong>"
-            f"<span>{html.escape(email)}</span>"
-            f"<em>Use demo account</em></a>"
-        )
+    if demo_mode_enabled():
+        for key, entries in roles.items():
+            account = entries[0] if entries else {}
+            label = key.upper() if key != "admin" else "ADMIN"
+            email = account.get("email") if isinstance(account, dict) else ""
+            if not email:
+                email = DEMO_ROLE_HINTS.get(label, f"demo-{key}@{DEMO_ROLE_HINTS.get('ADMIN', 'admin@demo.dxcon.test').split('@')[-1]}")
+            chips.append(
+                f'<a class="launch-role-card" href="/login/demo?role={html.escape(label)}">'
+                f"<strong>{html.escape(label)}</strong>"
+                f"<span>{html.escape(email)}</span>"
+                f"<em>Use demo account</em></a>"
+            )
     hint_role = role_hint.upper() if role_hint else "ADMIN"
     hint_email = DEMO_ROLE_HINTS.get(hint_role, "admin@demo.dxcon.test")
     for key, entries in roles.items():
@@ -412,23 +472,32 @@ def render_login_page(error: str = "", role_hint: str = "") -> str:
                 hint_email = account.get("email", hint_email)
                 break
     error_html = f'<div class="launch-error">{html.escape(error)}</div>' if error else ""
+    if expired and not error:
+        error_html = '<div class="launch-error">Your session expired. Please sign in again.</div>'
+    demo_block = ""
+    if demo_mode_enabled():
+        demo_block = (
+            f'<a class="launch-btn launch-btn-secondary" href="/login/demo?role=ADMIN">Continue to demo dashboard</a>'
+            f'<p class="launch-hint" style="margin-top:16px;">Demo password: <code>{html.escape(DEMO_PASSWORD)}</code></p>'
+            f'<p class="launch-hint" style="margin-bottom:8px;font-weight:700;color:#334155;">Quick demo roles</p>'
+            f'<div class="launch-role-grid">{"".join(chips)}</div>'
+        )
     head = page_head("Login")
     return f"""<!DOCTYPE html><html><head>{head}</head>
     <body class="launch-ui"><div class="launch-login-wrap"><div class="launch-login-card">
       <div class="launch-brand"><div class="launch-brand-mark">Dx</div><div><h1>DxCon Platform</h1><p>Sign in to your healthcare workspace</p></div></div>
       {error_html}
-      <form method="POST" action="/login">
-        <input class="launch-field" name="email" type="email" placeholder="Email" value="{html.escape(hint_email)}" required>
-        <input class="launch-field" name="password" type="password" placeholder="Password" value="{html.escape(DEMO_PASSWORD)}" required>
+      <form method="POST" action="/login" id="dxcon-login-form">
+        <input class="launch-field" name="email" id="login-email" type="email" placeholder="Email" value="{html.escape(hint_email)}" required autocomplete="username">
+        <input class="launch-field" name="password" id="login-password" type="password" placeholder="Password" autocomplete="current-password" required>
+        <label class="launch-checkbox"><input type="checkbox" name="remember" value="1"> Remember me</label>
+        <p class="launch-hint"><a href="#forgot-password">Forgot password?</a> <span id="forgot-password">Contact your administrator — self-service reset coming soon.</span></p>
         <button class="launch-btn" type="submit">Sign in</button>
       </form>
-      <a class="launch-btn launch-btn-secondary" href="/login/demo?role=ADMIN">Continue to demo dashboard</a>
-      <p class="launch-hint" style="margin-top:16px;">Demo password: <code>{html.escape(DEMO_PASSWORD)}</code></p>
-      <p class="launch-hint" style="margin-bottom:8px;font-weight:700;color:#334155;">Quick demo roles</p>
-      <div class="launch-role-grid">{''.join(chips)}</div>
+      {demo_block}
       <div class="launch-footer-actions">
-        <a class="launch-btn-outline" href="/home">Marketing site</a>
-        <a class="launch-btn-outline" href="/demo-landing">Legacy landing</a>
+        <a class="launch-btn-outline" href="{html.escape(public_site_url())}">Marketing site</a>
+        <a class="launch-btn-outline" href="/home">Landing page</a>
       </div>
     </div></div></body></html>"""
 
