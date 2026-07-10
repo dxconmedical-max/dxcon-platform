@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "pages": [
+    "src/app/marketplace/page.tsx",
+    "src/app/marketplace/tests/page.tsx",
+    "src/app/marketplace/packages/page.tsx",
+    "src/app/marketplace/providers/page.tsx",
+    "src/app/marketplace/providers/[id]/page.tsx",
+    "src/app/marketplace/compare/page.tsx",
+    "src/app/marketplace/book/page.tsx",
+    "src/app/marketplace/checkout/page.tsx",
+    "src/app/marketplace/payment/page.tsx",
+    "src/app/app/patient/bookings/page.tsx",
+    "src/app/app/patient/payments/page.tsx"
+  ],
+  "missing": [],
+  "generated_at": "2026-07-10T07:33:04.104Z"
+}

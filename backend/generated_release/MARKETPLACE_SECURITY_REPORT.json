@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "checks": {
+    "hidden_provider_blocked": true,
+    "org_header_required": true
+  },
+  "generated_at": "2026-07-10T07:32:12.769130+00:00"
+}

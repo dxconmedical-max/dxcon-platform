@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "checks": {
+    "qr_created": true,
+    "manual_adapter_ready": true,
+    "mock_not_production": true,
+    "amount_rejection": true,
+    "webhook_success": true
+  },
+  "generated_at": "2026-07-10T07:32:10.999105+00:00"
+}

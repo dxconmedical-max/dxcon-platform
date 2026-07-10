@@ -243,6 +243,7 @@ from app.api.enterprise.routes import (
 from app.web.enterprise_platform import enterprise_web_bp
 from app.api.connectors.routes import connectors_bp
 from app.integration.routes import integration_platform_bp as integration_foundation_bp
+from app.patient_marketplace.routes import patient_marketplace_bp
 from app.api.integration_platform.routes import (
     events_bp as integration_events_bp,
     plugins_bp as integration_plugins_bp,
@@ -515,6 +516,7 @@ def register_blueprints(app):
     app.register_blueprint(integration_queue_bp)
     app.register_blueprint(integration_sandbox_bp)
     app.register_blueprint(integration_foundation_bp)
+    app.register_blueprint(patient_marketplace_bp)
     app.register_blueprint(integration_platform_web_bp)
     app.register_blueprint(api_platform_bp)
     app.register_blueprint(api_platform_web_bp)

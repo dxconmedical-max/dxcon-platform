@@ -25,6 +25,13 @@ ROLE_PERMISSIONS = {
         "crm.read",
         "finance.read",
         "audit.read",
+        "MARKETPLACE_VIEW",
+        "MARKETPLACE_LISTING_MANAGE",
+        "MARKETPLACE_LISTING_APPROVE",
+        "MARKETPLACE_PRICE_MANAGE",
+        "PROMOTION_MANAGE",
+        "PAYMENT_VIEW",
+        "PAYMENT_RECONCILE",
     },
     "DOCTOR": {
         "patients.read",
@@ -88,6 +95,7 @@ ROLE_PERMISSIONS = {
         "report.released.read",
         "portal.patient.read",
         "portal.patient.write",
+        "MARKETPLACE_VIEW",
     },
 }
 
