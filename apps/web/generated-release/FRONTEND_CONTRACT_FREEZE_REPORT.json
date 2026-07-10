@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "required_files": [
+    "src/stores/authStore.ts",
+    "src/lib/permissions.ts",
+    "src/services/auth.ts",
+    "src/services/api.ts",
+    "src/middleware.ts",
+    "src/app/login/page.tsx",
+    "src/app/app/layout.tsx"
+  ],
+  "missing": [],
+  "capability_contract": true,
+  "generated_at": "2026-07-10T07:33:04.036Z"
+}

@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-07-10T07:24:17.572269+00:00",
+  "release": "2.0",
+  "result": "PASS_WITH_WARNINGS",
+  "critical_findings": 0,
+  "warning_count": 1,
+  "sections": {
+    "verify_api_contract.py": true,
+    "verify_permission_registry.py": true,
+    "verify_tenant_model_coverage.py": true,
+    "verify_domain_event_contract.py": true,
+    "verify_clinical_state_machines.py": true
+  }
+}

@@ -1,0 +1,557 @@
+{
+  "generated_at": "2026-07-10T07:24:15.062009+00:00",
+  "table_count": 345,
+  "migration_count": 11,
+  "migrations": [
+    "001_business_engine_sprint1.sql",
+    "002_uat_critical_fixes.sql",
+    "003_mdm_foundation.sql",
+    "004_partner_foundation.sql",
+    "005_reception_workspace.sql",
+    "006_lab_workspace.sql",
+    "007_reporting_engine.sql",
+    "008_portal.sql",
+    "009_executive_platform.sql",
+    "010_operations_center.sql",
+    "011_integration_platform.sql"
+  ],
+  "tenant_missing_count": 305,
+  "tenant_missing_sample": [
+    "ai_platform_audit_logs",
+    "ai_platform_inference_jobs",
+    "ai_platform_prompt_versions",
+    "ai_platform_prompts",
+    "ai_platform_providers",
+    "ai_platform_usage_metrics",
+    "alerts",
+    "api_clients",
+    "api_keys",
+    "api_usage_logs",
+    "battery_events",
+    "billing_accounts",
+    "billing_adjustments",
+    "billing_ledgers",
+    "biomarkers",
+    "biz_collections",
+    "biz_invoices",
+    "biz_order_items",
+    "biz_orders",
+    "biz_payments",
+    "biz_result_items",
+    "biz_results",
+    "biz_workflow_audits",
+    "booking_assignments",
+    "clinic_analytics"
+  ],
+  "destructive_migration_hits": [],
+  "tables_sample": [
+    {
+      "table": "ai_platform_audit_logs",
+      "columns": 7,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [],
+      "indexes": [
+        "ix_ai_platform_audit_logs_action"
+      ]
+    },
+    {
+      "table": "ai_platform_inference_jobs",
+      "columns": 11,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [
+        [
+          "job_code"
+        ]
+      ],
+      "indexes": [
+        "ix_ai_platform_inference_jobs_status",
+        "ix_ai_platform_inference_jobs_prompt_id",
+        "ix_ai_platform_inference_jobs_provider_id"
+      ]
+    },
+    {
+      "table": "ai_platform_prompt_versions",
+      "columns": 6,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "prompt_id->ai_platform_prompts.id"
+      ],
+      "unique_constraints": [],
+      "indexes": [
+        "ix_ai_platform_prompt_versions_prompt_id"
+      ]
+    },
+    {
+      "table": "ai_platform_prompts",
+      "columns": 6,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [
+        [
+          "prompt_code"
+        ]
+      ],
+      "indexes": [
+        "ix_ai_platform_prompts_task_type"
+      ]
+    },
+    {
+      "table": "ai_platform_providers",
+      "columns": 8,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [
+        [
+          "provider_code"
+        ]
+      ],
+      "indexes": [
+        "ix_ai_platform_providers_provider_type"
+      ]
+    },
+    {
+      "table": "ai_platform_usage_metrics",
+      "columns": 7,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [],
+      "indexes": [
+        "ix_ai_platform_usage_metrics_task_type",
+        "ix_ai_platform_usage_metrics_provider_id"
+      ]
+    },
+    {
+      "table": "alerts",
+      "columns": 11,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [
+        [
+          "alert_code"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "api_clients",
+      "columns": 7,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [
+        [
+          "client_code"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "api_keys",
+      "columns": 7,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "client_id->api_clients.id"
+      ],
+      "unique_constraints": [],
+      "indexes": [
+        "ix_api_keys_key_prefix"
+      ]
+    },
+    {
+      "table": "api_usage_logs",
+      "columns": 8,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "client_id->api_clients.id",
+        "api_key_id->api_keys.id"
+      ],
+      "unique_constraints": [],
+      "indexes": []
+    },
+    {
+      "table": "audit_logs",
+      "columns": 8,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [],
+      "indexes": []
+    },
+    {
+      "table": "battery_events",
+      "columns": 4,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "device_id->iot_devices.id"
+      ],
+      "unique_constraints": [],
+      "indexes": []
+    },
+    {
+      "table": "billing_accounts",
+      "columns": 8,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [
+        [
+          "account_code"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "billing_adjustments",
+      "columns": 7,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "invoice_id->invoices.id"
+      ],
+      "unique_constraints": [],
+      "indexes": []
+    },
+    {
+      "table": "billing_ledgers",
+      "columns": 8,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "account_id->billing_accounts.id"
+      ],
+      "unique_constraints": [],
+      "indexes": []
+    },
+    {
+      "table": "biomarkers",
+      "columns": 10,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [
+        [
+          "biomarker_code"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "biz_collections",
+      "columns": 15,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "order_id->biz_orders.id"
+      ],
+      "unique_constraints": [
+        [
+          "sample_code"
+        ],
+        [
+          "barcode_value"
+        ],
+        [
+          "accession_number"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "biz_invoices",
+      "columns": 6,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "order_id->biz_orders.id"
+      ],
+      "unique_constraints": [
+        [
+          "invoice_no"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "biz_order_items",
+      "columns": 9,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "order_id->biz_orders.id"
+      ],
+      "unique_constraints": [],
+      "indexes": []
+    },
+    {
+      "table": "biz_orders",
+      "columns": 12,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "patient_code->patients.patient_code"
+      ],
+      "unique_constraints": [
+        [
+          "barcode_value"
+        ],
+        [
+          "order_code"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "biz_payments",
+      "columns": 9,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "order_id->biz_orders.id",
+        "invoice_id->biz_invoices.id"
+      ],
+      "unique_constraints": [
+        [
+          "receipt_number"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "biz_result_items",
+      "columns": 13,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "result_id->biz_results.id"
+      ],
+      "unique_constraints": [],
+      "indexes": []
+    },
+    {
+      "table": "biz_results",
+      "columns": 15,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "order_id->biz_orders.id"
+      ],
+      "unique_constraints": [
+        [
+          "order_id"
+        ],
+        [
+          "result_code"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "biz_workflow_audits",
+      "columns": 9,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [],
+      "indexes": []
+    },
+    {
+      "table": "booking_assignments",
+      "columns": 11,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "partner_id->partners.id",
+        "booking_id->marketplace_bookings.id",
+        "scheduled_slot_id->scheduling_slots.id"
+      ],
+      "unique_constraints": [],
+      "indexes": []
+    },
+    {
+      "table": "clinic_analytics",
+      "columns": 10,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [
+        [
+          "analytics_code"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "clinic_bookings",
+      "columns": 10,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "patient_id->patients.patient_code"
+      ],
+      "unique_constraints": [
+        [
+          "booking_code"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "clinic_departments",
+      "columns": 6,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [],
+      "indexes": []
+    },
+    {
+      "table": "clinic_doctors",
+      "columns": 7,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [
+        [
+          "clinic_id",
+          "doctor_id"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "clinic_orders",
+      "columns": 9,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "patient_id->patients.patient_code"
+      ],
+      "unique_constraints": [
+        [
+          "order_code"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "clinic_patients",
+      "columns": 6,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "patient_id->patients.patient_code"
+      ],
+      "unique_constraints": [
+        [
+          "clinic_id",
+          "patient_id"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "clinic_profiles",
+      "columns": 16,
+      "tenant_columns": [
+        "organization_id",
+        "tenant_id"
+      ],
+      "foreign_keys": [
+        "tenant_id->enterprise_tenants.id",
+        "organization_id->enterprise_organizations.id"
+      ],
+      "unique_constraints": [
+        [
+          "clinic_code"
+        ],
+        [
+          "clinic_id"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "clinic_referrals",
+      "columns": 10,
+      "tenant_columns": [],
+      "foreign_keys": [
+        "patient_id->patients.patient_code"
+      ],
+      "unique_constraints": [
+        [
+          "referral_code"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "clinic_revenue_summaries",
+      "columns": 8,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [],
+      "indexes": [
+        "ix_clinic_revenue_summaries_clinic_id"
+      ]
+    },
+    {
+      "table": "clinical_delta_checks",
+      "columns": 10,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [
+        [
+          "check_code"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "clinical_guideline_packs",
+      "columns": 8,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [
+        [
+          "pack_code"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "clinical_guidelines",
+      "columns": 11,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [
+        [
+          "guideline_code"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "clinical_recommendations",
+      "columns": 9,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [
+        [
+          "recommendation_code"
+        ]
+      ],
+      "indexes": []
+    },
+    {
+      "table": "clinical_reports",
+      "columns": 30,
+      "tenant_columns": [
+        "organization_id"
+      ],
+      "foreign_keys": [],
+      "unique_constraints": [],
+      "indexes": [
+        "ix_clinical_reports_report_status",
+        "ix_clinical_reports_order_code",
+        "ix_clinical_reports_order_id",
+        "ix_clinical_reports_report_code",
+        "ix_clinical_reports_patient_id"
+      ]
+    },
+    {
+      "table": "clinical_risk_assessments",
+      "columns": 10,
+      "tenant_columns": [],
+      "foreign_keys": [],
+      "unique_constraints": [
+        [
+          "assessment_code"
+        ]
+      ],
+      "indexes": []
+    }
+  ],
+  "status": "PASS",
+  "tenant_coverage_note": "tenant_missing lists shared/reference tables; business tables use organization_id"
+}

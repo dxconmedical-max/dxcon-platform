@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-07-10T07:24:17.552385+00:00",
+  "critical_count": 0,
+  "warning_count": 1,
+  "critical": [],
+  "warnings": [
+    "domain_event_envelope_not_fully_aligned"
+  ],
+  "findings": [
+    {
+      "severity": "WARNING",
+      "code": "domain_event_envelope_not_fully_aligned"
+    }
+  ],
+  "ok": true
+}

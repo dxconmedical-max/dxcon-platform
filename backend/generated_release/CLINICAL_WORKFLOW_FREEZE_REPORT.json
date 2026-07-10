@@ -1,0 +1,94 @@
+{
+  "generated_at": "2026-07-10T07:24:17.209252+00:00",
+  "frozen_order_states": [
+    "CREATED",
+    "CONFIRMED",
+    "PAYMENT_PENDING",
+    "PAID",
+    "COLLECTION_SCHEDULED",
+    "COLLECTOR_ASSIGNED",
+    "COLLECTION_IN_PROGRESS",
+    "COLLECTED",
+    "IN_TRANSIT",
+    "LAB_RECEIVED",
+    "TESTING",
+    "QC_PENDING",
+    "VALIDATION_PENDING",
+    "REPORT_PENDING",
+    "RELEASED",
+    "CLOSED",
+    "CANCELLED"
+  ],
+  "frozen_sample_states": [
+    "CREATED",
+    "LABELLED",
+    "COLLECTED",
+    "PACKED",
+    "IN_TRANSIT",
+    "RECEIVED",
+    "ACCEPTED",
+    "REJECTED",
+    "TESTING",
+    "COMPLETED",
+    "DISPOSED"
+  ],
+  "frozen_result_states": [
+    "DRAFT",
+    "ENTERED",
+    "QC_PENDING",
+    "QC_PASSED",
+    "VALIDATION_REQUIRED",
+    "PENDING_REVIEW",
+    "APPROVED",
+    "RELEASED",
+    "AMENDED",
+    "REJECTED"
+  ],
+  "implemented_medical_order_states": [
+    "BOOKED",
+    "CONFIRMED",
+    "PAYMENT_PENDING",
+    "PAID",
+    "COLLECTOR_ASSIGNED",
+    "COLLECTOR_EN_ROUTE",
+    "ARRIVED",
+    "SAMPLE_COLLECTED",
+    "IN_TRANSIT",
+    "RECEIVED_BY_LAB",
+    "PROCESSING",
+    "VALIDATED",
+    "REPORT_READY",
+    "DELIVERED",
+    "COMPLETED",
+    "CANCELLED",
+    "REFUNDED",
+    "RECOLLECT_REQUIRED",
+    "REJECTED"
+  ],
+  "implemented_sample_states": [
+    "IN_TRANSIT",
+    "RECEIVED",
+    "PROCESSING",
+    "COMPLETED"
+  ],
+  "implemented_result_states": [
+    "DRAFT",
+    "VALIDATED",
+    "IN_REVIEW",
+    "APPROVED",
+    "RELEASED",
+    "REJECTED"
+  ],
+  "transition_maps": {
+    "MEDICAL_ORDER_TRANSITIONS": {
+      "state_count": 15,
+      "terminal_checks": true
+    },
+    "LAB_RESULT_TRANSITIONS": {
+      "state_count": 6,
+      "terminal_checks": true
+    }
+  },
+  "order_state_coverage": 6,
+  "status": "PASS"
+}

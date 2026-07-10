@@ -1,0 +1,63 @@
+{
+  "generated_at": "2026-07-10T07:24:16.148059+00:00",
+  "frozen_event_count": 17,
+  "implemented_legacy_events": [
+    "BookingCreated",
+    "CollectorAssigned",
+    "CriticalResultDetected",
+    "InvoiceCreated",
+    "InvoicePaid",
+    "OrderCreated",
+    "PartnerApproved",
+    "PatientCreated",
+    "ResultApproved",
+    "ResultReleased",
+    "SampleCollected",
+    "SampleReceived"
+  ],
+  "legacy_to_dot_notation": {
+    "PatientCreated": "patient.created",
+    "BookingCreated": "appointment.created",
+    "OrderCreated": "order.created",
+    "CollectorAssigned": "collection.assigned",
+    "SampleCollected": "sample.collected",
+    "SampleReceived": "sample.received",
+    "ResultApproved": "result.validated",
+    "ResultReleased": "report.released",
+    "InvoicePaid": "payment.confirmed",
+    "InvoiceCreated": "payment.confirmed"
+  },
+  "envelope_fields_required": [
+    "event_id",
+    "event_type",
+    "event_version",
+    "occurred_at",
+    "organization_id",
+    "actor_id",
+    "correlation_id",
+    "causation_id",
+    "resource_type",
+    "resource_id",
+    "payload",
+    "metadata"
+  ],
+  "envelope_fields_in_dataclass": [
+    "correlation_id",
+    "event_id",
+    "event_type",
+    "payload",
+    "source",
+    "timestamp"
+  ],
+  "envelope_gap": [
+    "event_version",
+    "occurred_at",
+    "organization_id",
+    "actor_id",
+    "causation_id",
+    "resource_type",
+    "resource_id",
+    "metadata"
+  ],
+  "status": "PASS"
+}

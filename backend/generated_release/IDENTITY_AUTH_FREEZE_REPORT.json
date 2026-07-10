@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "jwt_auth": true,
+  "org_context": true,
+  "refresh_tokens": true,
+  "limitations": [
+    "Password reset endpoint returns 501 until SMTP is configured",
+    "Session tokens stored client-side in sessionStorage (apps/web)"
+  ]
+}

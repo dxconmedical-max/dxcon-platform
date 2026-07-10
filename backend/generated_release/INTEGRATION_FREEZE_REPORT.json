@@ -1,0 +1,64 @@
+{
+  "generated_at": "2026-07-10T07:24:17.515489+00:00",
+  "connector_types": [
+    "LIS",
+    "HIS",
+    "EMR",
+    "PACS",
+    "ANALYZER",
+    "PAYMENT",
+    "INSURANCE",
+    "WEBHOOK",
+    "MOBILE",
+    "CUSTOM_API"
+  ],
+  "protocols": [
+    "REST",
+    "HL7_V2",
+    "FHIR_R4",
+    "ASTM",
+    "DICOM",
+    "SFTP",
+    "CSV",
+    "JSON",
+    "XML",
+    "WEBHOOK",
+    "MANUAL"
+  ],
+  "webhook_events": [
+    "order.created",
+    "order.updated",
+    "sample.collected",
+    "sample.received",
+    "result.validated",
+    "report.released",
+    "payment.confirmed"
+  ],
+  "adapters": {
+    "CSV": {
+      "production_ready": true
+    },
+    "JSON": {
+      "production_ready": true
+    },
+    "REST": {
+      "production_ready": false
+    },
+    "HL7_V2": {
+      "production_ready": false
+    },
+    "FHIR_R4": {
+      "production_ready": false
+    },
+    "SFTP": {
+      "production_ready": false
+    },
+    "WEBHOOK": {
+      "production_ready": true
+    },
+    "MANUAL": {
+      "production_ready": true
+    }
+  },
+  "status": "PASS"
+}
