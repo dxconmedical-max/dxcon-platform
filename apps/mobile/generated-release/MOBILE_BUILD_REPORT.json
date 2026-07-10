@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-07-10T12:03:02.016337Z",
+  "status": "PASS_WITH_WARNINGS",
+  "android_application_id": "vn.com.dxcon.mobile",
+  "ios_bundle_id": "vn.com.dxcon.mobile",
+  "android_debug_build": false,
+  "android_blocker": "ANDROID_HOME not configured in build environment",
+  "ios_readiness": "CONFIGURED"
+}

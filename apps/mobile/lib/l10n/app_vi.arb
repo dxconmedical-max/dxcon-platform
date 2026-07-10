@@ -1,0 +1,16 @@
+{
+  "@@locale": "vi",
+  "appTitle": "DxCon",
+  "loginTitle": "Đăng nhập",
+  "emailLabel": "Email",
+  "passwordLabel": "Mật khẩu",
+  "loginButton": "Đăng nhập",
+  "logoutButton": "Đăng xuất",
+  "sessionExpired": "Phiên đăng nhập đã hết hạn",
+  "serviceUnavailable": "Dịch vụ tạm thời không khả dụng",
+  "forbidden": "Bạn không có quyền truy cập",
+  "selectOrganization": "Chọn tổ chức",
+  "offline": "Không có kết nối mạng",
+  "syncPending": "Đang chờ đồng bộ",
+  "placeholderNotImplemented": "Chức năng đang được phát triển"
+}

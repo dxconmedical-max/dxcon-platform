@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-07-10T12:03:02.016337Z",
+  "status": "PASS_WITH_WARNINGS",
+  "checks": {
+    "file:lib/main.dart": true,
+    "file:lib/config/environment.dart": true,
+    "file:lib/core/api/api_client.dart": true,
+    "file:lib/core/auth/auth_repository.dart": true,
+    "file:lib/core/storage/secure_token_storage.dart": true,
+    "file:lib/core/permissions/capability_helpers.dart": true,
+    "file:lib/core/sync/sync_queue.dart": true,
+    "file:lib/core/navigation/app_router.dart": true,
+    "file:lib/design_system/theme.dart": true,
+    "file:lib/bootstrap/app_bootstrap.dart": true,
+    "file:lib/services/scanner_service.dart": true,
+    "file:lib/services/notification_service.dart": true,
+    "file:docs/ENVIRONMENT_SETUP.md": true,
+    "file:docs/MOBILE_TOKEN_SECURITY.md": true,
+    "file:docs/MOBILE_SECURITY.md": true,
+    "file:docs/OFFLINE_SYNC_ARCHITECTURE.md": true,
+    "file:docs/MAPS_PROVIDER_GUIDE.md": true,
+    "file:docs/MOBILE_VERSIONING.md": true,
+    "file:docs/ANDROID_RELEASE.md": true,
+    "file:docs/IOS_RELEASE.md": true,
+    "file:../../.github/workflows/mobile-ci.yml": true,
+    "api_url_production": true,
+    "demo_mode_disabled": true,
+    "push_foundation": true,
+    "android_deep_links": true,
+    "ios_url_scheme": true,
+    "android_debug_build": false
+  },
+  "warnings": [
+    "android_sdk_not_configured"
+  ],
+  "critical": []
+}

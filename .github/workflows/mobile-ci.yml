@@ -1,0 +1,56 @@
+name: Mobile CI
+
+on:
+  push:
+    paths:
+      - "apps/mobile/**"
+      - ".github/workflows/mobile-ci.yml"
+  pull_request:
+    paths:
+      - "apps/mobile/**"
+
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Pub get
+        run: flutter pub get
+      - name: Format check
+        run: dart format --output=none --set-exit-if-changed .
+      - name: Analyze
+        run: flutter analyze
+      - name: Test
+        run: flutter test
+      - name: Verify foundation
+        run: dart run tool/verify_mobile_foundation.dart
+      - name: Build Android debug APK
+        run: flutter build apk --debug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: dxcon-mobile-debug-apk
+          path: apps/mobile/build/app/outputs/flutter-apk/app-debug.apk
+
+  ios-readiness:
+    runs-on: macos-latest
+    if: github.event_name == 'push'
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: iOS build (no codesign)
+        run: flutter build ios --no-codesign

@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-07-10T12:03:02.021356Z",
+  "gaps": [
+    {
+      "id": "device_token_registration",
+      "severity": "HIGH",
+      "impact": "Push notifications cannot register device tokens",
+      "internal_pilot_blocker": true,
+      "customer_pilot_blocker": true,
+      "recommended_implementation": "POST /api/v1/mobile/devices with org scope and token hash",
+      "workaround": "Use in-app notifications and email/SMS channels"
+    },
+    {
+      "id": "minimum_app_version",
+      "severity": "MEDIUM",
+      "impact": "Cannot enforce forced upgrade from server",
+      "internal_pilot_blocker": false,
+      "customer_pilot_blocker": false,
+      "recommended_implementation": "GET /api/v1/mobile/app-config returning min_version",
+      "workaround": "Manual store version management"
+    },
+    {
+      "id": "sync_conflict_response",
+      "severity": "MEDIUM",
+      "impact": "Offline queue conflict resolution not standardized",
+      "internal_pilot_blocker": false,
+      "customer_pilot_blocker": false,
+      "recommended_implementation": "409 response with conflict envelope per ERROR_CONTRACT",
+      "workaround": "Client marks CONFLICT and prompts user refresh"
+    }
+  ]
+}

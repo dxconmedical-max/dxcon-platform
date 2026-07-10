@@ -1,0 +1,16 @@
+{
+  "@@locale": "en",
+  "appTitle": "DxCon",
+  "loginTitle": "Sign in",
+  "emailLabel": "Email",
+  "passwordLabel": "Password",
+  "loginButton": "Sign in",
+  "logoutButton": "Sign out",
+  "sessionExpired": "Session expired",
+  "serviceUnavailable": "Service temporarily unavailable",
+  "forbidden": "Access denied",
+  "selectOrganization": "Select organization",
+  "offline": "No network connection",
+  "syncPending": "Sync pending",
+  "placeholderNotImplemented": "Feature in development"
+}
