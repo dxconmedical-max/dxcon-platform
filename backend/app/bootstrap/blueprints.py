@@ -141,6 +141,9 @@ from app.api.dashboard.routes import dashboard_bp
 from app.api.seeds.routes import seeds_bp
 from app.api.mobile.routes import mobile_bp
 from app.mobile_mvp.routes import mobile_mvp_bp
+from app.api.pilot_readiness.routes import pilot_readiness_bp
+from app.api.operations_center.routes import operations_center_bp
+from app.web.operations_center_web import operations_center_web_bp
 from app.api.workflow.routes import workflow_bp
 from app.api.home_collections.routes import home_collections_bp
 from app.api.sample_trackings.routes import sample_trackings_bp
@@ -347,6 +350,8 @@ def register_blueprints(app):
     app.register_blueprint(seeds_bp)
     app.register_blueprint(mobile_bp)
     app.register_blueprint(mobile_mvp_bp)
+    app.register_blueprint(pilot_readiness_bp)
+    app.register_blueprint(operations_center_bp)
     app.register_blueprint(workflow_bp)
     app.register_blueprint(home_collections_bp)
     app.register_blueprint(sample_trackings_bp)
@@ -425,6 +430,7 @@ def register_blueprints(app):
     app.register_blueprint(enterprise_analytics_web_bp)
     app.register_blueprint(security_compliance_web_bp)
     app.register_blueprint(monitoring_center_web_bp)
+    app.register_blueprint(operations_center_web_bp)
     app.register_blueprint(backup_recovery_web_bp)
     app.register_blueprint(tenant_isolation_web_bp)
     app.register_blueprint(production_deployment_web_bp)

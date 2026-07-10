@@ -16,8 +16,10 @@ export default function AdminPage() {
           { label: "Audit", value: "—" },
         ]}
         actions={[
-          { label: "User management", href: "/app/admin", description: "Accounts and roles.", comingSoon: true },
-          { label: "Permission matrix", href: "/app/admin", description: "RBAC configuration.", comingSoon: true },
+          { label: "Organizations", href: "/app/admin/organizations", description: "Tenant onboarding and setup." },
+          { label: "Customer onboarding", href: "/app/admin/onboarding", description: "Wizard for new customers." },
+          { label: "Integrations", href: "/app/admin/integrations", description: "Connectors and webhooks." },
+          { label: "Operations", href: "/app/operations", description: "Production health and ops dashboard." },
         ]}
       />
     </AppShell>

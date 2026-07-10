@@ -364,3 +364,12 @@ from app.models.infrastructure_readiness import (
     RecoveryReport,
     RecoveryTest,
 )
+from app.models.operations_center import CustomerRequest, SupportTicket
+from app.pilot_readiness.models import (
+    KnowledgeArticle,
+    OnboardingSession,
+    OrgSetupSession,
+    PartnerRegistration,
+    PilotScorecardRun,
+    TrainingGuide,
+)

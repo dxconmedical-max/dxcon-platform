@@ -33,6 +33,13 @@ const ALL_NAV: NavItem[] = [
     workspaces: ["/app/admin"],
   },
   {
+    href: "/app/operations",
+    label: "Operations",
+    icon: LayoutDashboard,
+    permission: "executive.read",
+    workspaces: ["/app/admin", "/app/executive"],
+  },
+  {
     href: "/app/executive",
     label: "Executive",
     icon: LayoutDashboard,

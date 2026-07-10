@@ -30,6 +30,7 @@ export const PUBLIC_ROUTES = [
   "/reset-password",
   "/session-expired",
   "/service-unavailable",
+  "/onboarding/register",
 ] as const;
 
 export const REQUIRED_ENV_VARS = [

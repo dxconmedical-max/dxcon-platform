@@ -1,0 +1,44 @@
+{
+  "generated_at": "2026-07-10T13:15:05.421208+00:00",
+  "status": "WARNING",
+  "production_readiness_score": 54,
+  "pilot_score": 20,
+  "security_score": 85,
+  "performance_score": 80,
+  "customer_pilot_ready": false,
+  "commercial_ready": false,
+  "go_live_recommendation": "PILOT_ONLY",
+  "script_results": [
+    {
+      "script": "verify_production.py",
+      "status": "PASS",
+      "exit_code": 0,
+      "tail": "\n=== DXCON PRODUCTION VERIFY ===\n\nScore: 54/100 (FAIL)\nReport: /Users/mac/dxcon-platform/backend/generated_release/PRODUCTION_READINESS_SCORE.json\n2026-07-10 20:14:50,221 INFO [dxcon.startup] startup checks completed\n"
+    },
+    {
+      "script": "verify_monitoring.py",
+      "status": "PASS",
+      "exit_code": 0,
+      "tail": ".database] database connection verified\n2026-07-10 20:14:54,788 INFO [dxcon.request] request_id=242d7528-0af9-473b-bd2c-85d884916877 trace_id=242d7528-0af9-473b-bd2c-85d884916877 method=GET path=/api/v1/system/health status=200 duration_ms=0.6 user_id=- tenant_id=-\n2026-07-10 20:14:54,790 INFO [dxcon.request] request_id=e08f211f-d95f-4eb3-9706-840d1529cf92 trace_id=e08f211f-d95f-4eb3-9706-840d1529cf92 method=GET path=/api/v1/observability/health status=404 duration_ms=0.17 user_id=- tenant_id=-\n"
+    },
+    {
+      "script": "verify_backup.py",
+      "status": "PASS",
+      "exit_code": 0,
+      "tail": "\n=== DXCON BACKUP VERIFY ===\nStatus: PASS\nReport: /Users/mac/dxcon-platform/backend/generated_release/BACKUP_EPIC8_REPORT.json\n\n2026-07-10 20:14:58,460 INFO [dxcon.startup] startup checks completed\n"
+    },
+    {
+      "script": "verify_security.py",
+      "status": "PASS",
+      "exit_code": 0,
+      "tail": "e0f884 method=GET path=/api/v1/mobile/secure/profile status=401 duration_ms=0.25 user_id=- tenant_id=-\n2026-07-10 20:15:02,357 INFO [dxcon.request] request_id=ea3d7658-fec1-44ff-ac1f-90bc75543d9b trace_id=ea3d7658-fec1-44ff-ac1f-90bc75543d9b method=GET path=/api/v1/security/roles status=200 duration_ms=0.08 user_id=- tenant_id=-\n2026-07-10 20:15:02,358 INFO [dxcon.request] request_id=unknown trace_id=unknown method=GET path=/api/v1/security/roles status=429 duration_ms=0.0 user_id=- tenant_id=-\n"
+    },
+    {
+      "script": "verify_subscription.py",
+      "status": "PASS",
+      "exit_code": 0,
+      "tail": "up] startup checks completed\n2026-07-10 20:15:04,310 INFO [dxcon.request] request_id=b0421539-3a1e-4c8b-9a56-d1801cc1ff94 trace_id=b0421539-3a1e-4c8b-9a56-d1801cc1ff94 method=GET path=/api/v1/pilot-readiness/subscription-plans status=200 duration_ms=0.17 user_id=- tenant_id=-\n2026-07-10 20:15:04,324 INFO [dxcon.request] request_id=411ee541-afe4-4e90-b1d5-668514e11ade trace_id=411ee541-afe4-4e90-b1d5-668514e11ade method=GET path=/api/v1/licenses status=200 duration_ms=12.99 user_id=- tenant_id=-\n"
+    }
+  ],
+  "critical_blockers": []
+}

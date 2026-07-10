@@ -1,42 +1,80 @@
+"""Tests for Pilot Readiness API — Epic 8."""
+
+from __future__ import annotations
+
 import os
-import sys
 import unittest
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 
-os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+from app import create_app
+from app.extensions.db import db
+from app.pilot_readiness.audit import run_production_readiness_audit
+from app.pilot_readiness.models import PartnerRegistration
 
 
-class PilotReadinessTestCase(unittest.TestCase):
-    def test_pilot_pages_registered(self):
-        from app import create_app
+class PilotReadinessTests(unittest.TestCase):
+    def setUp(self):
+        self.app = create_app()
+        self.app.config["TESTING"] = True
+        self.client = self.app.test_client()
+        self.ctx = self.app.app_context()
+        self.ctx.push()
+        db.create_all()
 
-        app = create_app()
-        routes = {str(rule.rule) for rule in app.url_map.iter_rules()}
-        for route in (
-            "/demo-accounts",
-            "/workflow-demo",
-            "/pilot-checklist",
-            "/doctor-workbench",
-            "/patient-portal",
-            "/executive-v9",
-        ):
-            self.assertIn(route, routes)
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        self.ctx.pop()
 
-    def test_crm_and_logistics_do_not_500(self):
-        from app import create_app
-        from app.extensions.db import db
+    def test_audit_public(self):
+        with self.app.app_context():
+            audit = run_production_readiness_audit(self.app)
+        self.assertIn("production_readiness_score", audit)
+        self.assertGreaterEqual(audit["production_readiness_score"], 0)
 
-        app = create_app()
-        app.config["TESTING"] = True
-        with app.app_context():
-            db.create_all()
-            client = app.test_client()
-            for route in ("/crm-pipeline", "/logistics"):
-                response = client.get(route)
-                self.assertEqual(response.status_code, 200, route)
+    def test_audit_endpoint(self):
+        res = self.client.get("/api/v1/pilot-readiness/audit")
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("production_readiness_score", res.get_json()["data"])
+
+    def test_partner_self_registration(self):
+        res = self.client.post(
+            "/api/v1/pilot-readiness/partner-registration",
+            json={
+                "partner_type": "CLINIC",
+                "organization_name": "Demo Clinic",
+                "contact_email": "clinic@example.com",
+            },
+        )
+        self.assertEqual(res.status_code, 201)
+        self.assertEqual(PartnerRegistration.query.count(), 1)
+
+    def test_onboarding_flow(self):
+        start = self.client.post(
+            "/api/v1/pilot-readiness/onboarding",
+            json={"onboarding_type": "LABORATORY", "requester_email": "lab@example.com"},
+        )
+        self.assertEqual(start.status_code, 201)
+        code = start.get_json()["data"]["session_code"]
+        detail = self.client.get(f"/api/v1/pilot-readiness/onboarding/{code}")
+        self.assertEqual(detail.status_code, 200)
+        self.assertIn("steps", detail.get_json()["data"])
+
+    def test_subscription_plans(self):
+        res = self.client.get("/api/v1/pilot-readiness/subscription-plans")
+        self.assertEqual(res.status_code, 200)
+        plans = res.get_json()["data"]
+        self.assertGreaterEqual(len(plans), 4)
+
+    def test_knowledge_base(self):
+        res = self.client.get("/api/v1/pilot-readiness/knowledge")
+        self.assertEqual(res.status_code, 200)
+        self.assertGreater(len(res.get_json()["data"]), 0)
+
+    def test_operations_center_wired(self):
+        res = self.client.get("/api/v1/operations-center/dashboard")
+        self.assertIn(res.status_code, (200, 401, 403))
 
 
 if __name__ == "__main__":

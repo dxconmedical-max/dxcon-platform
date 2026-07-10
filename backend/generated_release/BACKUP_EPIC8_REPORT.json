@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-07-10T13:14:59.238260+00:00",
+  "status": "PASS",
+  "findings": [
+    {
+      "status": "PASS",
+      "name": "backup_postgres",
+      "detail": "/Users/mac/dxcon-platform/deployment/scripts/backup_postgres.sh"
+    },
+    {
+      "status": "PASS",
+      "name": "backup_uploads",
+      "detail": "/Users/mac/dxcon-platform/deployment/scripts/backup_uploads.sh"
+    },
+    {
+      "status": "PASS",
+      "name": "verify_backup_restore",
+      "detail": "/Users/mac/dxcon-platform/deployment/scripts/verify_backup_restore.sh"
+    },
+    {
+      "status": "PASS",
+      "name": "backup_runbook",
+      "detail": "/Users/mac/dxcon-platform/docs/BACKUP_RUNBOOK.md"
+    },
+    {
+      "status": "PASS",
+      "name": "dr_report",
+      "detail": "/Users/mac/dxcon-platform/backend/generated_release/BACKUP_DR_REPORT.json"
+    },
+    {
+      "status": "PASS",
+      "name": "backup_recovery_verify",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "backup_job_model",
+      "detail": "records=0"
+    }
+  ],
+  "score": {
+    "counts": {
+      "PASS": 7,
+      "WARNING": 0,
+      "FAIL": 0
+    },
+    "score_pct": 100.0,
+    "total": 7
+  }
+}

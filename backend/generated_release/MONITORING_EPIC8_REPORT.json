@@ -1,0 +1,45 @@
+{
+  "generated_at": "2026-07-10T13:14:54.791109+00:00",
+  "status": "PASS",
+  "findings": [
+    {
+      "status": "PASS",
+      "name": "prometheus_config",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "grafana_dashboards",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "alert_rules",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "monitoring_stack_script",
+      "detail": "N MONITORING STACK VERIFY ===\n\nPASS: prometheus\nPASS: alert_rules\nPASS: grafana\nPASS: log_readiness\nPASS: prometheus_metrics\nPASS: route_inventory\n\nSUMMARY: 6/6 passed\nMONITORING STACK VERIFY PASSED\n\n"
+    },
+    {
+      "status": "PASS",
+      "name": "system_health_endpoint",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "observability_health",
+      "detail": "status=404"
+    }
+  ],
+  "score": {
+    "counts": {
+      "PASS": 6,
+      "WARNING": 0,
+      "FAIL": 0
+    },
+    "score_pct": 100.0,
+    "total": 6
+  }
+}

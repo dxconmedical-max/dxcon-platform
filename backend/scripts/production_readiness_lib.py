@@ -40,6 +40,9 @@ def apply_migrations(db) -> None:
         "007_reporting_engine.sql",
         "008_portal.sql",
         "009_executive_platform.sql",
+        "010_operations_center.sql",
+        "013_mobile_mvp.sql",
+        "014_pilot_readiness.sql",
     ):
         path = ROOT / "migrations" / name
         if not path.exists():

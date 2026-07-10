@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-07-10T13:14:50.330937+00:00",
+  "status": "FAIL",
+  "production_readiness_score": 54,
+  "summary": {
+    "score": 54,
+    "grade": "FAIL",
+    "by_severity": {
+      "Low": 11,
+      "High": 7,
+      "Medium": 11
+    },
+    "by_status": {
+      "PASS": 13,
+      "FAIL": 4,
+      "WARNING": 12
+    },
+    "critical_blockers": []
+  },
+  "findings_count": 29,
+  "critical_blockers": []
+}

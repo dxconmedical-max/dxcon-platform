@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-07-10T13:15:04.324789+00:00",
+  "status": "PASS",
+  "findings": [
+    {
+      "status": "PASS",
+      "name": "subscription_plans_api",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "plan:STARTER",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "plan:PROFESSIONAL",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "plan:ENTERPRISE",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "plan:WHITE_LABEL",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "enterprise_licenses_api",
+      "detail": ""
+    },
+    {
+      "status": "PASS",
+      "name": "plan_catalog",
+      "detail": ""
+    }
+  ],
+  "score": {
+    "counts": {
+      "PASS": 7,
+      "WARNING": 0,
+      "FAIL": 0
+    },
+    "score_pct": 100.0,
+    "total": 7
+  }
+}
