@@ -40,7 +40,7 @@ class MobileMvpTests(unittest.TestCase):
             password_hash="x",
         )
         db.session.add(self.collector_user)
-        collector = Driver(
+        self.collector = Driver(
             id=str(uuid.uuid4()),
             driver_code="COL-001",
             full_name="Nguyen Van A",
