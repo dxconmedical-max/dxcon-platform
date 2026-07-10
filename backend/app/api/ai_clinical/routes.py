@@ -22,12 +22,38 @@ from app.services.ai_clinical_service import (
     safety_disclaimer,
     usage_metrics,
 )
+from app.clinical_ai.assistant import ClinicalAssistantError, assistant_critical_review, assistant_interpret, assistant_policy
 
 ai_clinical_bp = Blueprint("ai_clinical_api", __name__, url_prefix="/api/v1/ai-clinical")
 
 
 def _actor() -> str | None:
     return session.get("email")
+
+
+@ai_clinical_bp.route("/assistant/policy", methods=["GET"])
+def ai_clinical_assistant_policy_api():
+    return assistant_policy()
+
+
+@ai_clinical_bp.route("/assistant/interpret", methods=["POST"])
+def ai_clinical_assistant_interpret_api():
+    data = request.get_json(silent=True) or {}
+    try:
+        return assistant_interpret(data, actor=_actor())
+    except ClinicalAssistantError as exc:
+        return {"error": exc.message}, exc.status_code
+    except AIClinicalError as exc:
+        return {"error": exc.message}, exc.status_code
+
+
+@ai_clinical_bp.route("/assistant/critical-review", methods=["POST"])
+def ai_clinical_assistant_critical_api():
+    data = request.get_json(silent=True) or {}
+    try:
+        return assistant_critical_review(data, actor=_actor())
+    except ClinicalAssistantError as exc:
+        return {"error": exc.message}, exc.status_code
 
 
 @ai_clinical_bp.route("/dashboard", methods=["GET"])
