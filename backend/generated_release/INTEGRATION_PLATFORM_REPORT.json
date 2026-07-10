@@ -1,0 +1,11 @@
+{
+  "generated_at": "2026-07-10T06:23:47.515355+00:00",
+  "status": "PASS",
+  "checks": {
+    "connector_crud": true,
+    "connection_test": true,
+    "health": true,
+    "validation_required": true,
+    "auto_release_disabled": true
+  }
+}

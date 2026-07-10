@@ -1,0 +1,6 @@
+{
+  "status": "PASS",
+  "ssrf_blocked": true,
+  "masking": true,
+  "generated_at": "2026-07-10T06:23:51.657323+00:00"
+}

@@ -26,8 +26,8 @@ export type NavItem = {
 const ALL_NAV: NavItem[] = [
   { href: "/app", label: "Overview", icon: LayoutDashboard },
   {
-    href: "/app/admin",
-    label: "Administration",
+    href: "/app/admin/integrations",
+    label: "Integrations",
     icon: Settings,
     permission: "users.read",
     workspaces: ["/app/admin"],
