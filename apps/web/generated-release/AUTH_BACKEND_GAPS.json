@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-07-10T05:50:48.837Z",
+  "gaps": [
+    "Password reset email delivery not implemented",
+    "JWT does not embed organization_id",
+    "HttpOnly cookie auth not end-to-end",
+    "Refresh token rotation not implemented"
+  ]
+}

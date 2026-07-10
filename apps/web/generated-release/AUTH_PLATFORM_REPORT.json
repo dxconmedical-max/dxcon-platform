@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-07-10T05:50:48.835Z",
+  "status": "PASS",
+  "checks": {
+    "external_api_health": {
+      "ok": true,
+      "status": 200
+    },
+    "required_files": true,
+    "env_example": true,
+    "demo_mode_disabled_in_production": true
+  }
+}

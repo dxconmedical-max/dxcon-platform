@@ -1,0 +1,147 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, useEffect, useState, Suspense } from "react";
+import { Activity } from "lucide-react";
+
+import { Button } from "@/components/ui/Button";
+import { Input, Label } from "@/components/ui/Input";
+import { useAuth } from "@/hooks/useAuth";
+import { DEMO_MODE } from "@/lib/constants";
+import { ApiError, normalizeApiError } from "@/lib/errors";
+
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { login, status, error, clearError, isAuthenticated, workspacePath, isHydrated } =
+    useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
+  const [formError, setFormError] = useState<string | null>(
+    searchParams.get("reason") === "session-expired"
+      ? "Your session has expired. Please sign in again."
+      : null,
+  );
+  const isLoading = status === "loading";
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    if (isAuthenticated) {
+      const next = searchParams.get("next");
+      router.replace(next ?? workspacePath);
+    }
+  }, [isAuthenticated, isHydrated, workspacePath, router, searchParams]);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    clearError();
+    setFormError(null);
+    try {
+      const { redirect } = await login(email.trim(), password, remember);
+      router.replace(searchParams.get("next") ?? redirect);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 403) {
+          setFormError("This account has been disabled.");
+          return;
+        }
+        if (err.status === 401) {
+          setFormError("Invalid email or password.");
+          return;
+        }
+      }
+      setFormError(normalizeApiError(err));
+    }
+  }
+
+  return (
+    <div className="flex min-h-screen">
+      <div className="hidden w-1/2 bg-gradient-to-br from-slate-950 via-slate-900 to-teal-900 p-12 text-white lg:flex lg:flex-col lg:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500">
+              <Activity className="h-5 w-5" />
+            </span>
+            <span className="text-xl font-semibold">DxCon</span>
+          </div>
+          <h1 className="mt-16 text-4xl font-semibold leading-tight">
+            Sign in to your workspace
+          </h1>
+          <p className="mt-4 max-w-md text-slate-300">
+            Authenticate against api.dxcon.com.vn with your organization credentials.
+          </p>
+        </div>
+        <p className="text-sm text-slate-400">Production API gateway</p>
+      </div>
+      <div className="flex flex-1 items-center justify-center bg-slate-50 px-4 py-12">
+        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+          <h2 className="text-2xl font-semibold text-slate-900">Sign in</h2>
+          <p className="mt-1 text-sm text-slate-600">Use your DxCon account.</p>
+          {DEMO_MODE ? (
+            <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              Demo mode is enabled — not for production use.
+            </p>
+          ) : null}
+          <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center gap-2 text-slate-600">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                />
+                Remember me
+              </label>
+              <Link href="/forgot-password" className="text-teal-700 hover:text-teal-800">
+                Forgot password?
+              </Link>
+            </div>
+            {(formError || error) && (
+              <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+                {formError || error}
+              </p>
+            )}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Signing in..." : "Sign in"}
+            </Button>
+          </form>
+          <p className="mt-6 text-center text-sm text-slate-500">
+            <Link href="/" className="text-teal-700">Back to homepage</Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
+  );
+}

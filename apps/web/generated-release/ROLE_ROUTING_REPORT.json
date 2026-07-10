@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-07-10T05:50:48.837Z",
+  "status": "PASS",
+  "workspace_prefix": "/app",
+  "routes": [
+    "/app/admin",
+    "/app/executive",
+    "/app/reception",
+    "/app/doctor",
+    "/app/lab",
+    "/app/collector",
+    "/app/clinic",
+    "/app/patient"
+  ]
+}

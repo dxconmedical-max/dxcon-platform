@@ -20,6 +20,13 @@ from app.core.validation import (
 )
 from app.extensions.db import db
 from app.models.user import User
+from app.services.auth_context_service import (
+    AuthContextError,
+    build_capabilities,
+    current_user_payload,
+    list_user_memberships,
+    switch_organization,
+)
 from app.services.refresh_token_service import RefreshTokenService
 
 from app.core.passwords import (
@@ -180,3 +187,85 @@ def logout():
         "success": True,
         "message": "Logged out",
     }
+
+
+def _auth_context_error(exc: AuthContextError):
+    return {"error": str(exc), "code": exc.code}, exc.status
+
+
+@auth_bp.route("/me", methods=["GET"])
+@jwt_required()
+def auth_me():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user or not user.is_active:
+        return {"error": "Invalid user"}, 401
+    return {"success": True, "data": current_user_payload(user)}, 200
+
+
+@auth_bp.route("/memberships", methods=["GET"])
+@jwt_required()
+def auth_memberships():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user or not user.is_active:
+        return {"error": "Invalid user"}, 401
+    return {
+        "success": True,
+        "data": list_user_memberships(user),
+    }, 200
+
+
+@auth_bp.route("/switch-organization", methods=["POST"])
+@jwt_required()
+def auth_switch_organization():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user or not user.is_active:
+        return {"error": "Invalid user"}, 401
+    data = get_json_body()
+    require_fields(data, "organization_id")
+    organization_id = str(data.get("organization_id"))
+    try:
+        capabilities = switch_organization(user, organization_id)
+        db.session.commit()
+    except AuthContextError as exc:
+        return _auth_context_error(exc)
+    return {"success": True, "data": capabilities}, 200
+
+
+@auth_bp.route("/capabilities", methods=["GET"])
+@jwt_required()
+def auth_capabilities():
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user or not user.is_active:
+        return {"error": "Invalid user"}, 401
+    organization_id = request.args.get("organization_id") or user.organization_id
+    try:
+        data = build_capabilities(user, organization_id)
+    except AuthContextError as exc:
+        return _auth_context_error(exc)
+    return {"success": True, "data": data}, 200
+
+
+@auth_bp.route("/forgot-password", methods=["POST"])
+def auth_forgot_password():
+    data = get_json_body()
+    require_fields(data, "email")
+    validate_email(data.get("email"))
+    return {
+        "success": True,
+        "message": "If an account exists for this email, password reset instructions will be sent.",
+    }, 200
+
+
+@auth_bp.route("/reset-password", methods=["POST"])
+def auth_reset_password():
+    data = get_json_body()
+    require_fields(data, "token", "password")
+    validate_password(data.get("password"))
+    return {
+        "error": "Password reset is not yet enabled. Contact your administrator.",
+        "code": "RESET_NOT_ENABLED",
+    }, 501

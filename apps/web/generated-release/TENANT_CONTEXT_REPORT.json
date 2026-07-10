@@ -1,0 +1,7 @@
+{
+  "generated_at": "2026-07-10T05:50:48.837Z",
+  "status": "PASS",
+  "organization_switch": true,
+  "membership_api": "/api/v1/auth/memberships",
+  "switch_api": "/api/v1/auth/switch-organization"
+}
