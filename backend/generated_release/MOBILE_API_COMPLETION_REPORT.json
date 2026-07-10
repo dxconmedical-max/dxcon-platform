@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-07-10T12:32:07.345554+00:00",
+  "status": "PASS",
+  "required": [
+    "/api/v1/mobile/app-config",
+    "/api/v1/mobile/devices",
+    "/api/v1/mobile/patient/dashboard",
+    "/api/v1/mobile/patient/bookings",
+    "/api/v1/mobile/patient/results",
+    "/api/v1/mobile/collector/jobs",
+    "/api/v1/mobile/audit/events"
+  ],
+  "missing": []
+}

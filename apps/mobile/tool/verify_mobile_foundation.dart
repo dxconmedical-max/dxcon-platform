@@ -65,7 +65,8 @@ void main() {
     warnings.add('ios_build_not_run_non_macos');
   }
 
-  final androidSdk = Platform.environment['ANDROID_HOME'] ??
+  final androidSdk =
+      Platform.environment['ANDROID_HOME'] ??
       Platform.environment['ANDROID_SDK_ROOT'];
   if (androidSdk == null || !Directory(androidSdk).existsSync()) {
     warnings.add('android_sdk_not_configured');

@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-07-10T12:34:58.454349Z",
+  "status": "PASS",
+  "checks": {
+    "file:lib/features/patient/patient_home_screen.dart": true,
+    "file:lib/features/patient/patient_marketplace_screens.dart": true,
+    "file:lib/features/patient/patient_bookings_screens.dart": true,
+    "file:lib/services/patient_api_repository.dart": true,
+    "file:lib/services/marketplace_repository.dart": true,
+    "file:lib/features/collector/collector_screens.dart": true,
+    "file:lib/services/collector_api_repository.dart": true,
+    "file:lib/services/mobile_platform_services.dart": true,
+    "file:lib/core/sync/sync_queue.dart": true,
+    "file:lib/services/scanner_service.dart": true,
+    "route:/patient/home": true,
+    "route:/patient/marketplace": true,
+    "route:/patient/compare": true,
+    "route:/patient/provider/": true,
+    "route:/patient/booking/": true,
+    "route:/patient/payment/": true,
+    "route:/patient/results": true,
+    "route:/collector/home": true,
+    "route:/collector/jobs": true,
+    "route:/collector/job/": true,
+    "route:/collector/sync": true,
+    "real_api_client": true,
+    "offline_queue": true,
+    "no_demo_auth": true
+  },
+  "critical": []
+}
