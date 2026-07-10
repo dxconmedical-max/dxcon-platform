@@ -54,6 +54,9 @@ class InferenceService:
         redacted_input = redact_payload(data.get("input") or {})
         job = AIInferenceJob(
             job_code=data.get("job_code") or f"AIJ-{uuid.uuid4().hex[:8].upper()}",
+            organization_id=data.get("organization_id"),
+            user_id=data.get("user_id"),
+            session_id=data.get("session_id"),
             provider_id=provider_id,
             prompt_id=prompt_id,
             prompt_version=prompt_version,

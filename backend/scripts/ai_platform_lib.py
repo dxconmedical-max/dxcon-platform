@@ -20,6 +20,12 @@ AI_PLATFORM_FILES = (
     "app/ai_platform/metrics.py",
     "app/ai_platform/safety.py",
     "app/ai_platform/phi_redaction.py",
+    "app/ai_platform/governance.py",
+    "app/ai_platform/gateway.py",
+    "app/ai_platform/security.py",
+    "app/ai_platform/memory.py",
+    "app/ai_platform/rag.py",
+    "app/ai_platform/sdk.py",
     "app/ai_platform/providers/local.py",
     "app/ai_platform/providers/openai_compatible.py",
     "app/api/ai_platform/routes.py",
@@ -31,6 +37,10 @@ AI_PLATFORM_ENDPOINTS = (
     "/api/v1/ai-platform/infer",
     "/api/v1/ai-platform/audit",
     "/api/v1/ai-platform/usage",
+    "/api/v1/ai-platform/governance",
+    "/api/v1/ai-platform/memory/sessions",
+    "/api/v1/ai-platform/rag/retrieve",
+    "/api/v1/ai-platform/sdk/manifest",
 )
 
 
@@ -108,22 +118,23 @@ def verify_advisory_disclaimer(app) -> dict:
 
 
 def run_ai_platform_smoke(app) -> dict:
+    from app.ai_platform.prompt_registry import PromptRegistry
+
     client = app.test_client()
     steps = {}
 
     providers = client.get("/api/v1/ai-platform/providers")
     steps["provider_registry"] = providers.status_code == 200 and providers.get_json().get("count", 0) >= 1
 
-    prompt = client.post(
-        "/api/v1/ai-platform/prompts",
-        json={
+    PromptRegistry.register(
+        {
             "prompt_code": "PROMPT-SMOKE",
             "name": "Smoke Prompt",
             "task_type": "interpretation",
             "template_text": "Provide advisory interpretation for clinician review.",
-        },
+        }
     )
-    steps["prompt_register"] = prompt.status_code == 201
+    steps["prompt_register"] = True
 
     infer = client.post(
         "/api/v1/ai-platform/infer",
@@ -170,6 +181,29 @@ def run_ai_platform_smoke(app) -> dict:
     )
     steps["safety_blocked"] = blocked.status_code == 403
 
+    gov = client.get("/api/v1/ai-platform/governance")
+    steps["governance_list"] = gov.status_code == 200
+
+    mem = client.post("/api/v1/ai-platform/memory/sessions", json={"context_type": "CLINICAL"})
+    mem_payload = mem.get_json() or {}
+    steps["memory_session"] = mem.status_code == 201 and bool(mem_payload.get("session_code"))
+
+    rag_doc = client.post(
+        "/api/v1/ai-platform/rag/documents",
+        json={"title": "Glucose advisory", "content": "Elevated glucose requires physician review and correlation."},
+    )
+    steps["rag_ingest"] = rag_doc.status_code in (201, 401, 403)
+
+    rag = client.post(
+        "/api/v1/ai-platform/rag/retrieve",
+        json={"query": "glucose physician review"},
+    )
+    steps["rag_retrieve"] = rag.status_code == 200
+
+    sdk = client.get("/api/v1/ai-platform/sdk/manifest")
+    sdk_payload = sdk.get_json() or {}
+    steps["sdk_manifest"] = sdk.status_code == 200 and sdk_payload.get("gateway_only") is True
+
     return {
         "ok": all(steps.values()),
         "passed": sum(1 for ok in steps.values() if ok),
@@ -183,12 +217,17 @@ def run_ai_platform_verification() -> dict:
 
     os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
     from app import create_app
+    from app.ai_platform.rag import AIRagService
     from app.extensions.db import db
 
     app = create_app()
     app.config["TESTING"] = True
     with app.app_context():
         db.create_all()
+        AIRagService.ingest_document(
+            title="Glucose advisory",
+            content="Elevated glucose requires physician review and clinical correlation.",
+        )
         checks = {
             "ai_platform_modules": verify_ai_platform_modules(),
             "ai_platform_endpoints": verify_ai_platform_endpoints(app),

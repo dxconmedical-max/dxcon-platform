@@ -1,0 +1,73 @@
+{
+  "generated_at": "2026-07-10T16:30:54.099563+00:00",
+  "status": "PASS",
+  "release": "3.0",
+  "epic": 9,
+  "gates": {
+    "ai_gateway": true,
+    "ai_governance": true,
+    "prompt_registry": true,
+    "phi_protection": true,
+    "ai_audit": true,
+    "ai_sdk": true,
+    "memory": true,
+    "rag": true
+  },
+  "verification": {
+    "ok": true,
+    "passed": 8,
+    "total": 8,
+    "checks": {
+      "ai_platform_modules": {
+        "ok": true,
+        "missing": []
+      },
+      "ai_platform_endpoints": {
+        "ok": true,
+        "missing": []
+      },
+      "route_inventory": {
+        "ok": true,
+        "count": 0
+      },
+      "provider_registry": {
+        "ok": true,
+        "count": 1
+      },
+      "prompt_versioning": {
+        "ok": true,
+        "first_version": 1,
+        "second_version": 2
+      },
+      "phi_redaction": {
+        "ok": true,
+        "redacted": "Contact [REDACTED_EMAIL] or [REDACTED_MRN] phone [REDACTED_PHONE]"
+      },
+      "advisory_disclaimer": {
+        "ok": true,
+        "disclaimer_present": true
+      },
+      "ai_platform_smoke": {
+        "ok": true,
+        "passed": 14,
+        "total": 14,
+        "steps": {
+          "provider_registry": true,
+          "prompt_register": true,
+          "inference_completed": true,
+          "advisory_disclaimer": true,
+          "human_review_required": true,
+          "inference_queued": true,
+          "audit_written": true,
+          "usage_metrics": true,
+          "safety_blocked": true,
+          "governance_list": true,
+          "memory_session": true,
+          "rag_ingest": true,
+          "rag_retrieve": true,
+          "sdk_manifest": true
+        }
+      }
+    }
+  }
+}
