@@ -62,6 +62,21 @@ class Analyzer(db.Model):
     manufacturer = db.Column(db.String(100))
     lab_bench_id = db.Column(db.String(36), db.ForeignKey("lab_benches.id"))
     status = db.Column(db.String(50), default="ACTIVE")
+    organization_id = db.Column(db.String(36), index=True)
+    laboratory_id = db.Column(db.String(36))
+    vendor = db.Column(db.String(100))
+    serial_number = db.Column(db.String(100))
+    protocol = db.Column(db.String(30), default="SIMULATOR")
+    connection_mode = db.Column(db.String(30))
+    host = db.Column(db.String(255))
+    port = db.Column(db.Integer)
+    last_seen_at = db.Column(db.DateTime)
+    firmware_version = db.Column(db.String(50))
+    software_version = db.Column(db.String(50))
+    calibration_status = db.Column(db.String(30))
+    maintenance_status = db.Column(db.String(30))
+    result_mode = db.Column(db.String(30), default="PRELIMINARY")
+    enabled = db.Column(db.Boolean, default=True)
     utilization_percent = db.Column(db.Float, default=0)
     last_run_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -76,6 +91,11 @@ class Analyzer(db.Model):
             "manufacturer": self.manufacturer,
             "lab_bench_id": self.lab_bench_id,
             "status": self.status,
+            "organization_id": self.organization_id,
+            "protocol": self.protocol,
+            "vendor": self.vendor or self.manufacturer,
+            "serial_number": self.serial_number,
+            "enabled": self.enabled,
             "utilization_percent": self.utilization_percent,
             "last_run_at": self.last_run_at.isoformat() if self.last_run_at else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,

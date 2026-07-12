@@ -1,0 +1,12 @@
+{
+  "release": "7.0",
+  "sprint": "Sprint 5",
+  "status": "PASS",
+  "pages": {
+    "analyzer_dashboard": true,
+    "result_review": true,
+    "quarantine": true,
+    "analyzer_api": true
+  },
+  "generated_at": "2026-07-12T11:24:20.599759+00:00"
+}

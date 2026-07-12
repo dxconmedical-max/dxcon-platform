@@ -391,3 +391,10 @@ from app.models.iot_platform import (
     IoTTelemetryDeadLetter,
     LogisticsTransportTrip,
 )
+from app.models.analyzer_integration import (
+    AnalyzerIntegrationMessage,
+    AnalyzerPreliminaryResult,
+    AnalyzerWorklistItem,
+    IntegrationQuarantine,
+    IntegrationTestMapping,
+)

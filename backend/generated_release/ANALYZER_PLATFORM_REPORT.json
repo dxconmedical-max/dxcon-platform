@@ -1,0 +1,22 @@
+{
+  "release": "7.0",
+  "sprint": "Sprint 5",
+  "status": "PASS",
+  "checks": {
+    "migration": true,
+    "routes": true,
+    "tests": true,
+    "frontend": true,
+    "adapter_framework": true
+  },
+  "routes": {
+    "/api/v1/analyzers": true,
+    "/api/v1/integrations/analyzer/messages": true,
+    "/api/v1/integrations/analyzer/quarantine": true,
+    "/api/v1/integrations/analyzer/test-mappings": true,
+    "/api/v1/integrations/analyzer/results": true,
+    "/api/v1/lab/analyzer-dashboard": true,
+    "/api/v1/lab/result-review": true
+  },
+  "generated_at": "2026-07-12T11:24:20.599759+00:00"
+}
