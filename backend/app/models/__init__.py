@@ -373,3 +373,11 @@ from app.pilot_readiness.models import (
     PilotScorecardRun,
     TrainingGuide,
 )
+from app.models.lims_core import (
+    LimsAccession,
+    LimsBarcodeLog,
+    LimsContainer,
+    LimsSampleStatusHistory,
+    LimsSpecimen,
+    LimsStorageLocation,
+)

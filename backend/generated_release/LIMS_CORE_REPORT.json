@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-07-12T09:33:32.340284+00:00",
+  "release": "7.0",
+  "sprint": "Sprint 3 \u2014 LIMS Core",
+  "status": "PASS",
+  "checks": {
+    "models": true,
+    "service": true,
+    "routes": true,
+    "migration": true,
+    "tests": true,
+    "statuses": true,
+    "docs": true,
+    "frontend": true,
+    "barcode_pattern": true,
+    "lifecycle_transitions": true,
+    "dashboard_kpis": true
+  },
+  "frontend_checks": {
+    "specimens_page": true,
+    "barcode_page": true,
+    "accession_page": true,
+    "timeline_page": true,
+    "lab_api": true
+  },
+  "failed": [],
+  "api_endpoints": [
+    "GET/POST /api/v1/specimens",
+    "GET/PUT /api/v1/specimens/{id}",
+    "POST /api/v1/specimens/{id}/transition",
+    "GET /api/v1/specimens/{id}/timeline",
+    "GET/POST /api/v1/barcodes",
+    "GET/POST /api/v1/accessions",
+    "GET /api/v1/accessions/{id}",
+    "GET /api/v1/lab/dashboard"
+  ]
+}

@@ -141,11 +141,14 @@ export const WORKSPACE_DEFINITIONS: Record<WorkspaceKey, WorkspaceDefinition> = 
     key: "lab",
     path: "/app/lab",
     title: "Laboratory",
-    subtitle: "Accessions, testing queue, QC, and result validation.",
+    subtitle: "LIMS specimen lifecycle, accession, QC, and result validation.",
     permission: "lab.read",
-    dashboardPath: "/api/v1/lab/workspace/dashboard",
+    dashboardPath: "/api/v1/lab/dashboard",
     actions: [
-      { label: "Received samples", href: "/app/lab/samples", description: "Accessioned samples." },
+      { label: "Specimens", href: "/app/lab/specimens", description: "All specimens and lifecycle status." },
+      { label: "Accession", href: "/app/lab/accession", description: "Receive and accession specimens." },
+      { label: "Barcode viewer", href: "/app/lab/barcode", description: "View and verify specimen barcodes." },
+      { label: "Status timeline", href: "/app/lab/timeline", description: "Specimen status history." },
       { label: "Analyzer queue", href: "/app/lab/queue", description: "Samples in testing." },
       { label: "Quality control", href: "/app/lab/qc", description: "QC status for runs." },
       { label: "Verification & release", href: "/app/lab/verification", description: "Verify and release results." },
@@ -153,10 +156,14 @@ export const WORKSPACE_DEFINITIONS: Record<WorkspaceKey, WorkspaceDefinition> = 
     extractStatusCards: (data) => {
       const kpis = (nested(data, "kpis") ?? nested(data, "summary") ?? data) as Record<string, unknown>;
       return [
-        { label: "Pending accessions", value: asNumber(kpis.pending_accessions ?? kpis.pending) },
-        { label: "In testing", value: asNumber(kpis.in_testing ?? kpis.testing) },
-        { label: "QC pending", value: asNumber(kpis.qc_pending) },
-        { label: "Released today", value: asNumber(kpis.released_today ?? kpis.completed) },
+        { label: "Samples Today", value: asNumber(kpis.samples_today) },
+        { label: "Pending Collection", value: asNumber(kpis.pending_collection) },
+        { label: "In Transit", value: asNumber(kpis.in_transit) },
+        { label: "Received", value: asNumber(kpis.received) },
+        { label: "Processing", value: asNumber(kpis.processing) },
+        { label: "QC Failed", value: asNumber(kpis.qc_failed) },
+        { label: "Validation Pending", value: asNumber(kpis.validation_pending) },
+        { label: "Released Today", value: asNumber(kpis.released_today) },
       ];
     },
   },

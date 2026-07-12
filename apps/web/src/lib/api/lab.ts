@@ -118,3 +118,152 @@ export async function releaseResult(
     "Release recorded locally (no live backend response).",
   );
 }
+
+// --- LIMS Core (Release 7.0) ---
+
+export type LimsSpecimen = {
+  id: string;
+  barcode: string;
+  human_readable: string;
+  order_code?: string;
+  patient_code?: string;
+  status: string;
+  container_type?: string;
+  volume?: number;
+  volume_unit?: string;
+  collected_at?: string;
+  expires_at?: string;
+};
+
+export type LimsTimelineEvent = {
+  id: string;
+  specimen_id: string;
+  from_status?: string;
+  to_status: string;
+  actor?: string;
+  note?: string;
+  transitioned_at: string;
+};
+
+export type LimsDashboard = {
+  kpis: Record<string, number>;
+  cards: { label: string; value: number }[];
+};
+
+/** LIMS realtime dashboard — GET /api/v1/lab/dashboard */
+export async function fetchLimsDashboard({ token, organizationId }: Ctx): Promise<Sourced<LimsDashboard>> {
+  return withSampleFallback<LimsDashboard>(
+    async () => {
+      const response = await apiRequest<ApiEnvelope<LimsDashboard>>("/api/v1/lab/dashboard", {
+        token,
+        organizationId,
+      });
+      if (!response.data?.kpis) throw new Error("no dashboard");
+      return response.data;
+    },
+    {
+      kpis: {
+        samples_today: 0,
+        pending_collection: 0,
+        in_transit: 0,
+        received: 0,
+        processing: 0,
+        qc_failed: 0,
+        validation_pending: 0,
+        released_today: 0,
+      },
+      cards: [],
+    },
+    SAMPLE_NOTE,
+  );
+}
+
+export async function fetchSpecimens(
+  { token, organizationId }: Ctx,
+  page = 1,
+  status?: string,
+): Promise<Sourced<{ items: LimsSpecimen[]; total: number }>> {
+  const params = new URLSearchParams({ page: String(page), per_page: "25" });
+  if (status) params.set("status", status);
+  return withSampleFallback(
+    async () => {
+      const response = await apiRequest<ApiEnvelope<{ items: LimsSpecimen[]; pagination: { total: number } }>>(
+        `/api/v1/specimens?${params}`,
+        { token, organizationId },
+      );
+      const items = response.data?.items ?? [];
+      return { items, total: response.data?.pagination?.total ?? items.length };
+    },
+    { items: [], total: 0 },
+    SAMPLE_NOTE,
+  );
+}
+
+export async function fetchSpecimenDetail(
+  { token, organizationId }: Ctx,
+  specimenId: string,
+): Promise<Sourced<LimsSpecimen & { history?: LimsTimelineEvent[] }>> {
+  return withSampleFallback(
+    async () => {
+      const response = await apiRequest<ApiEnvelope<LimsSpecimen & { history?: LimsTimelineEvent[] }>>(
+        `/api/v1/specimens/${encodeURIComponent(specimenId)}`,
+        { token, organizationId },
+      );
+      if (!response.data?.id) throw new Error("not found");
+      return response.data;
+    },
+    { id: specimenId, barcode: "", human_readable: "", status: "CREATED" },
+    SAMPLE_NOTE,
+  );
+}
+
+export async function verifySpecimenBarcode(
+  { token, organizationId }: Ctx,
+  value: string,
+): Promise<Sourced<{ valid: boolean; specimen?: LimsSpecimen }>> {
+  return withSampleFallback(
+    async () => {
+      const response = await apiRequest<ApiEnvelope<{ valid: boolean; specimen?: LimsSpecimen }>>(
+        `/api/v1/barcodes?value=${encodeURIComponent(value)}`,
+        { token, organizationId },
+      );
+      return response.data ?? { valid: false };
+    },
+    { valid: false },
+    SAMPLE_NOTE,
+  );
+}
+
+export async function accessionSpecimen(
+  { token, organizationId }: Ctx,
+  payload: { barcode_value: string; rack?: string; shelf?: string; batch?: string; operator?: string },
+): Promise<Sourced<Record<string, unknown>>> {
+  return withSampleFallback(
+    async () => {
+      const response = await apiRequest<ApiEnvelope<Record<string, unknown>>>(
+        "/api/v1/accessions",
+        { token, organizationId, method: "POST", body: payload },
+      );
+      return response.data ?? {};
+    },
+    { accession_number: "SAMPLE-ACC", status: "active" },
+    SAMPLE_NOTE,
+  );
+}
+
+export async function fetchSpecimenTimeline(
+  { token, organizationId }: Ctx,
+  specimenId: string,
+): Promise<Sourced<LimsTimelineEvent[]>> {
+  return withSampleFallback(
+    async () => {
+      const response = await apiRequest<ApiEnvelope<LimsTimelineEvent[]>>(
+        `/api/v1/specimens/${encodeURIComponent(specimenId)}/timeline`,
+        { token, organizationId },
+      );
+      return Array.isArray(response.data) ? response.data : [];
+    },
+    [],
+    SAMPLE_NOTE,
+  );
+}

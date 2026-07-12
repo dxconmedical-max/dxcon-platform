@@ -18,7 +18,7 @@ describe("workspaces", () => {
     expect(workspaceByKey("reception").dashboardPath).toBe(
       "/api/v1/reception/workspace/dashboard",
     );
-    expect(workspaceByKey("lab").dashboardPath).toBe("/api/v1/lab/workspace/dashboard");
+    expect(workspaceByKey("lab").dashboardPath).toBe("/api/v1/lab/dashboard");
     expect(workspaceByKey("doctor").dashboardPath).toBe("/api/v1/portal/doctor/dashboard");
   });
 
