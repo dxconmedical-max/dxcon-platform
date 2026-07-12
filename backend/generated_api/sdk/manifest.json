@@ -1,10 +1,14 @@
 {
-  "route_count": 625,
-  "domain_count": 87,
+  "route_count": 1261,
+  "domain_count": 132,
   "domains": [
+    "accessions",
     "admin",
     "admin-security",
     "ai",
+    "ai-clinical",
+    "ai-copilot",
+    "ai-operations",
     "ai-platform",
     "ai-v2",
     "alerts",
@@ -14,13 +18,9 @@
     "api-usage",
     "audit",
     "auth",
+    "backup-recovery",
+    "barcodes",
     "billing",
-    "biomarkers",
-    "box-qr",
-    "clinic",
-    "collector",
-    "collector-operations",
-    "companies",
-    "connectors"
+    "biomarkers"
   ]
 }

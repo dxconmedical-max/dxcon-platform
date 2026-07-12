@@ -48,6 +48,30 @@ export class DxConClient {
     return this.request('POST', '/api/v1/auth/logout', body);
   }
 
+  async get_auth_me(body?: unknown) {
+    return this.request('GET', '/api/v1/auth/me', body);
+  }
+
+  async get_auth_memberships(body?: unknown) {
+    return this.request('GET', '/api/v1/auth/memberships', body);
+  }
+
+  async post_auth_switch_organization(body?: unknown) {
+    return this.request('POST', '/api/v1/auth/switch-organization', body);
+  }
+
+  async get_auth_capabilities(body?: unknown) {
+    return this.request('GET', '/api/v1/auth/capabilities', body);
+  }
+
+  async post_auth_forgot_password(body?: unknown) {
+    return this.request('POST', '/api/v1/auth/forgot-password', body);
+  }
+
+  async post_auth_reset_password(body?: unknown) {
+    return this.request('POST', '/api/v1/auth/reset-password', body);
+  }
+
   async get_admin_users(body?: unknown) {
     return this.request('GET', '/api/v1/admin/users', body);
   }
@@ -72,124 +96,100 @@ export class DxConClient {
     return this.request('DELETE', '/api/v1/patients/<patient_id>', body);
   }
 
-  async get_laboratories(body?: unknown) {
-    return this.request('GET', '/api/v1/laboratories', body);
+  async get_reception_dashboard(body?: unknown) {
+    return this.request('GET', '/api/v1/reception/dashboard', body);
   }
 
-  async post_laboratories(body?: unknown) {
-    return this.request('POST', '/api/v1/laboratories', body);
+  async get_reception_search(body?: unknown) {
+    return this.request('GET', '/api/v1/reception/search', body);
   }
 
-  async get_test_catalogs(body?: unknown) {
-    return this.request('GET', '/api/v1/test-catalogs', body);
+  async post_reception_register_quick(body?: unknown) {
+    return this.request('POST', '/api/v1/reception/register/quick', body);
   }
 
-  async post_test_catalogs(body?: unknown) {
-    return this.request('POST', '/api/v1/test-catalogs', body);
+  async post_reception_register_walk_in(body?: unknown) {
+    return this.request('POST', '/api/v1/reception/register/walk-in', body);
   }
 
-  async get_orders(body?: unknown) {
-    return this.request('GET', '/api/v1/orders', body);
+  async post_reception_check_in(body?: unknown) {
+    return this.request('POST', '/api/v1/reception/check-in', body);
   }
 
-  async post_orders(body?: unknown) {
-    return this.request('POST', '/api/v1/orders', body);
+  async post_reception_queue_entry_id_check_in(body?: unknown) {
+    return this.request('POST', '/api/v1/reception/queue/<entry_id>/check-in', body);
   }
 
-  async get_order_items(body?: unknown) {
-    return this.request('GET', '/api/v1/order-items', body);
+  async post_reception_queue_entry_id_check_out(body?: unknown) {
+    return this.request('POST', '/api/v1/reception/queue/<entry_id>/check-out', body);
   }
 
-  async post_order_items(body?: unknown) {
-    return this.request('POST', '/api/v1/order-items', body);
+  async get_reception_activity(body?: unknown) {
+    return this.request('GET', '/api/v1/reception/activity', body);
   }
 
-  async get_sample_collections(body?: unknown) {
-    return this.request('GET', '/api/v1/sample-collections', body);
+  async get_reception_kpi(body?: unknown) {
+    return this.request('GET', '/api/v1/reception/kpi', body);
   }
 
-  async post_sample_collections(body?: unknown) {
-    return this.request('POST', '/api/v1/sample-collections', body);
+  async get_integration_hub_dashboard(body?: unknown) {
+    return this.request('GET', '/api/v1/integration-hub/dashboard', body);
   }
 
-  async get_test_results(body?: unknown) {
-    return this.request('GET', '/api/v1/test-results', body);
+  async get_integration_hub_health(body?: unknown) {
+    return this.request('GET', '/api/v1/integration-hub/health', body);
   }
 
-  async post_test_results(body?: unknown) {
-    return this.request('POST', '/api/v1/test-results', body);
+  async get_integration_hub_connectors(body?: unknown) {
+    return this.request('GET', '/api/v1/integration-hub/connectors', body);
   }
 
-  async post_ai_interpret(body?: unknown) {
-    return this.request('POST', '/api/v1/ai/interpret', body);
+  async get_integration_hub_adapters(body?: unknown) {
+    return this.request('GET', '/api/v1/integration-hub/adapters', body);
   }
 
-  async post_ai_risk(body?: unknown) {
-    return this.request('POST', '/api/v1/ai/risk', body);
+  async get_integration_hub_webhooks(body?: unknown) {
+    return this.request('GET', '/api/v1/integration-hub/webhooks', body);
   }
 
-  async post_ai_recommend(body?: unknown) {
-    return this.request('POST', '/api/v1/ai/recommend', body);
+  async get_integration_hub_api_keys(body?: unknown) {
+    return this.request('GET', '/api/v1/integration-hub/api-keys', body);
   }
 
-  async get_ai_reference_ranges(body?: unknown) {
-    return this.request('GET', '/api/v1/ai/reference-ranges', body);
+  async get_integration_hub_retry_queue(body?: unknown) {
+    return this.request('GET', '/api/v1/integration-hub/retry-queue', body);
   }
 
-  async post_ai_critical_results(body?: unknown) {
-    return this.request('POST', '/api/v1/ai/critical-results', body);
+  async get_integration_hub_dead_letters(body?: unknown) {
+    return this.request('GET', '/api/v1/integration-hub/dead-letters', body);
   }
 
-  async get_companies(body?: unknown) {
-    return this.request('GET', '/api/v1/companies', body);
+  async get_integration_hub_audit(body?: unknown) {
+    return this.request('GET', '/api/v1/integration-hub/audit', body);
   }
 
-  async post_companies(body?: unknown) {
-    return this.request('POST', '/api/v1/companies', body);
+  async post_integration_hub_sandbox_test(body?: unknown) {
+    return this.request('POST', '/api/v1/integration-hub/sandbox/test', body);
   }
 
-  async get_companies_company_id(body?: unknown) {
-    return this.request('GET', '/api/v1/companies/<company_id>', body);
+  async get_ai_clinical_assistant_policy(body?: unknown) {
+    return this.request('GET', '/api/v1/ai-clinical/assistant/policy', body);
   }
 
-  async put_companies_company_id(body?: unknown) {
-    return this.request('PUT', '/api/v1/companies/<company_id>', body);
+  async post_ai_clinical_assistant_interpret(body?: unknown) {
+    return this.request('POST', '/api/v1/ai-clinical/assistant/interpret', body);
   }
 
-  async delete_companies_company_id(body?: unknown) {
-    return this.request('DELETE', '/api/v1/companies/<company_id>', body);
+  async post_ai_clinical_assistant_critical_review(body?: unknown) {
+    return this.request('POST', '/api/v1/ai-clinical/assistant/critical-review', body);
   }
 
-  async get_marketplace_search(body?: unknown) {
-    return this.request('GET', '/api/v1/marketplace/search', body);
+  async get_ai_clinical_dashboard(body?: unknown) {
+    return this.request('GET', '/api/v1/ai-clinical/dashboard', body);
   }
 
-  async get_marketplace_bookings(body?: unknown) {
-    return this.request('GET', '/api/v1/marketplace/bookings', body);
-  }
-
-  async post_marketplace_bookings(body?: unknown) {
-    return this.request('POST', '/api/v1/marketplace/bookings', body);
-  }
-
-  async get_marketplace_bookings_booking_id(body?: unknown) {
-    return this.request('GET', '/api/v1/marketplace/bookings/<booking_id>', body);
-  }
-
-  async post_marketplace_bookings_booking_id_transition(body?: unknown) {
-    return this.request('POST', '/api/v1/marketplace/bookings/<booking_id>/transition', body);
-  }
-
-  async get_marketplace_bookings_booking_id_timeline(body?: unknown) {
-    return this.request('GET', '/api/v1/marketplace/bookings/<booking_id>/timeline', body);
-  }
-
-  async get_partners(body?: unknown) {
-    return this.request('GET', '/api/v1/partners', body);
-  }
-
-  async post_partners(body?: unknown) {
-    return this.request('POST', '/api/v1/partners', body);
+  async get_ai_clinical_providers(body?: unknown) {
+    return this.request('GET', '/api/v1/ai-clinical/providers', body);
   }
 
 }

@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-07-12T10:47:41.493433+00:00",
+  "release": "7.0",
+  "sprint": "Sprint 3 \u2014 LIMS Core",
+  "status": "PASS",
+  "migration": "016_lims_core.sql",
+  "checks": {
+    "specimens": true,
+    "containers": true,
+    "barcode_logs": true,
+    "storage_locations": true,
+    "accessions": true,
+    "sample_status_history": true,
+    "migration_file_exists": true,
+    "additive_only": true
+  },
+  "failed": [],
+  "destructive_ops": false
+}

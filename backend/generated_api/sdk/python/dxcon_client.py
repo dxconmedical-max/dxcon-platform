@@ -48,6 +48,24 @@ class DxConClient:
     def post_auth_logout(self, **kwargs):
         return self.request('POST', '/api/v1/auth/logout', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
+    def get_auth_me(self, **kwargs):
+        return self.request('GET', '/api/v1/auth/me', body=kwargs.get('body'), headers=kwargs.get('headers'))
+
+    def get_auth_memberships(self, **kwargs):
+        return self.request('GET', '/api/v1/auth/memberships', body=kwargs.get('body'), headers=kwargs.get('headers'))
+
+    def post_auth_switch_organization(self, **kwargs):
+        return self.request('POST', '/api/v1/auth/switch-organization', body=kwargs.get('body'), headers=kwargs.get('headers'))
+
+    def get_auth_capabilities(self, **kwargs):
+        return self.request('GET', '/api/v1/auth/capabilities', body=kwargs.get('body'), headers=kwargs.get('headers'))
+
+    def post_auth_forgot_password(self, **kwargs):
+        return self.request('POST', '/api/v1/auth/forgot-password', body=kwargs.get('body'), headers=kwargs.get('headers'))
+
+    def post_auth_reset_password(self, **kwargs):
+        return self.request('POST', '/api/v1/auth/reset-password', body=kwargs.get('body'), headers=kwargs.get('headers'))
+
     def get_admin_users(self, **kwargs):
         return self.request('GET', '/api/v1/admin/users', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
@@ -66,93 +84,75 @@ class DxConClient:
     def delete_patients_patient_id(self, **kwargs):
         return self.request('DELETE', '/api/v1/patients/<patient_id>', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def get_laboratories(self, **kwargs):
-        return self.request('GET', '/api/v1/laboratories', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_reception_dashboard(self, **kwargs):
+        return self.request('GET', '/api/v1/reception/dashboard', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def post_laboratories(self, **kwargs):
-        return self.request('POST', '/api/v1/laboratories', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_reception_search(self, **kwargs):
+        return self.request('GET', '/api/v1/reception/search', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def get_test_catalogs(self, **kwargs):
-        return self.request('GET', '/api/v1/test-catalogs', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def post_reception_register_quick(self, **kwargs):
+        return self.request('POST', '/api/v1/reception/register/quick', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def post_test_catalogs(self, **kwargs):
-        return self.request('POST', '/api/v1/test-catalogs', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def post_reception_register_walk_in(self, **kwargs):
+        return self.request('POST', '/api/v1/reception/register/walk-in', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def get_orders(self, **kwargs):
-        return self.request('GET', '/api/v1/orders', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def post_reception_check_in(self, **kwargs):
+        return self.request('POST', '/api/v1/reception/check-in', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def post_orders(self, **kwargs):
-        return self.request('POST', '/api/v1/orders', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def post_reception_queue_entry_id_check_in(self, **kwargs):
+        return self.request('POST', '/api/v1/reception/queue/<entry_id>/check-in', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def get_order_items(self, **kwargs):
-        return self.request('GET', '/api/v1/order-items', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def post_reception_queue_entry_id_check_out(self, **kwargs):
+        return self.request('POST', '/api/v1/reception/queue/<entry_id>/check-out', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def post_order_items(self, **kwargs):
-        return self.request('POST', '/api/v1/order-items', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_reception_activity(self, **kwargs):
+        return self.request('GET', '/api/v1/reception/activity', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def get_sample_collections(self, **kwargs):
-        return self.request('GET', '/api/v1/sample-collections', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_reception_kpi(self, **kwargs):
+        return self.request('GET', '/api/v1/reception/kpi', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def post_sample_collections(self, **kwargs):
-        return self.request('POST', '/api/v1/sample-collections', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_integration_hub_dashboard(self, **kwargs):
+        return self.request('GET', '/api/v1/integration-hub/dashboard', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def get_test_results(self, **kwargs):
-        return self.request('GET', '/api/v1/test-results', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_integration_hub_health(self, **kwargs):
+        return self.request('GET', '/api/v1/integration-hub/health', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def post_test_results(self, **kwargs):
-        return self.request('POST', '/api/v1/test-results', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_integration_hub_connectors(self, **kwargs):
+        return self.request('GET', '/api/v1/integration-hub/connectors', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def post_ai_interpret(self, **kwargs):
-        return self.request('POST', '/api/v1/ai/interpret', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_integration_hub_adapters(self, **kwargs):
+        return self.request('GET', '/api/v1/integration-hub/adapters', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def post_ai_risk(self, **kwargs):
-        return self.request('POST', '/api/v1/ai/risk', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_integration_hub_webhooks(self, **kwargs):
+        return self.request('GET', '/api/v1/integration-hub/webhooks', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def post_ai_recommend(self, **kwargs):
-        return self.request('POST', '/api/v1/ai/recommend', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_integration_hub_api_keys(self, **kwargs):
+        return self.request('GET', '/api/v1/integration-hub/api-keys', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def get_ai_reference_ranges(self, **kwargs):
-        return self.request('GET', '/api/v1/ai/reference-ranges', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_integration_hub_retry_queue(self, **kwargs):
+        return self.request('GET', '/api/v1/integration-hub/retry-queue', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def post_ai_critical_results(self, **kwargs):
-        return self.request('POST', '/api/v1/ai/critical-results', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_integration_hub_dead_letters(self, **kwargs):
+        return self.request('GET', '/api/v1/integration-hub/dead-letters', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def get_companies(self, **kwargs):
-        return self.request('GET', '/api/v1/companies', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_integration_hub_audit(self, **kwargs):
+        return self.request('GET', '/api/v1/integration-hub/audit', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def post_companies(self, **kwargs):
-        return self.request('POST', '/api/v1/companies', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def post_integration_hub_sandbox_test(self, **kwargs):
+        return self.request('POST', '/api/v1/integration-hub/sandbox/test', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def get_companies_company_id(self, **kwargs):
-        return self.request('GET', '/api/v1/companies/<company_id>', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_ai_clinical_assistant_policy(self, **kwargs):
+        return self.request('GET', '/api/v1/ai-clinical/assistant/policy', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def put_companies_company_id(self, **kwargs):
-        return self.request('PUT', '/api/v1/companies/<company_id>', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def post_ai_clinical_assistant_interpret(self, **kwargs):
+        return self.request('POST', '/api/v1/ai-clinical/assistant/interpret', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def delete_companies_company_id(self, **kwargs):
-        return self.request('DELETE', '/api/v1/companies/<company_id>', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def post_ai_clinical_assistant_critical_review(self, **kwargs):
+        return self.request('POST', '/api/v1/ai-clinical/assistant/critical-review', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def get_marketplace_search(self, **kwargs):
-        return self.request('GET', '/api/v1/marketplace/search', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_ai_clinical_dashboard(self, **kwargs):
+        return self.request('GET', '/api/v1/ai-clinical/dashboard', body=kwargs.get('body'), headers=kwargs.get('headers'))
 
-    def get_marketplace_bookings(self, **kwargs):
-        return self.request('GET', '/api/v1/marketplace/bookings', body=kwargs.get('body'), headers=kwargs.get('headers'))
-
-    def post_marketplace_bookings(self, **kwargs):
-        return self.request('POST', '/api/v1/marketplace/bookings', body=kwargs.get('body'), headers=kwargs.get('headers'))
-
-    def get_marketplace_bookings_booking_id(self, **kwargs):
-        return self.request('GET', '/api/v1/marketplace/bookings/<booking_id>', body=kwargs.get('body'), headers=kwargs.get('headers'))
-
-    def post_marketplace_bookings_booking_id_transition(self, **kwargs):
-        return self.request('POST', '/api/v1/marketplace/bookings/<booking_id>/transition', body=kwargs.get('body'), headers=kwargs.get('headers'))
-
-    def get_marketplace_bookings_booking_id_timeline(self, **kwargs):
-        return self.request('GET', '/api/v1/marketplace/bookings/<booking_id>/timeline', body=kwargs.get('body'), headers=kwargs.get('headers'))
-
-    def get_partners(self, **kwargs):
-        return self.request('GET', '/api/v1/partners', body=kwargs.get('body'), headers=kwargs.get('headers'))
-
-    def post_partners(self, **kwargs):
-        return self.request('POST', '/api/v1/partners', body=kwargs.get('body'), headers=kwargs.get('headers'))
+    def get_ai_clinical_providers(self, **kwargs):
+        return self.request('GET', '/api/v1/ai-clinical/providers', body=kwargs.get('body'), headers=kwargs.get('headers'))
 

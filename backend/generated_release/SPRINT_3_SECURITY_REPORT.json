@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-07-12T10:47:41.493431+00:00",
+  "release": "7.0",
+  "sprint": "Sprint 3 \u2014 LIMS Core",
+  "status": "PASS",
+  "checks": {
+    "organization_filter_in_list": true,
+    "org_header_in_routes": true,
+    "lab_api_auth": true,
+    "read_decorator": true,
+    "write_decorator": true,
+    "no_credentials_in_barcode_api": true,
+    "audit_module": true
+  },
+  "failed": [],
+  "critical_blockers": []
+}

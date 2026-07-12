@@ -1,0 +1,65 @@
+{
+  "generated_at": "2026-07-12T10:47:41.493424+00:00",
+  "release": "7.0",
+  "sprint": "Sprint 3 \u2014 LIMS Core",
+  "status": "PASS",
+  "checks": {
+    "migrations": {
+      "specimens": true,
+      "containers": true,
+      "barcode_logs": true,
+      "storage_locations": true,
+      "accessions": true,
+      "sample_status_history": true,
+      "migration_file_exists": true,
+      "additive_only": true
+    },
+    "models": {
+      "models_importable": true,
+      "registered_in_init": true
+    },
+    "blueprints": {
+      "/api/v1/specimens": true,
+      "/api/v1/barcodes": true,
+      "/api/v1/accessions": true,
+      "/api/v1/lab/dashboard": true
+    },
+    "lifecycle": {
+      "transitions_defined": true,
+      "specimen_created": true
+    },
+    "barcode": {
+      "unique_barcodes": true
+    },
+    "accession": {
+      "receive_and_accession": true,
+      "verify_barcode": true
+    },
+    "tenant_isolation": {
+      "organization_filter_in_list": true,
+      "org_header_in_routes": true,
+      "lab_api_auth": true
+    },
+    "permissions": {
+      "read_decorator": true,
+      "write_decorator": true
+    },
+    "frontend": {
+      "specimens": true,
+      "barcode": true,
+      "accession": true,
+      "timeline": true,
+      "lab_api": true,
+      "workspaces": true,
+      "fetch_lims_dashboard": true,
+      "fetch_specimens": true
+    }
+  },
+  "failed": [],
+  "api_endpoints": [
+    "/api/v1/specimens",
+    "/api/v1/barcodes",
+    "/api/v1/accessions",
+    "/api/v1/lab/dashboard"
+  ]
+}
