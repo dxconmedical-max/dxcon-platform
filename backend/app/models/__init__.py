@@ -404,3 +404,19 @@ from app.models.clinical_governance import (
     CriticalValuePolicy,
     ReportVerificationToken,
 )
+from app.patient_marketplace.models import (
+    MpAuditEvent,
+    MpAvailability,
+    MpBooking,
+    MpHoliday,
+    MpListing,
+    MpPackageItem,
+    MpPatientAddress,
+    MpPayment,
+    MpPricingSnapshot,
+    MpPromotion,
+    MpProvider,
+    MpReview,
+    MpService,
+    MpSlotHold,
+)

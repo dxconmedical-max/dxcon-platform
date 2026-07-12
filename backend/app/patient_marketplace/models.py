@@ -34,6 +34,9 @@ class MpProvider(db.Model):
     payment_methods_json = db.Column(db.Text, default="[]")
     cancellation_policy = db.Column(db.Text)
     public_status = db.Column(db.String(30), default="ACTIVE")
+    featured = db.Column(db.Boolean, default=False)
+    city = db.Column(db.String(100))
+    category = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -53,6 +56,9 @@ class MpProvider(db.Model):
             "collection_methods": json.loads(self.collection_methods_json or "[]"),
             "payment_methods": json.loads(self.payment_methods_json or "[]"),
             "cancellation_policy": self.cancellation_policy,
+            "city": self.city,
+            "category": self.category,
+            "featured": self.featured,
         }
 
 
@@ -90,6 +96,9 @@ class MpListing(db.Model):
     service_radius_km = db.Column(db.Float)
     price_updated_at = db.Column(db.DateTime, default=datetime.utcnow)
     partner_consent = db.Column(db.Boolean, default=False)
+    turnaround_hours = db.Column(db.Integer)
+    featured = db.Column(db.Boolean, default=False)
+    category = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -108,6 +117,10 @@ class MpListing(db.Model):
             "price_updated_at": self.price_updated_at.isoformat() if self.price_updated_at else None,
             "provider": self.provider.public_dict() if self.provider else None,
             "service_type": self.service.service_type if self.service else None,
+            "service_name": self.service.service_name if self.service else None,
+            "turnaround_hours": self.turnaround_hours or (self.provider.turnaround_hours if self.provider else None),
+            "category": self.category,
+            "featured": self.featured,
         }
 
 
@@ -270,3 +283,83 @@ class MpAuditEvent(db.Model):
     outcome = db.Column(db.String(30))
     details_json = db.Column(db.Text, default="{}")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class MpSlotHold(db.Model):
+    __tablename__ = "mp_slot_holds"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    organization_id = db.Column(db.String(36), nullable=False, index=True)
+    provider_id = db.Column(db.String(36), db.ForeignKey("mp_providers.id"), nullable=False)
+    availability_id = db.Column(db.String(36), db.ForeignKey("mp_availability.id"))
+    patient_user_id = db.Column(db.String(36))
+    hold_token = db.Column(db.String(64), unique=True, nullable=False)
+    slot_start = db.Column(db.DateTime, nullable=False)
+    slot_end = db.Column(db.DateTime, nullable=False)
+    status = db.Column(db.String(30), default="HELD")
+    expires_at = db.Column(db.DateTime, nullable=False)
+    booking_id = db.Column(db.String(36))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class MpPatientAddress(db.Model):
+    __tablename__ = "mp_patient_addresses"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    organization_id = db.Column(db.String(36), nullable=False, index=True)
+    patient_user_id = db.Column(db.String(36), nullable=False, index=True)
+    label = db.Column(db.String(50), default="Home")
+    address_line = db.Column(db.Text, nullable=False)
+    building = db.Column(db.String(100))
+    apartment = db.Column(db.String(50))
+    city = db.Column(db.String(100))
+    district = db.Column(db.String(100))
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
+    contact_instructions = db.Column(db.Text)
+    collector_notes = db.Column(db.Text)
+    preferred_window_start = db.Column(db.String(10))
+    preferred_window_end = db.Column(db.String(10))
+    is_default = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "label": self.label,
+            "address_line": self.address_line,
+            "building": self.building,
+            "apartment": self.apartment,
+            "city": self.city,
+            "district": self.district,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
+            "contact_instructions": self.contact_instructions,
+            "collector_notes": self.collector_notes,
+            "preferred_window_start": self.preferred_window_start,
+            "preferred_window_end": self.preferred_window_end,
+            "is_default": self.is_default,
+        }
+
+
+class MpHoliday(db.Model):
+    __tablename__ = "mp_holidays"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    organization_id = db.Column(db.String(36), nullable=False, index=True)
+    provider_id = db.Column(db.String(36), db.ForeignKey("mp_providers.id"))
+    holiday_date = db.Column(db.Date, nullable=False)
+    name = db.Column(db.String(255))
+    is_closed = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class MpPackageItem(db.Model):
+    __tablename__ = "mp_package_items"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    organization_id = db.Column(db.String(36), nullable=False)
+    package_listing_id = db.Column(db.String(36), db.ForeignKey("mp_listings.id"), nullable=False)
+    service_id = db.Column(db.String(36), db.ForeignKey("mp_services.id"), nullable=False)
+    quantity = db.Column(db.Integer, default=1)
+    sort_order = db.Column(db.Integer, default=0)

@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-07-12T18:19:24.386532+00:00",
+  "release": "8.0",
+  "sprint": "Sprint 7 \u2014 Patient Commerce",
+  "status": "PASS",
+  "checks": {
+    "slot_engine": true,
+    "home_collection": true,
+    "migration": true,
+    "tests": true,
+    "routes": true,
+    "public_catalog_routes": true,
+    "slot_hold_route": true,
+    "quotation_route": true,
+    "frontend": true,
+    "unit_tests": true
+  },
+  "frontend_checks": {
+    "services_page": true,
+    "packages_page": true,
+    "partners_page": true,
+    "booking_wizard": true,
+    "marketplace_api": true
+  },
+  "failed": []
+}

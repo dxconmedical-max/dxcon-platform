@@ -24,13 +24,17 @@ from app.patient_marketplace.models import (
     MpAuditEvent,
     MpAvailability,
     MpBooking,
+    MpHoliday,
     MpListing,
+    MpPackageItem,
+    MpPatientAddress,
     MpPayment,
     MpPricingSnapshot,
     MpPromotion,
     MpProvider,
     MpReview,
     MpService,
+    MpSlotHold,
 )
 
 
@@ -111,6 +115,8 @@ class SearchService:
         home_collection: bool | None = None,
         page: int = 1,
         per_page: int = 20,
+        category: str | None = None,
+        featured: bool | None = None,
     ) -> dict:
         query = (
             MpListing.query.join(MpProvider).join(MpService)
@@ -121,11 +127,15 @@ class SearchService:
             term = f"%{q.strip()}%"
             query = query.filter(or_(MpListing.title.ilike(term), MpService.service_name.ilike(term)))
         if city:
-            query = query.filter(MpProvider.address.ilike(f"%{city}%"))
+            query = query.filter(or_(MpProvider.city.ilike(f"%{city}%"), MpProvider.address.ilike(f"%{city}%")))
         if service_type:
             query = query.filter(MpService.service_type == service_type)
         if home_collection is True:
             query = query.filter(MpListing.home_collection_available.is_(True))
+        if category:
+            query = query.filter(MpListing.category == category)
+        if featured:
+            query = query.filter(MpListing.featured.is_(True))
         if min_price is not None:
             query = query.filter(MpListing.base_price >= min_price)
         if max_price is not None:
@@ -138,6 +148,49 @@ class SearchService:
             "per_page": per_page,
             "listings": [item.public_dict() for item in items],
         }
+
+    @staticmethod
+    def list_services(**kwargs) -> dict:
+        return SearchService.search_listings(service_type="LAB_TEST", **kwargs)
+
+    @staticmethod
+    def list_packages(**kwargs) -> dict:
+        return SearchService.search_listings(service_type="TEST_PACKAGE", **kwargs)
+
+    @staticmethod
+    def list_partners(
+        *,
+        q: str | None = None,
+        city: str | None = None,
+        provider_type: str | None = None,
+        featured: bool | None = None,
+        page: int = 1,
+        per_page: int = 20,
+    ) -> dict:
+        query = MpProvider.query.filter_by(public_status="ACTIVE")
+        if q:
+            term = f"%{q.strip()}%"
+            query = query.filter(or_(MpProvider.provider_name.ilike(term), MpProvider.provider_code.ilike(term)))
+        if city:
+            query = query.filter(or_(MpProvider.city.ilike(f"%{city}%"), MpProvider.address.ilike(f"%{city}%")))
+        if provider_type:
+            query = query.filter(MpProvider.provider_type == provider_type)
+        if featured:
+            query = query.filter(MpProvider.featured.is_(True))
+        total = query.count()
+        rows = query.order_by(MpProvider.rating_avg.desc()).offset((page - 1) * per_page).limit(per_page).all()
+        return {"count": total, "page": page, "per_page": per_page, "partners": [p.public_dict() for p in rows]}
+
+    @staticmethod
+    def get_listing(listing_id: str) -> dict:
+        listing = MpListing.query.filter_by(id=listing_id, status="ACTIVE").first()
+        if not listing:
+            raise MarketplaceError("Listing not found", 404)
+        payload = listing.public_dict()
+        if listing.service and listing.service.service_type == "TEST_PACKAGE":
+            items = MpPackageItem.query.filter_by(package_listing_id=listing.id).all()
+            payload["package_items"] = [{"service_id": i.service_id, "quantity": i.quantity} for i in items]
+        return payload
 
     @staticmethod
     def provider_profile(provider_id: str) -> dict:
@@ -220,6 +273,22 @@ class PricingService:
             "currency": listing.currency,
             "quoted_at": datetime.utcnow().isoformat(),
         }
+
+    @staticmethod
+    def quote_package(
+        listing_id: str,
+        *,
+        promotion_code: str | None = None,
+        distance_km: float = 0,
+        urgent: bool = False,
+    ) -> dict:
+        listing = MpListing.query.filter_by(id=listing_id, status="ACTIVE").first()
+        if not listing or not listing.service or listing.service.service_type != "TEST_PACKAGE":
+            raise MarketplaceError("Package listing required", 400)
+        base_quote = PricingService.quote(listing_id, promotion_code, distance_km, urgent)
+        items = MpPackageItem.query.filter_by(package_listing_id=listing.id).all()
+        base_quote["package_items"] = len(items)
+        return base_quote
 
 
 class BookingService:
