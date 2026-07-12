@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Button } from "@/components/ui/Button";
 
 const PLANS = [
@@ -51,9 +53,11 @@ export function PricingSection() {
                   <li key={feature}>• {feature}</li>
                 ))}
               </ul>
-              <Button className="mt-6 w-full" variant={plan.featured ? "primary" : "outline"}>
-                Request quote
-              </Button>
+              <Link href="/book-demo">
+                <Button className="mt-6 w-full" variant={plan.featured ? "primary" : "outline"}>
+                  Request quote
+                </Button>
+              </Link>
             </div>
           ))}
         </div>

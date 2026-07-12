@@ -1,0 +1,11 @@
+{
+  "generated_at": "2026-07-12T04:36:36.247Z",
+  "release": "6.0",
+  "status": "PASS",
+  "checks": {
+    "app_shell_files": true,
+    "org_switcher": true,
+    "workspace_pages": true,
+    "role_workspace": true
+  }
+}

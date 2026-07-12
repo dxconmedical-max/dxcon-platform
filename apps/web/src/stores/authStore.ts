@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 import { clearAuthCookies, setAuthCookies } from "@/lib/cookies";
+import { clearTenantScopedCaches } from "@/lib/tenant-cache";
 import { workspacePathForRole } from "@/lib/roles";
 import { decodeJwtPayload, isTokenExpired } from "@/lib/utils";
 import { normalizeApiError, ApiError } from "@/lib/errors";
@@ -148,6 +149,7 @@ export const useAuthStore = create<AuthState>()(
             status: "authenticated",
           });
           setAuthCookies(role ?? user?.role ?? "", organizationId);
+          clearTenantScopedCaches();
           return capabilities.workspace;
         } catch (error) {
           const message = normalizeApiError(error);
@@ -166,6 +168,7 @@ export const useAuthStore = create<AuthState>()(
           }
         }
         clearAuthCookies();
+        clearTenantScopedCaches();
         set({
           status: "unauthenticated",
           user: null,

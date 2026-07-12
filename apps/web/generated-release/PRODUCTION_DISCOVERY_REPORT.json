@@ -1,0 +1,278 @@
+{
+  "generated_at": "2026-07-11T00:00:00.000Z",
+  "mission": "DxCon Production Web Application Rollout",
+  "repository": "dxcon-platform",
+  "frontend_root": "apps/web",
+  "production_api": "https://api.dxcon.com.vn",
+  "target_domains": {
+    "public_site": ["https://dxcon.com.vn", "https://www.dxcon.com.vn"],
+    "application": ["https://app.dxcon.com.vn"]
+  },
+  "framework": {
+    "name": "Next.js",
+    "version": "16.2.10",
+    "root_directory": "apps/web",
+    "deployment": "Vercel"
+  },
+  "critical_blockers": [],
+  "summary": {
+    "EXISTING_AND_WORKING": 28,
+    "EXISTING_NEEDS_FIX": 8,
+    "MISSING": 7,
+    "NOT_REQUIRED_FOR_PILOT": 4
+  },
+  "capabilities": {
+    "authentication_login": {
+      "status": "EXISTING_AND_WORKING",
+      "frontend": "apps/web/src/services/auth.ts",
+      "backend": "POST /api/v1/auth/login",
+      "notes": "Real JWT login wired in authStore; no mock auth."
+    },
+    "authentication_logout": {
+      "status": "EXISTING_AND_WORKING",
+      "frontend": "apps/web/src/services/auth.ts",
+      "backend": "POST /api/v1/auth/logout",
+      "notes": "Refresh token revocation via RefreshTokenService."
+    },
+    "authentication_refresh": {
+      "status": "EXISTING_AND_WORKING",
+      "frontend": "apps/web/src/stores/authStore.ts",
+      "backend": "POST /api/v1/auth/refresh",
+      "notes": "Session restore refreshes expired access tokens."
+    },
+    "authentication_current_user": {
+      "status": "EXISTING_AND_WORKING",
+      "frontend": "apps/web/src/services/auth.ts",
+      "backend": "GET /api/v1/auth/me",
+      "notes": "Returns user, active_organization_id, memberships."
+    },
+    "authentication_memberships": {
+      "status": "EXISTING_AND_WORKING",
+      "frontend": "apps/web/src/services/auth.ts",
+      "backend": "GET /api/v1/auth/memberships",
+      "notes": "Organization list via memberships; no separate org CRUD for pilot login."
+    },
+    "authentication_active_organization": {
+      "status": "EXISTING_AND_WORKING",
+      "frontend": "apps/web/src/stores/authStore.ts",
+      "backend": "POST /api/v1/auth/switch-organization",
+      "notes": "X-Organization-ID header sent on API requests."
+    },
+    "authentication_permissions": {
+      "status": "EXISTING_AND_WORKING",
+      "frontend": "apps/web/src/lib/permissions.ts",
+      "backend": "GET /api/v1/auth/capabilities",
+      "notes": "Permissions array drives nav and workspace access."
+    },
+    "authentication_feature_flags": {
+      "status": "EXISTING_AND_WORKING",
+      "frontend": "apps/web/src/lib/permissions.ts hasFeature()",
+      "backend": "GET /api/v1/auth/capabilities (features[])",
+      "notes": "Feature gating via capabilities payload."
+    },
+    "authentication_forgot_password": {
+      "status": "EXISTING_NEEDS_FIX",
+      "frontend": "apps/web/src/app/forgot-password/page.tsx",
+      "backend": "POST /api/v1/auth/forgot-password",
+      "notes": "Backend may return 501 when email reset is not enabled in production."
+    },
+    "authentication_reset_password": {
+      "status": "EXISTING_NEEDS_FIX",
+      "frontend": "apps/web/src/app/reset-password/page.tsx",
+      "backend": "POST /api/v1/auth/reset-password",
+      "notes": "Backend may return 501 when email reset is not enabled."
+    },
+    "session_middleware": {
+      "status": "EXISTING_AND_WORKING",
+      "frontend": "apps/web/src/middleware.ts",
+      "notes": "Cookie-based gate for /app/* routes."
+    },
+    "workspace_routes": {
+      "status": "EXISTING_AND_WORKING",
+      "frontend": "apps/web/src/lib/roles.ts, apps/web/src/app/app/**",
+      "notes": "All required workspace routes exist: admin, executive, reception, doctor, clinic, lab, collector, patient."
+    },
+    "permission_registry": {
+      "status": "EXISTING_AND_WORKING",
+      "frontend": "apps/web/src/lib/permissions.ts, apps/web/src/lib/navigation.ts",
+      "notes": "Permission strings align with Epic 3 capabilities."
+    },
+    "marketplace_routes": {
+      "status": "EXISTING_AND_WORKING",
+      "frontend": "apps/web/src/app/marketplace/**",
+      "backend": "GET /api/v1/marketplace-platform/*",
+      "notes": "Marketplace UI present; not in pilot mandatory path."
+    },
+    "dashboard_reception": {
+      "status": "EXISTING_NEEDS_FIX",
+      "frontend": "apps/web/src/app/app/reception/page.tsx",
+      "backend": "GET /api/v1/reception-workspace/dashboard",
+      "notes": "Page shell exists; dashboard data not yet wired to API."
+    },
+    "dashboard_executive": {
+      "status": "EXISTING_NEEDS_FIX",
+      "frontend": "apps/web/src/app/app/executive/page.tsx",
+      "backend": "GET /api/v1/executive-platform/dashboard",
+      "notes": "Workspace shell exists; live KPI wiring pending."
+    },
+    "dashboard_lab": {
+      "status": "EXISTING_NEEDS_FIX",
+      "frontend": "apps/web/src/app/app/lab/page.tsx",
+      "backend": "GET /api/v1/lab/dashboard",
+      "notes": "Workspace shell exists; accession data not wired."
+    },
+    "patients_api": {
+      "status": "EXISTING_AND_WORKING",
+      "backend": "GET/POST /api/v1/patients, GET/POST /api/v1/reception-workspace/patients/*",
+      "notes": "Backend ready; web reception UI integration pending."
+    },
+    "orders_api": {
+      "status": "EXISTING_AND_WORKING",
+      "backend": "GET/POST /api/v1/orders, POST /api/v1/reception-workspace/orders",
+      "notes": "Backend ready; web UI integration pending."
+    },
+    "samples_api": {
+      "status": "EXISTING_AND_WORKING",
+      "backend": "GET/POST /api/v1/sample-trackings, /api/v1/sample-collections",
+      "notes": "Backend ready; collector/lab web wiring pending."
+    },
+    "results_reports_api": {
+      "status": "EXISTING_AND_WORKING",
+      "backend": "GET /api/v1/results, /api/v1/reports, /api/v1/portal/patient/reports/*, /api/v1/portal/doctor/reports/*",
+      "notes": "Multiple reporting modules; portal routes for patient/doctor."
+    },
+    "system_health": {
+      "status": "EXISTING_AND_WORKING",
+      "frontend": "apps/web/src/services/api.ts healthCheck()",
+      "backend": "GET /health, GET /api/v1/system/health",
+      "notes": "Root /health used by verify script; system health is authenticated ops endpoint."
+    },
+    "public_metrics_endpoint": {
+      "status": "MISSING",
+      "notes": "No approved unauthenticated public metrics API for landing page; use illustrative capability cards."
+    },
+    "environment_validation": {
+      "status": "EXISTING_NEEDS_FIX",
+      "frontend": "apps/web/next.config.ts, apps/web/src/lib/constants.ts",
+      "notes": "Build validation exists but localhost fallbacks remain in constants; Phase 1 tightens."
+    },
+    "domain_aware_routing": {
+      "status": "MISSING",
+      "notes": "No hostname split between marketing and app domains; Phase 2 adds."
+    },
+    "public_marketing_pages": {
+      "status": "MISSING",
+      "notes": "Only / landing with anchor sections; dedicated /services, /partners, etc. missing."
+    },
+    "landing_production_safety": {
+      "status": "EXISTING_NEEDS_FIX",
+      "frontend": "apps/web/src/components/landing/HeroSection.tsx",
+      "notes": "Fabricated metrics and HIPAA-ready claim must be removed."
+    },
+    "cors_production_domains": {
+      "status": "EXISTING_NEEDS_FIX",
+      "backend": "CORS_ORIGINS env",
+      "notes": "Production example lists app.dxcon.com not .com.vn; Vercel preview origins may need backend allowlist update without weakening security."
+    },
+    "csp_connect_src": {
+      "status": "EXISTING_NEEDS_FIX",
+      "frontend": "apps/web/next.config.ts",
+      "notes": "CSP connect-src hardcoded to api.dxcon.com.vn; should derive from NEXT_PUBLIC_API_BASE_URL."
+    },
+    "typed_api_client": {
+      "status": "EXISTING_NEEDS_FIX",
+      "frontend": "apps/web/src/services/api.ts, apps/web/src/services/auth.ts",
+      "notes": "Functional but split; Phase 4 consolidates under lib/api."
+    },
+    "vietnamese_localization": {
+      "status": "MISSING",
+      "notes": "Phase 3 adds i18n structure; English default."
+    },
+    "vercel_configuration_docs": {
+      "status": "MISSING",
+      "notes": "Phase 1 creates VERCEL_PRODUCTION_CONFIGURATION.md."
+    },
+    "mobile_applications": {
+      "status": "NOT_REQUIRED_FOR_PILOT",
+      "notes": "Out of scope per rollout rules."
+    },
+    "operations_center_web": {
+      "status": "EXISTING_AND_WORKING",
+      "frontend": "apps/web/src/app/app/operations/page.tsx",
+      "backend": "GET /api/v1/pilot-readiness/*",
+      "notes": "Epic 8 operations pages present."
+    },
+    "integration_center": {
+      "status": "EXISTING_AND_WORKING",
+      "frontend": "apps/web/src/app/app/admin/integrations/**",
+      "backend": "GET /api/v1/integration-hub/*",
+      "notes": "Admin integration UI present."
+    },
+    "clinical_ai_assistant": {
+      "status": "NOT_REQUIRED_FOR_PILOT",
+      "backend": "POST /api/v1/ai-clinical/assistant/*",
+      "notes": "Epic 10 backend ready; doctor workspace AI wiring optional for pilot."
+    },
+    "ai_platform_core": {
+      "status": "NOT_REQUIRED_FOR_PILOT",
+      "backend": "POST /api/v1/ai-platform/*",
+      "notes": "Infrastructure layer; not required for web pilot shell."
+    },
+    "developer_portal": {
+      "status": "NOT_REQUIRED_FOR_PILOT",
+      "notes": "Backend developer portal exists; no web route in apps/web."
+    }
+  },
+  "frontend_inventory": {
+    "page_count": 41,
+    "auth_pages": ["/login", "/logout", "/forgot-password", "/reset-password", "/select-organization", "/session-expired", "/forbidden", "/service-unavailable"],
+    "workspace_pages": ["/app", "/app/admin", "/app/executive", "/app/reception", "/app/doctor", "/app/clinic", "/app/lab", "/app/collector", "/app/patient", "/app/operations", "/app/support"],
+    "marketplace_pages": ["/marketplace", "/marketplace/providers", "/marketplace/tests", "/marketplace/packages", "/marketplace/book", "/marketplace/checkout", "/marketplace/compare", "/marketplace/payment"]
+  },
+  "verified_backend_endpoints": {
+    "auth": {
+      "login": "POST /api/v1/auth/login",
+      "logout": "POST /api/v1/auth/logout",
+      "refresh": "POST /api/v1/auth/refresh",
+      "me": "GET /api/v1/auth/me",
+      "memberships": "GET /api/v1/auth/memberships",
+      "switch_organization": "POST /api/v1/auth/switch-organization",
+      "capabilities": "GET /api/v1/auth/capabilities",
+      "forgot_password": "POST /api/v1/auth/forgot-password",
+      "reset_password": "POST /api/v1/auth/reset-password"
+    },
+    "organizations": {
+      "list_via_memberships": "GET /api/v1/auth/memberships",
+      "active_context": "GET /api/v1/auth/me (active_organization_id)",
+      "switch": "POST /api/v1/auth/switch-organization"
+    },
+    "dashboards": {
+      "reception": "GET /api/v1/reception-workspace/dashboard",
+      "executive": "GET /api/v1/executive-platform/dashboard",
+      "lab": "GET /api/v1/lab/dashboard",
+      "doctor": "GET /api/v1/doctor-portal/dashboard",
+      "patient": "GET /api/v1/portal/patient/dashboard",
+      "admin_security": "GET /api/v1/admin-security/health",
+      "pilot_readiness": "GET /api/v1/pilot-readiness/health-dashboard"
+    },
+    "clinical_data": {
+      "patients": "GET/POST /api/v1/patients",
+      "orders": "GET/POST /api/v1/orders",
+      "samples": "GET/POST /api/v1/sample-trackings",
+      "results": "GET /api/v1/results",
+      "reports": "GET /api/v1/reports"
+    },
+    "health": {
+      "root": "GET /health",
+      "ready": "GET /ready",
+      "live": "GET /live",
+      "system": "GET /api/v1/system/health"
+    }
+  },
+  "recommendations": [
+    "Complete Phase 1–4 before production domain cutover.",
+    "Update backend CORS_ORIGINS to include https://dxcon.com.vn, https://www.dxcon.com.vn, https://app.dxcon.com.vn, and Vercel preview origins.",
+    "Replace landing fabricated metrics with capability cards.",
+    "Wire workspace dashboards to real API endpoints incrementally after pilot shell is live."
+  ]
+}

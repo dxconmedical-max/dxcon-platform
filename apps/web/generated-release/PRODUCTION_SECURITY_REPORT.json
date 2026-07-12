@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-07-12T04:36:36.248Z",
+  "release": "6.0",
+  "status": "PASS",
+  "checks": {
+    "no_fake_metrics": true,
+    "csp_configured": true,
+    "app_no_store": true,
+    "permissions_registry": true,
+    "demo_mode_disabled": true
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-07-10T20:09:28.852Z",
+  "status": "PASS",
+  "checks": {
+    "external_api_health": {
+      "ok": false,
+      "warning": "TimeoutError: The operation was aborted due to timeout",
+      "status": "WARNING"
+    },
+    "required_files": true,
+    "env_example": true,
+    "no_fake_metrics": true,
+    "demo_mode_disabled_in_production": true
+  },
+  "phase": "0-4"
+}

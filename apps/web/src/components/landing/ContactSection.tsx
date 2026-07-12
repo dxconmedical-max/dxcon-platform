@@ -25,7 +25,7 @@ export function ContactSection() {
             </p>
             <p className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-teal-600" />
-              +84 (placeholder)
+              Contact via email or the form
             </p>
             <p className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-teal-600" />
@@ -33,7 +33,12 @@ export function ContactSection() {
             </p>
           </div>
         </div>
-        <form className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <form
+          className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+          action="mailto:sales@dxcon.com.vn"
+          method="post"
+          encType="text/plain"
+        >
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="name">Name</Label>
@@ -58,7 +63,7 @@ export function ContactSection() {
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
             />
           </div>
-          <Button type="button" className="mt-6 w-full">
+          <Button type="submit" className="mt-6 w-full">
             Send inquiry
           </Button>
         </form>

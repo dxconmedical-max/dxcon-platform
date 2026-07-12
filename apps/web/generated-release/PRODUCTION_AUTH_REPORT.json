@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-07-12T04:36:36.247Z",
+  "release": "6.0",
+  "status": "PASS",
+  "checks": {
+    "auth_files": true,
+    "session_restore": true,
+    "login_show_password": true,
+    "demo_hidden_in_production": true,
+    "api_health": {
+      "ok": true,
+      "status": 200,
+      "url": "https://api.dxcon.com.vn"
+    }
+  }
+}

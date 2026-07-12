@@ -12,7 +12,15 @@ import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { useAuth } from "@/hooks/useAuth";
 import { roleLabel } from "@/lib/roles";
 
-export function Header({ title }: { title: string }) {
+export function Header({
+  title,
+  workspaceLabel,
+  onMenuClick,
+}: {
+  title: string;
+  workspaceLabel?: string;
+  onMenuClick?: () => void;
+}) {
   const router = useRouter();
   const { user, role, logout, memberships, activeOrganizationId, selectOrganization, capabilities } =
     useAuth();
@@ -27,6 +35,7 @@ export function Header({ title }: { title: string }) {
           <div className="flex items-center gap-3">
             <button
               type="button"
+              onClick={onMenuClick}
               className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
               aria-label="Open menu"
             >
@@ -36,6 +45,9 @@ export function Header({ title }: { title: string }) {
               <h1 className="truncate text-lg font-semibold text-slate-900">
                 {title}
               </h1>
+              {workspaceLabel && workspaceLabel !== title ? (
+                <p className="truncate text-xs text-slate-500">{workspaceLabel}</p>
+              ) : null}
               <Breadcrumb />
             </div>
           </div>

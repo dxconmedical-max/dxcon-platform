@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-10T05:50:48.837Z",
+  "generated_at": "2026-07-10T20:09:20.489Z",
   "gaps": [
     "Password reset email delivery not implemented",
     "JWT does not embed organization_id",

@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 
 import { can, canAny, canAll, hasFeature, isOrganizationType, isWorkspace } from "@/lib/permissions";
 import { isWorkspacePath, workspacePathForRole } from "@/lib/roles";
+import { workspaceByPath } from "@/lib/workspaces";
 import { useAuthStore } from "@/stores/authStore";
 
 export function useAuth() {
@@ -64,6 +65,15 @@ export function useRequireAuth(workspacePath?: string) {
         ]);
         const role = (auth.role ?? "").toUpperCase();
         const isAdmin = adminRoles.has(role);
+        const definition = workspaceByPath(workspacePath);
+        if (
+          definition?.permission &&
+          !isAdmin &&
+          !can(auth.capabilities, definition.permission)
+        ) {
+          router.replace("/forbidden");
+          return;
+        }
         if (
           !isAdmin &&
           workspacePath !== home &&

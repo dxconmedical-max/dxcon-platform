@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState, Suspense } from "react";
-import { Activity } from "lucide-react";
+import { Activity, Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
 import { useAuth } from "@/hooks/useAuth";
 import { DEMO_MODE } from "@/lib/constants";
-import { ApiError, normalizeApiError } from "@/lib/errors";
+import { loginErrorMessage } from "@/lib/errors";
+import { safeRedirectPath } from "@/lib/urls";
 
 function LoginForm() {
   const router = useRouter();
@@ -19,6 +20,7 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState<string | null>(
     searchParams.get("reason") === "session-expired"
       ? "Your session has expired. Please sign in again."
@@ -29,8 +31,7 @@ function LoginForm() {
   useEffect(() => {
     if (!isHydrated) return;
     if (isAuthenticated) {
-      const next = searchParams.get("next");
-      router.replace(next ?? workspacePath);
+      router.replace(safeRedirectPath(searchParams.get("next"), workspacePath));
     }
   }, [isAuthenticated, isHydrated, workspacePath, router, searchParams]);
 
@@ -40,19 +41,9 @@ function LoginForm() {
     setFormError(null);
     try {
       const { redirect } = await login(email.trim(), password, remember);
-      router.replace(searchParams.get("next") ?? redirect);
+      router.replace(safeRedirectPath(searchParams.get("next"), redirect));
     } catch (err) {
-      if (err instanceof ApiError) {
-        if (err.status === 403) {
-          setFormError("This account has been disabled.");
-          return;
-        }
-        if (err.status === 401) {
-          setFormError("Invalid email or password.");
-          return;
-        }
-      }
-      setFormError(normalizeApiError(err));
+      setFormError(loginErrorMessage(err));
     }
   }
 
@@ -98,14 +89,25 @@ function LoginForm() {
             </div>
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 text-slate-600">
@@ -130,6 +132,8 @@ function LoginForm() {
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-slate-500">
+            <Link href="/register" className="text-teal-700">Create account</Link>
+            {" · "}
             <Link href="/" className="text-teal-700">Back to homepage</Link>
           </p>
         </div>

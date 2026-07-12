@@ -1,10 +1,11 @@
 {
-  "generated_at": "2026-07-10T05:50:48.835Z",
+  "generated_at": "2026-07-10T20:09:20.487Z",
   "status": "PASS",
   "checks": {
     "external_api_health": {
-      "ok": true,
-      "status": 200
+      "ok": false,
+      "warning": "TimeoutError: The operation was aborted due to timeout",
+      "status": "WARNING"
     },
     "required_files": true,
     "env_example": true,

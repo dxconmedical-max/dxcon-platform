@@ -1,0 +1,29 @@
+{
+  "generated_at": "2026-07-10T20:40:00.972Z",
+  "release": "6.0",
+  "sprint": "Authentication + Application Shell + Role Workspace",
+  "branch": "release/6.0-auth-shell",
+  "status": "PASS",
+  "checks": {
+    "required_files": true,
+    "workspace_api_paths": true,
+    "role_workspace_component": true,
+    "app_workspace_redirect": true,
+    "session_restore_on_app_routes": true,
+    "external_api_health": {
+      "ok": false,
+      "warning": "TimeoutError: The operation was aborted due to timeout",
+      "status": "WARNING"
+    }
+  },
+  "workspaces": [
+    "/app/admin",
+    "/app/executive",
+    "/app/reception",
+    "/app/doctor",
+    "/app/lab",
+    "/app/collector",
+    "/app/clinic",
+    "/app/patient"
+  ]
+}

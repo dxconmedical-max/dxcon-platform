@@ -22,11 +22,17 @@ export function WorkspaceHome({
   subtitle,
   statusCards,
   actions,
+  loading = false,
+  error = null,
+  dataLoaded = false,
 }: {
   title: string;
   subtitle: string;
   statusCards: StatusCard[];
   actions: WorkspaceAction[];
+  loading?: boolean;
+  error?: string | null;
+  dataLoaded?: boolean;
 }) {
   return (
     <div className="space-y-6">
@@ -36,6 +42,17 @@ export function WorkspaceHome({
           {title}
         </h2>
         <p className="mt-2 max-w-2xl text-slate-600">{subtitle}</p>
+        {loading ? (
+          <p className="mt-3 text-sm text-slate-500">Loading workspace metrics…</p>
+        ) : null}
+        {error ? (
+          <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800" role="status">
+            Metrics unavailable: {error}. Showing placeholders until API access is confirmed.
+          </p>
+        ) : null}
+        {dataLoaded && !error ? (
+          <p className="mt-3 text-xs text-slate-500">Metrics loaded from production API.</p>
+        ) : null}
       </section>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-07-12T04:36:36.247Z",
+  "release": "6.0",
+  "status": "PASS",
+  "workspaces": [
+    "/app/admin",
+    "/app/doctor",
+    "/app/clinic",
+    "/app/lab",
+    "/app/collector",
+    "/app/patient"
+  ],
+  "pilot_data_pages": true
+}

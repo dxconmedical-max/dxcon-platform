@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-07-12T04:36:36.248Z",
+  "release": "6.0",
+  "sprint": "Production Sprint 1",
+  "branch": "release/6.0-auth-shell",
+  "status": "PASS",
+  "checks": {
+    "api_health": {
+      "ok": true,
+      "status": 200,
+      "url": "https://api.dxcon.com.vn"
+    },
+    "framework_nextjs": true,
+    "package_manager": "npm",
+    "env_example": true,
+    "env_ts": true,
+    "demo_mode_disabled_in_production": true,
+    "api_url_correct": true,
+    "auth_files": true,
+    "session_restore": true,
+    "login_show_password": true,
+    "demo_hidden_in_production": true,
+    "app_shell_files": true,
+    "org_switcher": true,
+    "workspace_pages": true,
+    "role_workspace": true,
+    "pilot_data_pages": true,
+    "no_fake_metrics": true,
+    "csp_configured": true,
+    "app_no_store": true,
+    "permissions_registry": true,
+    "documentation": true
+  },
+  "failed": [],
+  "known_limitations": [
+    "Bearer tokens in sessionStorage (not HttpOnly cookies)",
+    "Password reset returns 501 until email flow enabled",
+    "Clinic/collector list pages may need entity context (clinic_id/collector_id)",
+    "Backend CORS must include .com.vn domains in production API env"
+  ]
+}
