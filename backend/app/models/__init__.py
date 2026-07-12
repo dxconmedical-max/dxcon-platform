@@ -398,3 +398,9 @@ from app.models.analyzer_integration import (
     IntegrationQuarantine,
     IntegrationTestMapping,
 )
+from app.models.clinical_governance import (
+    ClinicalWorkflowTransition,
+    CriticalValueAcknowledgement,
+    CriticalValuePolicy,
+    ReportVerificationToken,
+)

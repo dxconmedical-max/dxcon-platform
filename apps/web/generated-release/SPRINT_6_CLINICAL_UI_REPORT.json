@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-07-12T16:55:00Z",
+  "release": "8.0",
+  "sprint": "Sprint 6",
+  "status": "PASS",
+  "routes": [
+    "/app/lab/result-review",
+    "/app/lab/result-review/[id]",
+    "/app/doctor/review",
+    "/app/doctor/review/[id]",
+    "/app/patient/results",
+    "/app/clinic/reports",
+    "/verify-report/[token]"
+  ],
+  "checks": {
+    "loading_states": true,
+    "empty_states": true,
+    "no_auto_release_ui": true,
+    "permission_gated_actions": true
+  }
+}

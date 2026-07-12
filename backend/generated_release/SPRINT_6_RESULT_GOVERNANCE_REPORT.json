@@ -1,0 +1,41 @@
+{
+  "generated_at": "2026-07-12T16:55:17.689302+00:00",
+  "release": "8.0",
+  "sprint": "Sprint 6 \u2014 Clinical Workflow and Result Governance",
+  "status": "PASS",
+  "checks": {
+    "workflow": true,
+    "service": true,
+    "routes": true,
+    "models": true,
+    "migration": true,
+    "tests": true,
+    "pilot_flow": true,
+    "statuses": true,
+    "workflow_transitions": true,
+    "no_auto_release": true,
+    "verification_no_phi": true,
+    "frontend": true,
+    "docs": true,
+    "unit_tests": true
+  },
+  "frontend_checks": {
+    "lab_result_review": true,
+    "doctor_review": true,
+    "patient_results": true,
+    "clinic_reports": true,
+    "verify_public": true,
+    "clinical_api": true
+  },
+  "failed": [],
+  "api_endpoints": [
+    "GET /api/v1/clinical/technician/queue",
+    "GET /api/v1/clinical/technician/results/{id}",
+    "POST /api/v1/clinical/technician/results/{id}/validate",
+    "POST /api/v1/clinical/technician/results/{id}/reject",
+    "POST /api/v1/clinical/technician/promote",
+    "GET /api/v1/clinical/doctor/queue",
+    "POST /api/v1/clinical/release/{order_ref}",
+    "GET /api/v1/verify-report/{token}"
+  ]
+}

@@ -214,6 +214,21 @@ class BizResultItem(db.Model):
     technician = db.Column(db.String(255))
     result_time = db.Column(db.DateTime)
     entry_note = db.Column(db.Text)
+    specimen_id = db.Column(db.String(36))
+    order_item_id = db.Column(db.String(36))
+    original_value = db.Column(db.Text)
+    normalized_value = db.Column(db.Text)
+    critical_flag = db.Column(db.Boolean, default=False)
+    analyzer_flags_json = db.Column(db.Text)
+    result_status = db.Column(db.String(30), default="PENDING")
+    technician_reviewer = db.Column(db.String(255))
+    doctor_approver = db.Column(db.String(255))
+    reviewed_at = db.Column(db.DateTime)
+    approved_at = db.Column(db.DateTime)
+    version = db.Column(db.Integer, default=1)
+    amendment_of = db.Column(db.String(36))
+    audit_reference = db.Column(db.String(36))
+    preliminary_result_id = db.Column(db.String(36))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self) -> dict:
@@ -226,6 +241,11 @@ class BizResultItem(db.Model):
             "unit": self.unit,
             "reference_range": self.reference_range,
             "flag": self.flag,
+            "result_status": self.result_status,
+            "original_value": self.original_value,
+            "normalized_value": self.normalized_value,
+            "critical_flag": self.critical_flag,
+            "version": self.version,
         }
 
 

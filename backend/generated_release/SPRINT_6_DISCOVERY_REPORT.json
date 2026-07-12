@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-07-12T00:00:00Z",
+  "release": "8.0",
+  "sprint": "Sprint 6 — Clinical Workflow and Result Governance",
+  "canonical_pilot_path": "biz_orders + biz_results + biz_result_items + clinical_reports + analyzer_preliminary_results",
+  "parallel_stores": [
+    {"name": "test_results", "binding": "legacy orders", "pilot": false},
+    {"name": "lab_results", "binding": "medical_orders / result_gateway", "pilot": false},
+    {"name": "biz_results", "binding": "biz_orders / reporting_engine", "pilot": true}
+  ],
+  "relationships": {
+    "analyzer_preliminary_result": "Sprint 5 ingestion; promoted to biz_result_item via clinical_governance.promote_preliminary_to_result",
+    "biz_result_item": "Technician/doctor governance fields; original_value preserved separately from normalized_value",
+    "clinical_report": "Reporting engine PDF/HTML; doctor approval then explicit governed release",
+    "released_report": "clinical_report.report_status=released; verification token opaque; no PHI in QR"
+  },
+  "capabilities": {
+    "orders_biz": "EXISTING_AND_WORKING",
+    "specimens_lims": "EXISTING_AND_WORKING",
+    "iot_logistics": "EXISTING_AND_WORKING",
+    "analyzer_ingestion": "EXISTING_AND_WORKING",
+    "technician_review_queue": "EXISTING_NEEDS_FIX",
+    "doctor_review_queue": "EXISTING_AND_WORKING",
+    "report_generation": "EXISTING_AND_WORKING",
+    "governed_release": "EXISTING_NEEDS_FIX",
+    "critical_value_policies": "EXISTING_NEEDS_FIX",
+    "verification_qr": "EXISTING_NEEDS_FIX",
+    "electronic_signature": "EXISTING_AND_WORKING",
+    "patient_portal_results": "EXISTING_NEEDS_FIX",
+    "clinic_portal_reports": "EXISTING_NEEDS_FIX",
+    "amendment_revocation": "EXISTING_AND_WORKING",
+    "real_analyzer_tcp": "NOT_REQUIRED_FOR_PILOT",
+    "qualified_digital_signature": "NOT_REQUIRED_FOR_PILOT"
+  },
+  "blockers": {
+    "critical": [],
+    "high": [
+      "Three parallel result stores remain; pilot uses biz path only",
+      "Working tree contains unrelated uncommitted files"
+    ]
+  }
+}
