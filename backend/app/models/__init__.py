@@ -381,3 +381,13 @@ from app.models.lims_core import (
     LimsSpecimen,
     LimsStorageLocation,
 )
+from app.models.iot_platform import (
+    IoTCanonicalReading,
+    IoTColdChainExcursion,
+    IoTDeviceAssignment,
+    IoTDeviceCredential,
+    IoTPlatformAlert,
+    IoTThresholdPolicy,
+    IoTTelemetryDeadLetter,
+    LogisticsTransportTrip,
+)

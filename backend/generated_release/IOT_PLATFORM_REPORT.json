@@ -1,0 +1,23 @@
+{
+  "release": "7.0",
+  "sprint": "Sprint 4",
+  "status": "PASS",
+  "checks": {
+    "migration": true,
+    "routes": true,
+    "simulator": true,
+    "tests": true,
+    "frontend": true
+  },
+  "routes": {
+    "/api/v1/iot/devices": true,
+    "/api/v1/iot/readings": true,
+    "/api/v1/iot/telemetry": true,
+    "/api/v1/iot/alerts": true,
+    "/api/v1/iot/excursions": true,
+    "/api/v1/logistics/trips": true,
+    "/api/v1/logistics/dashboard": true,
+    "/api/v1/custody/events": true
+  },
+  "generated_at": "2026-07-12T11:09:49.070006+00:00"
+}

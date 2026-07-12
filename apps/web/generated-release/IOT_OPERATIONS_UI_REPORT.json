@@ -1,0 +1,12 @@
+{
+  "release": "7.0",
+  "sprint": "Sprint 4",
+  "status": "PASS",
+  "pages": {
+    "operations_logistics": true,
+    "collector_trips": true,
+    "lab_cold_chain": true,
+    "iot_api": true
+  },
+  "generated_at": "2026-07-12T11:09:49.070006+00:00"
+}

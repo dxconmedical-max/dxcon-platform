@@ -14,6 +14,18 @@ from app.api.partner_foundation.routes import partner_foundation_bp
 from app.api.reception_workspace.routes import reception_workspace_bp
 from app.api.lab_workspace.routes import lab_workspace_bp
 from app.api.lims_core.routes import accessions_bp, barcodes_bp, lab_lims_bp, specimens_bp
+from app.api.iot_platform.routes import (
+    custody_bp,
+    iot_alerts_bp,
+    iot_devices_bp,
+    iot_excursions_bp,
+    iot_readings_bp,
+    iot_telemetry_bp,
+    logistics_containers_bp,
+    logistics_dashboard_bp,
+    logistics_trips_bp,
+    logistics_vehicles_bp,
+)
 from app.api.reporting_engine.routes import reporting_engine_bp
 from app.api.portal_workspace.routes import portal_doctor_bp, portal_patient_bp
 from app.api.executive_platform.routes import executive_platform_bp
@@ -477,6 +489,16 @@ def register_blueprints(app):
     app.register_blueprint(barcodes_bp)
     app.register_blueprint(accessions_bp)
     app.register_blueprint(lab_lims_bp)
+    app.register_blueprint(iot_devices_bp)
+    app.register_blueprint(iot_readings_bp)
+    app.register_blueprint(iot_telemetry_bp)
+    app.register_blueprint(iot_alerts_bp)
+    app.register_blueprint(iot_excursions_bp)
+    app.register_blueprint(logistics_trips_bp)
+    app.register_blueprint(logistics_vehicles_bp)
+    app.register_blueprint(logistics_containers_bp)
+    app.register_blueprint(logistics_dashboard_bp)
+    app.register_blueprint(custody_bp)
     app.register_blueprint(reporting_engine_bp)
     app.register_blueprint(portal_doctor_bp)
     app.register_blueprint(portal_patient_bp)
