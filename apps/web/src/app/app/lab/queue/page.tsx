@@ -1,7 +1,6 @@
 "use client";
 
 import { WorkspaceScreen, type WorkspaceContext } from "@/components/layout/WorkspaceScreen";
-import { Badge } from "@/components/ui/Badge";
 import {
   DataState,
   SectionHeader,
@@ -9,11 +8,11 @@ import {
   StatusPill,
 } from "@/components/workspace/primitives";
 import { useSourcedData } from "@/hooks/useSourcedData";
-import { fetchReceivedSamples, type LabSample } from "@/lib/api/lab";
+import { fetchAnalyzerQueue, type LabSample } from "@/lib/api/lab";
 
-function SamplesPanel({ accessToken, organizationId }: WorkspaceContext) {
+function QueuePanel({ accessToken, organizationId }: WorkspaceContext) {
   const state = useSourcedData<LabSample[]>(
-    () => fetchReceivedSamples({ token: accessToken, organizationId }),
+    () => fetchAnalyzerQueue({ token: accessToken, organizationId }),
     [accessToken, organizationId],
   );
   const rows = state.data ?? [];
@@ -21,15 +20,16 @@ function SamplesPanel({ accessToken, organizationId }: WorkspaceContext) {
   return (
     <div className="space-y-4">
       <SectionHeader
-        title="Received samples"
-        description="Samples accessioned into the laboratory."
+        title="Analyzer queue"
+        description="Samples currently in testing."
         source={state.source ?? undefined}
+        actions={undefined}
       />
       <DataState
         loading={state.loading}
         error={state.error}
         empty={rows.length === 0}
-        emptyLabel="No received samples."
+        emptyLabel="No samples in the analyzer queue."
         onRetry={state.reload}
       >
         <SimpleTable<LabSample>
@@ -39,17 +39,6 @@ function SamplesPanel({ accessToken, organizationId }: WorkspaceContext) {
             { key: "sample", label: "Sample", render: (r) => r.sample_code },
             { key: "order", label: "Order", render: (r) => r.order_code ?? "—" },
             { key: "test", label: "Test", render: (r) => r.test ?? "—" },
-            { key: "received", label: "Received", render: (r) => r.received_at ?? "—" },
-            {
-              key: "condition",
-              label: "Condition",
-              render: (r) =>
-                r.condition && r.condition.toLowerCase() !== "ok" ? (
-                  <Badge className="bg-rose-100 text-rose-700">{r.condition}</Badge>
-                ) : (
-                  <span className="text-slate-500">{r.condition ?? "—"}</span>
-                ),
-            },
             { key: "status", label: "Status", render: (r) => <StatusPill status={r.status} /> },
           ]}
         />
@@ -58,10 +47,10 @@ function SamplesPanel({ accessToken, organizationId }: WorkspaceContext) {
   );
 }
 
-export default function LabSamplesPage() {
+export default function LabQueuePage() {
   return (
-    <WorkspaceScreen title="Received samples" workspacePath="/app/lab" permission="lab.read">
-      {(ctx) => <SamplesPanel {...ctx} />}
+    <WorkspaceScreen title="Analyzer queue" workspacePath="/app/lab" permission="lab.read">
+      {(ctx) => <QueuePanel {...ctx} />}
     </WorkspaceScreen>
   );
 }

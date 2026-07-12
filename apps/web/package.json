@@ -13,6 +13,7 @@
     "verify:production-web": "node scripts/verify_production_web.mjs",
     "verify:release-6": "node scripts/verify_release_6_auth_shell.mjs",
     "verify:production-pilot": "node scripts/verify-production-pilot.mjs",
+    "verify:sprint2": "node scripts/verify_release_6_sprint2.mjs",
     "verify:integration-ui": "node scripts/verify_integration_center_ui.mjs"
   },
   "dependencies": {

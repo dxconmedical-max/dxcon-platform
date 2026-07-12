@@ -101,7 +101,9 @@ export const WORKSPACE_DEFINITIONS: Record<WorkspaceKey, WorkspaceDefinition> = 
     permission: "reception.read",
     dashboardPath: "/api/v1/reception/workspace/dashboard",
     actions: [
-      { label: "Patient queue", href: "/app/reception", description: "Today's reception queue." },
+      { label: "Today's queue", href: "/app/reception/queue", description: "Check-in and manage the queue." },
+      { label: "Walk-in registration", href: "/app/reception/register", description: "Register a new walk-in patient." },
+      { label: "Search", href: "/app/reception/search", description: "Find patients and bookings." },
     ],
     extractStatusCards: (data) => {
       const kpis = (nested(data, "kpis") ?? data) as Record<string, unknown>;
@@ -143,7 +145,10 @@ export const WORKSPACE_DEFINITIONS: Record<WorkspaceKey, WorkspaceDefinition> = 
     permission: "lab.read",
     dashboardPath: "/api/v1/lab/workspace/dashboard",
     actions: [
-      { label: "Work queue", href: "/app/lab/samples", description: "Samples in testing." },
+      { label: "Received samples", href: "/app/lab/samples", description: "Accessioned samples." },
+      { label: "Analyzer queue", href: "/app/lab/queue", description: "Samples in testing." },
+      { label: "Quality control", href: "/app/lab/qc", description: "QC status for runs." },
+      { label: "Verification & release", href: "/app/lab/verification", description: "Verify and release results." },
     ],
     extractStatusCards: (data) => {
       const kpis = (nested(data, "kpis") ?? nested(data, "summary") ?? data) as Record<string, unknown>;
@@ -163,7 +168,9 @@ export const WORKSPACE_DEFINITIONS: Record<WorkspaceKey, WorkspaceDefinition> = 
     permission: "collections.read",
     dashboardPath: "/api/v1/dashboard/collector",
     actions: [
+      { label: "Today's route", href: "/app/collector/route", description: "Route stops and navigation." },
       { label: "Assigned jobs", href: "/app/collector/jobs", description: "Today's collection assignments." },
+      { label: "Timeline", href: "/app/collector/timeline", description: "Recent collection activity." },
     ],
     extractStatusCards: (data) => {
       const summary = (nested(data, "summary") ?? nested(data, "kpis") ?? data) as Record<string, unknown>;
@@ -205,8 +212,12 @@ export const WORKSPACE_DEFINITIONS: Record<WorkspaceKey, WorkspaceDefinition> = 
     permission: "portal.patient.read",
     dashboardPath: "/api/v1/portal/patient/dashboard",
     actions: [
+      { label: "Book a service", href: "/app/patient/book", description: "Start a new booking." },
       { label: "My bookings", href: "/app/patient/bookings", description: "Scheduled collections and visits." },
+      { label: "Results", href: "/app/patient/results", description: "Released test reports." },
+      { label: "Health summary", href: "/app/patient/health-summary", description: "AI overview of recent results." },
       { label: "Payments", href: "/app/patient/payments", description: "Invoices and payment status." },
+      { label: "Profile", href: "/app/patient/profile", description: "Personal and contact details." },
     ],
     extractStatusCards: (data) => {
       const summary = (nested(data, "summary") ?? nested(data, "widgets") ?? data) as Record<string, unknown>;

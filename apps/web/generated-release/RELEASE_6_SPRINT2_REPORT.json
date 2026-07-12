@@ -1,0 +1,101 @@
+{
+  "generated_at": "2026-07-12T08:05:47.145Z",
+  "release": "6.0",
+  "sprint": "Production Sprint 2",
+  "scope": "Epic 16-21 — Patient, Reception, Collector, Laboratory, Doctor workspaces",
+  "status": "PASS",
+  "shared_components": {
+    "ok": true,
+    "missing": []
+  },
+  "domains": {
+    "patient_booking": {
+      "label": "Patient Booking",
+      "ok": true,
+      "missing": [],
+      "features": [
+        "multi-step wizard",
+        "package selection",
+        "location selection",
+        "home collection",
+        "schedule picker",
+        "QR booking confirmation"
+      ]
+    },
+    "patient_portal": {
+      "label": "Patient Portal",
+      "ok": true,
+      "missing": [],
+      "features": [
+        "dashboard",
+        "booking history",
+        "test reports",
+        "invoices",
+        "AI health summary",
+        "profile"
+      ]
+    },
+    "reception": {
+      "label": "Reception Workspace",
+      "ok": true,
+      "missing": [],
+      "features": [
+        "today's queue",
+        "check-in",
+        "walk-in registration",
+        "booking search",
+        "QR scanner placeholder",
+        "patient search"
+      ]
+    },
+    "collector": {
+      "label": "Collector Workspace",
+      "ok": true,
+      "missing": [],
+      "features": [
+        "today's route",
+        "assigned collections",
+        "map placeholder",
+        "navigation button",
+        "barcode scanner placeholder",
+        "upload specimen photo",
+        "collection timeline"
+      ]
+    },
+    "laboratory": {
+      "label": "Laboratory Workspace",
+      "ok": true,
+      "missing": [],
+      "features": [
+        "received samples",
+        "analyzer queue",
+        "QC status",
+        "verification workflow",
+        "release workflow"
+      ]
+    },
+    "doctor": {
+      "label": "Doctor Workspace",
+      "ok": true,
+      "missing": [],
+      "features": [
+        "patient list",
+        "result viewer",
+        "abnormal highlight",
+        "AI interpretation placeholder",
+        "electronic signature placeholder"
+      ]
+    }
+  },
+  "guardrails": {
+    "wizard_steps": true,
+    "qr_confirmation": true,
+    "sample_data_labeled": true,
+    "reuses_appshell": true
+  },
+  "notes": [
+    "Live backend endpoints are used where available; unimplemented capabilities use labeled sample adapters.",
+    "Sample data is surfaced with a visible 'Sample data' badge on each screen.",
+    "Reuses existing authentication, AppShell, and role workspace routing."
+  ]
+}
