@@ -24,7 +24,6 @@ from app.api.iot_platform.routes import (
     logistics_containers_bp,
     logistics_dashboard_bp,
     logistics_trips_bp,
-    logistics_vehicles_bp,
 )
 from app.api.analyzer_integration.routes import analyzers_bp, integrations_bp as analyzer_integrations_bp, lab_analyzer_bp
 from app.api.clinical_governance.routes import clinical_bp, verify_bp
@@ -497,7 +496,6 @@ def register_blueprints(app):
     app.register_blueprint(iot_alerts_bp)
     app.register_blueprint(iot_excursions_bp)
     app.register_blueprint(logistics_trips_bp)
-    app.register_blueprint(logistics_vehicles_bp)
     app.register_blueprint(logistics_containers_bp)
     app.register_blueprint(logistics_dashboard_bp)
     app.register_blueprint(custody_bp)

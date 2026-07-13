@@ -45,3 +45,15 @@ generated_reports/
 backend/generated_reports/
 backend/generated_reports/JOB-*.*
 backend/generated_reports/DxCon_Report_*.pdf
+
+# Local archives (never commit repo snapshots)
+*.zip
+backend.zip
+
+# Local test/smoke run output (regenerated each run)
+**/test_run_output.txt
+generated-release/PRODUCTION_API_SMOKE_REPORT.json
+generated-release/STAGING_SMOKE_REPORT.json
+
+# Upload scratch/report space (runtime-generated)
+backend/uploads/reports/

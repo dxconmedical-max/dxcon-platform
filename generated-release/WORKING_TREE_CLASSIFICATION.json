@@ -1,0 +1,91 @@
+{
+  "release": "8.1",
+  "phase": "1 - Working Tree Integrity",
+  "generated": "2026-07-13",
+  "branch": "release/8.1-production-integration",
+  "head_commit": "19a2931",
+  "summary": {
+    "modified_tracked": 82,
+    "untracked": 29,
+    "required_release_8_1": 0,
+    "note": "All Release 8.1 code/docs were already committed in 19a2931. No uncommitted files belong to Release 8.1 except the Phase-1 .gitignore/doc cleanup added in this pass."
+  },
+  "classifications": {
+    "GENERATED_ARTIFACT": {
+      "action": "exclude_from_8_1_commit (already tracked; churn is regeneration noise)",
+      "paths": [
+        "apps/mobile/generated-release/*.json",
+        "apps/web/generated-release/*.json",
+        "backend/generated_api/openapi.json",
+        "backend/generated_api/openapi.yaml",
+        "backend/generated_api/sdk/manifest.json",
+        "backend/generated_release/*.json (82 modified + several new)",
+        "deployment/reports/pre-deployment-report.json"
+      ]
+    },
+    "LOCAL_TEST_OUTPUT": {
+      "action": "gitignore (regenerated each run)",
+      "paths": [
+        "generated-release/test_run_output.txt",
+        "backend/generated_release/test_run_output.txt",
+        "generated-release/PRODUCTION_API_SMOKE_REPORT.json"
+      ]
+    },
+    "UNRELATED_LOCAL_FILE": {
+      "action": "gitignore, never commit",
+      "paths": [
+        "backend.zip (13MB repo snapshot)",
+        "backend/uploads/reports/test.txt (runtime scratch)"
+      ]
+    },
+    "PRE_EXISTING_USER_WORK": {
+      "action": "leave uncommitted; belongs to a different release (Master Data Foundation / Brand Assets). Do NOT delete, do NOT commit under 8.1.",
+      "paths": [
+        "backend/app/mdm/security.py (Master Data Management release)",
+        "backend/migrations/002_uat_critical_fixes.sql",
+        "backend/scripts/generate_brand_assets.py",
+        "backend/scripts/generate_uat_final_report.py",
+        "backend/scripts/uat_lib.py",
+        "backend/scripts/verify_master_data.py",
+        "backend/scripts/verify_uat_collector.py",
+        "backend/scripts/verify_uat_doctor.py",
+        "backend/scripts/verify_uat_lab.py",
+        "backend/scripts/verify_uat_patient.py",
+        "backend/scripts/verify_uat_reception.py",
+        "backend/docs/PRODUCTION_SMOKE_TEST.md",
+        "docs/BRAND_GUIDELINES.md",
+        "docs/REQUIRED_ENVIRONMENT_VARIABLES.md",
+        "docs/sprints/SPRINT-004-MASTER-DATA-FOUNDATION.md",
+        "docs/srs/SPRINT-004-MASTER-DATA-FOUNDATION-SRS.md",
+        "scripts/verify_master_data.py",
+        "apps/mobile/lib/**/*.dart (mobile app work)",
+        "apps/mobile/tool/verify_patient_collector_mvp.dart"
+      ]
+    },
+    "SENSITIVE_OR_SECRET": {
+      "action": "CRITICAL - flag for irreversible decision; do NOT auto-fix",
+      "paths": [
+        "backend/uploads/results/*.pdf (TRACKED in git history; filenames suggest REAL patient names / signed reports = possible PHI)"
+      ],
+      "detail": "Two PDFs are already committed to git history under backend/uploads/results/. Removing them requires history rewrite (git filter-repo / BFG) and force-push = irreversible. Escalated as Critical blocker CRIT-PHI-001."
+    },
+    "REQUIRED_RELEASE_8_1": {
+      "action": "commit in Phase-1 cleanup commit",
+      "paths": [
+        ".gitignore (extended for local artifacts)",
+        "docs/WORKING_TREE_CLASSIFICATION.md",
+        "generated-release/WORKING_TREE_CLASSIFICATION.json"
+      ]
+    }
+  },
+  "critical_blockers": [
+    {
+      "id": "CRIT-PHI-001",
+      "title": "Possible PHI committed to git history",
+      "path": "backend/uploads/results/*.pdf",
+      "action_required": "Human decision + history rewrite (irreversible). Not performed automatically."
+    }
+  ],
+  "resulting_working_tree_state": "NOT_CLEAN_BY_DESIGN",
+  "resulting_working_tree_note": "Remaining changes are generated-artifact churn + pre-existing other-release user work, intentionally left uncommitted per release-isolation rules. No Release 8.1 file is left uncommitted after the Phase-1 cleanup commit."
+}

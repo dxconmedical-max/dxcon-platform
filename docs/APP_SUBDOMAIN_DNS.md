@@ -113,3 +113,23 @@ To remove `app.dxcon.com.vn`:
 | DNS record not created | Critical | Complete Steps 1–2 |
 | Certificate pending | High | Wait; confirm DNS-only proxy |
 | `NEXT_PUBLIC_APP_URL` not set | Critical | Set in Vercel env before deploy |
+
+---
+
+## Staging domains (same process, separate Vercel/Render resources)
+
+| Domain | Provider | Target source |
+|---|---|---|
+| `staging.dxcon.com.vn` | Vercel staging project | Vercel Domains panel |
+| `app-staging.dxcon.com.vn` | Vercel staging project | Vercel Domains panel |
+| `api-staging.dxcon.com.vn` | Render staging service | Render Custom Domains panel |
+
+### Staging DNS checklist
+
+| Step | Domain | DNS type | Target (from provider) | Proxy | HTTPS | PASS/FAIL | Evidence |
+|---|---|---|---|---|---|---|---|
+| 1 | `staging.dxcon.com.vn` | CNAME/A | __________ | DNS only | | | |
+| 2 | `app-staging.dxcon.com.vn` | CNAME/A | __________ | DNS only | | | |
+| 3 | `api-staging.dxcon.com.vn` | CNAME | __________ | DNS only | | | |
+
+Do not invent DNS targets. Copy exact values from Vercel/Render after adding each domain.

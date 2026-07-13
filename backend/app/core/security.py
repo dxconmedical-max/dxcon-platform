@@ -44,6 +44,16 @@ def init_security(app):
             app,
             resources={r"/api/*": {"origins": origins}},
             supports_credentials=True,
+            allow_headers=[
+                "Authorization",
+                "Content-Type",
+                "X-Organization-ID",
+                "X-Correlation-ID",
+                "X-Request-ID",
+                "Idempotency-Key",
+            ],
+            expose_headers=["X-Correlation-ID", "X-Request-ID"],
+            methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         )
 
     if not app.config.get("MAX_CONTENT_LENGTH"):

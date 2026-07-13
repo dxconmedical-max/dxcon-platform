@@ -1,0 +1,68 @@
+{
+  "release": "8.1",
+  "generated": "2026-07-13",
+  "migrations": "016-020",
+  "ordering_ambiguous": false,
+  "destructive_ddl": false,
+  "production_execution": "FORBIDDEN until staging passes",
+  "migrations": [
+    {
+      "file": "016_lims_core.sql",
+      "order": 16,
+      "branch": "release/7.0-lims-core",
+      "dependency": "006_lab_workspace.sql",
+      "classification": "additive_create",
+      "purpose": "Specimens, containers, accessions, barcodes — LIMS core tables",
+      "lock_risk": "medium",
+      "idempotent": true,
+      "verification": "SELECT COUNT(*) FROM information_schema.tables WHERE table_name='specimens'"
+    },
+    {
+      "file": "017_iot_logistics.sql",
+      "order": 17,
+      "branch": "release/7.0-iot-logistics",
+      "dependency": "016_lims_core.sql",
+      "classification": "additive_alter",
+      "purpose": "IoT device metadata extensions, cold chain tables",
+      "lock_risk": "low",
+      "idempotent": true,
+      "verification": "SELECT column_name FROM information_schema.columns WHERE table_name='iot_devices' AND column_name='organization_id'"
+    },
+    {
+      "file": "018_analyzer_integration.sql",
+      "order": 18,
+      "branch": "release/7.0-analyzer-integration",
+      "dependency": "016_lims_core.sql",
+      "classification": "additive_alter",
+      "purpose": "Analyzer vendor/metadata columns",
+      "lock_risk": "low",
+      "idempotent": true,
+      "verification": "SELECT column_name FROM information_schema.columns WHERE table_name='lab_analyzers' AND column_name='vendor'"
+    },
+    {
+      "file": "019_clinical_workflow.sql",
+      "order": 19,
+      "branch": "release/8.0-clinical-workflow",
+      "dependency": "007_reporting_engine.sql",
+      "classification": "additive_alter_and_create",
+      "purpose": "Result governance columns, clinical_workflow_transitions table",
+      "lock_risk": "low",
+      "idempotent": true,
+      "verification": "SELECT column_name FROM information_schema.columns WHERE table_name='biz_result_items' AND column_name='result_status'"
+    },
+    {
+      "file": "020_patient_commerce.sql",
+      "order": 20,
+      "branch": "release/8.0-patient-commerce",
+      "dependency": "012_patient_marketplace.sql",
+      "classification": "additive_alter_and_create",
+      "purpose": "Slot holds, commerce extensions on marketplace tables",
+      "lock_risk": "low",
+      "idempotent": true,
+      "verification": "SELECT COUNT(*) FROM information_schema.tables WHERE table_name='mp_slot_holds'"
+    }
+  ],
+  "apply_order": ["016", "017", "018", "019", "020"],
+  "rollback": "forward-fix preferred; all migrations use IF NOT EXISTS",
+  "blockers": []
+}

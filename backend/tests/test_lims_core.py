@@ -139,7 +139,7 @@ class LimsCoreTestCase(unittest.TestCase):
 
     def test_api_lab_dashboard(self):
         client = self.app.test_client()
-        resp = client.get("/api/v1/lab/dashboard")
+        resp = client.get("/api/v1/lab/lims/dashboard")
         self.assertIn(resp.status_code, (200, 401, 403))
 
 

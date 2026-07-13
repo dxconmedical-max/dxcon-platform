@@ -1,0 +1,32 @@
+{
+  "release": "8.1",
+  "generated": "2026-07-13",
+  "exit_states": {
+    "CODE_READY": "PASS",
+    "STAGING_CONFIG_READY": "PASS",
+    "STAGING_DEPLOYED": "BLOCKED_EXTERNAL_ACTION",
+    "MIGRATIONS_APPLIED_STAGING": "NOT_STARTED",
+    "SMOKE_PASS": "FAIL",
+    "UAT_PASS": "NOT_STARTED",
+    "PRODUCTION_READY": "NOT_STARTED"
+  },
+  "notes": {
+    "CODE_READY": "Duplicate routes fixed; 13 backend failures resolved; CORS tests added; smoke scripts parametrized",
+    "STAGING_CONFIG_READY": "docs/STAGING_ENVIRONMENT_VARIABLES.md and runbooks complete",
+    "STAGING_DEPLOYED": "Requires Render/Vercel/DNS manual setup",
+    "SMOKE_PASS": "Production smoke fails until integration branch deployed and CORS_ORIGINS fixed on Render",
+    "PRODUCTION_READY": "Blocked until staging smoke + UAT pass"
+  },
+  "critical_blockers": [
+    {"id": "CORS-PROD", "title": "Render CORS_ORIGINS points to dxcon-ap.onrender.com not production domains"},
+    {"id": "DEPLOY-INT", "title": "Integration branch not deployed to Vercel production"},
+    {"id": "DNS-APP", "title": "app.dxcon.com.vn not configured"},
+    {"id": "CRIT-PHI-001", "title": "Possible PHI in git history (backend/uploads/results/*.pdf)"}
+  ],
+  "high_blockers": [
+    {"id": "MIG-STAGING", "title": "Migrations 016-020 not applied on staging"},
+    {"id": "REDIS-PROD", "title": "REDIS_URL required on production Render"},
+    {"id": "SMTP", "title": "SMTP not configured; password reset disabled by design"},
+    {"id": "UAT", "title": "Manual UAT not executed on staging"}
+  ]
+}

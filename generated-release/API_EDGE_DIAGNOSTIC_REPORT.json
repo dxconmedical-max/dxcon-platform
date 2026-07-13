@@ -1,0 +1,61 @@
+{
+  "generated_at": "2026-07-13T17:57:50.287540+00:00",
+  "api_base": "https://api.dxcon.com.vn",
+  "cors_origin": "https://app.dxcon.com.vn",
+  "denied_origin": "https://evil.attacker.example",
+  "results": [
+    {
+      "name": "api.health",
+      "pass": true,
+      "detail": "status=200",
+      "server": "cloudflare",
+      "cf_ray": null,
+      "acao": "https://dxcon-ap.onrender.com"
+    },
+    {
+      "name": "api.edge_not_blanket_403",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "api.auth_rejection",
+      "pass": true,
+      "detail": "status=401"
+    },
+    {
+      "name": "api.cors_preflight",
+      "pass": false,
+      "detail": "status=200 ACAO="
+    },
+    {
+      "name": "api.cors_allowed_origin",
+      "pass": false,
+      "detail": "ACAO=None"
+    },
+    {
+      "name": "api.cors_denied_origin",
+      "pass": true,
+      "detail": "ACAO=(none)"
+    },
+    {
+      "name": "api.no500/api/v1/system/health",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "api.no500/api/v1/system/version",
+      "pass": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "api.no500/api/v1/auth/me",
+      "pass": true,
+      "detail": "status=401"
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 2,
+    "total": 9
+  }
+}

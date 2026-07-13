@@ -1,0 +1,26 @@
+{
+  "release": "8.1",
+  "generated": "2026-07-13",
+  "staging": {
+    "postgresql": {"status": "BLOCKED_EXTERNAL_ACTION", "note": "Operator must create separate Render Postgres"},
+    "redis": {"status": "BLOCKED_EXTERNAL_ACTION", "note": "Operator must provision staging Redis"},
+    "render_backend": {"status": "BLOCKED_EXTERNAL_ACTION", "note": "Create staging service from release/8.1-production-integration"},
+    "vercel_frontend": {"status": "BLOCKED_EXTERNAL_ACTION", "note": "Create staging project or branch deploy with apps/web root"},
+    "dns": {"status": "BLOCKED_EXTERNAL_ACTION", "note": "Attach domains after Vercel/Render display exact targets"},
+    "migrations_016_020": {"status": "NOT_STARTED", "note": "Run on staging DB only after backup"},
+    "pilot_accounts": {"status": "NOT_STARTED", "note": "Create at deploy time per STAGING_UAT_EXECUTION.md"},
+    "smtp": {"status": "BLOCKED_EXTERNAL_ACTION", "note": "Mailtrap or safe capture provider for staging"}
+  },
+  "code_ready": {
+    "duplicate_routes_fixed": true,
+    "cors_hardening_tests": true,
+    "smoke_scripts_parametrized": true,
+    "password_reset_ui_honest": true,
+    "migration_runbooks": true
+  },
+  "recommended_domains": {
+    "public": "staging.dxcon.com.vn",
+    "application": "app-staging.dxcon.com.vn",
+    "api": "api-staging.dxcon.com.vn"
+  }
+}

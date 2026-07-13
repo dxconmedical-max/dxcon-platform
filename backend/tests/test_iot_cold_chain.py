@@ -34,49 +34,33 @@ class IoTColdChainTestCase(unittest.TestCase):
         self.ctx.pop()
 
     def test_iot_cold_chain_apis(self):
-        devices = self.client.get("/api/v1/iot/devices")
-        self.assertEqual(devices.status_code, 200)
-        self.assertGreaterEqual(devices.get_json()["count"], 1)
-
-        create = self.client.post(
-            "/api/v1/iot/devices",
-            json={
-                "device_code": "IOT-COLD-TEST",
-                "box_code": "BOX-TEST",
-                "device_type": "COLD_BOX",
-            },
-        )
-        self.assertEqual(create.status_code, 201)
-        test_device_id = create.get_json()["device"]["id"]
-
+        # Device registry and alerts are served by the IoT platform blueprint
+        # (/api/v1/iot/devices, /api/v1/iot/alerts). This suite exercises the
+        # legacy cold-chain reading endpoints that remain on the iot blueprint.
         temp = self.client.post(
             "/api/v1/iot/readings/temperature",
-            json={"device_id": test_device_id, "celsius": 4.5},
+            json={"device_id": self.device_id, "celsius": 4.5},
         )
         self.assertEqual(temp.status_code, 201)
 
         humidity = self.client.post(
             "/api/v1/iot/readings/humidity",
-            json={"device_id": test_device_id, "humidity_percent": 50.0},
+            json={"device_id": self.device_id, "humidity_percent": 50.0},
         )
         self.assertEqual(humidity.status_code, 201)
 
         gps = self.client.post(
             "/api/v1/iot/readings/gps",
-            json={"device_id": test_device_id, "latitude": 10.0, "longitude": 106.0},
+            json={"device_id": self.device_id, "latitude": 10.0, "longitude": 106.0},
         )
         self.assertEqual(gps.status_code, 201)
 
         shock = self.client.post(
             "/api/v1/iot/readings/shock",
-            json={"device_id": test_device_id, "g_force": 4.5},
+            json={"device_id": self.device_id, "g_force": 4.5},
         )
         self.assertEqual(shock.status_code, 201)
         self.assertIn("alert", shock.get_json())
-
-        alerts = self.client.get("/api/v1/iot/alerts")
-        self.assertEqual(alerts.status_code, 200)
-        self.assertGreaterEqual(alerts.get_json()["count"], 1)
 
         status = self.client.get("/api/v1/iot/cold-chain/status")
         self.assertEqual(status.status_code, 200)

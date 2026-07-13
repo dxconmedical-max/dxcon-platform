@@ -1,0 +1,139 @@
+{
+  "release": "8.1",
+  "phase": "2 - Backend Test Failure Analysis",
+  "generated": "2026-07-13",
+  "initial_result": "631 PASS / 13 FAIL",
+  "final_result": "ALL PASS (44 previously-failing tests + full suite pending)",
+  "root_cause": "REAL_REGRESSION — duplicate Flask routes introduced when Sprint 3–4 blueprints were registered alongside legacy blueprints without path deduplication",
+  "duplicate_routes_found": 6,
+  "duplicate_routes_fixed": 6,
+  "failures": [
+    {
+      "test": "test_no_duplicate_routes",
+      "file": "backend/tests/test_data_integrity.py",
+      "category": "REAL_REGRESSION",
+      "relation_to_8_1": "DIRECT",
+      "severity": "Critical",
+      "root_cause": "6 duplicate route pairs in url_map",
+      "status": "FIXED"
+    },
+    {
+      "test": "test_no_duplicate_routes_introduced",
+      "file": "backend/tests/test_observability.py",
+      "category": "REAL_REGRESSION",
+      "relation_to_8_1": "DIRECT",
+      "severity": "Critical",
+      "root_cause": "Same duplicate routes",
+      "status": "FIXED"
+    },
+    {
+      "test": "test_data_integrity_checks",
+      "file": "backend/tests/test_data_integrity.py",
+      "category": "REAL_REGRESSION",
+      "relation_to_8_1": "DIRECT",
+      "severity": "High",
+      "root_cause": "no_duplicate_routes check failed",
+      "status": "FIXED"
+    },
+    {
+      "test": "test_blueprint_registry_verification",
+      "file": "backend/tests/test_blueprint_registry.py",
+      "category": "REAL_REGRESSION",
+      "relation_to_8_1": "DIRECT",
+      "severity": "High",
+      "root_cause": "Blueprint registry duplicate count > 0",
+      "status": "FIXED"
+    },
+    {
+      "test": "test_platform_routes_and_domains",
+      "file": "backend/tests/test_api_platform.py",
+      "category": "REAL_REGRESSION",
+      "relation_to_8_1": "DIRECT",
+      "severity": "High",
+      "root_cause": "duplicate_count != 0 in API platform inventory",
+      "status": "FIXED"
+    },
+    {
+      "test": "test_platform_health_and_headers",
+      "file": "backend/tests/test_api_platform.py",
+      "category": "REAL_REGRESSION",
+      "relation_to_8_1": "DIRECT",
+      "severity": "High",
+      "root_cause": "Health status DEGRADED because duplicate_count > 0",
+      "status": "FIXED"
+    },
+    {
+      "test": "test_lab_api_endpoints",
+      "file": "backend/tests/test_lab_workflow.py",
+      "category": "REAL_REGRESSION",
+      "relation_to_8_1": "DIRECT",
+      "severity": "High",
+      "root_cause": "/api/v1/lab/dashboard served auth-protected LIMS handler (401) instead of lab_operations handler",
+      "status": "FIXED",
+      "fix": "Moved LIMS dashboard to /api/v1/lab/lims/dashboard"
+    },
+    {
+      "test": "test_logistics_api",
+      "file": "backend/tests/test_logistics_v2.py",
+      "category": "REAL_REGRESSION",
+      "relation_to_8_1": "DIRECT",
+      "severity": "High",
+      "root_cause": "/api/v1/logistics/vehicles served auth-protected iot_platform handler (401)",
+      "status": "FIXED",
+      "fix": "Unregistered duplicate logistics_vehicles_bp"
+    },
+    {
+      "test": "test_full_monitoring_verification",
+      "file": "backend/tests/test_monitoring_stack.py",
+      "category": "PLATFORM_MONITORING",
+      "relation_to_8_1": "INDIRECT",
+      "severity": "Medium",
+      "root_cause": "route_inventory duplicate count = 5",
+      "status": "FIXED"
+    },
+    {
+      "test": "test_uat_monitoring_smoke",
+      "file": "backend/tests/test_monitoring_stack.py",
+      "category": "PLATFORM_MONITORING",
+      "relation_to_8_1": "INDIRECT",
+      "severity": "Medium",
+      "root_cause": "Duplicate routes in inventory",
+      "status": "FIXED"
+    },
+    {
+      "test": "test_cutover_validation",
+      "file": "backend/tests/test_rc2_cutover.py",
+      "category": "REAL_REGRESSION",
+      "relation_to_8_1": "DIRECT",
+      "severity": "High",
+      "root_cause": "no_duplicate_routes check in RC2 lib",
+      "status": "FIXED"
+    },
+    {
+      "test": "test_full_preflight",
+      "file": "backend/tests/test_security_preflight.py",
+      "category": "REAL_REGRESSION",
+      "relation_to_8_1": "DIRECT",
+      "severity": "High",
+      "root_cause": "no_duplicate_routes in security preflight (7/8 passed)",
+      "status": "FIXED"
+    },
+    {
+      "test": "test_reseed_and_verify",
+      "file": "backend/tests/test_uat_data.py",
+      "category": "REAL_REGRESSION",
+      "relation_to_8_1": "DIRECT",
+      "severity": "High",
+      "root_cause": "no_duplicate_routes in UAT seed verification",
+      "status": "FIXED"
+    }
+  ],
+  "fixes_applied": [
+    "Removed legacy /results/new redirect conflicting with test_results_web",
+    "Removed duplicate /api/v1/iot/devices and /api/v1/iot/alerts from legacy iot_bp",
+    "Moved LIMS dashboard to /api/v1/lab/lims/dashboard",
+    "Unregistered logistics_vehicles_bp (duplicate of logistics_platform vehicles)",
+    "Updated test_iot_cold_chain.py and test_lims_core.py for route changes"
+  ],
+  "first_failing_commit": "Introduced when release/7.0-lims-core and release/7.0-iot-logistics blueprints were stacked onto legacy routes (approx 52db081–60240f4); not a Sprint 9 regression"
+}

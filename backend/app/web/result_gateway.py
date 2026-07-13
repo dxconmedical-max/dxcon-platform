@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, request
+from flask import Blueprint, request
 
 from app.models.medical_order import MedicalOrder
 from app.services.result_gateway_service import ResultGatewayBase, ResultUploadService
@@ -19,11 +19,6 @@ def _styles():
     .badge { padding:4px 8px; border-radius:999px; background:#dbeafe; font-size:12px; }
     input, textarea, select { width:100%; padding:10px; margin:8px 0 16px; border:1px solid #cbd5e1; border-radius:8px; }
     """
-
-
-@result_gateway_web_bp.route("/results/new")
-def legacy_results_new_redirect():
-    return redirect("/results/upload")
 
 
 @result_gateway_web_bp.route("/results")

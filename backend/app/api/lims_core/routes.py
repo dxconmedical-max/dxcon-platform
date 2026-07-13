@@ -36,7 +36,7 @@ def _org_id() -> str | None:
     return request.headers.get("X-Organization-ID") or session.get("organization_id")
 
 
-@lab_lims_bp.route("/dashboard", methods=["GET"])
+@lab_lims_bp.route("/lims/dashboard", methods=["GET"])
 @lab_api_read
 def dashboard():
     return {"success": True, "data": lims_dashboard(organization_id=_org_id())}, 200
