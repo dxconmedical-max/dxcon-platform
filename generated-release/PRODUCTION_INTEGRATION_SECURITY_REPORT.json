@@ -1,0 +1,78 @@
+{
+  "release": "8.1",
+  "sprint": "9 - Production Web Integration and Go Live Validation",
+  "generated": "2026-07-13",
+  "method": "static_code_review_and_configuration_audit",
+  "overall_status": "PASS_WITH_DEPLOYMENT_BLOCKERS",
+  "checks": {
+    "no_phi_in_public_urls": {"status": "PASS", "evidence": "Public routes serve marketing content only; no patient identifiers in URL patterns"},
+    "no_phi_in_logs": {"status": "PASS", "evidence": "LOG_FORMAT=json; no patient data logged in auth routes"},
+    "no_hardcoded_credentials": {"status": "PASS", "evidence": "No credentials in apps/web/src or backend/app source; dev defaults in config.py only"},
+    "no_demo_accounts_in_production": {"status": "PASS", "evidence": "NEXT_PUBLIC_DEMO_MODE build guard; DEMO_MODE default false"},
+    "no_mock_runtime_api": {"status": "PASS", "evidence": "Frontend auth calls real /api/v1/auth/* endpoints only"},
+    "no_cross_tenant_access": {"status": "PASS_CODE_REVIEW", "evidence": "X-Organization-ID enforced; tenant scoping in backend queries — requires UAT-15 runtime verification"},
+    "no_cross_patient_access": {"status": "PASS_CODE_REVIEW", "evidence": "Patient routes scoped by user — requires UAT-14 runtime verification"},
+    "no_insecure_direct_object_reference": {"status": "PASS_CODE_REVIEW", "evidence": "Auth decorators on protected routes — requires UAT-14/15 runtime verification"},
+    "no_automatic_result_release": {"status": "PASS", "evidence": "Clinical workflow requires explicit validation, approval, and release actions in backend service layer"},
+    "protected_report_access": {"status": "PASS", "evidence": "Reports require auth; PDF not on public routes"},
+    "secure_headers": {"status": "PASS", "evidence": "next.config.ts security headers; backend SECURITY_HEADERS in security.py"},
+    "csp_supports_api": {"status": "PASS", "evidence": "CSP connect-src includes API_BASE_URL (https://api.dxcon.com.vn)"},
+    "protected_pages_not_publicly_cached": {"status": "PASS", "evidence": "Cache-Control: private, no-store on /app/:path*"},
+    "logout_clears_session": {"status": "PASS", "evidence": "POST /logout blocklists refresh token; frontend clears cookies and memory"},
+    "payment_production_guard": {"status": "PASS", "evidence": "get_payment_adapter blocks non-production-ready adapters in strict envs; MOCK_TEST production_ready=false"},
+    "cors_no_wildcard_with_credentials": {"status": "PASS", "evidence": "Wildcard blocked in strict env; explicit origins required"},
+    "reset_password_disabled": {"status": "INFO", "evidence": "POST /reset-password returns 501 RESET_NOT_ENABLED — not a security risk but functional gap"}
+  },
+  "blockers": {
+    "critical": [
+      {
+        "id": "DEPLOY-001",
+        "title": "Production not yet deployed from integration branch",
+        "detail": "main is at Release 3.0; integration branch not deployed to Vercel/Render",
+        "action": "Deploy release/8.1-production-integration to staging then production"
+      },
+      {
+        "id": "CORS-001",
+        "title": "CORS_ORIGINS not set in render.yaml",
+        "detail": "Must be set in Render dashboard: https://dxcon.com.vn,https://www.dxcon.com.vn,https://app.dxcon.com.vn",
+        "action": "Set CORS_ORIGINS in Render env before backend deploy"
+      },
+      {
+        "id": "DNS-001",
+        "title": "app.dxcon.com.vn DNS not configured",
+        "detail": "Application subdomain requires Vercel domain add + Cloudflare DNS record",
+        "action": "Follow docs/APP_SUBDOMAIN_DNS.md"
+      }
+    ],
+    "high": [
+      {
+        "id": "MIG-001",
+        "title": "Migrations 016-020 not applied to production DB",
+        "detail": "LIMS, clinical workflow, and patient commerce schemas required",
+        "action": "Apply on staging first, then production with backup"
+      },
+      {
+        "id": "UAT-001",
+        "title": "Manual UAT not executed",
+        "detail": "UAT-01 through UAT-16 pending execution on staging",
+        "action": "Execute docs/PRODUCTION_UAT_SPRINT_6_7.md on staging"
+      },
+      {
+        "id": "REDIS-001",
+        "title": "REDIS_URL required for production backend",
+        "detail": "production_readiness.py blocks startup without Redis in strict env",
+        "action": "Provision Redis and set REDIS_URL in Render"
+      },
+      {
+        "id": "SMTP-001",
+        "title": "SMTP required for production backend",
+        "detail": "production_readiness.py blocks startup without SMTP in strict env",
+        "action": "Configure SMTP vars in Render"
+      }
+    ]
+  },
+  "readiness": {
+    "internal_pilot": "NOT_READY — deploy + staging UAT required",
+    "customer_pilot": "NOT_READY — all Critical blockers must clear first"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "release": "8.1",
+  "sprint": "9",
+  "generated": "2026-07-13",
+  "total_migrations": 20,
+  "ordering_ambiguous": false,
+  "destructive_ddl_present": false,
+  "duplicate_schema_concepts": false,
+  "production_readiness": "PASS_PENDING_STAGING_REHEARSAL",
+  "apply_order": "001 through 020 strict numeric order",
+  "incremental_for_integration": ["016_lims_core.sql", "017_iot_logistics.sql", "018_analyzer_integration.sql", "019_clinical_workflow.sql", "020_patient_commerce.sql"],
+  "migrations": [
+    {"file": "001_business_engine_sprint1.sql", "branch": "release/6.0-auth-shell", "dependency": "none", "purpose": "Business engine core tables", "type": "additive_create", "rollback": "forward_fix_or_drop_empty_tables", "lock_risk": "low", "production_ready": true},
+    {"file": "002_uat_critical_fixes.sql", "branch": "uat", "dependency": "001", "purpose": "Audit request_id, order barcode", "type": "additive_alter", "rollback": "drop_column_if_unused", "lock_risk": "low", "production_ready": true},
+    {"file": "003_mdm_foundation.sql", "branch": "mdm", "dependency": "001", "purpose": "MDM import batches", "type": "additive_create", "rollback": "drop_table_if_empty", "lock_risk": "low", "production_ready": true},
+    {"file": "004_partner_foundation.sql", "branch": "release/6.0-auth-shell", "dependency": "001", "purpose": "Organizations and partners", "type": "additive_create", "rollback": "drop_table_if_empty", "lock_risk": "low", "production_ready": true},
+    {"file": "005_reception_workspace.sql", "branch": "release/6.0-auth-shell", "dependency": "004", "purpose": "Reception queue extensions", "type": "additive_alter", "rollback": "drop_column_if_unused", "lock_risk": "low", "production_ready": true},
+    {"file": "006_lab_workspace.sql", "branch": "release/6.0-auth-shell", "dependency": "001", "purpose": "Lab collection fields", "type": "additive_alter", "rollback": "drop_column_if_unused", "lock_risk": "low", "production_ready": true},
+    {"file": "007_reporting_engine.sql", "branch": "main", "dependency": "001", "purpose": "Clinical reports", "type": "additive_create", "rollback": "drop_table_if_empty", "lock_risk": "low", "production_ready": true},
+    {"file": "008_portal.sql", "branch": "main", "dependency": "007", "purpose": "Portal notifications", "type": "additive_create", "rollback": "drop_table_if_empty", "lock_risk": "low", "production_ready": true},
+    {"file": "009_executive_platform.sql", "branch": "main", "dependency": "004", "purpose": "Launch checklist", "type": "additive_create", "rollback": "drop_table_if_empty", "lock_risk": "low", "production_ready": true},
+    {"file": "010_operations_center.sql", "branch": "main", "dependency": "001", "purpose": "Support tickets", "type": "additive_create", "rollback": "drop_table_if_empty", "lock_risk": "low", "production_ready": true},
+    {"file": "011_integration_platform.sql", "branch": "main", "dependency": "004", "purpose": "Integration connectors", "type": "additive_create", "rollback": "drop_table_if_empty", "lock_risk": "low", "production_ready": true},
+    {"file": "012_patient_marketplace.sql", "branch": "main", "dependency": "004", "purpose": "Marketplace providers", "type": "additive_create", "rollback": "drop_table_if_empty", "lock_risk": "low", "production_ready": true},
+    {"file": "013_mobile_mvp.sql", "branch": "main", "dependency": "001", "purpose": "Mobile devices", "type": "additive_create", "rollback": "drop_table_if_empty", "lock_risk": "low", "production_ready": true},
+    {"file": "014_pilot_readiness.sql", "branch": "main", "dependency": "004", "purpose": "Pilot onboarding", "type": "additive_create", "rollback": "drop_table_if_empty", "lock_risk": "low", "production_ready": true},
+    {"file": "015_ai_platform_core.sql", "branch": "main", "dependency": "001", "purpose": "AI platform providers", "type": "additive_create", "rollback": "drop_table_if_empty", "lock_risk": "low", "production_ready": true},
+    {"file": "016_lims_core.sql", "branch": "release/7.0-lims-core", "dependency": "006", "purpose": "LIMS specimens and accession", "type": "additive_create", "rollback": "drop_table_if_empty", "lock_risk": "medium", "production_ready": true},
+    {"file": "017_iot_logistics.sql", "branch": "release/7.0-iot-logistics", "dependency": "016", "purpose": "IoT device extensions", "type": "additive_alter", "rollback": "drop_column_if_unused", "lock_risk": "low", "production_ready": true},
+    {"file": "018_analyzer_integration.sql", "branch": "release/7.0-analyzer-integration", "dependency": "016", "purpose": "Analyzer metadata", "type": "additive_alter", "rollback": "drop_column_if_unused", "lock_risk": "low", "production_ready": true},
+    {"file": "019_clinical_workflow.sql", "branch": "release/8.0-clinical-workflow", "dependency": "007", "purpose": "Result governance columns", "type": "additive_alter", "rollback": "drop_column_if_unused", "lock_risk": "low", "production_ready": true},
+    {"file": "020_patient_commerce.sql", "branch": "release/8.0-patient-commerce", "dependency": "012", "purpose": "Commerce marketplace extensions", "type": "additive_alter", "rollback": "drop_column_if_unused", "lock_risk": "low", "production_ready": true}
+  ],
+  "verification_queries": {
+    "016_lims_core": "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'specimens'",
+    "019_clinical_workflow": "SELECT column_name FROM information_schema.columns WHERE table_name = 'biz_result_items' AND column_name = 'specimen_id'",
+    "020_patient_commerce": "SELECT column_name FROM information_schema.columns WHERE table_name = 'mp_providers' AND column_name = 'featured'"
+  },
+  "blockers": []
+}

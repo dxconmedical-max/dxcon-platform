@@ -1,0 +1,103 @@
+{
+  "release": "8.1",
+  "sprint": "9 - Web Application Cutover and Production Validation",
+  "generated": "2026-07-13",
+  "method": "verified_from_code_and_git_history",
+  "trusted_prior_agent_reports": false,
+  "git": {
+    "discovery_branch": "release/8.0-patient-commerce",
+    "integration_branch": "release/8.1-production-integration",
+    "base_commit": "456fabbea3ced2f91f4cc3bd5b628f42013691b4",
+    "base_commit_subject": "Release 8.0 Sprint 7 - Patient Commerce Platform",
+    "main_commit": "b8ae528586a0c20cbd7e72256718a8c2a89ceeb0",
+    "main_subject": "Add Epic 10 clinical AI assistant verification report.",
+    "commits_ahead_of_main": 9,
+    "topology": "linear_stack",
+    "notes": "All release/feature branches are direct ancestors of the base commit; no divergent merges required."
+  },
+  "branch_ancestry": {
+    "release/6.0-auth-shell": {"head": "af69576", "ancestor_of_base": true},
+    "release/7.0-lims-core": {"head": "52db081", "ancestor_of_base": true},
+    "release/7.0-iot-logistics": {"head": "60240f4", "ancestor_of_base": true},
+    "release/7.0-analyzer-integration": {"head": "b3e1c54", "ancestor_of_base": true},
+    "release/8.0-clinical-workflow": {"head": "b69e655", "ancestor_of_base": true},
+    "feature/collector-lab-workflow": {"head": "dd38d37", "ancestor_of_base": true, "commits_ahead_of_base": 0}
+  },
+  "deployments": {
+    "vercel_production_commit": "UNKNOWN_REQUIRES_DASHBOARD_CONFIRMATION",
+    "render_backend_commit": "UNKNOWN_REQUIRES_DASHBOARD_CONFIRMATION",
+    "vercel_root_directory": "apps/web",
+    "vercel_json_present": false,
+    "package_manager": "npm",
+    "render_health_check_path": "/api/v1/system/health"
+  },
+  "frontend": {
+    "landing_page": "apps/web/src/app/page.tsx",
+    "landing_requires_auth": false,
+    "middleware": "apps/web/src/middleware.ts",
+    "domain_routing_implemented": true,
+    "www_redirects_to_apex": true,
+    "public_host_app_path_redirect_to_app_host": true,
+    "env_module": "apps/web/src/lib/env.ts",
+    "build_time_env_guard": "apps/web/next.config.ts",
+    "runtime_env_guard": true,
+    "public_env_vars": [
+      "NEXT_PUBLIC_API_BASE_URL",
+      "NEXT_PUBLIC_PUBLIC_SITE_URL",
+      "NEXT_PUBLIC_APP_URL",
+      "NEXT_PUBLIC_APP_ENV",
+      "NEXT_PUBLIC_DEMO_MODE"
+    ]
+  },
+  "public_pages": ["/", "/services", "/partners", "/pricing", "/contact", "/book-demo", "/privacy", "/terms"],
+  "auth_pages": ["/login", "/register", "/forgot-password", "/reset-password", "/select-organization", "/session-expired", "/forbidden", "/service-unavailable"],
+  "workspace_routes": ["/app", "/app/admin", "/app/executive", "/app/reception", "/app/doctor", "/app/clinic", "/app/lab", "/app/collector", "/app/patient"],
+  "duplicated_routes": "none_detected",
+  "duplicated_models_or_apis": "none_detected",
+  "backend": {
+    "health_endpoint": "/api/v1/system/health",
+    "auth_prefix": "/api/v1/auth",
+    "auth_endpoints": {
+      "login": "POST /api/v1/auth/login",
+      "current_user": "GET /api/v1/auth/me",
+      "refresh": "POST /api/v1/auth/refresh",
+      "logout": "POST /api/v1/auth/logout",
+      "memberships": "GET /api/v1/auth/memberships",
+      "switch_organization": "POST /api/v1/auth/switch-organization",
+      "capabilities_permissions_features": "GET /api/v1/auth/capabilities",
+      "forgot_password": "POST /api/v1/auth/forgot-password",
+      "register": "POST /api/v1/auth/register",
+      "reset_password": "POST /api/v1/auth/reset-password (501 RESET_NOT_ENABLED)"
+    },
+    "feature_flags_endpoint": "none_separate_uses_capabilities",
+    "cors_init": "backend/app/core/security.py",
+    "cors_env_var": "CORS_ORIGINS",
+    "cors_intended_production_allowlist": ["https://dxcon.com.vn", "https://www.dxcon.com.vn", "https://app.dxcon.com.vn"],
+    "cors_wildcard_blocked_in_strict_env": true,
+    "config_module": "backend/app/core/config.py",
+    "production_readiness_guard": "backend/app/infrastructure/production_readiness.py"
+  },
+  "migrations": {
+    "count": 20,
+    "range": "001-020",
+    "all_present_in_base_commit": true,
+    "divergent_unmerged": "none"
+  },
+  "sprint_status": {
+    "sprint_1_auth_appshell": "VERIFIED_AND_MERGED",
+    "sprint_2_workspaces": "VERIFIED_AND_MERGED",
+    "sprint_3_lims_core": "VERIFIED_AND_MERGED",
+    "sprint_4_iot_logistics": "VERIFIED_AND_MERGED",
+    "sprint_5_analyzer_integration": "VERIFIED_AND_MERGED",
+    "sprint_6_clinical_workflow": "VERIFIED_AND_MERGED",
+    "sprint_7_patient_commerce": "VERIFIED_AND_MERGED",
+    "sprint_8_collector_lab_workflow": "VERIFIED_AND_MERGED"
+  },
+  "sprint_status_note": "MERGED means merged into the linear release stack (base commit), NOT merged into main and NOT deployed. main remains at Release 3.0. No capability is LIVE until deployed and smoke/UAT-verified.",
+  "known_limitations": [
+    "reset-password backend returns 501 RESET_NOT_ENABLED",
+    "render.yaml does not set CORS_ORIGINS, REDIS_URL, or SMTP vars (must be set in Render dashboard)",
+    "no vercel.json; Vercel Root Directory must be set to apps/web in dashboard",
+    "no /logout page route although /logout is whitelisted in middleware"
+  ]
+}

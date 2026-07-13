@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
@@ -94,7 +95,16 @@ ADAPTER_REGISTRY: dict[str, type[PaymentProviderAdapter]] = {
     "VNPAY": VNPayPlaceholderAdapter,
 }
 
+_STRICT_ENVS = {"production", "prod", "live", "staging", "stage", "uat"}
+
 
 def get_payment_adapter(provider_code: str) -> PaymentProviderAdapter:
     cls = ADAPTER_REGISTRY.get(provider_code.upper(), ManualBankQRAdapter)
+    env = os.getenv("APP_ENV", "development").strip().lower()
+    if env in _STRICT_ENVS and not cls.production_ready:
+        # Production guard: the test-only adapter must never settle real payments.
+        raise ValueError(
+            f"Payment provider '{provider_code}' is not production-ready "
+            f"and is disabled in {env} environments"
+        )
     return cls()
