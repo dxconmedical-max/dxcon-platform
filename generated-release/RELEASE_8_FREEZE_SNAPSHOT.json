@@ -1,0 +1,20 @@
+{
+  "release": "8.1",
+  "event": "code_freeze",
+  "at": "2026-07-14T04:40:00+00:00",
+  "tag": "release/8.1-code-freeze",
+  "branch": "release/8.1-production-integration",
+  "includes": {
+    "8.0_sprint_6": "b69e655",
+    "8.0_sprint_7": "456fabb",
+    "8.1_sprint_9": "19a2931",
+    "8.1_blocker_resolution": "069cb8c",
+    "8.1_code_freeze": "tagged as release/8.1-code-freeze"
+  },
+  "policy": {
+    "no_new_product_features_on_frozen_tip": true,
+    "no_merge_to_main_until_staging_uat": true,
+    "no_production_migration": true,
+    "no_claim_live_until_smoke_and_uat": true
+  }
+}

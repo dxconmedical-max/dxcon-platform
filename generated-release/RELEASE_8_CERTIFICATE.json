@@ -1,0 +1,47 @@
+{
+  "certificate": "RELEASE_8_CERTIFICATE",
+  "release_family": "8.0+8.1",
+  "version": "8.1.0-code-freeze",
+  "status": "CODE_FREEZE",
+  "production_ready": false,
+  "merge_to_main": false,
+  "branch": "release/8.1-production-integration",
+  "code_freeze_tag": "release/8.1-code-freeze",
+  "code_freeze_commit": "RESOLVED_BY_TAG",
+  "main_base": "b8ae528586a0c20cbd7e72256718a8c2a89ceeb0",
+  "commits_ahead_of_main_at_freeze": 12,
+  "generated_at": "2026-07-14T04:40:00+00:00",
+  "modules_certified_in_code": [
+    "authentication_appshell",
+    "lims_core",
+    "iot_logistics",
+    "analyzer_integration",
+    "clinical_workflow_result_governance",
+    "patient_commerce",
+    "domain_aware_web_routing",
+    "production_smoke_tooling",
+    "staging_runbooks"
+  ],
+  "explicitly_not_live": [
+    "sprint_6_clinical_governance_in_production",
+    "sprint_7_patient_commerce_in_production",
+    "app.dxcon.com.vn",
+    "live_payment_gateways"
+  ],
+  "exit_states": {
+    "CODE_READY": "PASS",
+    "STAGING_CONFIG_READY": "PASS",
+    "STAGING_DEPLOYED": "BLOCKED_EXTERNAL_ACTION",
+    "MIGRATIONS_APPLIED_STAGING": "NOT_STARTED",
+    "SMOKE_PASS": "FAIL",
+    "UAT_PASS": "NOT_STARTED",
+    "PRODUCTION_READY": "NOT_STARTED"
+  },
+  "critical_blockers_remaining": [
+    "CORS-PROD",
+    "DEPLOY-INT",
+    "DNS-APP",
+    "CRIT-PHI-001"
+  ],
+  "next_manual_action": "Set Render CORS_ORIGINS=https://dxcon.com.vn,https://www.dxcon.com.vn,https://app.dxcon.com.vn and create staging Render/Vercel resources per docs/STAGING_ENVIRONMENT_VARIABLES.md"
+}
