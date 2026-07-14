@@ -1,0 +1,41 @@
+{
+  "release": "9.0",
+  "generated": "2026-07-14",
+  "source_branch": "release/8.1-production-integration",
+  "exit_states": {
+    "CODE_READY": "PASS",
+    "RENDER_CONFIG_READY": "BLOCKED_EXTERNAL_ACTION",
+    "VERCEL_CONFIG_READY": "BLOCKED_EXTERNAL_ACTION",
+    "CORS_LIVE_VERIFIED": "BLOCKED_EXTERNAL_ACTION",
+    "STAGING_RESOURCES_READY": "BLOCKED_EXTERNAL_ACTION",
+    "STAGING_MIGRATIONS_APPLIED": "NOT_STARTED",
+    "STAGING_DEPLOYED": "BLOCKED_EXTERNAL_ACTION",
+    "STAGING_SMOKE_PASS": "NOT_STARTED",
+    "STAGING_UAT_PASS": "NOT_STARTED",
+    "PRODUCTION_MIGRATIONS_APPLIED": "NOT_STARTED",
+    "PRODUCTION_DEPLOYED": "NOT_STARTED",
+    "PRODUCTION_SMOKE_PASS": "NOT_STARTED",
+    "PRODUCTION_READY": "NOT_STARTED"
+  },
+  "notes": {
+    "CODE_READY": "Release 8.1 tip code-frozen; CORS unit tests PASS; duplicate routes fixed; password-reset UI honest",
+    "CORS_LIVE_VERIFIED": "Render CORS_ORIGINS must be set to production apex/www/app then redeployed",
+    "RENDER_CONFIG_READY": "Operator must set DATABASE_URL Redis SMTP CORS secrets in Render",
+    "VERCEL_CONFIG_READY": "Operator must set NEXT_PUBLIC_* and attach app.dxcon.com.vn",
+    "STAGING_RESOURCES_READY": "Create isolated Postgres Redis Render Vercel DNS"
+  },
+  "critical_blockers": [
+    "CORS-PROD-RENDER",
+    "STAGING-INFRA",
+    "DNS-APP",
+    "CRIT-PHI-001"
+  ],
+  "high_blockers": [
+    "REDIS-PROD",
+    "SMTP-OR-KEEP-RESET-DISABLED",
+    "STAGING-MIGRATIONS-016-020",
+    "STAGING-UAT-EXECUTION"
+  ],
+  "exact_cors_origins": "https://dxcon.com.vn,https://www.dxcon.com.vn,https://app.dxcon.com.vn",
+  "next_manual_action": "In Render production service, set CORS_ORIGINS=https://dxcon.com.vn,https://www.dxcon.com.vn,https://app.dxcon.com.vn and redeploy"
+}

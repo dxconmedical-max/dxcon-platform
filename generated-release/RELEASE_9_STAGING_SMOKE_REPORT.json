@@ -1,0 +1,24 @@
+{
+  "release": "9.0",
+  "generated": "2026-07-14",
+  "status": "NOT_STARTED",
+  "classification": "Staging smoke cannot PASS until staging hosts are deployed.",
+  "script": "apps/web/scripts/production-smoke-test.mjs",
+  "api_script": "backend/scripts/production_api_smoke_test.py",
+  "command_example": {
+    "web": "PUBLIC_SITE_URL=https://staging.dxcon.com.vn APP_URL=https://app-staging.dxcon.com.vn API_BASE_URL=https://api-staging.dxcon.com.vn SMOKE_ENV=staging SMOKE_REPORT_PATH=generated-release/RELEASE_9_STAGING_SMOKE_REPORT.json node apps/web/scripts/production-smoke-test.mjs",
+    "api": "python backend/scripts/production_api_smoke_test.py --api-base https://api-staging.dxcon.com.vn --cors-origin https://app-staging.dxcon.com.vn --report generated-release/RELEASE_9_STAGING_SMOKE_REPORT.json"
+  },
+  "required_checks": {
+    "public": ["homepage_200", "services", "partners", "login_link_targets_app"],
+    "application": ["login_200", "unauthenticated_app_redirect", "protected_not_publicly_cached", "role_routes_no_500"],
+    "api": ["health", "cors_allowed", "cors_denied", "auth_401_or_403", "no_blanket_edge_403", "no_500"]
+  },
+  "results": [],
+  "summary": {
+    "passed": 0,
+    "failed": 0,
+    "total": 0,
+    "blocked_reason": "STAGING_RESOURCES_READY is BLOCKED_EXTERNAL_ACTION"
+  }
+}

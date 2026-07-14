@@ -119,7 +119,7 @@ function LoginForm() {
                 Remember me
               </label>
               <Link href="/forgot-password" className="text-teal-700 hover:text-teal-800">
-                Forgot password?
+                Need help signing in?
               </Link>
             </div>
             {(formError || error) && (

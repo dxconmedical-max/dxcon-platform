@@ -1,0 +1,68 @@
+{
+  "release": "9.0",
+  "generated": "2026-07-14",
+  "source": "backend/migrations/",
+  "order_authority": "numeric filenames in repository",
+  "destructive_ddl": false,
+  "production_auto_execute": false,
+  "order": [
+    "016_lims_core.sql",
+    "017_iot_logistics.sql",
+    "018_analyzer_integration.sql",
+    "019_clinical_workflow.sql",
+    "020_patient_commerce.sql"
+  ],
+  "migrations": [
+    {
+      "file": "016_lims_core.sql",
+      "order": 1,
+      "dependency": "006_lab_workspace_and_core_orders",
+      "classification": "additive",
+      "lock_risk": "medium",
+      "created": ["specimens", "containers", "barcode_logs", "storage_locations", "accessions", "sample_status_history"],
+      "changed": [],
+      "rollback": "forward_fix_or_snapshot_restore"
+    },
+    {
+      "file": "017_iot_logistics.sql",
+      "order": 2,
+      "dependency": "016_lims_core_and_iot_devices",
+      "classification": "additive",
+      "lock_risk": "low_medium",
+      "created": ["iot_device_credentials", "iot_device_assignments", "iot_canonical_readings", "iot_threshold_policies", "iot_cold_chain_excursions", "iot_platform_alerts", "iot_telemetry_dead_letters", "logistics_transport_trips"],
+      "changed": ["iot_devices"],
+      "rollback": "forward_fix_or_snapshot_restore"
+    },
+    {
+      "file": "018_analyzer_integration.sql",
+      "order": 3,
+      "dependency": "lab_analyzers",
+      "classification": "additive",
+      "lock_risk": "low",
+      "created": ["analyzer_integration_messages", "integration_test_mappings", "integration_quarantine", "analyzer_worklist_items", "analyzer_preliminary_results"],
+      "changed": ["lab_analyzers"],
+      "rollback": "forward_fix_or_snapshot_restore"
+    },
+    {
+      "file": "019_clinical_workflow.sql",
+      "order": 4,
+      "dependency": "biz_result_items",
+      "classification": "additive",
+      "lock_risk": "low",
+      "created": ["clinical_workflow_transitions", "critical_value_policies", "report_verification_tokens", "critical_value_acknowledgements"],
+      "changed": ["biz_result_items"],
+      "rollback": "forward_fix_or_snapshot_restore"
+    },
+    {
+      "file": "020_patient_commerce.sql",
+      "order": 5,
+      "dependency": "012_patient_marketplace",
+      "classification": "additive",
+      "lock_risk": "low",
+      "created": ["mp_slot_holds", "mp_patient_addresses", "mp_holidays", "mp_package_items"],
+      "changed": ["mp_providers", "mp_listings"],
+      "rollback": "forward_fix_or_snapshot_restore"
+    }
+  ],
+  "blockers": []
+}

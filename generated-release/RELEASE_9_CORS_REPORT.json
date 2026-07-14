@@ -1,0 +1,53 @@
+{
+  "release": "9.0",
+  "generated": "2026-07-14",
+  "source_branch": "release/8.1-production-integration",
+  "cors_code_status": "PASS",
+  "cors_live_status": "BLOCKED_EXTERNAL_ACTION",
+  "required_production_origins": [
+    "https://dxcon.com.vn",
+    "https://www.dxcon.com.vn",
+    "https://app.dxcon.com.vn"
+  ],
+  "exact_render_variable": "CORS_ORIGINS=https://dxcon.com.vn,https://www.dxcon.com.vn,https://app.dxcon.com.vn",
+  "implementation": {
+    "file": "backend/app/core/security.py",
+    "wildcard_blocked_in_strict_env": true,
+    "credentials_with_explicit_origins": true,
+    "allow_headers": [
+      "Authorization",
+      "Content-Type",
+      "X-Organization-ID",
+      "X-Correlation-ID",
+      "X-Request-ID",
+      "Idempotency-Key"
+    ],
+    "expose_headers": ["X-Correlation-ID", "X-Request-ID"],
+    "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+  },
+  "automated_tests": {
+    "file": "backend/tests/test_cors_hardening.py",
+    "coverage": [
+      "permitted_apex_origin",
+      "permitted_www_origin",
+      "permitted_application_origin",
+      "rejected_attacker_origin",
+      "options_preflight_allowed_origin",
+      "credentials_enabled_with_explicit_origins",
+      "staging_origins_separate_from_production",
+      "no_wildcard_production_cors",
+      "production_rejects_wildcard"
+    ]
+  },
+  "live_findings": {
+    "health_endpoint": "GET /api/v1/system/health returns 200 when reachable",
+    "misconfigured_live_acao": "Previous observation: Access-Control-Allow-Origin reflected https://dxcon-ap.onrender.com",
+    "classification": "BLOCKED_EXTERNAL_ACTION — configure CORS_ORIGINS on Render and redeploy",
+    "remaining_smoke_failures": "Live API CORS checks remain BLOCKED_EXTERNAL_ACTION until Render env is corrected"
+  },
+  "do_not": [
+    "place staging origins in production CORS_ORIGINS",
+    "use wildcard origin with credentials",
+    "reflect arbitrary Origin headers"
+  ]
+}

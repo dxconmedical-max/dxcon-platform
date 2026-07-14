@@ -1,261 +1,317 @@
-# Production UAT Package — Sprint 6 & 7
+# Production / Staging UAT Package — Sprint 6 & 7 (Release 9)
 
-**Release:** 8.1 · **Sprint:** 9
-**Environment:** Execute on **staging** (`uat.dxcon.com.vn`) before production.
-**Do not mark PASS until executed with evidence.**
+**Release:** 9.0  
+**Execute on staging first** (`staging.dxcon.com.vn` / `app-staging.dxcon.com.vn`).  
+**Do not mark PASS without evidence.**  
+**No real PHI. No production passwords in git.**
+
+Base host placeholders:
+
+- Public: `https://staging.dxcon.com.vn` (or production apex after cutover)
+- App: `https://app-staging.dxcon.com.vn`
+- API: `https://api-staging.dxcon.com.vn`
 
 ---
 
-## UAT-01 Public Website
+## UAT-01 Public website
 
 | Field | Value |
-| --- | --- |
-| Prerequisite | Staging or production frontend deployed |
-| Account role | None (unauthenticated) |
-| Route | `https://uat.dxcon.com.vn/` |
-| Steps | 1. Open homepage. 2. Verify hero, services, pricing sections render. 3. Click Sign In. |
-| Expected result | Homepage loads without auth. Sign In opens `app.uat.dxcon.com.vn/login`. No clinical data visible. |
+|---|---|
+| Prerequisite | Staging/public frontend deployed |
+| Account role | None |
+| URL | `/` |
+| Steps | Open homepage; verify landing content; click Sign In |
+| Expected result | 200; Sign In targets application `/login` |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
+| Evidence/screenshot | |
 | Blocker severity | Critical if fail |
 
----
-
-## UAT-02 Login and Session Restore
+## UAT-02 Login and session restore
 
 | Field | Value |
-| --- | --- |
-| Prerequisite | Pilot account exists on staging |
-| Account role | Any (e.g. `doctor@uat.dxcon.local`) |
-| Route | `https://app.uat.dxcon.com.vn/login` |
-| Steps | 1. Enter valid credentials. 2. Confirm redirect to role workspace. 3. Refresh page. 4. Confirm session restored without re-login. |
-| Expected result | Login succeeds. Session persists on refresh. No mock/demo banner. |
+|---|---|
+| Prerequisite | Pilot account |
+| Account role | Any authorized role |
+| URL | `/login` |
+| Steps | Login; confirm workspace redirect; refresh; confirm session |
+| Expected result | Real auth; no demo banner; session restored |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
-| Blocker severity | Critical if fail |
+| Evidence/screenshot | |
+| Blocker severity | Critical |
 
----
-
-## UAT-03 Admin Workspace
+## UAT-03 Admin workspace
 
 | Field | Value |
-| --- | --- |
+|---|---|
 | Prerequisite | Admin account |
 | Account role | ADMIN |
-| Route | `/app/admin` |
-| Steps | 1. Login as admin. 2. Navigate to admin workspace. 3. Verify sidebar menu items match permissions. 4. Open organizations page. |
-| Expected result | Admin workspace loads. Menu filtered by capabilities. No fake metrics. |
+| URL | `/app/admin` |
+| Steps | Open admin; verify menu permissions; open organizations |
+| Expected result | Loads; no fake metrics; permission-filtered nav |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
-| Blocker severity | High if fail |
+| Evidence/screenshot | |
+| Blocker severity | High |
 
----
-
-## UAT-04 Patient Booking
+## UAT-04 Patient service discovery
 
 | Field | Value |
-| --- | --- |
-| Prerequisite | Patient account; marketplace listings seeded |
+|---|---|
+| Prerequisite | Patient account; listings seeded |
 | Account role | PATIENT |
-| Route | `/app/patient/book` |
-| Steps | 1. Login as patient. 2. Open booking wizard. 3. Select service and provider. 4. Proceed through wizard steps. |
-| Expected result | Booking wizard loads. Services/providers from real API or honest empty state. |
+| URL | `/app/patient/book` or public `/services` |
+| Steps | Browse services/providers |
+| Expected result | Real API data or honest empty state |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
-| Blocker severity | High if fail |
+| Evidence/screenshot | |
+| Blocker severity | High |
 
----
-
-## UAT-05 Quotation and Slot Hold
+## UAT-05 Quotation
 
 | Field | Value |
-| --- | --- |
-| Prerequisite | UAT-04 in progress; slot engine configured |
+|---|---|
+| Prerequisite | Service + provider selected |
 | Account role | PATIENT |
-| Route | `/app/patient/book` (quotation step) |
-| Steps | 1. Select date/time slot. 2. Request quotation. 3. Verify slot hold (10 min). 4. Wait for hold expiry and confirm slot released. |
-| Expected result | Quotation returned with pricing. Slot held then released. |
+| URL | booking wizard quotation step |
+| Steps | Request quotation; verify priced breakdown |
+| Expected result | Server-priced quotation |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
-| Blocker severity | High if fail |
+| Evidence/screenshot | |
+| Blocker severity | High |
 
----
-
-## UAT-06 Payment Pending or Verified Test Flow
+## UAT-06 Slot hold
 
 | Field | Value |
-| --- | --- |
-| Prerequisite | Order created; payment adapter configured |
+|---|---|
+| Prerequisite | Quotation available |
 | Account role | PATIENT |
-| Route | `/app/patient/payments` |
-| Steps | 1. Create order with payment required. 2. Attempt payment. 3. Verify "Payment configuration required" if no live gateway. 4. Verify pay-later only if server policy allows. |
-| Expected result | No false claim of live VNPay/MoMo. Test adapter not usable in staging/production strict env. Manual bank QR or pay-later shown per policy. |
+| URL | booking slot step |
+| Steps | Hold slot; confirm expiry behavior |
+| Expected result | Hold created then expires/releases |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
-| Blocker severity | Critical if mock payment works in production |
+| Evidence/screenshot | |
+| Blocker severity | High |
 
----
-
-## UAT-07 Order Creation
+## UAT-07 Booking confirmation
 
 | Field | Value |
-| --- | --- |
-| Prerequisite | UAT-05 quotation accepted |
+|---|---|
+| Prerequisite | Slot held |
 | Account role | PATIENT |
-| Route | `/app/patient/book` (confirm step) |
-| Steps | 1. Confirm booking. 2. Verify order created in `/app/patient/orders`. 3. Check order status. |
-| Expected result | Order appears with correct status. Linked to selected service/provider. |
+| URL | booking confirm step |
+| Steps | Confirm booking |
+| Expected result | Booking/order created |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
-| Blocker severity | High if fail |
+| Evidence/screenshot | |
+| Blocker severity | High |
 
----
-
-## UAT-08 Specimen and Lab Workflow
+## UAT-08 Payment pending / manual QR state
 
 | Field | Value |
-| --- | --- |
-| Prerequisite | Order with specimen; lab account |
+|---|---|
+| Prerequisite | Booking requiring payment |
+| Account role | PATIENT |
+| URL | `/app/patient/payments` |
+| Steps | Open payment; observe provider state |
+| Expected result | No false live gateway claim; manual QR / pending / config-required as policy allows |
+| Actual result | |
+| PASS/FAIL | |
+| Evidence/screenshot | |
+| Blocker severity | Critical if mock payment settles in production |
+
+## UAT-09 Order creation
+
+| Field | Value |
+|---|---|
+| Prerequisite | Booking confirmed |
+| Account role | PATIENT |
+| URL | `/app/patient/orders` |
+| Steps | Verify order appears with correct status |
+| Expected result | Order linked to service/provider |
+| Actual result | |
+| PASS/FAIL | |
+| Evidence/screenshot | |
+| Blocker severity | High |
+
+## UAT-10 Specimen creation and collection
+
+| Field | Value |
+|---|---|
+| Prerequisite | Order ready for collection |
+| Account role | COLLECTOR / LAB |
+| URL | collector/lab specimen routes |
+| Steps | Create/collect specimen; assign barcode |
+| Expected result | Specimen lifecycle advances |
+| Actual result | |
+| PASS/FAIL | |
+| Evidence/screenshot | |
+| Blocker severity | High |
+
+## UAT-11 Transport and accession
+
+| Field | Value |
+|---|---|
+| Prerequisite | Collected specimen |
+| Account role | LAB / OPERATIONS |
+| URL | lab accession / logistics |
+| Steps | Transport if needed; accession at lab |
+| Expected result | Accession recorded; timeline updated |
+| Actual result | |
+| PASS/FAIL | |
+| Evidence/screenshot | |
+| Blocker severity | High |
+
+## UAT-12 Simulated analyzer result
+
+| Field | Value |
+|---|---|
+| Prerequisite | Staging simulator enabled |
 | Account role | LAB |
-| Route | `/app/lab/specimens`, `/app/lab/accession` |
-| Steps | 1. Login as lab tech. 2. Accession specimen from order. 3. Verify barcode assignment. 4. Check specimen timeline. |
-| Expected result | Specimen accessioned. Barcode generated. Timeline updated. |
+| URL | lab analyzers / result intake |
+| Steps | Ingest simulated analyzer preliminary result |
+| Expected result | Result enters queue; **not** auto-released |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
-| Blocker severity | High if fail |
+| Evidence/screenshot | |
+| Blocker severity | Critical if auto-release |
 
----
-
-## UAT-09 Technician Validation
+## UAT-13 Technician validation
 
 | Field | Value |
-| --- | --- |
-| Prerequisite | Result entered for accessioned specimen |
-| Account role | LAB (technician) |
-| Route | `/app/lab/result-review` |
-| Steps | 1. Open technician review queue. 2. Select pending result. 3. Perform explicit validation action. 4. Verify status changes to validated (not auto-released). |
-| Expected result | Explicit validation required. No automatic release. Status transitions logged. |
+|---|---|
+| Prerequisite | Preliminary/pending result |
+| Account role | LAB technician |
+| URL | `/app/lab/result-review` |
+| Steps | Explicit validate |
+| Expected result | Status → validated; not patient-visible as final |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
-| Blocker severity | Critical if auto-release occurs |
+| Evidence/screenshot | |
+| Blocker severity | Critical |
 
----
-
-## UAT-10 Doctor Approval
+## UAT-14 Doctor approval
 
 | Field | Value |
-| --- | --- |
-| Prerequisite | UAT-09 validated result |
+|---|---|
+| Prerequisite | Technician-validated result |
 | Account role | DOCTOR |
-| Route | `/app/doctor/review` |
-| Steps | 1. Login as doctor. 2. Open review queue. 3. Review validated result. 4. Perform explicit approval. |
-| Expected result | Doctor must explicitly approve. Result not released until UAT-11. |
+| URL | `/app/doctor/review` |
+| Steps | Explicit approve |
+| Expected result | Approved; still not released until UAT-15 |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
-| Blocker severity | Critical if auto-release occurs |
+| Evidence/screenshot | |
+| Blocker severity | Critical |
 
----
-
-## UAT-11 Explicit Report Release
+## UAT-15 Explicit report release
 
 | Field | Value |
-| --- | --- |
-| Prerequisite | UAT-10 approved result |
-| Account role | DOCTOR or authorized release role |
-| Route | `/app/doctor/reports` |
-| Steps | 1. Open approved report. 2. Perform explicit release action. 3. Verify report version created. 4. Confirm pre-release result not accessible to patient. |
-| Expected result | Release is explicit separate action. Version incremented. Pre-release hidden from patient. |
+|---|---|
+| Prerequisite | Doctor-approved result |
+| Account role | DOCTOR / release-authorized |
+| URL | `/app/doctor/reports` |
+| Steps | Explicit release |
+| Expected result | Versioned release; pre-release hidden from patient |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
-| Blocker severity | Critical if fail |
+| Evidence/screenshot | |
+| Blocker severity | Critical |
 
----
-
-## UAT-12 Patient Released-Result Access
+## UAT-16 Patient released-result access
 
 | Field | Value |
-| --- | --- |
-| Prerequisite | UAT-11 report released |
-| Account role | PATIENT (owner of order) |
-| Route | `/app/patient/results` |
-| Steps | 1. Login as patient who owns the order. 2. Open results. 3. Verify only released results visible. 4. Confirm pre-release results not shown. |
-| Expected result | Only explicitly released results accessible. No draft/pending results. |
+|---|---|
+| Prerequisite | Released report |
+| Account role | PATIENT (owner) |
+| URL | `/app/patient/results` |
+| Steps | View results |
+| Expected result | Only released results visible |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
-| Blocker severity | Critical if pre-release visible |
+| Evidence/screenshot | |
+| Blocker severity | Critical |
 
----
-
-## UAT-13 PDF and Verification Token
+## UAT-17 PDF authorization
 
 | Field | Value |
-| --- | --- |
-| Prerequisite | UAT-11 released report |
+|---|---|
+| Prerequisite | Released report |
 | Account role | PATIENT |
-| Route | `/app/patient/results` → PDF download |
-| Steps | 1. Download PDF for released report. 2. Verify PDF requires auth (not public URL). 3. Check verification QR/token on report. 4. Validate token via verification endpoint. |
-| Expected result | PDF access protected. Verification token valid for released report only. |
+| URL | PDF download from results |
+| Steps | Download PDF; attempt unauthenticated URL |
+| Expected result | Auth required; no public PHI PDF |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
-| Blocker severity | High if PDF publicly accessible |
+| Evidence/screenshot | |
+| Blocker severity | High |
 
----
-
-## UAT-14 Patient Isolation
+## UAT-18 Verification token
 
 | Field | Value |
-| --- | --- |
-| Prerequisite | Two patient accounts with separate orders |
-| Account role | PATIENT A, PATIENT B |
-| Route | `/app/patient/results`, `/app/patient/orders` |
-| Steps | 1. Login as Patient A. 2. Note order/result IDs. 3. Logout. 4. Login as Patient B. 5. Attempt to access Patient A's order/result by ID manipulation. |
-| Expected result | Patient B cannot see Patient A's data. API returns 403/404. |
+|---|---|
+| Prerequisite | Released report with token |
+| Account role | Verifier / PATIENT |
+| URL | `/verify-report/[token]` |
+| Steps | Validate token |
+| Expected result | Token verifies released report only |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
-| Blocker severity | Critical if fail |
+| Evidence/screenshot | |
+| Blocker severity | High |
 
----
-
-## UAT-15 Tenant Isolation
+## UAT-19 Patient isolation
 
 | Field | Value |
-| --- | --- |
-| Prerequisite | Two org accounts in different tenants |
-| Account role | ADMIN Org A, ADMIN Org B |
-| Route | `/app/admin/organizations`, `/app/admin/patients` |
-| Steps | 1. Login as Admin Org A. 2. Note org/patient IDs. 3. Switch or login as Admin Org B. 4. Attempt cross-tenant ID access. |
-| Expected result | Cross-tenant access denied. Each org sees only its data. |
+|---|---|
+| Prerequisite | Two patients with distinct orders |
+| Account role | PATIENT A then PATIENT B |
+| URL | orders/results |
+| Steps | Attempt IDOR / cross-patient access |
+| Expected result | 403/404; no cross-patient data |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
-| Blocker severity | Critical if fail |
+| Evidence/screenshot | |
+| Blocker severity | Critical |
 
----
-
-## UAT-16 Logout and Back-Button Protection
+## UAT-20 Tenant isolation
 
 | Field | Value |
-| --- | --- |
+|---|---|
+| Prerequisite | Two organizations |
+| Account role | ADMIN Org A / ADMIN Org B |
+| URL | `/app/admin/*` |
+| Steps | Attempt cross-tenant ID access |
+| Expected result | Denied; tenant scoping enforced |
+| Actual result | |
+| PASS/FAIL | |
+| Evidence/screenshot | |
+| Blocker severity | Critical |
+
+## UAT-21 Logout and back-button protection
+
+| Field | Value |
+|---|---|
 | Prerequisite | Authenticated session |
 | Account role | Any |
-| Route | Any protected route → logout |
-| Steps | 1. Login and navigate to protected page. 2. Click logout. 3. Press browser back button. 4. Attempt to access protected route directly. |
-| Expected result | Back button does not show protected content. Redirect to login. Session fully cleared. |
+| URL | protected page → logout |
+| Steps | Logout; browser back; open `/app` |
+| Expected result | No protected content; redirect to login; session cleared |
 | Actual result | |
 | PASS/FAIL | |
-| Screenshot/evidence | |
-| Blocker severity | High if fail |
+| Evidence/screenshot | |
+| Blocker severity | High |
+
+---
+
+## UAT sign-off
+
+| Gate | PASS/FAIL | Date | Tester |
+|---|---|---|---|
+| Staging UAT complete | | | |
+| Critical path production subset | | | |
