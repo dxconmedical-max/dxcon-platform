@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Header, MobileNav } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { IS_STAGING } from "@/lib/constants";
 import { workspaceByPath } from "@/lib/workspaces";
 
 export function AppShell({
@@ -34,7 +35,12 @@ export function AppShell({
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <div className="hidden lg:block">
+      {IS_STAGING ? (
+        <div className="fixed inset-x-0 top-0 z-50 bg-amber-500 px-3 py-1 text-center text-xs font-semibold text-amber-950">
+          STAGING — not production. Synthetic data only.
+        </div>
+      ) : null}
+      <div className={`hidden lg:block${IS_STAGING ? " pt-6" : ""}`}>
         <Sidebar />
       </div>
 
@@ -52,7 +58,7 @@ export function AppShell({
         </div>
       ) : null}
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className={`flex min-w-0 flex-1 flex-col${IS_STAGING ? " pt-6" : ""}`}>
         <Header
           title={title}
           workspaceLabel={definition?.title}

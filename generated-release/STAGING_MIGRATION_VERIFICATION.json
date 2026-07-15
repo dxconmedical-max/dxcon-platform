@@ -1,0 +1,17 @@
+{
+  "release": "9.0",
+  "generated": "2026-07-15",
+  "ordering_ambiguous": false,
+  "destructive_ddl": false,
+  "safety": "PASS",
+  "order": [
+    "016_lims_core.sql",
+    "017_iot_logistics.sql",
+    "018_analyzer_integration.sql",
+    "019_clinical_workflow.sql",
+    "020_patient_commerce.sql"
+  ],
+  "runner": "backend/scripts/apply_staging_migrations_016_020.sh",
+  "production_execution": "FORBIDDEN",
+  "status": "NOT_STARTED"
+}

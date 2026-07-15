@@ -14,6 +14,13 @@ describe("domains", () => {
     expect(hostKind("app.dxcon.com.vn")).toBe("application");
   });
 
+  it("classifies staging hosts", () => {
+    expect(isPublicSiteHost("staging.dxcon.com.vn")).toBe(true);
+    expect(isAppHost("app-staging.dxcon.com.vn")).toBe(true);
+    expect(hostKind("staging.dxcon.com.vn")).toBe("public_site");
+    expect(hostKind("app-staging.dxcon.com.vn")).toBe("application");
+  });
+
   it("treats unknown hosts as preview", () => {
     expect(isPreviewHost("dxcon-web.vercel.app")).toBe(true);
     expect(hostKind("localhost:3000")).toBe("preview");

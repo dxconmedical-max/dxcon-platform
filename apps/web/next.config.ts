@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
-const isProduction =
-  (process.env.NEXT_PUBLIC_APP_ENV ?? "development") === "production";
+const appEnv = process.env.NEXT_PUBLIC_APP_ENV ?? "development";
+const isProduction = appEnv === "production";
+const isStaging = appEnv === "staging";
 
 const required = [
   "NEXT_PUBLIC_API_BASE_URL",
@@ -10,14 +11,16 @@ const required = [
   "NEXT_PUBLIC_APP_ENV",
 ];
 
-if (isProduction) {
+if (isProduction || isStaging) {
   const missing = required.filter((key) => !process.env[key]);
   if ((process.env.NEXT_PUBLIC_DEMO_MODE ?? "false").toLowerCase() === "true") {
-    missing.push("NEXT_PUBLIC_DEMO_MODE must be false in production");
+    missing.push(
+      `NEXT_PUBLIC_DEMO_MODE must be false in ${isProduction ? "production" : "staging"}`,
+    );
   }
   if (missing.length > 0) {
     throw new Error(
-      `Missing required production environment variables: ${missing.join(", ")}`,
+      `Missing required ${isProduction ? "production" : "staging"} environment variables: ${missing.join(", ")}`,
     );
   }
 }

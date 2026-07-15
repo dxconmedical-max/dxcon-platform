@@ -30,6 +30,8 @@ export function collectEnvErrors(): string[] {
   const errors: string[] = [];
   const appEnv = (readEnv("NEXT_PUBLIC_APP_ENV") ?? "development") as AppEnvironment;
   const isProduction = appEnv === "production";
+  const isStaging = appEnv === "staging";
+  const isDeployed = isProduction || isStaging;
 
   for (const key of REQUIRED_PUBLIC_VARS) {
     if (!readEnv(key)) {
@@ -41,20 +43,24 @@ export function collectEnvErrors(): string[] {
   if (isProduction && demoMode) {
     errors.push("NEXT_PUBLIC_DEMO_MODE must be false in production");
   }
+  if (isStaging && demoMode) {
+    errors.push("NEXT_PUBLIC_DEMO_MODE must be false in staging (use pilot accounts)");
+  }
 
-  if (isProduction) {
+  if (isDeployed) {
     const apiBase = readEnv("NEXT_PUBLIC_API_BASE_URL");
     const publicSite = readEnv("NEXT_PUBLIC_PUBLIC_SITE_URL");
     const appUrl = readEnv("NEXT_PUBLIC_APP_URL");
+    const label = isProduction ? "production" : "staging";
 
     if (apiBase && isLocalhostUrl(apiBase)) {
-      errors.push("NEXT_PUBLIC_API_BASE_URL must not use localhost in production");
+      errors.push(`NEXT_PUBLIC_API_BASE_URL must not use localhost in ${label}`);
     }
     if (publicSite && isLocalhostUrl(publicSite)) {
-      errors.push("NEXT_PUBLIC_PUBLIC_SITE_URL must not use localhost in production");
+      errors.push(`NEXT_PUBLIC_PUBLIC_SITE_URL must not use localhost in ${label}`);
     }
     if (appUrl && isLocalhostUrl(appUrl)) {
-      errors.push("NEXT_PUBLIC_APP_URL must not use localhost in production");
+      errors.push(`NEXT_PUBLIC_APP_URL must not use localhost in ${label}`);
     }
   }
 
@@ -65,25 +71,29 @@ export function assertProductionEnv(): void {
   const errors = collectEnvErrors();
   if (errors.length > 0) {
     throw new Error(
-      `Production environment validation failed:\n${errors.map((e) => `  - ${e}`).join("\n")}`,
+      `Environment validation failed:\n${errors.map((e) => `  - ${e}`).join("\n")}`,
     );
   }
 }
 
 const appEnv = (readEnv("NEXT_PUBLIC_APP_ENV") ?? "development") as AppEnvironment;
 const isProduction = appEnv === "production";
+const isStaging = appEnv === "staging";
 
-if (isProduction) {
+if (isProduction || isStaging) {
   assertProductionEnv();
 }
 
 export const env = {
-  apiBaseUrl: readEnv("NEXT_PUBLIC_API_BASE_URL") ?? (isProduction ? "" : "http://localhost:5000"),
-  publicSiteUrl: readEnv("NEXT_PUBLIC_PUBLIC_SITE_URL") ?? (isProduction ? "" : "http://localhost:3000"),
-  appUrl: readEnv("NEXT_PUBLIC_APP_URL") ?? (isProduction ? "" : "http://localhost:3000"),
+  apiBaseUrl: readEnv("NEXT_PUBLIC_API_BASE_URL") ?? (isProduction || isStaging ? "" : "http://localhost:5000"),
+  publicSiteUrl:
+    readEnv("NEXT_PUBLIC_PUBLIC_SITE_URL") ??
+    (isProduction || isStaging ? "" : "http://localhost:3000"),
+  appUrl: readEnv("NEXT_PUBLIC_APP_URL") ?? (isProduction || isStaging ? "" : "http://localhost:3000"),
   appEnv,
   demoMode: (readEnv("NEXT_PUBLIC_DEMO_MODE") ?? "false").toLowerCase() === "true",
   isProduction,
+  isStaging,
 } as const;
 
 export type PublicEnv = typeof env;

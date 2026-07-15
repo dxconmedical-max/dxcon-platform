@@ -1,0 +1,15 @@
+{
+  "release": "9.0",
+  "generated": "2026-07-15",
+  "exit_states": {
+    "CODE_READY": "PASS",
+    "STAGING_CONFIG_READY": "PASS",
+    "STAGING_DEPLOYED": "BLOCKED_EXTERNAL_ACTION",
+    "MIGRATIONS_APPLIED_STAGING": "NOT_STARTED",
+    "SMOKE_PASS": "NOT_STARTED",
+    "UAT_PASS": "NOT_STARTED",
+    "PRODUCTION_READY": "NOT_STARTED",
+    "MOBILE_FOUNDATION_DOCS": "PASS"
+  },
+  "next_manual_action": "Create Render staging PostgreSQL named dxcon-staging-postgres (separate from production), then continue docs/STAGING_MANUAL_SETUP_CHECKLIST.md"
+}

@@ -1,7 +1,14 @@
-import { IS_PRODUCTION, PUBLIC_SITE_URL, APP_URL } from "@/lib/constants";
+import { APP_ENV, APP_URL, IS_PRODUCTION, PUBLIC_SITE_URL } from "@/lib/constants";
 
-export const PUBLIC_SITE_HOSTS = ["dxcon.com.vn", "www.dxcon.com.vn"] as const;
-export const APP_HOSTS = ["app.dxcon.com.vn"] as const;
+/** Production marketing hosts */
+export const PUBLIC_SITE_HOSTS = [
+  "dxcon.com.vn",
+  "www.dxcon.com.vn",
+  "staging.dxcon.com.vn",
+] as const;
+
+/** Production / staging application hosts */
+export const APP_HOSTS = ["app.dxcon.com.vn", "app-staging.dxcon.com.vn"] as const;
 
 export type HostKind = "public_site" | "application" | "preview";
 
@@ -18,12 +25,19 @@ export function hostFromUrl(url: string): string {
   }
 }
 
+function isDeployedSplitEnv(): boolean {
+  return IS_PRODUCTION || APP_ENV === "staging";
+}
+
 export function isPublicSiteHost(host: string | null | undefined): boolean {
   const normalized = normalizeHost(host);
   if (PUBLIC_SITE_HOSTS.includes(normalized as (typeof PUBLIC_SITE_HOSTS)[number])) {
     return true;
   }
-  return IS_PRODUCTION && normalized === hostFromUrl(PUBLIC_SITE_URL);
+  if (isDeployedSplitEnv() && normalized === hostFromUrl(PUBLIC_SITE_URL)) {
+    return true;
+  }
+  return false;
 }
 
 export function isAppHost(host: string | null | undefined): boolean {
@@ -31,7 +45,10 @@ export function isAppHost(host: string | null | undefined): boolean {
   if (APP_HOSTS.includes(normalized as (typeof APP_HOSTS)[number])) {
     return true;
   }
-  return IS_PRODUCTION && normalized === hostFromUrl(APP_URL);
+  if (isDeployedSplitEnv() && normalized === hostFromUrl(APP_URL)) {
+    return true;
+  }
+  return false;
 }
 
 export function hostKind(host: string | null | undefined): HostKind {

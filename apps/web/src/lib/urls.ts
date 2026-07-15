@@ -1,4 +1,4 @@
-import { APP_URL, IS_PRODUCTION } from "@/lib/constants";
+import { APP_ENV, APP_URL, IS_PRODUCTION } from "@/lib/constants";
 import { isPublicSiteHost } from "@/lib/domains";
 
 /**
@@ -15,11 +15,15 @@ export function safeRedirectPath(
   return next;
 }
 
+function usesSplitDomains(): boolean {
+  return IS_PRODUCTION || APP_ENV === "staging";
+}
+
 /**
- * Sign-in URL: on production marketing hosts, route to the app subdomain.
+ * Sign-in URL: on production/staging marketing hosts, route to the app subdomain.
  */
 export function loginUrl(host?: string | null): string {
-  if (!IS_PRODUCTION) return "/login";
+  if (!usesSplitDomains()) return "/login";
   if (isPublicSiteHost(host)) {
     return `${APP_URL.replace(/\/$/, "")}/login`;
   }
@@ -31,14 +35,14 @@ export function loginUrl(host?: string | null): string {
  */
 export function appPathUrl(path: string, host?: string | null): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  if (IS_PRODUCTION && isPublicSiteHost(host)) {
+  if (usesSplitDomains() && isPublicSiteHost(host)) {
     return `${APP_URL.replace(/\/$/, "")}${normalized}`;
   }
   return normalized;
 }
 
 export function bookDemoUrl(host?: string | null): string {
-  if (IS_PRODUCTION && isPublicSiteHost(host)) {
+  if (usesSplitDomains() && isPublicSiteHost(host)) {
     return `${APP_URL.replace(/\/$/, "")}/book-demo`;
   }
   return "/book-demo";

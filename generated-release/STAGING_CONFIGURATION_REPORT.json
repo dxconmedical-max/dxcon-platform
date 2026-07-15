@@ -1,0 +1,42 @@
+{
+  "release": "9.0",
+  "generated": "2026-07-15",
+  "branch": "release/8.1-production-integration",
+  "domains": {
+    "public": "https://staging.dxcon.com.vn",
+    "application": "https://app-staging.dxcon.com.vn",
+    "api": "https://api-staging.dxcon.com.vn"
+  },
+  "frontend_env_names": [
+    "NEXT_PUBLIC_API_BASE_URL",
+    "NEXT_PUBLIC_PUBLIC_SITE_URL",
+    "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_APP_ENV",
+    "NEXT_PUBLIC_DEMO_MODE"
+  ],
+  "backend_env_names": [
+    "APP_ENV",
+    "DATABASE_URL",
+    "REDIS_URL",
+    "SECRET_KEY",
+    "JWT_SECRET_KEY",
+    "CORS_ORIGINS",
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_USER",
+    "SMTP_PASSWORD",
+    "SMTP_FROM",
+    "SMTP_USE_TLS",
+    "MARKETPLACE_PAYMENT_WEBHOOK_SECRET",
+    "DEMO_MODE",
+    "LOG_FORMAT"
+  ],
+  "cors_staging_value": "https://staging.dxcon.com.vn,https://app-staging.dxcon.com.vn",
+  "code_support": {
+    "staging_hosts_in_domains_ts": true,
+    "staging_localhost_rejected": true,
+    "staging_banner": true,
+    "mock_payment_blocked_in_staging": true
+  },
+  "secrets_committed": false
+}

@@ -6,6 +6,7 @@ export const APP_URL = env.appUrl;
 export const APP_ENV = env.appEnv;
 export const DEMO_MODE = env.demoMode;
 export const IS_PRODUCTION = env.isProduction;
+export const IS_STAGING = env.isStaging;
 
 export const APP_NAME = "DxCon";
 
