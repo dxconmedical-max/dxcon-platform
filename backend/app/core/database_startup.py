@@ -1,11 +1,29 @@
 import logging
 import time
 
+from flask import has_app_context
 from sqlalchemy import inspect, text
 
 from app.extensions.db import db
 
 logger = logging.getLogger("dxcon.database")
+
+
+def _safe_session_rollback():
+    """Roll back only when a Flask application context is active.
+
+    Avoids masking the original database error with
+    ``Working outside of application context`` from a failed rollback.
+    """
+    if not has_app_context():
+        return
+    try:
+        db.session.rollback()
+    except Exception as rollback_exc:
+        logger.debug(
+            "database session rollback skipped after connection failure",
+            extra={"error": str(rollback_exc)},
+        )
 
 
 def verify_database_connection(app, retries=None, delay_seconds=None):
@@ -26,7 +44,7 @@ def verify_database_connection(app, retries=None, delay_seconds=None):
             return True
         except Exception as exc:
             last_error = exc
-            db.session.rollback()
+            _safe_session_rollback()
             logger.warning(
                 "database connection attempt failed",
                 extra={"attempt": attempt, "error": str(exc)},

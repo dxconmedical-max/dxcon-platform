@@ -22,6 +22,16 @@ def log_production_startup(app):
     )
 
 
+_STRICT_STARTUP_ENVS = {
+    "production",
+    "prod",
+    "live",
+    "staging",
+    "stage",
+    "uat",
+}
+
+
 def validate_startup(app):
     validate_config(app)
 
@@ -33,7 +43,8 @@ def validate_startup(app):
             migration_status = startup_database_check(app)
         except Exception as exc:
             migration_status = {"ready": False, "error": str(exc)}
-            if app.config.get("APP_ENV") == "production":
+            env = (app.config.get("APP_ENV") or "").lower()
+            if env in _STRICT_STARTUP_ENVS:
                 raise
 
     from app.core.startup_checks import run_startup_checks
@@ -58,7 +69,11 @@ def init_deployment(app):
         app.extensions["dxcon_deployment"]["startup_complete"] = True
         return {"ready": True, "testing": True}
 
-    return validate_startup(app)
+    # Database and readiness checks use db.session / db.engine / model queries.
+    # Always run them inside an application context so create_app() is safe
+    # for gunicorn/Render workers that call create_app() outside a request.
+    with app.app_context():
+        return validate_startup(app)
 
 
 def deployment_readiness(app):
