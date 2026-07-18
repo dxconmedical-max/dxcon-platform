@@ -15,18 +15,23 @@ import { safeRedirectPath } from "@/lib/urls";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, status, error, clearError, isAuthenticated, workspacePath, isHydrated } =
+  const { login, error, clearError, isAuthenticated, workspacePath, isHydrated } =
     useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  // Submit loading only — never tied to auth session bootstrap (`status === "loading"`).
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(
     searchParams.get("reason") === "session-expired"
       ? "Your session has expired. Please sign in again."
       : null,
   );
-  const isLoading = status === "loading";
+
+  const emailValid = email.trim().length > 0 && email.includes("@");
+  const passwordValid = password.length > 0;
+  const canSubmit = emailValid && passwordValid && !isSubmitting;
 
   useEffect(() => {
     if (!isHydrated) return;
@@ -37,13 +42,17 @@ function LoginForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canSubmit) return;
     clearError();
     setFormError(null);
+    setIsSubmitting(true);
     try {
       const { redirect } = await login(email.trim(), password, remember);
       router.replace(safeRedirectPath(searchParams.get("next"), redirect));
     } catch (err) {
       setFormError(loginErrorMessage(err));
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -127,8 +136,8 @@ function LoginForm() {
                 {formError || error}
               </p>
             )}
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign in"}
+            <Button type="submit" className="w-full" disabled={!canSubmit}>
+              {isSubmitting ? "Signing in..." : "Sign in"}
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-slate-500">

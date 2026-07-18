@@ -102,6 +102,12 @@ export const useAuthStore = create<AuthState>()(
               : "unauthenticated";
           set({ status, error: message });
           throw error;
+        } finally {
+          // Never leave the store stuck on bootstrap/submit "loading" if a
+          // post-login step failed without updating status.
+          if (get().status === "loading") {
+            set({ status: "unauthenticated" });
+          }
         }
       },
 
