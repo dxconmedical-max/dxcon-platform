@@ -141,6 +141,36 @@ def orders_collection(order_ref: str):
         return {"success": False, "error": str(exc)}, 400
 
 
+@reception_workspace_bp.route("/orders/<order_ref>/collect", methods=["POST"])
+@reception_api_write
+def orders_collect(order_ref: str):
+    """Mark specimen collected (ORDERED collection → COLLECTED)."""
+    from app.business_engine import service as biz
+
+    try:
+        biz.collect_sample(order_ref, actor=_actor())
+        db.session.commit()
+        return {"success": True, "data": biz.order_to_detail(order_ref)}, 200
+    except BusinessEngineError as exc:
+        db.session.rollback()
+        return {"success": False, "error": str(exc)}, 400
+
+
+@reception_workspace_bp.route("/orders/<order_ref>/transit", methods=["POST"])
+@reception_api_write
+def orders_transit(order_ref: str):
+    """Mark specimen in transit (COLLECTED → IN_TRANSIT)."""
+    from app.business_engine import service as biz
+
+    try:
+        biz.handover_sample(order_ref, actor=_actor())
+        db.session.commit()
+        return {"success": True, "data": biz.order_to_detail(order_ref)}, 200
+    except BusinessEngineError as exc:
+        db.session.rollback()
+        return {"success": False, "error": str(exc)}, 400
+
+
 @reception_workspace_bp.route("/orders/<order_ref>/barcode", methods=["GET"])
 @reception_api_read
 def orders_barcode(order_ref: str):
@@ -158,6 +188,19 @@ def orders_request_form(order_ref: str):
         return {"success": True, "data": {"html": html}}, 200
     except ReceptionWorkspaceError as exc:
         return {"success": False, "error": str(exc)}, 404
+
+
+@reception_workspace_bp.route("/queue/<entry_id>/check-in", methods=["POST"])
+@reception_api_write
+def queue_check_in(entry_id: str):
+    from app.services.reception_service import ReceptionError, check_in_queue
+
+    try:
+        entry = check_in_queue(entry_id, actor_email=_actor())
+        return {"success": True, "data": entry.to_dict()}, 200
+    except ReceptionError as exc:
+        db.session.rollback()
+        return {"success": False, "error": str(exc.message)}, int(exc.status_code or 400)
 
 
 @reception_workspace_bp.route("/queue", methods=["GET"])

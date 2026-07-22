@@ -143,11 +143,33 @@ MODEL_SYNC_CHANGES: tuple[dict[str, Any], ...] = (
 
 
 def _inspector():
+    # Prefer the active session bind so sqlite :memory: / StaticPool checks
+    # do not checkout a separate connection and invalidate an open transaction.
+    try:
+        bind = db.session.get_bind()
+        if bind is not None:
+            return sa_inspect(bind)
+    except Exception:
+        pass
     return sa_inspect(db.engine)
 
 
 def table_exists_name(table_name: str) -> bool:
+    """Return True if table exists, using the active session when possible.
+
+    Engine-level inspection can steal the StaticPool sqlite connection and
+    drop visibility of uncommitted rows in the current request transaction.
+    """
     try:
+        bind = db.session.get_bind()
+        if bind is not None and bind.dialect.name == "sqlite":
+            row = db.session.execute(
+                db.text(
+                    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = :name LIMIT 1"
+                ),
+                {"name": table_name},
+            ).first()
+            return row is not None
         return table_name in _inspector().get_table_names()
     except Exception:
         return False
@@ -155,6 +177,10 @@ def table_exists_name(table_name: str) -> bool:
 
 def get_table_columns(table_name: str) -> set[str]:
     try:
+        bind = db.session.get_bind()
+        if bind is not None and bind.dialect.name == "sqlite":
+            rows = db.session.execute(db.text(f"PRAGMA table_info({table_name})")).fetchall()
+            return {row[1] for row in rows}
         inspector = _inspector()
         if table_name not in inspector.get_table_names():
             return set()

@@ -59,6 +59,11 @@ export const WORKSPACE_DEFINITIONS: Record<WorkspaceKey, WorkspaceDefinition> = 
       { label: "Organizations", href: "/app/admin/organizations", description: "Tenant onboarding and setup." },
       { label: "Patients", href: "/app/admin/patients", description: "Organization patient registry." },
       { label: "Orders", href: "/app/admin/orders", description: "Order registry." },
+      {
+        label: "Diagnostic workflow",
+        href: "/app/admin/workflow",
+        description: "Live patient → order → specimen → result → PDF path.",
+      },
       { label: "Customer onboarding", href: "/app/admin/onboarding", description: "Wizard for new customers." },
       { label: "Integrations", href: "/app/admin/integrations", description: "Connectors and webhooks." },
       { label: "Operations", href: "/app/operations", description: "Production health and ops dashboard." },
@@ -97,13 +102,14 @@ export const WORKSPACE_DEFINITIONS: Record<WorkspaceKey, WorkspaceDefinition> = 
     key: "reception",
     path: "/app/reception",
     title: "Reception",
-    subtitle: "Patient check-in, orders, payments, and queue management.",
+    subtitle: "Patient search, registration, and diagnostic order creation.",
     permission: "reception.read",
     dashboardPath: "/api/v1/reception/workspace/dashboard",
     actions: [
-      { label: "Today's queue", href: "/app/reception/queue", description: "Check-in and manage the queue." },
+      { label: "Create order", href: "/app/reception/workflow", description: "Search or register a patient and create an order." },
+      { label: "Patient search", href: "/app/reception/search", description: "Find patients by code, name, phone, or national ID." },
       { label: "Walk-in registration", href: "/app/reception/register", description: "Register a new walk-in patient." },
-      { label: "Search", href: "/app/reception/search", description: "Find patients and bookings." },
+      { label: "Today's queue", href: "/app/reception/queue", description: "View and check in today's queue." },
     ],
     extractStatusCards: (data) => {
       const kpis = (nested(data, "kpis") ?? data) as Record<string, unknown>;

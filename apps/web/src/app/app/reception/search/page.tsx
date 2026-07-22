@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Search } from "lucide-react";
 
@@ -11,29 +12,24 @@ import {
   ScannerPlaceholder,
   SectionHeader,
   SimpleTable,
-  StatusPill,
 } from "@/components/workspace/primitives";
-import { searchReception, type QueueEntry } from "@/lib/api/reception";
-import type { DataSource } from "@/lib/api/adapter";
+import { searchReceptionPatients, type ReceptionPatient } from "@/lib/api/reception";
 import { normalizeApiError } from "@/lib/errors";
 
 function SearchPanel({ accessToken, organizationId }: WorkspaceContext) {
   const [query, setQuery] = useState("");
-  const [rows, setRows] = useState<QueueEntry[]>([]);
-  const [source, setSource] = useState<DataSource | null>(null);
+  const [rows, setRows] = useState<ReceptionPatient[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function runSearch(term: string) {
-    if (!term.trim()) return;
     setLoading(true);
     setError(null);
     setSearched(true);
     try {
-      const result = await searchReception({ token: accessToken, organizationId }, term.trim());
-      setRows(result.value);
-      setSource(result.source);
+      const result = await searchReceptionPatients({ token: accessToken, organizationId }, term.trim());
+      setRows(result.items);
     } catch (err) {
       setRows([]);
       setError(normalizeApiError(err));
@@ -45,9 +41,8 @@ function SearchPanel({ accessToken, organizationId }: WorkspaceContext) {
   return (
     <div className="space-y-4">
       <SectionHeader
-        title="Booking & patient search"
-        description="Find patients and bookings by name, code, or reference."
-        source={source ?? undefined}
+        title="Patient search"
+        description="Find patients by code, name, phone, or national ID."
       />
 
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
@@ -62,9 +57,9 @@ function SearchPanel({ accessToken, organizationId }: WorkspaceContext) {
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search patient name, code, or booking reference"
+              placeholder="Patient code, name, phone, or national ID"
             />
-            <Button type="submit" disabled={!query.trim() || loading}>
+            <Button type="submit" disabled={loading || !query.trim()}>
               <Search className="h-4 w-4" />
               Search
             </Button>
@@ -75,32 +70,43 @@ function SearchPanel({ accessToken, organizationId }: WorkspaceContext) {
               loading={loading}
               error={error}
               empty={rows.length === 0}
-              emptyLabel="No matches found."
+              emptyLabel="No patients found."
               onRetry={() => void runSearch(query)}
             >
-              <SimpleTable<QueueEntry>
+              <SimpleTable<ReceptionPatient>
                 rows={rows}
-                rowKey={(row) => row.id}
+                rowKey={(row) => row.patient_code}
                 columns={[
-                  { key: "patient", label: "Patient", render: (r) => r.patient_name },
-                  { key: "code", label: "Code", render: (r) => r.patient_code ?? "—" },
-                  { key: "service", label: "Service", render: (r) => r.service ?? "—" },
-                  { key: "status", label: "Status", render: (r) => <StatusPill status={r.status} /> },
+                  { key: "patient", label: "Patient", render: (row) => row.full_name },
+                  { key: "code", label: "Code", render: (row) => row.patient_code },
+                  { key: "phone", label: "Phone", render: (row) => row.phone ?? "—" },
+                  { key: "nid", label: "National ID", render: (row) => row.national_id ?? "—" },
+                  {
+                    key: "action",
+                    label: "",
+                    render: (row) => (
+                      <Link href={`/app/reception/workflow?patient=${encodeURIComponent(row.patient_code)}`}>
+                        <Button size="sm" variant="outline">
+                          Start order
+                        </Button>
+                      </Link>
+                    ),
+                  },
                 ]}
               />
             </DataState>
           ) : (
             <p className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500">
-              Enter a search term or scan a QR code to begin.
+              Enter a search term or scan a patient QR code to begin.
             </p>
           )}
         </div>
 
         <ScannerPlaceholder
-          label="Scan booking QR"
+          label="Scan patient QR"
           onSimulate={() => {
-            setQuery("Le Van C");
-            void runSearch("Le Van C");
+            setQuery("");
+            void runSearch("");
           }}
         />
       </div>
