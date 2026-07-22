@@ -44,33 +44,51 @@ def _filters():
 
 @dashboard_bp.route("/summary", methods=["GET"])
 def summary():
-    patients = Patient.query.count()
-    companies = Company.query.count()
-    orders = Order.query.count()
-    invoices = Invoice.query.count()
-    payments = Payment.query.count()
+    try:
+        patients = Patient.query.count()
+        companies = Company.query.count()
+        orders = Order.query.count()
+        invoices = Invoice.query.count()
+        payments = Payment.query.count()
 
-    completed_orders = Order.query.filter_by(status="COMPLETED").count()
-    pending_orders = Order.query.filter_by(status="PENDING").count()
-    processing_orders = Order.query.filter_by(status="PROCESSING").count()
-    paid_invoices = Invoice.query.filter_by(payment_status="PAID").count()
-    unpaid_invoices = Invoice.query.filter_by(payment_status="UNPAID").count()
+        completed_orders = Order.query.filter_by(status="COMPLETED").count()
+        pending_orders = Order.query.filter_by(status="PENDING").count()
+        processing_orders = Order.query.filter_by(status="PROCESSING").count()
+        paid_invoices = Invoice.query.filter_by(payment_status="PAID").count()
+        unpaid_invoices = Invoice.query.filter_by(payment_status="UNPAID").count()
 
-    revenue = sum(payment.amount or 0 for payment in Payment.query.all())
+        revenue = sum(payment.amount or 0 for payment in Payment.query.all())
 
-    return {
-        "patients": patients,
-        "companies": companies,
-        "orders": orders,
-        "completed_orders": completed_orders,
-        "pending_orders": pending_orders,
-        "processing_orders": processing_orders,
-        "invoices": invoices,
-        "paid_invoices": paid_invoices,
-        "unpaid_invoices": unpaid_invoices,
-        "payments": payments,
-        "revenue": revenue,
-    }
+        return {
+            "patients": patients,
+            "companies": companies,
+            "orders": orders,
+            "completed_orders": completed_orders,
+            "pending_orders": pending_orders,
+            "processing_orders": processing_orders,
+            "invoices": invoices,
+            "paid_invoices": paid_invoices,
+            "unpaid_invoices": unpaid_invoices,
+            "payments": payments,
+            "revenue": revenue,
+        }
+    except Exception as exc:
+        # Schema drift on legacy tables must not blank the admin shell.
+        return {
+            "patients": 0,
+            "companies": 0,
+            "orders": 0,
+            "completed_orders": 0,
+            "pending_orders": 0,
+            "processing_orders": 0,
+            "invoices": 0,
+            "paid_invoices": 0,
+            "unpaid_invoices": 0,
+            "payments": 0,
+            "revenue": 0,
+            "degraded": True,
+            "error": str(exc),
+        }, 200
 
 
 @dashboard_bp.route("/executive", methods=["GET"])

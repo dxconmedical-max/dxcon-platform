@@ -28,6 +28,7 @@ from app.api.iot_platform.routes import (
 from app.api.analyzer_integration.routes import analyzers_bp, integrations_bp as analyzer_integrations_bp, lab_analyzer_bp
 from app.api.clinical_governance.routes import clinical_bp, verify_bp
 from app.api.reporting_engine.routes import reporting_engine_bp
+from app.api.diagnostic_workflow.routes import diagnostic_workflow_bp
 from app.api.portal_workspace.routes import portal_doctor_bp, portal_patient_bp
 from app.api.executive_platform.routes import executive_platform_bp
 from app.api.files.routes import files_bp
@@ -505,6 +506,7 @@ def register_blueprints(app):
     app.register_blueprint(clinical_bp)
     app.register_blueprint(verify_bp)
     app.register_blueprint(reporting_engine_bp)
+    app.register_blueprint(diagnostic_workflow_bp)
     app.register_blueprint(portal_doctor_bp)
     app.register_blueprint(portal_patient_bp)
     app.register_blueprint(executive_platform_bp)

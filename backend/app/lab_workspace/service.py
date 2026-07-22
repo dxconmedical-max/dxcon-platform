@@ -89,6 +89,32 @@ def receive_sample(
         write_lab_audit(action="sample_rejected", object_type="sample", object_id=sample_code or order.order_code, actor=actor)
         return {"order_code": order.order_code, "status": "rejected", "condition_status": condition_status}
 
+    # Lab receive requires in_transit. Advance earlier milestones when the
+    # specimen arrives without prior collector scan events.
+    from app.business_engine.statuses import (
+        ORDER_COLLECTED,
+        ORDER_PAID,
+        ORDER_SAMPLING,
+    )
+
+    order = BizOrder.query.filter_by(order_code=order.order_code).first()
+    if order.status == ORDER_PAID:
+        collection = BizCollection.query.filter_by(order_id=order.id).first()
+        if not collection:
+            biz.create_collection_job(
+                order.order_code,
+                collector_name="Lab Walk-in",
+                pickup_address="Lab Reception",
+                actor=actor,
+            )
+        order = BizOrder.query.filter_by(order_code=order.order_code).first()
+    if order.status == ORDER_SAMPLING:
+        biz.collect_sample(order.order_code, actor=actor)
+        order = BizOrder.query.filter_by(order_code=order.order_code).first()
+    if order.status == ORDER_COLLECTED:
+        biz.handover_sample(order.order_code, actor=actor)
+        order = BizOrder.query.filter_by(order_code=order.order_code).first()
+
     collection = biz.receive_sample_at_lab(order.order_code, received_by=received_by, actor=actor)
     if hasattr(collection, "condition_status"):
         collection.condition_status = condition_status
@@ -187,11 +213,24 @@ def enter_result_manual(
     actor: str | None = None,
 ) -> dict:
     catalog = TestCatalog.query.filter_by(code=test_code).first()
-    if not catalog:
-        raise LabWorkspaceError("Test not found in Master Data")
     order = BizOrder.query.filter_by(order_code=order_code).first()
     if not order:
         raise LabWorkspaceError("Order not found")
+    if not catalog:
+        # Fall back to an order line item so barcode/test codes from the order work.
+        from app.models.biz_order import BizOrderItem
+
+        line = BizOrderItem.query.filter_by(order_id=order.id, test_code=test_code).first()
+        if not line and order.items:
+            line = order.items[0]
+            test_code = line.test_code
+        if not line:
+            raise LabWorkspaceError("Test not found in Master Data")
+        catalog_name = line.test_name
+        catalog_unit = unit or ""
+    else:
+        catalog_name = catalog.name
+        catalog_unit = unit or ""
     if order.status == ORDER_RELEASED:
         raise LabWorkspaceError("Order already released")
 
@@ -207,9 +246,9 @@ def enter_result_manual(
 
     items = [{
         "test_code": test_code,
-        "test_name": catalog.name,
+        "test_name": catalog_name,
         "result_value": result_value,
-        "unit": unit or "",
+        "unit": catalog_unit,
         "reference_range": ref,
         "flag": flag.upper(),
     }]

@@ -85,10 +85,37 @@ def init_api_response_envelope(app):
                 payload["timestamp"] = utc_timestamp()
                 if "request_id" not in payload:
                     payload["request_id"] = get_request_id() or "unknown"
-                response.data = json.dumps(payload)
+                response.set_data(json.dumps(payload))
+                response.content_type = "application/json"
             return response
 
-        wrapped = api_envelope(True, data=payload, error=None)
-        response.data = json.dumps(wrapped)
+        # Preserve HTTP semantics: 4xx/5xx must not be wrapped as success=true.
+        ok = 200 <= int(response.status_code) < 400
+        if ok:
+            wrapped = api_envelope(True, data=payload, error=None)
+        else:
+            if isinstance(payload, dict):
+                message = str(
+                    payload.get("error")
+                    or payload.get("message")
+                    or payload.get("detail")
+                    or "Request failed"
+                )
+                code = str(payload.get("code") or ("UNAUTHORIZED" if response.status_code == 401 else "REQUEST_FAILED"))
+                field = payload.get("field")
+            else:
+                message = str(payload)
+                code = "REQUEST_FAILED"
+                field = None
+            error = {
+                "code": code,
+                "message": message,
+                "request_id": get_request_id() or "unknown",
+            }
+            if field:
+                error["field"] = field
+            wrapped = api_envelope(False, data=None, error=error)
+
+        response.set_data(json.dumps(wrapped))
         response.content_type = "application/json"
         return response

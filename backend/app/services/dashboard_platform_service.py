@@ -155,8 +155,14 @@ class DashboardPlatformService:
         if role == DASHBOARD_ROLE_EXECUTIVE:
             base["executive"] = ExecutiveDashboardService.get_dashboard(date_from, date_to)
         elif role == DASHBOARD_ROLE_ADMIN:
-            base["system"] = SystemAnalyticsService.aggregate(date_from, date_to)
-            base["operations"] = ReportingService.get_operations_report(date_from, date_to)
+            try:
+                base["system"] = SystemAnalyticsService.aggregate(date_from, date_to)
+            except Exception as exc:
+                base["system"] = {"error": str(exc), "degraded": True}
+            try:
+                base["operations"] = ReportingService.get_operations_report(date_from, date_to)
+            except Exception as exc:
+                base["operations"] = {"error": str(exc), "degraded": True}
         elif role == DASHBOARD_ROLE_LAB:
             base["lab"] = LabAnalyticsService.aggregate(date_from, date_to)
         elif role == DASHBOARD_ROLE_CLINIC:

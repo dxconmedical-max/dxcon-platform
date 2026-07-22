@@ -172,6 +172,11 @@ def enter_results(order_ref: str):
         if not items:
             items = [{"test_name": "Panel", "result_value": "12.5", "unit": "g/dL", "reference_range": "10-15"}]
         biz.enter_results(order_ref, items)
+        try:
+            biz.complete_qc(order_ref)
+        except BusinessEngineError:
+            # enter_results may leave order in testing; QC is required before approve
+            raise
         db.session.commit()
         result = biz.order_to_detail(order_ref).get("result")
         code = result["result_code"] if result else order_ref
