@@ -1,13 +1,11 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-import { APP_URL } from "@/lib/constants";
+import { APP_URL, AUTH_COOKIE, ROLE_COOKIE } from "@/lib/constants";
 import { isPublicSiteHost, normalizeHost } from "@/lib/domains";
 import { parseCookieValue } from "@/lib/cookies";
 import { WORKSPACE_ROUTES, workspacePathForRole } from "@/lib/roles";
 import { loginUrl, safeRedirectPath } from "@/lib/urls";
-
-const AUTH_COOKIE = "dxcon_authenticated";
 
 const LEGACY_REDIRECTS: Record<string, string> = {
   "/admin": "/app/admin",
@@ -62,7 +60,7 @@ export function middleware(request: NextRequest) {
 
   const cookieHeader = request.headers.get("cookie") ?? undefined;
   const isAuthenticated = parseCookieValue(cookieHeader, AUTH_COOKIE) === "1";
-  const role = parseCookieValue(cookieHeader, "dxcon_role");
+  const role = parseCookieValue(cookieHeader, ROLE_COOKIE);
 
   if (pathname === "/login" && isAuthenticated) {
     const next = safeRedirectPath(
