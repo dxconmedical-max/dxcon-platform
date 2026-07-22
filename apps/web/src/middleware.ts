@@ -49,12 +49,6 @@ export function middleware(request: NextRequest) {
   const host = normalizeHost(request.headers.get("host"));
   const { pathname, search } = request.nextUrl;
 
-  if (host === "www.dxcon.com.vn") {
-    const apex = request.nextUrl.clone();
-    apex.hostname = "dxcon.com.vn";
-    return NextResponse.redirect(apex, 308);
-  }
-
   if (isPublicSiteHost(host) && isApplicationPath(pathname)) {
     const target = new URL(`${pathname}${search}`, APP_URL);
     return NextResponse.redirect(target);
