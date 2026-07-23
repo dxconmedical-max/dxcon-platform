@@ -3,6 +3,13 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+import {
+  AUTH_PERSIST_VERSION,
+  AUTH_STORAGE_KEY,
+  LEGACY_AUTH_STORAGE_KEYS,
+  TRANSIENT_AUTH_KEYS,
+  parseLoginResponse,
+} from "@/lib/auth/session";
 import { clearAuthCookies, setAuthCookies } from "@/lib/cookies";
 import { workspacePathForRole } from "@/lib/roles";
 import { decodeJwtPayload, isTokenExpired } from "@/lib/utils";
@@ -19,8 +26,11 @@ import {
   type Membership,
 } from "@/services/auth";
 
+/**
+ * Domain session status — never encode submit/init/refresh loading here.
+ * Loading is represented only by the explicit boolean flags below.
+ */
 export type AuthStatus =
-  | "loading"
   | "unauthenticated"
   | "authenticated"
   | "session_expired"
@@ -29,7 +39,6 @@ export type AuthStatus =
   | "workspace_required";
 
 const SESSION_RESTORE_TIMEOUT_MS = 15_000;
-export const AUTH_STORAGE_KEY = "dxcon-auth-v2";
 
 type AuthState = {
   status: AuthStatus;
@@ -43,9 +52,16 @@ type AuthState = {
   capabilities: AuthCapabilities | null;
   error: string | null;
   isHydrated: boolean;
+  /** Persist/rehydrate + restoreSession in progress. */
+  isInitializingSession: boolean;
+  /** Login form submit in progress — only flag the Sign in button may use. */
+  isSubmittingLogin: boolean;
+  /** Token refresh in progress. */
+  isRefreshingSession: boolean;
 
   setHydrated: (value: boolean) => void;
   clearError: () => void;
+  clearTransientFlags: () => void;
   login: (
     email: string,
     password: string,
@@ -83,25 +99,90 @@ async function withTimeout<T>(
   }
 }
 
-/** Drop transient fields if an older build ever persisted them. */
-export function sanitizePersistedAuth(persisted: unknown): Record<string, unknown> {
-  if (!persisted || typeof persisted !== "object") return {};
-  const state = { ...(persisted as Record<string, unknown>) };
-  delete state.status;
-  delete state.error;
-  delete state.isHydrated;
-  delete state.isLoading;
-  delete state.isSubmittingLogin;
-  delete state.memberships;
-  delete state.capabilities;
-  return state;
+function clearLegacyStorage(): void {
+  if (typeof sessionStorage === "undefined") return;
+  for (const key of LEGACY_AUTH_STORAGE_KEYS) {
+    try {
+      sessionStorage.removeItem(key);
+    } catch {
+      // ignore
+    }
+  }
 }
+
+function isValidPersistedUser(value: unknown): value is AuthUser {
+  if (!value || typeof value !== "object") return false;
+  const u = value as Record<string, unknown>;
+  return (
+    typeof u.id === "string" &&
+    u.id.length > 0 &&
+    typeof u.email === "string" &&
+    u.email.includes("@") &&
+    typeof u.role === "string" &&
+    u.role.length > 0
+  );
+}
+
+/**
+ * Persist migration: strip every transient/loading field and keep only a
+ * structurally valid session snapshot.
+ */
+export function migratePersistedAuth(
+  persisted: unknown,
+  _fromVersion?: number,
+): Record<string, unknown> {
+  clearLegacyStorage();
+  if (!persisted || typeof persisted !== "object") {
+    return {};
+  }
+  const raw = { ...(persisted as Record<string, unknown>) };
+  for (const key of TRANSIENT_AUTH_KEYS) {
+    delete raw[key];
+  }
+
+  const accessToken =
+    typeof raw.accessToken === "string" && raw.accessToken.length > 0
+      ? raw.accessToken
+      : null;
+  const refreshToken =
+    typeof raw.refreshToken === "string" && raw.refreshToken.length > 0
+      ? raw.refreshToken
+      : null;
+  const user = isValidPersistedUser(raw.user) ? raw.user : null;
+  const role =
+    typeof raw.role === "string" && raw.role.length > 0 ? raw.role : null;
+  const tokenExpiresAt =
+    typeof raw.tokenExpiresAt === "number" ? raw.tokenExpiresAt : null;
+  const activeOrganizationId =
+    typeof raw.activeOrganizationId === "string"
+      ? raw.activeOrganizationId
+      : null;
+
+  // Discard incomplete / incompatible snapshots entirely.
+  if (!accessToken || !user) {
+    return {};
+  }
+
+  return {
+    accessToken,
+    refreshToken,
+    user,
+    role: role ?? user.role,
+    tokenExpiresAt,
+    activeOrganizationId,
+  };
+}
+
+/** @deprecated use migratePersistedAuth */
+export function sanitizePersistedAuth(persisted: unknown): Record<string, unknown> {
+  return migratePersistedAuth(persisted);
+}
+
+export { AUTH_STORAGE_KEY, AUTH_PERSIST_VERSION };
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      // Never start as "loading" — that previously drove the login button.
-      // Session restore sets "loading" only while a token is being validated.
       status: "unauthenticated",
       user: null,
       role: null,
@@ -113,28 +194,46 @@ export const useAuthStore = create<AuthState>()(
       capabilities: null,
       error: null,
       isHydrated: false,
+      isInitializingSession: false,
+      isSubmittingLogin: false,
+      isRefreshingSession: false,
 
       setHydrated: (value) => set({ isHydrated: value }),
 
       clearError: () => set({ error: null }),
 
+      clearTransientFlags: () =>
+        set({
+          isInitializingSession: false,
+          isSubmittingLogin: false,
+          isRefreshingSession: false,
+          error: null,
+        }),
+
       login: async (email, password, remember = false) => {
-        console.debug("[authStore.login] start");
-        // Do not set status:"loading" here — that is session init, not submit.
-        set({ error: null });
-        try {
-          console.debug("[authStore.login] calling loginRequest → POST /api/v1/auth/login");
-          const response = await loginRequest(email, password);
-          console.debug("[authStore.login] loginRequest resolved");
-          set({
-            accessToken: response.access_token,
-            refreshToken: response.refresh_token,
-            user: response.user,
-            role: response.role,
-            tokenExpiresAt: tokenExpiry(response.access_token),
-            activeOrganizationId: response.user.organization_id ?? null,
+        if (get().isSubmittingLogin) {
+          console.debug("[authStore.login] blocked — already submitting");
+          throw new ApiError("Login already in progress", 429, {
+            code: "LOGIN_IN_PROGRESS",
           });
-          console.debug("[authStore.login] resolveAfterLogin");
+        }
+        console.debug("[authStore.login] start → POST /api/v1/auth/login");
+        set({
+          isSubmittingLogin: true,
+          error: null,
+        });
+        try {
+          const raw = await loginRequest(email, password);
+          const session = parseLoginResponse(raw);
+          console.debug("[authStore.login] parsed session");
+          set({
+            accessToken: session.accessToken,
+            refreshToken: session.refreshToken,
+            user: session.user,
+            role: session.role,
+            tokenExpiresAt: tokenExpiry(session.accessToken),
+            activeOrganizationId: session.user.organization_id ?? null,
+          });
           const redirect = await get().resolveAfterLogin(remember);
           console.debug("[authStore.login] done", { redirect });
           return { redirect };
@@ -147,6 +246,8 @@ export const useAuthStore = create<AuthState>()(
               : "unauthenticated";
           set({ status, error: message });
           throw error;
+        } finally {
+          set({ isSubmittingLogin: false });
         }
       },
 
@@ -189,7 +290,7 @@ export const useAuthStore = create<AuthState>()(
       selectOrganization: async (organizationId) => {
         const { accessToken, role, user } = get();
         if (!accessToken) return "/login";
-        set({ status: "loading" });
+        set({ isInitializingSession: true });
         try {
           const capabilities = await switchOrganization(accessToken, organizationId);
           set({
@@ -204,9 +305,7 @@ export const useAuthStore = create<AuthState>()(
           set({ status: "forbidden", error: message });
           return "/forbidden";
         } finally {
-          if (get().status === "loading") {
-            set({ status: "unauthenticated" });
-          }
+          set({ isInitializingSession: false });
         }
       },
 
@@ -220,6 +319,12 @@ export const useAuthStore = create<AuthState>()(
           }
         }
         clearAuthCookies();
+        clearLegacyStorage();
+        try {
+          useAuthStore.persist.clearStorage();
+        } catch {
+          // ignore
+        }
         set({
           status: "unauthenticated",
           user: null,
@@ -231,6 +336,9 @@ export const useAuthStore = create<AuthState>()(
           activeOrganizationId: null,
           capabilities: null,
           error: null,
+          isInitializingSession: false,
+          isSubmittingLogin: false,
+          isRefreshingSession: false,
         });
       },
 
@@ -238,11 +346,15 @@ export const useAuthStore = create<AuthState>()(
         const state = get();
         const { accessToken, refreshToken, user } = state;
         if (!accessToken || !user) {
-          set({ status: "unauthenticated" });
+          set({
+            status: "unauthenticated",
+            isInitializingSession: false,
+            isRefreshingSession: false,
+          });
           return "unauthenticated";
         }
 
-        set({ status: "loading" });
+        set({ isInitializingSession: true, error: null });
         try {
           return await withTimeout(
             (async () => {
@@ -253,9 +365,18 @@ export const useAuthStore = create<AuthState>()(
                   set({ status: "session_expired" });
                   return "session_expired" as AuthStatus;
                 }
+                set({ isRefreshingSession: true });
                 try {
                   const refreshed = await refreshAccessToken(refreshToken);
-                  token = refreshed.access_token;
+                  const access =
+                    refreshed.access_token ||
+                    (refreshed as { token?: string }).token;
+                  if (!access) {
+                    throw new ApiError("Malformed refresh response", 502, {
+                      code: "MALFORMED_REFRESH_RESPONSE",
+                    });
+                  }
+                  token = access;
                   set({
                     accessToken: token,
                     tokenExpiresAt: tokenExpiry(token),
@@ -264,6 +385,8 @@ export const useAuthStore = create<AuthState>()(
                   await get().logout();
                   set({ status: "session_expired" });
                   return "session_expired" as AuthStatus;
+                } finally {
+                  set({ isRefreshingSession: false });
                 }
               }
 
@@ -312,15 +435,16 @@ export const useAuthStore = create<AuthState>()(
           set({ status: "unauthenticated" });
           return "unauthenticated";
         } finally {
-          if (get().status === "loading") {
-            set({ status: "unauthenticated" });
-          }
+          set({
+            isInitializingSession: false,
+            isRefreshingSession: false,
+          });
         }
       },
     }),
     {
       name: AUTH_STORAGE_KEY,
-      version: 2,
+      version: AUTH_PERSIST_VERSION,
       storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         accessToken: state.accessToken,
@@ -330,34 +454,38 @@ export const useAuthStore = create<AuthState>()(
         tokenExpiresAt: state.tokenExpiresAt,
         activeOrganizationId: state.activeOrganizationId,
       }),
-      migrate: (persisted) => sanitizePersistedAuth(persisted),
+      migrate: (persisted, fromVersion) =>
+        migratePersistedAuth(persisted, fromVersion),
       onRehydrateStorage: () => (state, error) => {
+        const finish = (patch: Partial<AuthState>) => {
+          useAuthStore.setState({
+            isHydrated: true,
+            isInitializingSession: false,
+            isSubmittingLogin: false,
+            isRefreshingSession: false,
+            error: null,
+            ...patch,
+          });
+        };
+
         if (error) {
-          console.debug("[authStore.rehydrate] error → unauthenticated", error);
-          useAuthStore.setState({
-            isHydrated: true,
-            status: "unauthenticated",
-          });
+          console.debug("[authStore.rehydrate] failure → anonymous", error);
+          finish({ status: "unauthenticated" });
           return;
         }
-        // status is not persisted; never leave bootstrap "loading" active.
-        // Only keep "loading" briefly when a token exists (session restore).
-        if (!state) {
-          useAuthStore.setState({
-            isHydrated: true,
-            status: "unauthenticated",
-          });
+
+        if (!state?.accessToken || !state.user) {
+          console.debug("[authStore.rehydrate] anonymous");
+          finish({ status: "unauthenticated" });
           return;
         }
-        const nextStatus = state.accessToken ? "loading" : "unauthenticated";
-        console.debug("[authStore.rehydrate] setHydrated", {
-          hasToken: Boolean(state.accessToken),
-          nextStatus,
-        });
-        useAuthStore.setState({
-          isHydrated: true,
-          status: nextStatus,
-          error: null,
+
+        // Token present: leave anonymous until restoreSession validates.
+        // Never leave isSubmittingLogin or a shared isLoading stuck.
+        console.debug("[authStore.rehydrate] token present → await restore");
+        finish({
+          status: "unauthenticated",
+          isInitializingSession: true,
         });
       },
     },

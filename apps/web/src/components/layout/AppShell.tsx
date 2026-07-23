@@ -15,7 +15,7 @@ export function AppShell({
 }) {
   const auth = useRequireAuth(workspacePath);
 
-  if (!auth.isHydrated || auth.status === "loading") {
+  if (!auth.isHydrated || auth.isInitializingSession) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />

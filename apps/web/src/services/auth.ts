@@ -72,6 +72,7 @@ export async function login(
   password: string,
 ): Promise<LoginResponse> {
   console.debug("[services/auth.login] POST /api/v1/auth/login");
+  // Raw payload — authStore parses/validates via parseLoginResponse.
   return apiRequest<LoginResponse>("/api/v1/auth/login", {
     method: "POST",
     body: { email, password },

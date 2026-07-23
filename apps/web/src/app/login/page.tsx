@@ -15,15 +15,20 @@ import { safeRedirectPath } from "@/lib/urls";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, error, clearError, isAuthenticated, workspacePath, isHydrated } =
-    useAuth();
+  const {
+    login,
+    error,
+    clearError,
+    isAuthenticated,
+    workspacePath,
+    isHydrated,
+    isSubmittingLogin,
+  } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  // Submit-only flag. Never bind the button to auth bootstrap / isLoading /
-  // status==="loading" — that leaves "Signing in..." stuck on first paint.
-  const [isSubmittingLogin, setIsSubmittingLogin] = useState(false);
+  // Guard against sync double-submit before React re-renders store flag.
   const submittingRef = useRef(false);
   const [formError, setFormError] = useState<string | null>(
     searchParams.get("reason") === "session-expired"
@@ -33,6 +38,7 @@ function LoginForm() {
 
   const emailValid = email.trim().length > 0 && email.includes("@");
   const passwordValid = password.length > 0;
+  // Button depends ONLY on isSubmittingLogin — never session init flags.
   const canSubmit = emailValid && passwordValid && !isSubmittingLogin;
 
   useEffect(() => {
@@ -44,31 +50,26 @@ function LoginForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    console.debug("[login] handleSubmit start", {
+    console.debug("[login] handleSubmit", {
       canSubmit,
       isSubmittingLogin,
       email: email.trim(),
     });
-    if (!canSubmit || isSubmittingLogin || submittingRef.current) {
-      console.debug("[login] handleSubmit blocked (duplicate or invalid)");
+    if (!emailValid || !passwordValid) return;
+    if (isSubmittingLogin || submittingRef.current) {
+      console.debug("[login] blocked duplicate submit");
       return;
     }
     submittingRef.current = true;
     clearError();
     setFormError(null);
-    setIsSubmittingLogin(true);
     try {
-      console.debug("[login] calling authStore.login() → POST /api/v1/auth/login");
       const { redirect } = await login(email.trim(), password, remember);
-      console.debug("[login] authStore.login() resolved", { redirect });
       router.replace(safeRedirectPath(searchParams.get("next"), redirect));
     } catch (err) {
-      console.debug("[login] authStore.login() rejected", err);
       setFormError(loginErrorMessage(err));
     } finally {
-      console.debug("[login] handleSubmit finally → isSubmittingLogin=false");
       submittingRef.current = false;
-      setIsSubmittingLogin(false);
     }
   }
 

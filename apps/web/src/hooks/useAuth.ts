@@ -9,14 +9,12 @@ import { useAuthStore } from "@/stores/authStore";
 
 export function useAuth() {
   const store = useAuthStore();
-  const isInitializing = !store.isHydrated || store.status === "loading";
   return {
     ...store,
     isAuthenticated: store.status === "authenticated",
-    /** Session bootstrap / restore — never use for the login submit button. */
-    isInitializing,
-    /** @deprecated Prefer isInitializing for session, local isSubmittingLogin for login. */
-    isLoading: isInitializing,
+    isInitializingSession: store.isInitializingSession || !store.isHydrated,
+    isSubmittingLogin: store.isSubmittingLogin,
+    isRefreshingSession: store.isRefreshingSession,
     capabilities: store.capabilities,
     can: (permission: string) => can(store.capabilities, permission),
     canAny: (permissions: string[]) => canAny(store.capabilities, permissions),

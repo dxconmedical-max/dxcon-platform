@@ -34,6 +34,15 @@ export function loginErrorMessage(error: unknown): string {
     return normalizeApiError(error);
   }
   switch (error.status) {
+    case 400:
+      return (
+        (typeof error.body === "object" &&
+        error.body &&
+        "error" in error.body &&
+        String((error.body as { error: unknown }).error)) ||
+        error.message ||
+        "Invalid login request."
+      );
     case 401:
       return "Invalid email or password.";
     case 403:
@@ -41,9 +50,20 @@ export function loginErrorMessage(error: unknown): string {
     case 429:
       return "Too many login attempts. Please wait and try again.";
     case 0:
-    case 408:
       return "Network error — check your connection and try again.";
+    case 408:
+      return "Sign-in timed out. Please try again.";
+    case 502:
+      if (
+        typeof error.body === "object" &&
+        error.body &&
+        (error.body as { code?: string }).code === "MALFORMED_LOGIN_RESPONSE"
+      ) {
+        return "Unexpected login response from server. Please try again.";
+      }
+      return error.message || "Service temporarily unavailable.";
     default:
-      return error.message;
+      // Preserve real backend messages for 500 and other statuses.
+      return error.message || `Request failed (${error.status})`;
   }
 }

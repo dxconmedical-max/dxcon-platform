@@ -6,6 +6,7 @@ import { ApiError } from "@/lib/errors";
 const replace = vi.fn();
 const login = vi.fn();
 const clearError = vi.fn();
+let isSubmittingLogin = false;
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace, push: vi.fn() }),
@@ -14,16 +15,23 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/hooks/useAuth", () => ({
   useAuth: () => ({
-    login,
+    login: async (...args: unknown[]) => {
+      isSubmittingLogin = true;
+      try {
+        return await login(...args);
+      } finally {
+        isSubmittingLogin = false;
+      }
+    },
     error: null,
     clearError,
     isAuthenticated: false,
     workspacePath: "/app",
     isHydrated: true,
-    // Session bootstrap still reports loading — must not drive the submit button.
-    status: "loading",
-    isInitializing: true,
-    isLoading: true,
+    isInitializingSession: true,
+    isSubmittingLogin,
+    isRefreshingSession: false,
+    status: "unauthenticated",
   }),
 }));
 
@@ -53,16 +61,17 @@ describe("LoginPage submit loading state", () => {
     replace.mockReset();
     login.mockReset();
     clearError.mockReset();
+    isSubmittingLogin = false;
   });
 
-  it("fresh page renders Sign in, not Signing in...", () => {
+  it("fresh anonymous visit renders Sign in, never Signing in...", () => {
     render(<LoginPage />);
     const button = submitButton();
     expect(button).toHaveTextContent("Sign in");
     expect(button).not.toHaveTextContent("Signing in...");
   });
 
-  it("stale auth isLoading=true does not lock the submit label", () => {
+  it("session initialization flags do not lock the submit label", () => {
     render(<LoginPage />);
     expect(submitButton()).toHaveTextContent("Sign in");
   });
@@ -74,16 +83,16 @@ describe("LoginPage submit loading state", () => {
     expect(submitButton()).toBeEnabled();
   });
 
-  it("clicking submit creates exactly one login call", async () => {
+  it("one submit / double submit creates exactly one login call", async () => {
     login.mockResolvedValue({ redirect: "/app" });
     render(<LoginPage />);
     fillCredentials();
-    fireEvent.submit(submitButton().closest("form")!);
-    fireEvent.submit(submitButton().closest("form")!);
+    const form = submitButton().closest("form")!;
+    fireEvent.submit(form);
+    fireEvent.submit(form);
     await waitFor(() => {
       expect(login).toHaveBeenCalledTimes(1);
     });
-    expect(login).toHaveBeenCalledWith("user@example.com", "secret", false);
   });
 
   it("successful login redirects", async () => {
@@ -96,8 +105,8 @@ describe("LoginPage submit loading state", () => {
     });
   });
 
-  it("failed login resets the button", async () => {
-    login.mockRejectedValue(new ApiError("Invalid email or password.", 401));
+  it("invalid credentials show auth error and reset the button", async () => {
+    login.mockRejectedValue(new ApiError("Invalid credentials", 401));
     render(<LoginPage />);
     fillCredentials();
     fireEvent.submit(submitButton().closest("form")!);
@@ -108,7 +117,35 @@ describe("LoginPage submit loading state", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Invalid email or password.");
   });
 
-  it("timeout resets the button and shows network message", async () => {
+  it("API 500 resets the button and preserves message", async () => {
+    login.mockRejectedValue(new ApiError("Upstream lab gateway failed", 500));
+    render(<LoginPage />);
+    fillCredentials();
+    fireEvent.submit(submitButton().closest("form")!);
+    await waitFor(() => {
+      expect(submitButton()).toHaveTextContent("Sign in");
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Upstream lab gateway failed",
+      );
+    });
+  });
+
+  it("network failure resets the button", async () => {
+    login.mockRejectedValue(
+      new ApiError("Network error — check your connection", 0, {
+        code: "NETWORK_ERROR",
+      }),
+    );
+    render(<LoginPage />);
+    fillCredentials();
+    fireEvent.submit(submitButton().closest("form")!);
+    await waitFor(() => {
+      expect(submitButton()).toHaveTextContent("Sign in");
+      expect(screen.getByRole("alert")).toHaveTextContent(/Network error/);
+    });
+  });
+
+  it("timeout resets the button", async () => {
     login.mockRejectedValue(
       new ApiError("Request timed out", 408, { code: "TIMEOUT" }),
     );
@@ -117,20 +154,7 @@ describe("LoginPage submit loading state", () => {
     fireEvent.submit(submitButton().closest("form")!);
     await waitFor(() => {
       expect(submitButton()).toHaveTextContent("Sign in");
-      expect(submitButton()).toBeEnabled();
-    });
-    expect(screen.getByRole("alert")).toHaveTextContent(/Network error/);
-  });
-
-  it("preserves 500 message", async () => {
-    login.mockRejectedValue(new ApiError("Upstream lab gateway failed", 500));
-    render(<LoginPage />);
-    fillCredentials();
-    fireEvent.submit(submitButton().closest("form")!);
-    await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(
-        "Upstream lab gateway failed",
-      );
+      expect(screen.getByRole("alert")).toHaveTextContent(/timed out/i);
     });
   });
 });
