@@ -1,0 +1,42 @@
+name: DxCon Web Auth Freeze CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "docs/AUTH_FREEZE.md"
+      - ".github/workflows/web-auth-ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "docs/AUTH_FREEZE.md"
+      - ".github/workflows/web-auth-ci.yml"
+
+jobs:
+  auth-freeze-regression:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Auth freeze file guard
+        run: node scripts/verify_auth_freeze.mjs
+
+      - name: Mandatory auth regression tests
+        run: npm run test:auth-freeze

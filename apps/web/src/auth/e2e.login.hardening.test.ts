@@ -57,24 +57,32 @@ describe("production-like auth e2e config", () => {
 });
 
 describe("live production API probe (read-only)", () => {
-  it("rejects invalid credentials with a real auth status, not network error", async () => {
-    const response = await fetch(`${PROD_API}/api/v1/auth/login`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: "e2e-invalid@dxcon.test",
-        password: "definitely-not-valid-password",
-      }),
-      signal: AbortSignal.timeout(API_TIMEOUT_MS),
-    });
+  // Opt-in only — CI auth freeze must stay deterministic offline.
+  // Enable with AUTH_LIVE_PROBE=1 when network to api.dxcon.com.vn is available.
+  const liveEnabled = process.env.AUTH_LIVE_PROBE === "1";
 
-    expect([400, 401, 403, 422, 429]).toContain(response.status);
-    const payload = await response.json().catch(() => ({}));
-    expect(response.status).not.toBe(0);
-    // Body should be structured enough for the client error mapper.
-    expect(payload === null || typeof payload === "object").toBe(true);
-  }, 35_000);
+  it.skipIf(!liveEnabled)(
+    "rejects invalid credentials with a real auth status, not network error",
+    async () => {
+      const response = await fetch(`${PROD_API}/api/v1/auth/login`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: "e2e-invalid@dxcon.test",
+          password: "definitely-not-valid-password",
+        }),
+        signal: AbortSignal.timeout(API_TIMEOUT_MS),
+      });
+
+      expect([400, 401, 403, 422, 429]).toContain(response.status);
+      const payload = await response.json().catch(() => ({}));
+      expect(response.status).not.toBe(0);
+      // Body should be structured enough for the client error mapper.
+      expect(payload === null || typeof payload === "object").toBe(true);
+    },
+    35_000,
+  );
 });
