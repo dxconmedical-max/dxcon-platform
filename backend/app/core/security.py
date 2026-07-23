@@ -17,17 +17,35 @@ RATE_LIMIT_EXEMPT_PATHS = {
 }
 
 
+# Explicit browser origins for deployed API (never wildcard with credentials).
+PRODUCTION_CORS_ORIGINS = (
+    "https://dxcon.com.vn,"
+    "https://www.dxcon.com.vn,"
+    "https://app.dxcon.com.vn"
+)
+STAGING_CORS_ORIGINS = (
+    "https://staging.dxcon.com.vn,"
+    "https://app-staging.dxcon.com.vn"
+)
+
+
 def init_security(app):
     from flask_cors import CORS
 
     from app.core.errors import build_error_response
     from app.core.rate_limit import check_rate_limit
-    from app.infrastructure.production_readiness import app_env, is_relaxed_env
+    from app.infrastructure.production_readiness import app_env, is_relaxed_env, is_strict_env
 
-    cors_origins = app.config.get("CORS_ORIGINS", "*")
+    cors_origins = (app.config.get("CORS_ORIGINS") or "*").strip()
     env = app_env(app)
-    if cors_origins == "*" and not is_relaxed_env(app):
-        cors_origins = ""
+    # In staging/production, never leave CORS empty after rejecting "*".
+    # Empty origins omit Access-Control-Allow-Origin and break browser login.
+    # Use is_strict_env (APP_ENV) so unit tests with TESTING=True still exercise this path.
+    if is_strict_env(app) and (cors_origins == "*" or not cors_origins):
+        cors_origins = (
+            STAGING_CORS_ORIGINS if env == "staging" else PRODUCTION_CORS_ORIGINS
+        )
+        app.config["CORS_ORIGINS"] = cors_origins
     if cors_origins == "*":
         CORS(
             app,

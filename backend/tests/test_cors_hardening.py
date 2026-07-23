@@ -56,12 +56,40 @@ class CorsHardeningTestCase(unittest.TestCase):
         self.assertTrue(cors_status(app)["ok"])
         validate_cors(app)
 
-    def test_production_rejects_wildcard(self):
+    def test_production_rewrites_wildcard_to_explicit_origins(self):
         app = _cors_test_app(app_env="production", cors_origins="*")
-        app.config["TESTING"] = False
-        self.assertFalse(cors_status(app)["ok"])
-        with self.assertRaises(RuntimeError):
-            validate_cors(app)
+        self.assertNotEqual(app.config.get("CORS_ORIGINS"), "*")
+        self.assertIn("https://dxcon.com.vn", app.config.get("CORS_ORIGINS"))
+        self.assertTrue(cors_status(app)["ok"])
+        validate_cors(app)
+        client = app.test_client()
+        response = client.get(
+            "/api/v1/system/health",
+            headers={"Origin": "https://dxcon.com.vn"},
+        )
+        self.assertEqual(
+            response.headers.get("Access-Control-Allow-Origin"),
+            "https://dxcon.com.vn",
+        )
+
+    def test_production_rewrites_empty_cors_to_explicit_origins(self):
+        app = _cors_test_app(app_env="production", cors_origins="")
+        self.assertIn("https://dxcon.com.vn", app.config.get("CORS_ORIGINS"))
+        client = app.test_client()
+        response = client.open(
+            "/api/v1/system/health",
+            method="OPTIONS",
+            headers={
+                "Origin": "https://dxcon.com.vn",
+                "Access-Control-Request-Method": "GET",
+                "Access-Control-Request-Headers": "content-type",
+            },
+        )
+        self.assertIn(response.status_code, (200, 204))
+        self.assertEqual(
+            response.headers.get("Access-Control-Allow-Origin"),
+            "https://dxcon.com.vn",
+        )
 
     def test_production_accepts_explicit_origins(self):
         app = _cors_test_app(app_env="production", cors_origins=PRODUCTION_ORIGINS)
