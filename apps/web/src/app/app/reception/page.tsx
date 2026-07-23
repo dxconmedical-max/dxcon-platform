@@ -8,15 +8,29 @@ export default function ReceptionPage() {
     <AppShell title="Reception" workspacePath="/app/reception">
       <WorkspaceHome
         title="Reception workspace"
-        subtitle="Patient check-in, orders, and queue management."
+        subtitle="Production patient intake, catalog orders, payment, and document generation."
         statusCards={[
-          { label: "Queue", value: "—" },
-          { label: "Orders", value: "—" },
-          { label: "Payments", value: "—" },
-          { label: "Print jobs", value: "—" },
+          { label: "Queue", value: "Live" },
+          { label: "Orders", value: "Live" },
+          { label: "Payments", value: "Live" },
+          { label: "Documents", value: "Live" },
         ]}
         actions={[
-          { label: "Patient queue", href: "/app/reception", description: "Today's queue.", comingSoon: true },
+          {
+            label: "Create order",
+            href: "/app/reception/workflow",
+            description: "Patient → tests → payment → barcode / requisition / QR.",
+          },
+          {
+            label: "Patient search",
+            href: "/app/reception/search",
+            description: "Search production patients by code, name, phone, or ID.",
+          },
+          {
+            label: "Register patient",
+            href: "/app/reception/register",
+            description: "Walk-in registration with duplicate detection.",
+          },
         ]}
       />
     </AppShell>
