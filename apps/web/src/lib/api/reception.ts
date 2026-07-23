@@ -271,6 +271,7 @@ export async function createReceptionOrder(
     queue_entry_id?: string;
   },
 ): Promise<ReceptionOrderCreate> {
+  const uniqueTestIds = Array.from(new Set(payload.test_catalog_ids.filter(Boolean)));
   const response = await apiRequest<{ success: boolean; data: ReceptionOrderCreate }>(
     "/api/v1/reception/workspace/orders",
     {
@@ -278,7 +279,7 @@ export async function createReceptionOrder(
         method: "POST",
         body: {
           patient_code: payload.patient_code,
-          test_catalog_ids: payload.test_catalog_ids,
+          test_catalog_ids: uniqueTestIds,
           discount: payload.discount ?? 0,
           note: payload.note,
           queue_entry_id: payload.queue_entry_id,

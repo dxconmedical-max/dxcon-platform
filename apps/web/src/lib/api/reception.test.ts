@@ -137,8 +137,7 @@ describe("reception Milestone 1 API client", () => {
     });
     const body = (vi.mocked(apiRequest).mock.calls[0]?.[1] as { body: { test_catalog_ids: string[] } })
       .body;
-    // Client may send duplicates; UI dedupes — API still accepts list. Assert call shape.
-    expect(body.test_catalog_ids).toEqual(["t1", "t1", "t1"]);
+    expect(body.test_catalog_ids).toEqual(["t1"]);
   });
 
   it("11. authoritative pricing from backend", async () => {
