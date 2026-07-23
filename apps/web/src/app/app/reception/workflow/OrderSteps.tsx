@@ -6,17 +6,26 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input, Label } from "@/components/ui/Input";
 import {
+  collectReceptionPayment,
   createReceptionOrder,
+  fetchReceptionBarcodes,
   fetchReceptionOrder,
   fetchReceptionPatient,
+  fetchReceptionRequestForm,
   fetchReceptionTests,
   getDuplicateWarnings,
   getOrderCode,
+  isValidPatientQr,
   registerWalkIn,
   searchReceptionPatients,
+  RECEPTION_PAYMENT_METHODS,
+  RECEPTION_PAYMENT_TIMEOUT_MS,
   type DuplicateWarning,
+  type ReceptionBarcodes,
   type ReceptionOrderCreate,
   type ReceptionOrderPricing,
+  type ReceptionPaymentRecord,
+  type ReceptionPaymentSummary,
   type ReceptionPatient,
   type ReceptionTest,
 } from "@/lib/api/reception";
@@ -668,7 +677,21 @@ export function TestsStep({
   );
 }
 
-export function OrderCreatedStep({
+
+export function OrderCreatedStep(props: {
+  accessToken: string;
+  organizationId?: string | null;
+  patient: SelectedPatient;
+  orderRef: string;
+  pricing: ReceptionOrderPricing;
+  order: ReceptionOrderCreate["order"];
+  onReset: () => void;
+  cashierLabel?: string | null;
+}) {
+  return <PaymentStep {...props} />;
+}
+
+export function PaymentStep({
   accessToken,
   organizationId,
   patient,
@@ -676,6 +699,7 @@ export function OrderCreatedStep({
   pricing,
   order,
   onReset,
+  cashierLabel,
 }: {
   accessToken: string;
   organizationId?: string | null;
@@ -684,39 +708,60 @@ export function OrderCreatedStep({
   pricing: ReceptionOrderPricing;
   order: ReceptionOrderCreate["order"];
   onReset: () => void;
+  cashierLabel?: string | null;
 }) {
   const [authoritative, setAuthoritative] = useState(pricing);
   const [detail, setDetail] = useState(order);
+  const [summary, setSummary] = useState<ReceptionPaymentSummary>(() => ({
+    order_total: pricing.total,
+    paid_amount: 0,
+    outstanding_amount: pricing.total,
+    discount: pricing.discount,
+    subtotal: pricing.subtotal,
+    tax: pricing.tax ?? null,
+    status: "unpaid",
+    payment_methods_supported: [...RECEPTION_PAYMENT_METHODS],
+    partial_payments_supported: false,
+  }));
+  const [payment, setPayment] = useState<ReceptionPaymentRecord | null>(null);
   const [loading, setLoading] = useState(false);
+  const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState("cash");
+  const [amountInput, setAmountInput] = useState(String(pricing.total));
+  const [showDocuments, setShowDocuments] = useState(false);
+  const [idempotencyKey] = useState(() =>
+    typeof crypto !== "undefined" && crypto.randomUUID
+      ? `pay-${crypto.randomUUID()}`
+      : `pay-${Date.now()}`,
+  );
+  const submitLock = useRef(false);
 
   const items = Array.isArray((detail as { items?: unknown }).items)
     ? ((detail as { items: Record<string, unknown>[] }).items ?? [])
     : [];
+  const methods =
+    summary.payment_methods_supported?.length
+      ? summary.payment_methods_supported
+      : [...RECEPTION_PAYMENT_METHODS];
+  const isPaid = summary.status === "paid" || summary.outstanding_amount <= 0;
 
   async function refresh() {
     setLoading(true);
     setError(null);
     try {
-      const patientResult = await fetchReceptionPatient(
-        { token: accessToken, organizationId },
-        patient.patientCode,
-      );
-      if (!patientResult.patient_code) {
-        throw new Error("Patient persistence check failed.");
-      }
       const orderResult = await fetchReceptionOrder(
         { token: accessToken, organizationId },
         orderRef,
         { patientCode: patient.patientCode },
       );
       setAuthoritative(orderResult.pricing);
-      setDetail((prev) => ({
-        ...orderResult.order,
-        items:
-          (orderResult.order as { items?: unknown }).items ??
-          (prev as { items?: unknown }).items,
-      }));
+      setDetail(orderResult.order);
+      if (orderResult.payment_summary) {
+        setSummary(orderResult.payment_summary);
+        setAmountInput(String(orderResult.payment_summary.outstanding_amount));
+      }
+      if (orderResult.payment) setPayment(orderResult.payment);
     } catch (err) {
       setError(normalizeApiError(err));
     } finally {
@@ -729,74 +774,446 @@ export function OrderCreatedStep({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderRef, accessToken, organizationId]);
 
-  return (
-    <Card className="space-y-4">
-      <SectionHeader
-        title="Order created"
-        description="Milestone 1 complete. Payment and barcode are Milestone 2."
-        actions={
-          <Button size="sm" variant="outline" disabled={loading} onClick={() => void refresh()}>
-            {loading ? "Refreshing…" : "Refresh & verify"}
-          </Button>
-        }
+  function validateAmount(raw: string, outstanding: number): number {
+    const value = Number(raw);
+    if (!Number.isFinite(value)) throw new Error("Enter a valid payment amount.");
+    if (value <= 0) throw new Error("Payment amount must be greater than zero.");
+    if (value > outstanding + 0.0001) {
+      throw new Error(`Overpayment not allowed. Outstanding is ${formatCurrency(outstanding)}.`);
+    }
+    if (value + 0.0001 < outstanding) {
+      throw new Error(
+        "Partial payments are not supported. Amount must equal the outstanding balance.",
+      );
+    }
+    return value;
+  }
+
+  async function submitPayment() {
+    if (submitLock.current || paying) return;
+    setError(null);
+    let amount: number;
+    try {
+      amount = validateAmount(amountInput, summary.outstanding_amount);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Invalid amount");
+      return;
+    }
+    submitLock.current = true;
+    setPaying(true);
+    try {
+      const result = await collectReceptionPayment(
+        { token: accessToken, organizationId, timeoutMs: RECEPTION_PAYMENT_TIMEOUT_MS },
+        orderRef,
+        { payment_method: paymentMethod, amount, idempotency_key: idempotencyKey },
+      );
+      setSummary(result.payment_summary);
+      setPayment(result.payment);
+      await refresh();
+    } catch (err) {
+      setError(normalizeApiError(err));
+    } finally {
+      setPaying(false);
+      submitLock.current = false;
+    }
+  }
+
+  function openPrintableReceipt() {
+    if (!payment) return;
+    const paidAt = payment.paid_at ? new Date(payment.paid_at).toLocaleString() : "—";
+    const cashier = cashierLabel || payment.created_by || "—";
+    const html = `<!doctype html><html><head><title>Receipt ${escapeHtml(payment.receipt_number)}</title>
+<style>body{font-family:ui-monospace,Menlo,monospace;padding:24px}.row{display:flex;justify-content:space-between;margin:6px 0;font-size:13px}.hr{border-top:1px dashed #94a3b8;margin:12px 0}</style></head><body>
+<h1>DxCon Reception Receipt</h1>
+<div class="row"><span>Receipt</span><span>${escapeHtml(payment.receipt_number)}</span></div>
+<div class="row"><span>Order</span><span>${escapeHtml(orderRef)}</span></div>
+<div class="row"><span>Patient</span><span>${escapeHtml(patient.patientName)} (${escapeHtml(patient.patientCode)})</span></div>
+<div class="hr"></div>
+<div class="row"><span>Method</span><span>${escapeHtml(payment.payment_method)}</span></div>
+<div class="row"><span>Amount</span><span>${escapeHtml(formatCurrency(payment.amount))}</span></div>
+<div class="row"><span>Status</span><span>${escapeHtml(summary.status)}</span></div>
+<div class="row"><span>Paid at</span><span>${escapeHtml(paidAt)}</span></div>
+<div class="row"><span>Cashier</span><span>${escapeHtml(cashier)}</span></div>
+<script>window.onload=function(){window.print()}</script></body></html>`;
+    const popup = window.open("", "_blank", "noopener,noreferrer,width=480,height=720");
+    if (!popup) return;
+    popup.document.write(html);
+    popup.document.close();
+  }
+
+  if (showDocuments && isPaid) {
+    return (
+      <DocumentsStep
+        accessToken={accessToken}
+        organizationId={organizationId}
+        patient={patient}
+        orderRef={orderRef}
+        pricing={authoritative}
+        payment={payment}
+        cashierLabel={cashierLabel}
+        onReset={onReset}
+        onBackToPayment={() => setShowDocuments(false)}
       />
-      {error ? (
-        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
-          <p>{error}</p>
-          <Button className="mt-2" size="sm" variant="outline" onClick={() => void refresh()}>
-            Retry
-          </Button>
-        </div>
-      ) : null}
-      <div className="grid gap-3 md:grid-cols-3">
-        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-          <p className="text-xs text-slate-500">Patient</p>
-          <p className="font-medium text-slate-900">{patient.patientName}</p>
-          <p className="text-xs text-slate-500">{patient.patientCode}</p>
-        </div>
-        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-          <p className="text-xs text-slate-500">Authoritative total (API)</p>
-          <p className="font-semibold text-slate-900">{formatCurrency(authoritative.total)}</p>
-          <p className="text-xs text-slate-500">
-            Subtotal {formatCurrency(authoritative.subtotal)} · Discount{" "}
-            {formatCurrency(authoritative.discount)}
-            {authoritative.tax != null ? ` · Tax ${formatCurrency(authoritative.tax)}` : ""}
-          </p>
-        </div>
-        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-          <p className="text-xs text-slate-500">Order code</p>
-          <p className="break-all font-mono text-sm">{orderRef}</p>
-          <p className="text-xs text-slate-500">
-            Status: {String((detail as { status?: string }).status ?? "payment_pending")}
-          </p>
-        </div>
-      </div>
-      {items.length > 0 ? (
-        <SimpleTable
-          rows={items}
-          rowKey={(row, index) => String(row.id ?? row.test_code ?? index)}
-          columns={[
-            { key: "code", label: "Code", render: (row) => String(row.test_code ?? "—") },
-            { key: "name", label: "Test", render: (row) => String(row.test_name ?? "—") },
-            {
-              key: "price",
-              label: "Unit price",
-              render: (row) =>
-                row.unit_price != null ? formatCurrency(Number(row.unit_price)) : "—",
-            },
-          ]}
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <Card className="space-y-4">
+        <SectionHeader
+          title="Payment & receipt"
+          description="Collect payment against the authoritative backend total. Documents unlock after paid status."
+          actions={
+            <Button size="sm" variant="outline" disabled={loading} onClick={() => void refresh()}>
+              {loading ? "Refreshing…" : "Refresh"}
+            </Button>
+          }
         />
+        {error ? (
+          <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+            <p>{error}</p>
+            <Button className="mt-2" size="sm" variant="outline" onClick={() => void refresh()}>
+              Retry
+            </Button>
+          </div>
+        ) : null}
+        <div className="grid gap-3 md:grid-cols-4">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs text-slate-500">Patient</p>
+            <p className="font-medium text-slate-900">{patient.patientName}</p>
+            <p className="text-xs text-slate-500">{patient.patientCode}</p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs text-slate-500">Order total</p>
+            <p className="font-semibold text-slate-900">{formatCurrency(summary.order_total)}</p>
+            <p className="text-xs text-slate-500">
+              Subtotal {formatCurrency(summary.subtotal ?? authoritative.subtotal)} · Discount{" "}
+              {formatCurrency(summary.discount ?? authoritative.discount)}
+            </p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs text-slate-500">Paid / outstanding</p>
+            <p className="font-semibold text-slate-900">{formatCurrency(summary.paid_amount)}</p>
+            <p className="text-xs text-slate-500">Due {formatCurrency(summary.outstanding_amount)}</p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs text-slate-500">Order · status</p>
+            <p className="break-all font-mono text-sm">{orderRef}</p>
+            <p className="text-xs font-medium uppercase text-slate-600">{summary.status}</p>
+          </div>
+        </div>
+        {items.length > 0 ? (
+          <SimpleTable
+            rows={items}
+            rowKey={(row, index) => String(row.id ?? row.test_code ?? index)}
+            columns={[
+              { key: "code", label: "Code", render: (row) => String(row.test_code ?? "—") },
+              { key: "name", label: "Test", render: (row) => String(row.test_name ?? "—") },
+              {
+                key: "price",
+                label: "Unit price",
+                render: (row) =>
+                  row.unit_price != null ? formatCurrency(Number(row.unit_price)) : "—",
+              },
+            ]}
+          />
+        ) : null}
+      </Card>
+
+      {!isPaid ? (
+        <Card className="space-y-4">
+          <SectionHeader
+            title="Settle outstanding balance"
+            description="Full settlement only. Amount must equal outstanding."
+          />
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <Label htmlFor="payment_method">Payment method</Label>
+              <select
+                id="payment_method"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+                value={paymentMethod}
+                onChange={(event) => setPaymentMethod(event.target.value)}
+                disabled={paying}
+              >
+                {methods.map((method) => (
+                  <option key={method} value={method}>
+                    {method}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="pay_amount">Amount due</Label>
+              <Input
+                id="pay_amount"
+                inputMode="decimal"
+                value={amountInput}
+                onChange={(event) => setAmountInput(event.target.value)}
+                disabled={paying}
+              />
+            </div>
+          </div>
+          <Button disabled={paying || loading} onClick={() => void submitPayment()}>
+            {paying ? "Recording payment…" : "Collect payment"}
+          </Button>
+        </Card>
+      ) : (
+        <Card className="space-y-4">
+          <SectionHeader title="Receipt" description="Payment persisted from the backend." />
+          {payment ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-lg border border-slate-200 p-3">
+                <p className="text-xs text-slate-500">Receipt / reference</p>
+                <p className="font-mono text-sm">{payment.receipt_number}</p>
+              </div>
+              <div className="rounded-lg border border-slate-200 p-3">
+                <p className="text-xs text-slate-500">Date / time</p>
+                <p className="text-sm">
+                  {payment.paid_at ? new Date(payment.paid_at).toLocaleString() : "—"}
+                </p>
+              </div>
+              <div className="rounded-lg border border-slate-200 p-3">
+                <p className="text-xs text-slate-500">Method</p>
+                <p className="text-sm">{payment.payment_method}</p>
+              </div>
+              <div className="rounded-lg border border-slate-200 p-3">
+                <p className="text-xs text-slate-500">Amount</p>
+                <p className="text-sm font-semibold">{formatCurrency(payment.amount)}</p>
+              </div>
+              <div className="rounded-lg border border-slate-200 p-3">
+                <p className="text-xs text-slate-500">Cashier</p>
+                <p className="text-sm">{cashierLabel || payment.created_by || "—"}</p>
+              </div>
+            </div>
+          ) : null}
+          <div className="flex flex-wrap gap-3">
+            <Button variant="outline" disabled={!payment} onClick={openPrintableReceipt}>
+              Print receipt
+            </Button>
+            <Button onClick={() => setShowDocuments(true)}>Continue to barcodes & requisition</Button>
+            <Button variant="ghost" onClick={onReset}>
+              New order
+            </Button>
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+export function DocumentsStep({
+  accessToken,
+  organizationId,
+  patient,
+  orderRef,
+  pricing,
+  payment,
+  cashierLabel,
+  onReset,
+  onBackToPayment,
+}: {
+  accessToken: string;
+  organizationId?: string | null;
+  patient: SelectedPatient;
+  orderRef: string;
+  pricing: ReceptionOrderPricing;
+  payment: ReceptionPaymentRecord | null;
+  cashierLabel?: string | null;
+  onReset: () => void;
+  onBackToPayment?: () => void;
+}) {
+  const [barcodes, setBarcodes] = useState<ReceptionBarcodes | null>(null);
+  const [requisitionHtml, setRequisitionHtml] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function loadDocuments() {
+    setLoading(true);
+    setError(null);
+    try {
+      const [codes, form] = await Promise.all([
+        fetchReceptionBarcodes({ token: accessToken, organizationId }, orderRef),
+        fetchReceptionRequestForm({ token: accessToken, organizationId }, orderRef),
+      ]);
+      if (!isValidPatientQr(codes.patient_qr)) {
+        throw new Error("Invalid patient QR payload from backend.");
+      }
+      setBarcodes(codes);
+      setRequisitionHtml(form.html);
+    } catch (err) {
+      setError(normalizeApiError(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void loadDocuments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderRef, accessToken, organizationId]);
+
+  function openLabels() {
+    if (!barcodes) return;
+    const sampleRows = (barcodes.sample_barcodes || [])
+      .map(
+        (s) => `<div class="label"><div><strong>${escapeHtml(s.barcode)}</strong></div>
+<div>${escapeHtml(patient.patientName)} · ${escapeHtml(patient.patientCode)}</div>
+<div>${escapeHtml(orderRef)} · ${escapeHtml(s.test_code)}</div>
+<div>${escapeHtml(s.sample_type || s.test_name)}</div>
+<div>${escapeHtml(s.collection_requirement || "Standard collection")}</div>
+<div>${escapeHtml(barcodes.generated_at || "")}</div></div>`,
+      )
+      .join("");
+    const html = `<!doctype html><html><head><title>Labels ${escapeHtml(orderRef)}</title>
+<style>
+body{font-family:ui-monospace,Menlo,monospace;padding:16px}
+.label{border:1px solid #0f172a;padding:12px;margin:0 0 12px;width:320px;page-break-inside:avoid;font-size:12px}
+</style></head><body>
+<div class="label"><div><strong>${escapeHtml(barcodes.order_barcode)}</strong></div>
+<div>Order ${escapeHtml(orderRef)}</div>
+<div>${escapeHtml(patient.patientName)} (${escapeHtml(patient.patientCode)})</div>
+<div>QR ${escapeHtml(barcodes.patient_qr)}</div>
+<div>${escapeHtml(barcodes.generated_at || "")}</div></div>
+${sampleRows}
+<script>window.onload=function(){window.print()}</script></body></html>`;
+    const popup = window.open("", "_blank", "noopener,noreferrer,width=420,height=720");
+    if (!popup) return;
+    popup.document.write(html);
+    popup.document.close();
+  }
+
+  function openRequisition() {
+    if (!requisitionHtml) return;
+    const popup = window.open("", "_blank", "noopener,noreferrer");
+    if (!popup) return;
+    popup.document.write(requisitionHtml);
+    popup.document.close();
+  }
+
+  return (
+    <div className="space-y-5">
+      <Card className="space-y-4">
+        <SectionHeader
+          title="Barcode, QR & requisition"
+          description="Backend-generated identifiers for the paid order. Reprint returns the same codes."
+          actions={
+            <Button size="sm" variant="outline" disabled={loading} onClick={() => void loadDocuments()}>
+              {loading ? "Loading…" : barcodes?.reprint ? "Reprint / refresh" : "Generate / refresh"}
+            </Button>
+          }
+        />
+        {error ? (
+          <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+            <p>{error}</p>
+            <Button className="mt-2" size="sm" variant="outline" onClick={() => void loadDocuments()}>
+              Retry
+            </Button>
+          </div>
+        ) : null}
+        <div className="grid gap-3 md:grid-cols-3">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs text-slate-500">Order</p>
+            <p className="font-mono text-sm">{orderRef}</p>
+            <p className="text-xs text-slate-500">Total {formatCurrency(pricing.total)}</p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs text-slate-500">Patient</p>
+            <p className="font-medium">{patient.patientName}</p>
+            <p className="text-xs text-slate-500">{patient.patientCode}</p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs text-slate-500">Receipt</p>
+            <p className="font-mono text-sm">{payment?.receipt_number ?? "—"}</p>
+            <p className="text-xs text-slate-500">{cashierLabel || payment?.created_by || "—"}</p>
+          </div>
+        </div>
+      </Card>
+
+      {barcodes ? (
+        <Card className="space-y-4">
+          <SectionHeader
+            title="Identifiers"
+            description={
+              barcodes.reprint
+                ? "Reprint — same backend identifiers (no new codes created)."
+                : "First generation — identifiers persisted for this order."
+            }
+          />
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-lg border border-slate-200 p-3">
+              <p className="text-xs text-slate-500">Order barcode</p>
+              <p className="font-mono text-sm">{barcodes.order_barcode}</p>
+            </div>
+            <div className="rounded-lg border border-slate-200 p-3">
+              <p className="text-xs text-slate-500">Patient barcode</p>
+              <p className="font-mono text-sm">{barcodes.patient_barcode}</p>
+            </div>
+            <div className="rounded-lg border border-slate-200 p-3 md:col-span-2">
+              <p className="text-xs text-slate-500">Patient QR payload</p>
+              <p className="break-all font-mono text-sm">{barcodes.patient_qr}</p>
+              <p className="mt-1 text-xs text-emerald-700">
+                {isValidPatientQr(barcodes.patient_qr) ? "QR format valid" : "Invalid QR format"}
+              </p>
+            </div>
+            <div className="rounded-lg border border-slate-200 p-3">
+              <p className="text-xs text-slate-500">Generated at</p>
+              <p className="text-sm">
+                {barcodes.generated_at
+                  ? new Date(barcodes.generated_at).toLocaleString()
+                  : "—"}
+              </p>
+            </div>
+          </div>
+          {barcodes.sample_barcodes?.length ? (
+            <SimpleTable
+              rows={barcodes.sample_barcodes}
+              rowKey={(row, index) => `${row.barcode}-${index}`}
+              columns={[
+                { key: "specimen", label: "Specimen", render: (row) => row.specimen_code ?? "—" },
+                { key: "barcode", label: "Barcode", render: (row) => row.barcode },
+                { key: "test", label: "Test", render: (row) => `${row.test_code} · ${row.test_name}` },
+                { key: "type", label: "Type", render: (row) => row.sample_type ?? "—" },
+              ]}
+            />
+          ) : null}
+          <div className="flex flex-wrap gap-3">
+            <Button variant="outline" onClick={openLabels}>
+              Print labels
+            </Button>
+            <Button variant="outline" disabled={!requisitionHtml} onClick={openRequisition}>
+              Open requisition
+            </Button>
+            <Button variant="ghost" onClick={() => void loadDocuments()}>
+              Reprint
+            </Button>
+          </div>
+        </Card>
+      ) : loading ? (
+        <p className="text-sm text-slate-500">Generating identifiers…</p>
       ) : null}
-      <div className="flex flex-wrap gap-3 border-t border-slate-100 pt-4">
+
+      <div className="flex flex-wrap gap-3">
+        {onBackToPayment ? (
+          <Button variant="outline" onClick={onBackToPayment}>
+            Back to receipt
+          </Button>
+        ) : null}
         <Button onClick={onReset}>New order</Button>
-        <a
-          href={`/app/reception/workflow?order=${encodeURIComponent(orderRef)}&orderPatient=${encodeURIComponent(patient.patientCode)}`}
-        >
-          <Button variant="outline">Reopen order link</Button>
+        <a href={`/app/reception/workflow?order=${encodeURIComponent(orderRef)}`}>
+          <Button variant="ghost">Reopen order link</Button>
         </a>
       </div>
-    </Card>
+    </div>
   );
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
 }
 
 export { formatCurrency };

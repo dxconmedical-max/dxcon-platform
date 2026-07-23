@@ -327,6 +327,12 @@ describe("Reception Milestone 1 UI integration", () => {
         items: [{ test_code: "CBC", test_name: "CBC", unit_price: 100 }],
       },
       pricing: { subtotal: 100, discount: 0, total: 100 },
+      payment_summary: {
+        order_total: 100,
+        paid_amount: 0,
+        outstanding_amount: 100,
+        status: "unpaid",
+      },
     });
     vi.mocked(fetchReceptionPatient).mockResolvedValue({
       patient_code: "P-1",
@@ -343,7 +349,7 @@ describe("Reception Milestone 1 UI integration", () => {
         onReset={vi.fn()}
       />,
     );
-    expect(await screen.findByText("Authoritative total (API)")).toBeInTheDocument();
+    expect(await screen.findByText("Payment & receipt")).toBeInTheDocument();
     await waitFor(() =>
       expect(fetchReceptionOrder).toHaveBeenCalledWith(
         expect.objectContaining({ token: "t" }),

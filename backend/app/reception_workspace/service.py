@@ -217,35 +217,143 @@ def create_reception_order(
     }
 
 
+def payment_summary_for_order(order: BizOrder) -> dict[str, Any]:
+    payments = BizPayment.query.filter_by(order_id=order.id).all()
+    paid_amount = round(sum(float(p.amount or 0) for p in payments), 2)
+    order_total = round(float(order.total_amount or 0), 2)
+    outstanding_amount = round(max(0.0, order_total - paid_amount), 2)
+    if paid_amount <= 0:
+        status = "unpaid"
+    elif outstanding_amount <= 0 or order.status == ORDER_PAID:
+        status = "paid"
+    else:
+        status = "partial"
+    return {
+        "order_total": order_total,
+        "paid_amount": paid_amount,
+        "outstanding_amount": outstanding_amount,
+        "discount": round(float(order.discount or 0), 2),
+        "subtotal": round(float(order.subtotal or 0), 2),
+        "tax": None,
+        "status": status,
+        "payment_methods_supported": list(PAYMENT_METHODS),
+        "partial_payments_supported": False,
+    }
+
+
+def get_order_with_payment(order_ref: str) -> dict[str, Any]:
+    detail = biz.order_to_detail(order_ref)
+    order = BizOrder.query.filter(
+        or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)
+    ).first()
+    if not order:
+        raise ReceptionWorkspaceError("Order not found")
+    payment = (
+        BizPayment.query.filter_by(order_id=order.id)
+        .order_by(BizPayment.paid_at.desc())
+        .first()
+    )
+    invoice = BizInvoice.query.filter_by(order_id=order.id).first()
+    summary = payment_summary_for_order(order)
+    return {
+        "order": detail,
+        "pricing": {
+            "subtotal": summary["subtotal"],
+            "discount": summary["discount"],
+            "total": summary["order_total"],
+            "tax": summary["tax"],
+        },
+        "payment_summary": summary,
+        "payment": payment.to_dict() if payment else None,
+        "invoice": invoice.to_dict() if invoice else None,
+    }
+
+
+def _payment_collect_result(
+    order: BizOrder,
+    payment: BizPayment,
+    *,
+    idempotent_replay: bool,
+) -> dict[str, Any]:
+    invoice = BizInvoice.query.filter_by(order_id=order.id).first()
+    db.session.refresh(order)
+    return {
+        "payment": payment.to_dict(),
+        "invoice": invoice.to_dict() if invoice else None,
+        "order_status": order.status,
+        "payment_summary": payment_summary_for_order(order),
+        "idempotent_replay": idempotent_replay,
+    }
+
+
 def collect_payment(
     order_ref: str,
     *,
     payment_method: str = "cash",
     receipt_number: str | None = None,
     amount: float | None = None,
+    idempotency_key: str | None = None,
     actor: str | None = None,
 ) -> dict[str, Any]:
-    if payment_method.lower() not in PAYMENT_METHODS:
+    method = (payment_method or "").strip().lower()
+    if method not in PAYMENT_METHODS:
         raise ReceptionWorkspaceError(f"Invalid payment method: {payment_method}")
-    payment = biz.mark_order_paid(
-        order_ref,
-        payment_method=payment_method,
-        receipt_number=receipt_number,
-        actor=actor,
-    )
+
     order = BizOrder.query.filter(
         or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)
     ).first()
-    invoice = BizInvoice.query.filter_by(order_id=order.id).first() if order else None
+    if not order:
+        raise ReceptionWorkspaceError("Order not found")
+
+    key = (idempotency_key or "").strip() or None
+    receipt = (receipt_number or "").strip() or key
+
+    if key:
+        existing_by_key = BizPayment.query.filter_by(
+            order_id=order.id, receipt_number=key
+        ).first()
+        if existing_by_key:
+            return _payment_collect_result(order, existing_by_key, idempotent_replay=True)
+
+    summary = payment_summary_for_order(order)
+    if summary["status"] == "paid" or order.status == ORDER_PAID:
+        existing = (
+            BizPayment.query.filter_by(order_id=order.id)
+            .order_by(BizPayment.paid_at.desc())
+            .first()
+        )
+        if existing:
+            return _payment_collect_result(order, existing, idempotent_replay=True)
+
+    outstanding = float(summary["outstanding_amount"])
+    pay_amount = float(amount) if amount is not None else outstanding
+    if pay_amount <= 0:
+        raise ReceptionWorkspaceError("Payment amount must be greater than zero")
+    if pay_amount > outstanding + 0.009:
+        raise ReceptionWorkspaceError(
+            f"Overpayment is not allowed (outstanding={outstanding})"
+        )
+    if pay_amount < outstanding - 0.009:
+        raise ReceptionWorkspaceError(
+            "Partial payments are not supported. Collect the full outstanding amount."
+        )
+
+    payment = biz.mark_order_paid(
+        order_ref,
+        payment_method=method,
+        receipt_number=receipt,
+        actor=actor,
+    )
+    invoice = BizInvoice.query.filter_by(order_id=order.id).first()
     _sync_queue_after_payment(order, invoice, actor=actor)
-    write_reception_audit(action="payment_collected", object_type="payment", object_id=payment.receipt_number, actor=actor)
-    barcodes = generate_barcodes(order.order_code) if order else {}
-    return {
-        "payment": payment.to_dict(),
-        "invoice": invoice.to_dict() if invoice else None,
-        "order_status": order.status if order else None,
-        "barcodes": barcodes,
-    }
+    write_reception_audit(
+        action="payment_collected",
+        object_type="payment",
+        object_id=payment.receipt_number,
+        actor=actor,
+    )
+    db.session.refresh(order)
+    return _payment_collect_result(order, payment, idempotent_replay=False)
 
 
 def _sync_queue_after_payment(order: BizOrder | None, invoice: BizInvoice | None, *, actor: str | None = None) -> None:
@@ -285,38 +393,118 @@ def create_collection_after_payment(
     return {"collection": collection.to_dict(), "queue_entry": entry.to_dict() if entry else None}
 
 
+def _assert_order_document_eligible(order: BizOrder) -> None:
+    """Milestone 3 — barcodes/requisition require a paid, non-cancelled order."""
+    status = (order.status or "").lower()
+    if status in {"cancelled", "canceled", "void"}:
+        raise ReceptionWorkspaceError(
+            f"Cannot generate documents for order in status {order.status}"
+        )
+    summary = payment_summary_for_order(order)
+    if summary["status"] != "paid" and status != ORDER_PAID:
+        raise ReceptionWorkspaceError(
+            "Order must be paid before barcode, QR, or requisition generation"
+        )
+
+
 def generate_barcodes(order_ref: str) -> dict[str, Any]:
+    """Return stable backend identifiers. Reprint returns the same codes (no new IDs)."""
     order = BizOrder.query.filter(or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)).first()
     if not order:
         raise ReceptionWorkspaceError("Order not found")
+    _assert_order_document_eligible(order)
+
     patient = Patient.query.get(order.patient_code)
     collection = BizCollection.query.filter_by(order_id=order.id).first()
+
+    had_order_barcode = bool(order.barcode_value)
+    order_barcode = order.barcode_value or f"BC-{order.order_code}"
+    if not order.barcode_value:
+        try:
+            from app.business_engine.service import table_has_column
+
+            if table_has_column("biz_orders", "barcode_value"):
+                order.barcode_value = order_barcode
+                db.session.flush()
+        except Exception:
+            # Column may be absent in some environments — still return deterministic code.
+            pass
+
+    patient_code = order.patient_code
+    patient_barcode = f"BC-PAT-{patient_code}"
+    patient_qr = f"dxcon:patient:{patient_code}"
+    if not patient_qr.startswith("dxcon:patient:") or not patient_code:
+        raise ReceptionWorkspaceError("Invalid patient QR payload")
+
     samples = []
     for item in order.items:
         sample_code = f"SMP-{item.test_code}-{order.order_code}"
         samples.append({
             "test_code": item.test_code,
             "test_name": item.test_name,
-            "sample_type": item.test_name,
+            "sample_type": getattr(item, "sample_type", None) or item.test_name,
+            "specimen_code": sample_code,
             "barcode": f"BC-{sample_code}",
+            "collection_requirement": "Follow standard collection SOP",
         })
+
+    generated_at = datetime.utcnow().isoformat() + "Z"
     payload = {
-        "order_barcode": order.barcode_value or f"BC-{order.order_code}",
-        "patient_barcode": f"BC-PAT-{order.patient_code}",
-        "patient_qr": f"dxcon:patient:{order.patient_code}",
+        "order_code": order.order_code,
+        "patient_code": patient_code,
+        "patient_name": order.patient_name or (patient.full_name if patient else None),
+        "order_barcode": order_barcode,
+        "patient_barcode": patient_barcode,
+        "patient_qr": patient_qr,
         "sample_barcodes": samples,
         "collection_barcode": collection.barcode_value if collection else None,
+        "generated_at": generated_at,
+        "reprint": had_order_barcode,
+        "status": order.status,
     }
-    write_reception_audit(action="barcode_printed", object_type="order", object_id=order.order_code)
+    write_reception_audit(
+        action="barcode_printed" if had_order_barcode else "barcode_generated",
+        object_type="order",
+        object_id=order.order_code,
+    )
     return payload
 
 
-def render_request_form(order_ref: str) -> str:
+def render_request_form(order_ref: str) -> dict[str, Any]:
+    """Return requisition HTML plus embedded identifier metadata for reprint stability."""
     order = BizOrder.query.filter(or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)).first()
     if not order:
         raise ReceptionWorkspaceError("Order not found")
+    _assert_order_document_eligible(order)
+    barcodes = generate_barcodes(order_ref)
+    html = biz.render_request_form_html(order)
+    # Enrich with QR + specimen identifiers for printable requisition.
+    sample_rows = "".join(
+        f"<li>{s['test_name']} ({s['test_code']}) — specimen {s['specimen_code']} — barcode {s['barcode']}</li>"
+        for s in barcodes.get("sample_barcodes") or []
+    )
+    enrichment = (
+        f"<section><h2>Identifiers</h2>"
+        f"<p>Order barcode: {barcodes['order_barcode']}</p>"
+        f"<p>Patient barcode: {barcodes['patient_barcode']}</p>"
+        f"<p>Patient QR: {barcodes['patient_qr']}</p>"
+        f"<p>Generated at: {barcodes['generated_at']}</p>"
+        f"<ul>{sample_rows or '<li>No specimen lines</li>'}</ul>"
+        f"</section>"
+    )
+    if "</body>" in html:
+        html = html.replace("</body>", enrichment + "</body>")
+    else:
+        html = html + enrichment
     write_reception_audit(action="request_form_printed", object_type="order", object_id=order.order_code)
-    return biz.render_request_form_html(order)
+    return {
+        "html": html,
+        "order_code": order.order_code,
+        "patient_code": order.patient_code,
+        "barcodes": barcodes,
+        "reprint": barcodes.get("reprint", False),
+        "generated_at": barcodes.get("generated_at"),
+    }
 
 
 def workspace_dashboard() -> dict[str, Any]:

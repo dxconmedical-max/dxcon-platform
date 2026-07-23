@@ -63,7 +63,84 @@ export type ReceptionOrderCreate = {
 export type ReceptionOrderDetail = {
   order: Record<string, unknown>;
   pricing: ReceptionOrderPricing;
+  payment_summary?: ReceptionPaymentSummary | null;
+  payment?: ReceptionPaymentRecord | null;
+  invoice?: Record<string, unknown> | null;
 };
+
+export type ReceptionPaymentSummary = {
+  order_total: number;
+  paid_amount: number;
+  outstanding_amount: number;
+  discount?: number;
+  subtotal?: number;
+  tax?: number | null;
+  status: string;
+  payment_methods_supported?: string[];
+  partial_payments_supported?: boolean;
+};
+
+export type ReceptionPaymentRecord = {
+  id?: string;
+  receipt_number: string;
+  payment_method: string;
+  amount: number;
+  paid_at?: string | null;
+  created_by?: string | null;
+};
+
+export type ReceptionPaymentResult = {
+  payment: ReceptionPaymentRecord | null;
+  invoice: Record<string, unknown> | null;
+  order_status: string | null;
+  payment_summary: ReceptionPaymentSummary;
+  idempotent_replay?: boolean;
+};
+
+export type ReceptionSampleBarcode = {
+  test_code: string;
+  test_name: string;
+  sample_type?: string;
+  specimen_code?: string;
+  barcode: string;
+  collection_requirement?: string;
+};
+
+export type ReceptionBarcodes = {
+  order_code?: string;
+  patient_code?: string;
+  patient_name?: string | null;
+  order_barcode: string;
+  patient_barcode: string;
+  patient_qr: string;
+  sample_barcodes: ReceptionSampleBarcode[];
+  collection_barcode?: string | null;
+  generated_at?: string;
+  reprint?: boolean;
+  status?: string;
+};
+
+export type ReceptionRequestForm = {
+  html: string;
+  order_code?: string;
+  patient_code?: string;
+  barcodes?: ReceptionBarcodes;
+  reprint?: boolean;
+  generated_at?: string;
+};
+
+export const RECEPTION_PAYMENT_METHODS = [
+  "cash",
+  "transfer",
+  "qr",
+  "pos",
+  "corporate",
+  "insurance",
+] as const;
+
+export const RECEPTION_PAYMENT_TIMEOUT_MS = 30_000;
+
+export const PATIENT_QR_PREFIX = "dxcon:patient:";
 
 type Ctx = {
   token: string;
@@ -310,9 +387,20 @@ export async function fetchReceptionOrder(
       `/api/v1/reception/workspace/orders/${encodeURIComponent(orderRef)}`,
       requestOpts(ctx),
     );
+    const data = response.data as unknown as Record<string, unknown>;
+    const pricing = mapPricing(data.pricing as Record<string, unknown> | undefined);
     return {
-      order: response.data.order,
-      pricing: mapPricing(response.data.pricing as unknown as Record<string, unknown>),
+      order: (data.order as Record<string, unknown>) ?? response.data.order,
+      pricing,
+      payment_summary: mapPaymentSummary(
+        data.payment_summary as Record<string, unknown> | undefined,
+        pricing,
+      ),
+      payment: mapPaymentRecord(data.payment as Record<string, unknown> | undefined),
+      invoice:
+        data.invoice && typeof data.invoice === "object"
+          ? (data.invoice as Record<string, unknown>)
+          : null,
     };
   } catch (error) {
     if (!(error instanceof ApiError) || error.status !== 404 || !opts?.patientCode) {
@@ -344,6 +432,150 @@ export async function fetchReceptionOrder(
       }),
     };
   }
+}
+
+
+function mapPaymentSummary(
+  raw: Record<string, unknown> | undefined | null,
+  pricingFallback?: ReceptionOrderPricing,
+): ReceptionPaymentSummary {
+  const source = raw ?? {};
+  const total = Number(source.order_total ?? pricingFallback?.total ?? 0);
+  const paid = Number(source.paid_amount ?? 0);
+  const outstanding = Number(
+    source.outstanding_amount ?? Math.max(0, total - paid),
+  );
+  return {
+    order_total: total,
+    paid_amount: paid,
+    outstanding_amount: outstanding,
+    discount: source.discount != null ? Number(source.discount) : pricingFallback?.discount,
+    subtotal: source.subtotal != null ? Number(source.subtotal) : pricingFallback?.subtotal,
+    tax: source.tax != null ? Number(source.tax) : pricingFallback?.tax ?? null,
+    status: String(source.status ?? (paid > 0 && outstanding <= 0 ? "paid" : "unpaid")),
+    payment_methods_supported: Array.isArray(source.payment_methods_supported)
+      ? (source.payment_methods_supported as string[])
+      : [...RECEPTION_PAYMENT_METHODS],
+    partial_payments_supported: Boolean(source.partial_payments_supported),
+  };
+}
+
+function mapPaymentRecord(raw: Record<string, unknown> | null | undefined): ReceptionPaymentRecord | null {
+  if (!raw) return null;
+  const receipt = raw.receipt_number ?? raw.receiptNumber;
+  if (!receipt) return null;
+  return {
+    id: raw.id != null ? String(raw.id) : undefined,
+    receipt_number: String(receipt),
+    payment_method: String(raw.payment_method ?? "cash"),
+    amount: Number(raw.amount ?? 0),
+    paid_at: raw.paid_at != null ? String(raw.paid_at) : null,
+    created_by: raw.created_by != null ? String(raw.created_by) : null,
+  };
+}
+
+function mapBarcodes(raw: Record<string, unknown>): ReceptionBarcodes {
+  const samples = Array.isArray(raw.sample_barcodes)
+    ? (raw.sample_barcodes as Record<string, unknown>[]).map((s) => ({
+        test_code: String(s.test_code ?? ""),
+        test_name: String(s.test_name ?? ""),
+        sample_type: s.sample_type != null ? String(s.sample_type) : undefined,
+        specimen_code: s.specimen_code != null ? String(s.specimen_code) : undefined,
+        barcode: String(s.barcode ?? ""),
+        collection_requirement:
+          s.collection_requirement != null ? String(s.collection_requirement) : undefined,
+      }))
+    : [];
+  return {
+    order_code: raw.order_code != null ? String(raw.order_code) : undefined,
+    patient_code: raw.patient_code != null ? String(raw.patient_code) : undefined,
+    patient_name: raw.patient_name != null ? String(raw.patient_name) : null,
+    order_barcode: String(raw.order_barcode ?? ""),
+    patient_barcode: String(raw.patient_barcode ?? ""),
+    patient_qr: String(raw.patient_qr ?? ""),
+    sample_barcodes: samples,
+    collection_barcode: raw.collection_barcode != null ? String(raw.collection_barcode) : null,
+    generated_at: raw.generated_at != null ? String(raw.generated_at) : undefined,
+    reprint: Boolean(raw.reprint),
+    status: raw.status != null ? String(raw.status) : undefined,
+  };
+}
+
+export function isValidPatientQr(payload: string): boolean {
+  return payload.startsWith(PATIENT_QR_PREFIX) && payload.length > PATIENT_QR_PREFIX.length;
+}
+
+
+/** POST /api/v1/reception/workspace/orders/:ref/payment */
+export async function collectReceptionPayment(
+  ctx: Ctx,
+  orderRef: string,
+  payload: {
+    payment_method: string;
+    amount: number;
+    receipt_number?: string;
+    idempotency_key: string;
+  },
+): Promise<ReceptionPaymentResult> {
+  const response = await apiRequest<{ success: boolean; data: Record<string, unknown> }>(
+    `/api/v1/reception/workspace/orders/${encodeURIComponent(orderRef)}/payment`,
+    requestOpts(ctx, {
+      method: "POST",
+      timeoutMs: ctx.timeoutMs ?? RECEPTION_PAYMENT_TIMEOUT_MS,
+      headers: { "Idempotency-Key": payload.idempotency_key },
+      body: {
+        payment_method: payload.payment_method,
+        amount: payload.amount,
+        receipt_number: payload.receipt_number ?? payload.idempotency_key,
+        idempotency_key: payload.idempotency_key,
+      },
+    }),
+  );
+  const data = response.data ?? {};
+  return {
+    payment: mapPaymentRecord(data.payment as Record<string, unknown> | undefined),
+    invoice:
+      data.invoice && typeof data.invoice === "object"
+        ? (data.invoice as Record<string, unknown>)
+        : null,
+    order_status: data.order_status != null ? String(data.order_status) : null,
+    payment_summary: mapPaymentSummary(data.payment_summary as Record<string, unknown> | undefined),
+    idempotent_replay: Boolean(data.idempotent_replay),
+  };
+}
+
+/** GET /api/v1/reception/workspace/orders/:ref/barcode */
+export async function fetchReceptionBarcodes(
+  ctx: Ctx,
+  orderRef: string,
+): Promise<ReceptionBarcodes> {
+  const response = await apiRequest<{ success: boolean; data: Record<string, unknown> }>(
+    `/api/v1/reception/workspace/orders/${encodeURIComponent(orderRef)}/barcode`,
+    requestOpts(ctx),
+  );
+  return mapBarcodes(response.data ?? {});
+}
+
+/** GET /api/v1/reception/workspace/orders/:ref/request-form */
+export async function fetchReceptionRequestForm(
+  ctx: Ctx,
+  orderRef: string,
+): Promise<ReceptionRequestForm> {
+  const response = await apiRequest<{ success: boolean; data: Record<string, unknown> }>(
+    `/api/v1/reception/workspace/orders/${encodeURIComponent(orderRef)}/request-form`,
+    requestOpts(ctx),
+  );
+  const data = response.data ?? {};
+  return {
+    html: String(data.html ?? ""),
+    order_code: data.order_code != null ? String(data.order_code) : undefined,
+    patient_code: data.patient_code != null ? String(data.patient_code) : undefined,
+    barcodes: data.barcodes && typeof data.barcodes === "object"
+      ? mapBarcodes(data.barcodes as Record<string, unknown>)
+      : undefined,
+    reprint: Boolean(data.reprint),
+    generated_at: data.generated_at != null ? String(data.generated_at) : undefined,
+  };
 }
 
 export function getOrderCode(

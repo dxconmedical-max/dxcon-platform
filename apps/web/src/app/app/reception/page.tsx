@@ -8,18 +8,18 @@ export default function ReceptionPage() {
     <AppShell title="Reception" workspacePath="/app/reception">
       <WorkspaceHome
         title="Reception workspace"
-        subtitle="Milestone 1: patient search/create and diagnostic order creation against the production API."
+        subtitle="Patient intake, orders, payment, barcodes/QR, and laboratory requisitions."
         statusCards={[
           { label: "Patients", value: "Live" },
-          { label: "Catalog", value: "Live" },
           { label: "Orders", value: "Live" },
-          { label: "Payment", value: "M2" },
+          { label: "Payment", value: "Live" },
+          { label: "Documents", value: "Live" },
         ]}
         actions={[
           {
-            label: "Create order",
+            label: "Create order & documents",
             href: "/app/reception/workflow",
-            description: "Patient → tests → authoritative order totals.",
+            description: "Patient → tests → payment → barcode/QR → requisition.",
           },
           {
             label: "Patient search",

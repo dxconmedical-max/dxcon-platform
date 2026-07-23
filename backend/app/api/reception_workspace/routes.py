@@ -14,6 +14,7 @@ from app.reception_workspace.service import (
     create_reception_order,
     fast_search_patients,
     generate_barcodes,
+    get_order_with_payment,
     get_patient_profile,
     payment_report,
     queue_report,
@@ -108,23 +109,12 @@ def orders_create():
 @reception_workspace_bp.route("/orders/<order_ref>", methods=["GET"])
 @reception_api_read
 def orders_get(order_ref: str):
-    """Milestone 1 — reopen/refresh persisted order (no payment/barcode)."""
-    from app.business_engine import service as biz
-
+    """Milestone 2 — order detail with payment summary, payment, and invoice."""
     try:
-        detail = biz.order_to_detail(order_ref)
-        return {
-            "success": True,
-            "data": {
-                "order": detail,
-                "pricing": {
-                    "subtotal": detail.get("subtotal") or 0,
-                    "discount": detail.get("discount") or 0,
-                    "total": detail.get("total_amount") or detail.get("total") or 0,
-                },
-            },
-        }, 200
+        return {"success": True, "data": get_order_with_payment(order_ref)}, 200
     except BusinessEngineError as exc:
+        return {"success": False, "error": str(exc)}, 404
+    except ReceptionWorkspaceError as exc:
         return {"success": False, "error": str(exc)}, 404
 
 
@@ -132,11 +122,20 @@ def orders_get(order_ref: str):
 @reception_api_write
 def orders_payment(order_ref: str):
     payload = request.get_json(silent=True) or {}
+    raw_amount = payload.get("amount")
+    amount = float(raw_amount) if raw_amount is not None and raw_amount != "" else None
+    idempotency_key = (
+        payload.get("idempotency_key")
+        or request.headers.get("Idempotency-Key")
+        or request.headers.get("Idempotency-key")
+    )
     try:
         result = collect_payment(
             order_ref,
             payment_method=payload.get("payment_method", "cash"),
             receipt_number=payload.get("receipt_number"),
+            amount=amount,
+            idempotency_key=idempotency_key,
             actor=_actor(),
         )
         db.session.commit()
@@ -167,20 +166,26 @@ def orders_collection(order_ref: str):
 @reception_workspace_bp.route("/orders/<order_ref>/barcode", methods=["GET"])
 @reception_api_read
 def orders_barcode(order_ref: str):
+    """Milestone 3 — generate or reprint stable barcodes/QR (paid orders only)."""
     try:
         return {"success": True, "data": generate_barcodes(order_ref)}, 200
     except ReceptionWorkspaceError as exc:
-        return {"success": False, "error": str(exc)}, 404
+        message = str(exc)
+        status = 404 if "not found" in message.lower() else 400
+        return {"success": False, "error": message}, status
 
 
 @reception_workspace_bp.route("/orders/<order_ref>/request-form", methods=["GET"])
 @reception_api_read
 def orders_request_form(order_ref: str):
+    """Milestone 3 — laboratory requisition HTML (paid orders only)."""
     try:
-        html = render_request_form(order_ref)
-        return {"success": True, "data": {"html": html}}, 200
+        result = render_request_form(order_ref)
+        return {"success": True, "data": result}, 200
     except ReceptionWorkspaceError as exc:
-        return {"success": False, "error": str(exc)}, 404
+        message = str(exc)
+        status = 404 if "not found" in message.lower() else 400
+        return {"success": False, "error": message}, status
 
 
 @reception_workspace_bp.route("/queue", methods=["GET"])

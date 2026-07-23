@@ -17,20 +17,19 @@ import { normalizeApiError } from "@/lib/errors";
 
 import { SectionHeader } from "../_components/ui";
 import {
-  OrderCreatedStep,
+  PaymentStep,
   PatientStep,
   TestsStep,
   type SelectedPatient,
 } from "./OrderSteps";
 
-const STEPS = ["Patient", "Tests & order", "Order created"] as const;
+const STEPS = ["Patient", "Tests & order", "Payment & receipt"] as const;
 
 function ReceptionOrderWorkflowPanel() {
-  const { accessToken, activeOrganizationId, can, role } = useAuth();
+  const { accessToken, activeOrganizationId, can, role, user } = useAuth();
   const searchParams = useSearchParams();
   const patientParam = searchParams.get("patient") ?? undefined;
   const orderParam = searchParams.get("order") ?? undefined;
-  const orderPatientParam = searchParams.get("orderPatient") ?? patientParam;
 
   const [step, setStep] = useState(0);
   const [patient, setPatient] = useState<SelectedPatient | null>(null);
@@ -51,6 +50,16 @@ function ReceptionOrderWorkflowPanel() {
       role ?? "",
     );
 
+  const cashierLabel =
+    user && typeof user === "object"
+      ? String(
+          (user as { email?: string; full_name?: string; name?: string }).email ??
+            (user as { full_name?: string }).full_name ??
+            (user as { name?: string }).name ??
+            "",
+        ) || null
+      : null;
+
   useEffect(() => {
     if (!orderParam || !accessToken) {
       setReopening(false);
@@ -62,13 +71,12 @@ function ReceptionOrderWorkflowPanel() {
     void fetchReceptionOrder(
       { token: accessToken, organizationId: activeOrganizationId },
       orderParam,
-      { patientCode: orderPatientParam },
     )
       .then((result) => {
         if (cancelled) return;
         const row = result.order as Record<string, unknown>;
         setPatient({
-          patientCode: String(row.patient_code ?? row.patient_id ?? orderPatientParam ?? ""),
+          patientCode: String(row.patient_code ?? row.patient_id ?? ""),
           patientName: String(row.patient_name ?? row.patient_code ?? "Patient"),
         });
         setOrderRef(String(row.order_code ?? orderParam));
@@ -85,7 +93,7 @@ function ReceptionOrderWorkflowPanel() {
     return () => {
       cancelled = true;
     };
-  }, [orderParam, orderPatientParam, accessToken, activeOrganizationId]);
+  }, [orderParam, accessToken, activeOrganizationId]);
 
   function reset() {
     setStep(0);
@@ -103,7 +111,7 @@ function ReceptionOrderWorkflowPanel() {
   if (!canWrite) {
     return (
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-        Reception write permission is required to create patients and orders.
+        Reception write permission is required for orders, payment, and documents.
       </div>
     );
   }
@@ -111,8 +119,8 @@ function ReceptionOrderWorkflowPanel() {
   return (
     <div className="space-y-5">
       <SectionHeader
-        title="Reception Milestone 1 — Patient & order"
-        description="Search or create a patient, select catalog tests, and create an order. Payment and barcode are not included in this milestone."
+        title="Reception — Order, payment & documents"
+        description="Patient and order (M1), payment and receipt (M2), barcode/QR and requisition (M3)."
         actions={
           step > 0 ? (
             <Button size="sm" variant="outline" onClick={reset}>
@@ -172,7 +180,7 @@ function ReceptionOrderWorkflowPanel() {
       ) : null}
 
       {!reopening && step === 2 && patient && orderRef && pricing && order ? (
-        <OrderCreatedStep
+        <PaymentStep
           accessToken={accessToken}
           organizationId={activeOrganizationId}
           patient={patient}
@@ -180,6 +188,7 @@ function ReceptionOrderWorkflowPanel() {
           pricing={pricing}
           order={order}
           onReset={reset}
+          cashierLabel={cashierLabel}
         />
       ) : null}
     </div>
@@ -188,7 +197,7 @@ function ReceptionOrderWorkflowPanel() {
 
 export default function ReceptionWorkflowPage() {
   return (
-    <AppShell title="Create order" workspacePath="/app/reception">
+    <AppShell title="Reception order" workspacePath="/app/reception">
       <Suspense fallback={<p className="text-sm text-slate-500">Loading…</p>}>
         <ReceptionOrderWorkflowPanel />
       </Suspense>
