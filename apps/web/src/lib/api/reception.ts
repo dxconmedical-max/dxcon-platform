@@ -129,6 +129,24 @@ export type ReceptionRequestForm = {
   generated_at?: string;
 };
 
+export type ReceptionLabHandoff = {
+  order_code: string;
+  order_status: string | null;
+  collection: Record<string, unknown> | null;
+  queue_entry: Record<string, unknown> | null;
+  queue_reference: string | null;
+  laboratory: { id: string | null; name: string };
+  accepted_at: string | null;
+  barcodes?: {
+    order_barcode?: string | null;
+    patient_qr?: string | null;
+    sample_count?: number;
+  };
+  handed_off?: boolean;
+  idempotent_replay?: boolean;
+  actor?: string | null;
+};
+
 export const RECEPTION_PAYMENT_METHODS = [
   "cash",
   "transfer",
@@ -139,6 +157,7 @@ export const RECEPTION_PAYMENT_METHODS = [
 ] as const;
 
 export const RECEPTION_PAYMENT_TIMEOUT_MS = 30_000;
+export const RECEPTION_LAB_HANDOFF_TIMEOUT_MS = 30_000;
 
 export const PATIENT_QR_PREFIX = "dxcon:patient:";
 
@@ -576,6 +595,130 @@ export async function fetchReceptionRequestForm(
     reprint: Boolean(data.reprint),
     generated_at: data.generated_at != null ? String(data.generated_at) : undefined,
   };
+}
+
+function mapLabHandoff(raw: Record<string, unknown>): ReceptionLabHandoff {
+  const laboratory =
+    raw.laboratory && typeof raw.laboratory === "object"
+      ? (raw.laboratory as Record<string, unknown>)
+      : {};
+  return {
+    order_code: String(raw.order_code ?? ""),
+    order_status: raw.order_status != null ? String(raw.order_status) : null,
+    collection:
+      raw.collection && typeof raw.collection === "object"
+        ? (raw.collection as Record<string, unknown>)
+        : null,
+    queue_entry:
+      raw.queue_entry && typeof raw.queue_entry === "object"
+        ? (raw.queue_entry as Record<string, unknown>)
+        : null,
+    queue_reference: raw.queue_reference != null ? String(raw.queue_reference) : null,
+    laboratory: {
+      id: laboratory.id != null ? String(laboratory.id) : null,
+      name: String(laboratory.name ?? "Central Laboratory"),
+    },
+    accepted_at: raw.accepted_at != null ? String(raw.accepted_at) : null,
+    barcodes:
+      raw.barcodes && typeof raw.barcodes === "object"
+        ? {
+            order_barcode: (raw.barcodes as Record<string, unknown>).order_barcode != null
+              ? String((raw.barcodes as Record<string, unknown>).order_barcode)
+              : null,
+            patient_qr: (raw.barcodes as Record<string, unknown>).patient_qr != null
+              ? String((raw.barcodes as Record<string, unknown>).patient_qr)
+              : null,
+            sample_count: Number(
+              (raw.barcodes as Record<string, unknown>).sample_count ?? 0,
+            ),
+          }
+        : undefined,
+    handed_off: Boolean(
+      raw.handed_off ??
+        (raw.order_status === "lab_received" || raw.order_status === "testing"),
+    ),
+    idempotent_replay: Boolean(raw.idempotent_replay),
+    actor: raw.actor != null ? String(raw.actor) : null,
+  };
+}
+
+/** POST /api/v1/reception/workspace/orders/:ref/lab-handoff */
+export async function handoffReceptionOrderToLab(
+  ctx: Ctx,
+  orderRef: string,
+  payload: {
+    laboratory_name?: string;
+    laboratory_id?: string | null;
+    collector_name?: string;
+    pickup_address?: string;
+  } = {},
+): Promise<ReceptionLabHandoff> {
+  try {
+    const response = await apiRequest<{ success: boolean; data: Record<string, unknown> }>(
+      `/api/v1/reception/workspace/orders/${encodeURIComponent(orderRef)}/lab-handoff`,
+      requestOpts(ctx, {
+        method: "POST",
+        timeoutMs: ctx.timeoutMs ?? RECEPTION_LAB_HANDOFF_TIMEOUT_MS,
+        body: {
+          laboratory_name: payload.laboratory_name ?? "Central Laboratory",
+          laboratory_id: payload.laboratory_id ?? undefined,
+          collector_name: payload.collector_name ?? "Reception Desk",
+          pickup_address: payload.pickup_address ?? "Reception Desk",
+        },
+      }),
+    );
+    return mapLabHandoff(response.data ?? {});
+  } catch (error) {
+    if (error instanceof ApiError) {
+      const body =
+        error.body && typeof error.body === "object"
+          ? (error.body as Record<string, unknown>)
+          : {};
+      const message =
+        (typeof body.error === "string" && body.error) ||
+        error.message ||
+        "Laboratory handoff failed";
+      throw new ApiError(message, error.status, {
+        ...body,
+        error: message,
+        code: typeof body.code === "string" ? body.code : "LAB_HANDOFF_FAILED",
+      });
+    }
+    throw error;
+  }
+}
+
+/** GET /api/v1/reception/workspace/orders/:ref/lab-handoff */
+export async function fetchReceptionLabHandoff(
+  ctx: Ctx,
+  orderRef: string,
+): Promise<ReceptionLabHandoff> {
+  try {
+    const response = await apiRequest<{ success: boolean; data: Record<string, unknown> }>(
+      `/api/v1/reception/workspace/orders/${encodeURIComponent(orderRef)}/lab-handoff`,
+      requestOpts(ctx, {
+        timeoutMs: ctx.timeoutMs ?? RECEPTION_LAB_HANDOFF_TIMEOUT_MS,
+      }),
+    );
+    return mapLabHandoff(response.data ?? {});
+  } catch (error) {
+    if (error instanceof ApiError) {
+      const body =
+        error.body && typeof error.body === "object"
+          ? (error.body as Record<string, unknown>)
+          : {};
+      const message =
+        (typeof body.error === "string" && body.error) ||
+        error.message ||
+        "Failed to load laboratory handoff status";
+      throw new ApiError(message, error.status, {
+        ...body,
+        error: message,
+        code: typeof body.code === "string" ? body.code : "LAB_HANDOFF_STATUS_FAILED",
+      });
+    }
+    throw error;
+  }
 }
 
 export function getOrderCode(

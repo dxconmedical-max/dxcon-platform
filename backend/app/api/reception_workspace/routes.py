@@ -14,8 +14,10 @@ from app.reception_workspace.service import (
     create_reception_order,
     fast_search_patients,
     generate_barcodes,
+    get_lab_handoff_status,
     get_order_with_payment,
     get_patient_profile,
+    handoff_to_laboratory,
     payment_report,
     queue_report,
     reception_workspace_report,
@@ -182,6 +184,46 @@ def orders_request_form(order_ref: str):
     try:
         result = render_request_form(order_ref)
         return {"success": True, "data": result}, 200
+    except ReceptionWorkspaceError as exc:
+        message = str(exc)
+        status = 404 if "not found" in message.lower() else 400
+        return {"success": False, "error": message}, status
+
+
+@reception_workspace_bp.route("/orders/<order_ref>/lab-handoff", methods=["POST"])
+@reception_api_write
+def orders_lab_handoff(order_ref: str):
+    """Milestone 4 — hand paid+documented order into laboratory incoming queue."""
+    payload = request.get_json(silent=True) or {}
+    try:
+        result = handoff_to_laboratory(
+            order_ref,
+            collector_name=payload.get("collector_name") or "Reception Desk",
+            pickup_address=payload.get("pickup_address") or "Reception Desk",
+            laboratory_name=payload.get("laboratory_name") or "Central Laboratory",
+            laboratory_id=payload.get("laboratory_id"),
+            actor=_actor(),
+            desk_complete=payload.get("desk_complete", True) is not False,
+        )
+        db.session.commit()
+        return {"success": True, "data": result}, 200
+    except ReceptionWorkspaceError as exc:
+        db.session.rollback()
+        message = str(exc)
+        if "not found" in message.lower():
+            return {"success": False, "error": message}, 404
+        return {"success": False, "error": message}, 400
+    except BusinessEngineError as exc:
+        db.session.rollback()
+        return {"success": False, "error": str(exc)}, 400
+
+
+@reception_workspace_bp.route("/orders/<order_ref>/lab-handoff", methods=["GET"])
+@reception_api_read
+def orders_lab_handoff_status(order_ref: str):
+    """Milestone 4 — refresh handoff persistence (order/sample status + queue ref)."""
+    try:
+        return {"success": True, "data": get_lab_handoff_status(order_ref)}, 200
     except ReceptionWorkspaceError as exc:
         message = str(exc)
         status = 404 if "not found" in message.lower() else 400

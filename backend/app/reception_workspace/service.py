@@ -25,7 +25,17 @@ from app.services.reception_service import (
     serialize_queue,
     today_queue_entries,
 )
-from app.business_engine.statuses import COLLECTION_ASSIGNED, ORDER_PAID, ORDER_PAYMENT_PENDING
+from app.business_engine.statuses import (
+    COLLECTION_ASSIGNED,
+    COLLECTION_DELIVERED,
+    ORDER_COLLECTED,
+    ORDER_IN_TRANSIT,
+    ORDER_LAB_RECEIVED,
+    ORDER_PAID,
+    ORDER_PAYMENT_PENDING,
+    ORDER_SAMPLING,
+    ORDER_TESTING,
+)
 
 WORKFLOW_WAITING = "WAITING"
 WORKFLOW_CHECKED_IN = "CHECKED_IN"
@@ -38,9 +48,26 @@ WORKFLOW_CANCELLED = "CANCELLED"
 PAYMENT_METHODS = ("cash", "transfer", "qr", "pos", "corporate", "insurance")
 PAYMENT_STATUSES = ("paid", "pending", "partial", "waived")
 
+# Order already visible on laboratory incoming / past receive.
+_LAB_HANDED_OFF_STATUSES = frozenset(
+    {
+        ORDER_LAB_RECEIVED,
+        ORDER_TESTING,
+        "pending_review",
+        "approved",
+        "released",
+    }
+)
+
 
 class ReceptionWorkspaceError(ValueError):
     pass
+
+
+def _collection_is_lab_received(collection: BizCollection | None) -> bool:
+    if not collection:
+        return False
+    return bool(collection.accession_number) or collection.status == COLLECTION_DELIVERED
 
 
 def duplicate_warnings(*, phone: str | None = None, national_id: str | None = None) -> list[dict]:
@@ -379,18 +406,254 @@ def create_collection_after_payment(
     pickup_address: str = "Reception Desk",
     actor: str | None = None,
 ) -> dict[str, Any]:
+    """Create collection job after payment (paid → sampling). Prefer handoff_to_laboratory for M4."""
     collection = biz.create_collection_job(
         order_ref,
         collector_name=collector_name,
         pickup_address=pickup_address,
         actor=actor,
     )
-    order = BizOrder.query.filter(or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)).first()
+    order = BizOrder.query.filter(
+        or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)
+    ).first()
     entry = ReceptionQueueEntry.query.filter_by(order_id=order.id).first() if order else None
     if entry:
         entry.workflow_status = WORKFLOW_SAMPLING
-    write_reception_audit(action="collection_created", object_type="collection", object_id=collection.id, actor=actor)
-    return {"collection": collection.to_dict(), "queue_entry": entry.to_dict() if entry else None}
+    write_reception_audit(
+        action="collection_created",
+        object_type="collection",
+        object_id=collection.id,
+        actor=actor,
+    )
+    return {
+        "collection": collection.to_dict(),
+        "queue_entry": entry.to_dict() if entry else None,
+    }
+
+
+def handoff_to_laboratory(
+    order_ref: str,
+    *,
+    collector_name: str = "Reception Desk",
+    pickup_address: str = "Reception Desk",
+    laboratory_name: str = "Central Laboratory",
+    laboratory_id: str | None = None,
+    actor: str | None = None,
+    desk_complete: bool = True,
+) -> dict[str, Any]:
+    """
+    Milestone 4 — paid + documented order → laboratory queue (single insertion).
+
+    Transition path (walk-in desk):
+      paid → sampling (collection) → collected → in_transit → lab_received
+
+    Idempotent: if already handed off / collection exists at target, returns existing
+    without creating a second queue row.
+    """
+    order = BizOrder.query.filter(
+        or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)
+    ).first()
+    if not order:
+        raise ReceptionWorkspaceError("Order not found")
+
+    status = (order.status or "").lower()
+    if status in {"cancelled", "canceled", "void"}:
+        raise ReceptionWorkspaceError(
+            f"Cannot hand off order in status {order.status}"
+        )
+
+    summary = payment_summary_for_order(order)
+    paid_or_beyond = summary["status"] == "paid" or status in {
+        ORDER_PAID,
+        ORDER_SAMPLING,
+        ORDER_COLLECTED,
+        ORDER_IN_TRANSIT,
+        *_LAB_HANDED_OFF_STATUSES,
+    }
+    if not paid_or_beyond:
+        raise ReceptionWorkspaceError(
+            "Order must be paid before laboratory handoff"
+        )
+
+    # Require specimen identifiers + requisition readiness (stable backend codes).
+    try:
+        barcodes = generate_barcodes(order.order_code)
+    except ReceptionWorkspaceError as exc:
+        raise ReceptionWorkspaceError(
+            f"Specimen identifiers required before handoff: {exc}"
+        ) from exc
+    if not barcodes.get("order_barcode") or not barcodes.get("sample_barcodes"):
+        raise ReceptionWorkspaceError(
+            "Specimen barcodes are missing; generate barcode/QR before handoff"
+        )
+    try:
+        requisition = render_request_form(order.order_code)
+    except ReceptionWorkspaceError as exc:
+        raise ReceptionWorkspaceError(
+            f"Requisition required before handoff: {exc}"
+        ) from exc
+    if not (requisition.get("html") or "").strip():
+        raise ReceptionWorkspaceError("Requisition HTML is empty; cannot hand off")
+
+    existing = BizCollection.query.filter_by(order_id=order.id).first()
+    if order.status in _LAB_HANDED_OFF_STATUSES or _collection_is_lab_received(existing):
+        entry = ReceptionQueueEntry.query.filter_by(order_id=order.id).first()
+        if entry:
+            entry.workflow_status = WORKFLOW_SAMPLING
+        return _handoff_payload(
+            order,
+            existing,
+            barcodes=barcodes,
+            laboratory_name=laboratory_name,
+            laboratory_id=laboratory_id,
+            idempotent_replay=True,
+            actor=actor,
+        )
+
+    idempotent_replay = False
+    collection = existing
+    try:
+        # create_collection_job requires paid; resume from an existing collection
+        # (e.g. create_collection_after_payment) without re-calling it.
+        # Do not session.refresh() mid-flow — that can reload pre-flush status.
+        if collection is None:
+            if order.status != ORDER_PAID:
+                raise ReceptionWorkspaceError(
+                    f"Cannot create collection for order in status {order.status}"
+                )
+            collection = biz.create_collection_job(
+                order.order_code,
+                collector_name=collector_name,
+                pickup_address=pickup_address,
+                actor=actor,
+            )
+        else:
+            collection = existing
+
+        if desk_complete and collection:
+            # Advance walk-in desk sample into the laboratory incoming/received queue once.
+            if order.status == ORDER_SAMPLING:
+                collection = biz.collect_sample(order.order_code, actor=actor)
+            if order.status == ORDER_COLLECTED:
+                collection = biz.handover_sample(order.order_code, actor=actor)
+            if order.status == ORDER_IN_TRANSIT:
+                collection = biz.receive_sample_at_lab(
+                    order.order_code,
+                    received_by=actor or laboratory_name,
+                    actor=actor,
+                )
+    except BusinessEngineError as exc:
+        raise ReceptionWorkspaceError(str(exc)) from exc
+
+    entry = ReceptionQueueEntry.query.filter_by(order_id=order.id).first()
+    if entry:
+        entry.workflow_status = WORKFLOW_SAMPLING
+
+    write_reception_audit(
+        action="lab_handoff",
+        object_type="order",
+        object_id=order.order_code,
+        actor=actor,
+    )
+    log_reception_activity(
+        "LAB_HANDOFF",
+        patient_id=order.patient_code,
+        queue_entry_id=entry.id if entry else None,
+        actor=actor,
+    )
+
+    return _handoff_payload(
+        order,
+        collection,
+        barcodes=barcodes,
+        laboratory_name=laboratory_name,
+        laboratory_id=laboratory_id,
+        idempotent_replay=idempotent_replay,
+        actor=actor,
+    )
+
+
+def _handoff_payload(
+    order: BizOrder,
+    collection: BizCollection | None,
+    *,
+    barcodes: dict[str, Any],
+    laboratory_name: str,
+    laboratory_id: str | None,
+    idempotent_replay: bool,
+    actor: str | None,
+) -> dict[str, Any]:
+    entry = ReceptionQueueEntry.query.filter_by(order_id=order.id).first()
+    accepted_at = None
+    if collection and collection.received_at:
+        accepted_at = collection.received_at.isoformat()
+    elif collection and collection.updated_at:
+        accepted_at = collection.updated_at.isoformat()
+    elif collection and collection.created_at:
+        accepted_at = collection.created_at.isoformat()
+
+    queue_reference = None
+    if collection:
+        queue_reference = (
+            collection.accession_number
+            or collection.sample_code
+            or collection.barcode_value
+            or collection.id
+        )
+
+    return {
+        "order_code": order.order_code,
+        "order_status": order.status,
+        "collection": collection.to_dict() if collection else None,
+        "queue_entry": entry.to_dict() if entry else None,
+        "queue_reference": queue_reference,
+        "laboratory": {
+            "id": laboratory_id,
+            "name": laboratory_name,
+        },
+        "accepted_at": accepted_at,
+        "barcodes": {
+            "order_barcode": barcodes.get("order_barcode"),
+            "patient_qr": barcodes.get("patient_qr"),
+            "sample_count": len(barcodes.get("sample_barcodes") or []),
+        },
+        "handed_off": order.status in _LAB_HANDED_OFF_STATUSES
+        or _collection_is_lab_received(collection),
+        "idempotent_replay": idempotent_replay,
+        "actor": actor,
+    }
+
+
+def get_lab_handoff_status(order_ref: str) -> dict[str, Any]:
+    """Refresh persistence for Milestone 4 handoff status."""
+    order = BizOrder.query.filter(
+        or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)
+    ).first()
+    if not order:
+        raise ReceptionWorkspaceError("Order not found")
+    collection = BizCollection.query.filter_by(order_id=order.id).first()
+    barcodes = None
+    try:
+        if (
+            payment_summary_for_order(order)["status"] == "paid"
+            or order.status == ORDER_PAID
+            or collection
+        ):
+            barcodes = generate_barcodes(order.order_code)
+    except ReceptionWorkspaceError:
+        barcodes = None
+    handed_off = order.status in _LAB_HANDED_OFF_STATUSES or _collection_is_lab_received(
+        collection
+    )
+    return _handoff_payload(
+        order,
+        collection,
+        barcodes=barcodes or {},
+        laboratory_name="Central Laboratory",
+        laboratory_id=None,
+        idempotent_replay=handed_off,
+        actor=None,
+    )
 
 
 def _assert_order_document_eligible(order: BizOrder) -> None:

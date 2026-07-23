@@ -9,19 +9,23 @@ import {
   collectReceptionPayment,
   createReceptionOrder,
   fetchReceptionBarcodes,
+  fetchReceptionLabHandoff,
   fetchReceptionOrder,
   fetchReceptionPatient,
   fetchReceptionRequestForm,
   fetchReceptionTests,
   getDuplicateWarnings,
   getOrderCode,
+  handoffReceptionOrderToLab,
   isValidPatientQr,
   registerWalkIn,
   searchReceptionPatients,
+  RECEPTION_LAB_HANDOFF_TIMEOUT_MS,
   RECEPTION_PAYMENT_METHODS,
   RECEPTION_PAYMENT_TIMEOUT_MS,
   type DuplicateWarning,
   type ReceptionBarcodes,
+  type ReceptionLabHandoff,
   type ReceptionOrderCreate,
   type ReceptionOrderPricing,
   type ReceptionPaymentRecord,
@@ -1025,22 +1029,44 @@ export function DocumentsStep({
 }) {
   const [barcodes, setBarcodes] = useState<ReceptionBarcodes | null>(null);
   const [requisitionHtml, setRequisitionHtml] = useState<string | null>(null);
+  const [handoff, setHandoff] = useState<ReceptionLabHandoff | null>(null);
   const [loading, setLoading] = useState(false);
+  const [handingOff, setHandingOff] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [handoffError, setHandoffError] = useState<string | null>(null);
+  const handoffLock = useRef(false);
+
+  const documentsReady = Boolean(
+    barcodes?.order_barcode &&
+      (barcodes.sample_barcodes?.length ?? 0) > 0 &&
+      (requisitionHtml || "").trim(),
+  );
+  const alreadyHandedOff = Boolean(
+    handoff?.handed_off ||
+      handoff?.order_status === "lab_received" ||
+      handoff?.order_status === "testing",
+  );
 
   async function loadDocuments() {
     setLoading(true);
     setError(null);
     try {
-      const [codes, form] = await Promise.all([
+      const [codes, form, status] = await Promise.all([
         fetchReceptionBarcodes({ token: accessToken, organizationId }, orderRef),
         fetchReceptionRequestForm({ token: accessToken, organizationId }, orderRef),
+        fetchReceptionLabHandoff(
+          { token: accessToken, organizationId, timeoutMs: RECEPTION_LAB_HANDOFF_TIMEOUT_MS },
+          orderRef,
+        ).catch(() => null),
       ]);
       if (!isValidPatientQr(codes.patient_qr)) {
         throw new Error("Invalid patient QR payload from backend.");
       }
       setBarcodes(codes);
       setRequisitionHtml(form.html);
+      if (status?.handed_off) {
+        setHandoff(status);
+      }
     } catch (err) {
       setError(normalizeApiError(err));
     } finally {
@@ -1052,6 +1078,30 @@ export function DocumentsStep({
     void loadDocuments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderRef, accessToken, organizationId]);
+
+  async function submitHandoff() {
+    if (handoffLock.current || handingOff || alreadyHandedOff || !documentsReady) return;
+    handoffLock.current = true;
+    setHandingOff(true);
+    setHandoffError(null);
+    try {
+      const result = await handoffReceptionOrderToLab(
+        { token: accessToken, organizationId, timeoutMs: RECEPTION_LAB_HANDOFF_TIMEOUT_MS },
+        orderRef,
+      );
+      setHandoff(result);
+      const refreshed = await fetchReceptionLabHandoff(
+        { token: accessToken, organizationId, timeoutMs: RECEPTION_LAB_HANDOFF_TIMEOUT_MS },
+        orderRef,
+      );
+      setHandoff(refreshed);
+    } catch (err) {
+      setHandoffError(normalizeApiError(err));
+    } finally {
+      setHandingOff(false);
+      handoffLock.current = false;
+    }
+  }
 
   function openLabels() {
     if (!barcodes) return;
@@ -1191,6 +1241,72 @@ ${sampleRows}
         </Card>
       ) : loading ? (
         <p className="text-sm text-slate-500">Generating identifiers…</p>
+      ) : null}
+
+      {documentsReady ? (
+        <Card className="space-y-4">
+          <SectionHeader
+            title="Laboratory handoff"
+            description="Send this paid, documented order into the laboratory incoming queue once."
+          />
+          {handoffError ? (
+            <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+              <p>{handoffError}</p>
+              <Button
+                className="mt-2"
+                size="sm"
+                variant="outline"
+                disabled={handingOff || alreadyHandedOff}
+                onClick={() => void submitHandoff()}
+              >
+                Retry handoff
+              </Button>
+            </div>
+          ) : null}
+          {alreadyHandedOff ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                <p className="text-xs text-emerald-700">Accepted at</p>
+                <p className="text-sm text-emerald-900">
+                  {handoff?.accepted_at ? new Date(handoff.accepted_at).toLocaleString() : "—"}
+                </p>
+              </div>
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                <p className="text-xs text-emerald-700">Order / sample status</p>
+                <p className="text-sm font-medium uppercase text-emerald-900">
+                  {handoff?.order_status ?? "—"}
+                  {handoff?.collection?.status
+                    ? ` · ${String(handoff.collection.status)}`
+                    : ""}
+                </p>
+              </div>
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                <p className="text-xs text-emerald-700">Destination laboratory</p>
+                <p className="text-sm text-emerald-900">
+                  {handoff?.laboratory.name ?? "Central Laboratory"}
+                </p>
+              </div>
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                <p className="text-xs text-emerald-700">Queue reference</p>
+                <p className="font-mono text-sm text-emerald-900">
+                  {handoff?.queue_reference ?? "—"}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <Button
+              disabled={handingOff || !documentsReady}
+              onClick={() => void submitHandoff()}
+            >
+              {handingOff ? "Handing off…" : "Hand off to Laboratory"}
+            </Button>
+          )}
+          {alreadyHandedOff ? (
+            <p className="text-xs text-slate-500">
+              Handoff is complete. Repeat submit is disabled; refresh reloads persisted status.
+            </p>
+          ) : null}
+        </Card>
       ) : null}
 
       <div className="flex flex-wrap gap-3">

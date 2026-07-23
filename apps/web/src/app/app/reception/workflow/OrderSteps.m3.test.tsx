@@ -10,11 +10,14 @@ vi.mock("@/lib/api/reception", async () => {
     collectReceptionPayment: vi.fn(),
     fetchReceptionBarcodes: vi.fn(),
     fetchReceptionRequestForm: vi.fn(),
+    fetchReceptionLabHandoff: vi.fn(),
+    handoffReceptionOrderToLab: vi.fn(),
   };
 });
 
 import {
   fetchReceptionBarcodes,
+  fetchReceptionLabHandoff,
   fetchReceptionOrder,
   fetchReceptionRequestForm,
 } from "@/lib/api/reception";
@@ -28,6 +31,17 @@ describe("Reception Milestone 3 documents UI", () => {
     vi.mocked(fetchReceptionBarcodes).mockReset();
     vi.mocked(fetchReceptionRequestForm).mockReset();
     vi.mocked(fetchReceptionOrder).mockReset();
+    vi.mocked(fetchReceptionLabHandoff).mockReset();
+    vi.mocked(fetchReceptionLabHandoff).mockResolvedValue({
+      order_code: "ORD-1",
+      order_status: "paid",
+      collection: null,
+      queue_entry: null,
+      queue_reference: null,
+      laboratory: { id: null, name: "Central Laboratory" },
+      accepted_at: null,
+      handed_off: false,
+    });
     vi.mocked(fetchReceptionBarcodes).mockResolvedValue({
       order_barcode: "BC-ORD-1",
       patient_barcode: "BC-PAT-P1",

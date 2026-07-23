@@ -2,8 +2,16 @@
 
 from __future__ import annotations
 
+import os
+import tempfile
 import unittest
 import uuid
+
+# File-backed SQLite: schema introspection opens a second connection; :memory:
+# would otherwise wipe the DB mid-request (see table_exists_name).
+_TEST_DB = tempfile.NamedTemporaryFile(prefix="dxcon_reception_", suffix=".db", delete=False)
+_TEST_DB.close()
+os.environ["DATABASE_URL"] = f"sqlite:///{_TEST_DB.name}"
 
 from app import create_app
 from app.business_engine import service as biz
@@ -18,6 +26,7 @@ class ReceptionWorkspaceTests(unittest.TestCase):
         self.app.config["TESTING"] = True
         self.ctx = self.app.app_context()
         self.ctx.push()
+        db.drop_all()
         db.create_all()
         biz.ensure_test_catalog_seed()
         user = User(
@@ -319,6 +328,197 @@ class ReceptionWorkspaceTests(unittest.TestCase):
         form_resp = client.get(f"/api/v1/reception/workspace/orders/{order_code}/request-form")
         self.assertEqual(form_resp.status_code, 200)
         self.assertIn("html", form_resp.get_json()["data"])
+
+    def test_milestone4_lab_handoff_queue_and_idempotent(self):
+        """Paid+docs → lab_received; unpaid/docs reject; duplicate idempotent; lab queue."""
+        from app.models.biz_order import BizCollection, BizOrder
+        from app.models.test_catalog import TestCatalog
+        from app.reception_workspace.service import (
+            ReceptionWorkspaceError,
+            collect_payment,
+            generate_barcodes,
+            get_lab_handoff_status,
+            handoff_to_laboratory,
+            render_request_form,
+        )
+
+        phone = f"0913{uuid.uuid4().hex[:6]}"
+        patient = biz.create_patient(
+            full_name="M4 HANDOFF PATIENT",
+            phone=phone,
+            patient_code=f"P-M4-{uuid.uuid4().hex[:6].upper()}",
+            actor=self.user.email,
+        )
+        db.session.commit()
+        test = TestCatalog.query.first()
+        self.assertIsNotNone(test)
+
+        unpaid = biz.create_order(
+            patient_code=patient.patient_code,
+            test_catalog_ids=[test.id],
+            actor=self.user.email,
+        )
+        biz.submit_order_for_payment(unpaid.order_code, actor=self.user.email)
+        biz.create_invoice_from_order(unpaid.order_code, actor=self.user.email)
+        db.session.commit()
+        with self.assertRaisesRegex(ReceptionWorkspaceError, "paid|Specimen|Requisition"):
+            handoff_to_laboratory(unpaid.order_code, actor=self.user.email)
+
+        order = biz.create_order(
+            patient_code=patient.patient_code,
+            test_catalog_ids=[test.id],
+            actor=self.user.email,
+        )
+        biz.submit_order_for_payment(order.order_code, actor=self.user.email)
+        biz.create_invoice_from_order(order.order_code, actor=self.user.email)
+        db.session.commit()
+        order_code = order.order_code
+        total = float(order.total_amount)
+
+        collect_payment(
+            order_code,
+            payment_method="cash",
+            amount=total,
+            idempotency_key=f"RCT-M4-{uuid.uuid4().hex[:6]}",
+            actor=self.user.email,
+        )
+        db.session.commit()
+
+        # Paid but missing documents path is covered by generate_barcodes/requisition
+        # being required inside handoff — call after docs exist.
+        barcodes = generate_barcodes(order_code)
+        self.assertTrue(barcodes.get("sample_barcodes"))
+        form = render_request_form(order_code)
+        self.assertTrue((form.get("html") or "").strip())
+
+        first = handoff_to_laboratory(
+            order_code,
+            laboratory_name="Central Laboratory",
+            laboratory_id="lab-central",
+            actor=self.user.email,
+        )
+        db.session.commit()
+        self.assertEqual(first["order_status"], "lab_received")
+        self.assertTrue(first.get("handed_off"))
+        self.assertFalse(first.get("idempotent_replay"))
+        self.assertEqual(first["laboratory"]["name"], "Central Laboratory")
+        self.assertEqual(first["laboratory"]["id"], "lab-central")
+        self.assertIsNotNone(first.get("queue_reference"))
+        self.assertIsNotNone(first.get("accepted_at"))
+
+        order_row = BizOrder.query.filter_by(order_code=order_code).first()
+        collections = BizCollection.query.filter_by(order_id=order_row.id).all()
+        self.assertEqual(len(collections), 1)
+
+        incoming = biz.list_lab_incoming(limit=50)
+        self.assertTrue(any(row["order_code"] == order_code for row in incoming))
+        match = next(row for row in incoming if row["order_code"] == order_code)
+        self.assertEqual(match["status"], "lab_received")
+        self.assertEqual(match["accession_number"], first["queue_reference"])
+
+        replay = handoff_to_laboratory(
+            order_code,
+            laboratory_name="Central Laboratory",
+            actor=self.user.email,
+        )
+        db.session.commit()
+        self.assertTrue(replay.get("idempotent_replay"))
+        self.assertEqual(replay["order_status"], "lab_received")
+        self.assertEqual(replay["queue_reference"], first["queue_reference"])
+        self.assertEqual(
+            BizCollection.query.filter_by(order_id=order_row.id).count(),
+            1,
+        )
+
+        status = get_lab_handoff_status(order_code)
+        self.assertTrue(status.get("handed_off"))
+        self.assertEqual(status["order_status"], "lab_received")
+        self.assertEqual(status["queue_reference"], first["queue_reference"])
+
+        # Resume after create_collection_after_payment (sampling) still lands once.
+        order2 = biz.create_order(
+            patient_code=patient.patient_code,
+            test_catalog_ids=[test.id],
+            actor=self.user.email,
+        )
+        biz.submit_order_for_payment(order2.order_code, actor=self.user.email)
+        biz.create_invoice_from_order(order2.order_code, actor=self.user.email)
+        db.session.commit()
+        collect_payment(
+            order2.order_code,
+            payment_method="qr",
+            amount=float(order2.total_amount),
+            idempotency_key=f"RCT-M4B-{uuid.uuid4().hex[:6]}",
+            actor=self.user.email,
+        )
+        db.session.commit()
+        generate_barcodes(order2.order_code)
+        render_request_form(order2.order_code)
+        from app.reception_workspace.service import create_collection_after_payment
+
+        create_collection_after_payment(order2.order_code, actor=self.user.email)
+        db.session.commit()
+        mid = BizOrder.query.filter_by(order_code=order2.order_code).first()
+        self.assertEqual(mid.status, "sampling")
+        resumed = handoff_to_laboratory(order2.order_code, actor=self.user.email)
+        db.session.commit()
+        self.assertEqual(resumed["order_status"], "lab_received")
+        self.assertEqual(
+            BizCollection.query.filter_by(order_id=mid.id).count(),
+            1,
+        )
+
+        client = self.app.test_client()
+        with client.session_transaction() as sess:
+            sess["user_id"] = self.user.id
+            sess["role"] = self.user.role
+            sess["email"] = self.user.email
+
+        post = client.post(
+            f"/api/v1/reception/workspace/orders/{order_code}/lab-handoff",
+            json={"laboratory_name": "Central Laboratory"},
+        )
+        self.assertEqual(post.status_code, 200)
+        self.assertTrue(post.get_json()["data"].get("idempotent_replay"))
+        self.assertEqual(post.get_json()["data"]["order_status"], "lab_received")
+
+        get_status = client.get(
+            f"/api/v1/reception/workspace/orders/{order_code}/lab-handoff"
+        )
+        self.assertEqual(get_status.status_code, 200)
+        self.assertTrue(get_status.get_json()["data"].get("handed_off"))
+
+        unpaid_http = client.post(
+            f"/api/v1/reception/workspace/orders/{unpaid.order_code}/lab-handoff",
+            json={},
+        )
+        self.assertEqual(unpaid_http.status_code, 400)
+
+        missing = client.post(
+            "/api/v1/reception/workspace/orders/DOES-NOT-EXIST-M4/lab-handoff",
+            json={},
+        )
+        self.assertEqual(missing.status_code, 404)
+
+        # Permission denial — role not in reception write set.
+        other = User(
+            email=f"doctor-{uuid.uuid4().hex[:6]}@test.local",
+            role="DOCTOR",
+            password_hash="x",
+            is_active=True,
+        )
+        db.session.add(other)
+        db.session.commit()
+        denied = self.app.test_client()
+        with denied.session_transaction() as sess:
+            sess["user_id"] = other.id
+            sess["role"] = other.role
+            sess["email"] = other.email
+        forbid = denied.post(
+            f"/api/v1/reception/workspace/orders/{order_code}/lab-handoff",
+            json={},
+        )
+        self.assertIn(forbid.status_code, {401, 403})
 
     def test_reception_ui_route(self):
         client = self.app.test_client()
