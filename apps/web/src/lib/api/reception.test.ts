@@ -217,6 +217,23 @@ describe("reception Milestone 1 API client", () => {
     expect(patient.orders?.[0]?.order_code).toBe("ORD-1");
   });
 
+  it("15b. order reopen falls back to patient profile when GET /orders/:ref is 404", async () => {
+    vi.mocked(apiRequest)
+      .mockRejectedValueOnce(new ApiError("Not found", 404, { error: "Not found" }))
+      .mockResolvedValueOnce({
+        success: true,
+        data: {
+          patient_code: "P-100",
+          full_name: "Jane",
+          orders: [{ order_code: "ORD-FALLBACK", total_amount: 150000, status: "payment_pending" }],
+        },
+      });
+    const order = await fetchReceptionOrder(ctx, "ORD-FALLBACK", { patientCode: "P-100" });
+    expect(getOrderCode(order.order)).toBe("ORD-FALLBACK");
+    expect(order.pricing.total).toBe(150000);
+    expect(order.order.patient_code).toBe("P-100");
+  });
+
   it("16. permission denial", async () => {
     vi.mocked(apiRequest).mockRejectedValue(
       new ApiError("Forbidden", 403, { error: "Forbidden" }),

@@ -30,6 +30,7 @@ function ReceptionOrderWorkflowPanel() {
   const searchParams = useSearchParams();
   const patientParam = searchParams.get("patient") ?? undefined;
   const orderParam = searchParams.get("order") ?? undefined;
+  const orderPatientParam = searchParams.get("orderPatient") ?? patientParam;
 
   const [step, setStep] = useState(0);
   const [patient, setPatient] = useState<SelectedPatient | null>(null);
@@ -58,12 +59,16 @@ function ReceptionOrderWorkflowPanel() {
     let cancelled = false;
     setReopening(true);
     setReopenError(null);
-    void fetchReceptionOrder({ token: accessToken, organizationId: activeOrganizationId }, orderParam)
+    void fetchReceptionOrder(
+      { token: accessToken, organizationId: activeOrganizationId },
+      orderParam,
+      { patientCode: orderPatientParam },
+    )
       .then((result) => {
         if (cancelled) return;
         const row = result.order as Record<string, unknown>;
         setPatient({
-          patientCode: String(row.patient_code ?? row.patient_id ?? ""),
+          patientCode: String(row.patient_code ?? row.patient_id ?? orderPatientParam ?? ""),
           patientName: String(row.patient_name ?? row.patient_code ?? "Patient"),
         });
         setOrderRef(String(row.order_code ?? orderParam));
@@ -80,7 +85,7 @@ function ReceptionOrderWorkflowPanel() {
     return () => {
       cancelled = true;
     };
-  }, [orderParam, accessToken, activeOrganizationId]);
+  }, [orderParam, orderPatientParam, accessToken, activeOrganizationId]);
 
   function reset() {
     setStep(0);

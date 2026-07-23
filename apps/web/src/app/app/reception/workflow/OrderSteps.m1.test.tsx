@@ -348,6 +348,7 @@ describe("Reception Milestone 1 UI integration", () => {
       expect(fetchReceptionOrder).toHaveBeenCalledWith(
         expect.objectContaining({ token: "t" }),
         "ORD-1",
+        { patientCode: "P-1" },
       ),
     );
   });

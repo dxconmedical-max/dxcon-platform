@@ -698,15 +698,25 @@ export function OrderCreatedStep({
     setLoading(true);
     setError(null);
     try {
-      const [orderResult, patientResult] = await Promise.all([
-        fetchReceptionOrder({ token: accessToken, organizationId }, orderRef),
-        fetchReceptionPatient({ token: accessToken, organizationId }, patient.patientCode),
-      ]);
-      setAuthoritative(orderResult.pricing);
-      setDetail(orderResult.order);
+      const patientResult = await fetchReceptionPatient(
+        { token: accessToken, organizationId },
+        patient.patientCode,
+      );
       if (!patientResult.patient_code) {
         throw new Error("Patient persistence check failed.");
       }
+      const orderResult = await fetchReceptionOrder(
+        { token: accessToken, organizationId },
+        orderRef,
+        { patientCode: patient.patientCode },
+      );
+      setAuthoritative(orderResult.pricing);
+      setDetail((prev) => ({
+        ...orderResult.order,
+        items:
+          (orderResult.order as { items?: unknown }).items ??
+          (prev as { items?: unknown }).items,
+      }));
     } catch (err) {
       setError(normalizeApiError(err));
     } finally {
@@ -779,7 +789,9 @@ export function OrderCreatedStep({
       ) : null}
       <div className="flex flex-wrap gap-3 border-t border-slate-100 pt-4">
         <Button onClick={onReset}>New order</Button>
-        <a href={`/app/reception/workflow?order=${encodeURIComponent(orderRef)}`}>
+        <a
+          href={`/app/reception/workflow?order=${encodeURIComponent(orderRef)}&orderPatient=${encodeURIComponent(patient.patientCode)}`}
+        >
           <Button variant="outline">Reopen order link</Button>
         </a>
       </div>

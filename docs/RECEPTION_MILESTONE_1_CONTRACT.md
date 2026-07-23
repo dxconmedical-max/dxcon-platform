@@ -11,6 +11,7 @@ Out of scope: payment, barcode, lab handoff.
 | Duplicate resolve | same + `force:true` or select existing | Soft 409 warnings `{ field, message, patient_code }` | Soft skip via force; hard uniqueness may still 400 | — | |
 | Patient profile / reopen | `GET /patients/:code` | path code | patient + `orders[]` (summary) | 200, 404 | — |
 | Get order (reopen) | `GET /orders/:ref` | path order_code or id | `{ order, pricing: { subtotal, discount, total } }` | 200, 404 | — |
+| Reopen fallback | `GET /patients/:code` then match `orders[]` | used when `GET /orders/:ref` returns 404 (API not yet deployed) | order summary + totals from profile | 200 | — |
 | Search catalog | `GET /tests?q&category&limit&page` | text + category package filter | tests: `id, code, name, category, sample_type, price, turnaround_hours` | 200 | — |
 | Create order | `POST /orders` | `patient_code*`, `test_catalog_ids*` (UUIDs), `discount?`, `note?` | `{ order, invoice, pricing }` — **pricing authoritative** | 201, 400, 401, 403 | order, items, invoice, queue |
 

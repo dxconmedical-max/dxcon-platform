@@ -295,19 +295,55 @@ export async function createReceptionOrder(
   };
 }
 
-/** GET /api/v1/reception/workspace/orders/:ref — reopen / refresh persistence */
+/**
+ * GET /api/v1/reception/workspace/orders/:ref — reopen / refresh persistence.
+ * If that route is not yet deployed (404), optionally resolve via patient profile
+ * `orders[]` when `patientCode` is provided (production-safe fallback).
+ */
 export async function fetchReceptionOrder(
   ctx: Ctx,
   orderRef: string,
+  opts?: { patientCode?: string },
 ): Promise<ReceptionOrderDetail> {
-  const response = await apiRequest<{ success: boolean; data: ReceptionOrderDetail }>(
-    `/api/v1/reception/workspace/orders/${encodeURIComponent(orderRef)}`,
-    requestOpts(ctx),
-  );
-  return {
-    order: response.data.order,
-    pricing: mapPricing(response.data.pricing as unknown as Record<string, unknown>),
-  };
+  try {
+    const response = await apiRequest<{ success: boolean; data: ReceptionOrderDetail }>(
+      `/api/v1/reception/workspace/orders/${encodeURIComponent(orderRef)}`,
+      requestOpts(ctx),
+    );
+    return {
+      order: response.data.order,
+      pricing: mapPricing(response.data.pricing as unknown as Record<string, unknown>),
+    };
+  } catch (error) {
+    if (!(error instanceof ApiError) || error.status !== 404 || !opts?.patientCode) {
+      throw error;
+    }
+    const profile = await fetchReceptionPatient(ctx, opts.patientCode);
+    const match = (profile.orders ?? []).find((row) => {
+      const code = String(row.order_code ?? row.id ?? "");
+      return code === orderRef;
+    });
+    if (!match) {
+      throw new ApiError("Order not found on patient profile", 404, {
+        code: "ORDER_NOT_FOUND",
+        error: "Order not found on patient profile",
+      });
+    }
+    return {
+      order: {
+        ...match,
+        order_code: match.order_code ?? orderRef,
+        patient_code: profile.patient_code,
+        patient_name: profile.full_name,
+      },
+      pricing: mapPricing({
+        subtotal: match.subtotal,
+        discount: match.discount,
+        total: match.total_amount ?? match.total,
+        tax: match.tax,
+      }),
+    };
+  }
 }
 
 export function getOrderCode(
