@@ -28,4 +28,23 @@ describe("loginErrorMessage", () => {
   it("maps rate limit", () => {
     expect(loginErrorMessage(err(429))).toContain("Too many");
   });
+
+  it("only uses network copy for transport failures", () => {
+    expect(loginErrorMessage(err(0))).toContain("Network error");
+    expect(loginErrorMessage(err(408))).toContain("Network error");
+    expect(loginErrorMessage(err(500, "boom"))).toBe("boom");
+  });
+});
+
+describe("mapResponseToApiError envelope", () => {
+  it("reads nested data.error when top-level error is null", async () => {
+    const { mapResponseToApiError } = await import("@/lib/errors");
+    const err = mapResponseToApiError(401, {
+      success: true,
+      data: { error: "Invalid credentials" },
+      error: null,
+    });
+    expect(err.status).toBe(401);
+    expect(err.message).toBe("Invalid credentials");
+  });
 });

@@ -91,10 +91,51 @@ class CorsHardeningTestCase(unittest.TestCase):
             "https://dxcon.com.vn",
         )
 
-    def test_production_accepts_explicit_origins(self):
-        app = _cors_test_app(app_env="production", cors_origins=PRODUCTION_ORIGINS)
-        self.assertTrue(cors_status(app)["ok"])
-        validate_cors(app)
+    def test_production_merges_apex_when_cors_is_render_hostname_only(self):
+        """Live misconfig: CORS_ORIGINS=https://dxcon-ap.onrender.com blocked browser login."""
+        app = _cors_test_app(
+            app_env="production",
+            cors_origins="https://dxcon-ap.onrender.com",
+        )
+        self.assertIn("https://dxcon.com.vn", app.config.get("CORS_ORIGINS"))
+        self.assertIn("https://dxcon-ap.onrender.com", app.config.get("CORS_ORIGINS"))
+        client = app.test_client()
+        response = client.open(
+            "/api/v1/system/health",
+            method="OPTIONS",
+            headers={
+                "Origin": "https://dxcon.com.vn",
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "content-type,authorization",
+            },
+        )
+        self.assertIn(response.status_code, (200, 204))
+        self.assertEqual(
+            response.headers.get("Access-Control-Allow-Origin"),
+            "https://dxcon.com.vn",
+        )
+        self.assertEqual(
+            response.headers.get("Access-Control-Allow-Credentials"),
+            "true",
+        )
+
+    def test_staging_mislabelled_api_still_allows_production_apex(self):
+        """api.dxcon.com.vn has reported APP_ENV=staging while serving production domain."""
+        app = _cors_test_app(
+            app_env="staging",
+            cors_origins="https://dxcon-ap.onrender.com",
+        )
+        self.assertIn("https://dxcon.com.vn", app.config.get("CORS_ORIGINS"))
+        client = app.test_client()
+        response = client.get(
+            "/api/v1/system/health",
+            headers={"Origin": "https://dxcon.com.vn"},
+        )
+        self.assertEqual(
+            response.headers.get("Access-Control-Allow-Origin"),
+            "https://dxcon.com.vn",
+        )
+
 
     def test_permitted_apex_origin(self):
         client = _cors_test_app(app_env="production", cors_origins=PRODUCTION_ORIGINS).test_client()
@@ -170,22 +211,28 @@ class CorsHardeningTestCase(unittest.TestCase):
         )
         self.assertEqual(response.headers.get("Access-Control-Allow-Credentials"), "true")
 
-    def test_staging_origins_separate_from_production(self):
+    def test_staging_origins_include_staging_hosts(self):
         client = _cors_test_app(app_env="staging", cors_origins=STAGING_ORIGINS).test_client()
         allowed = client.get(
             "/api/v1/system/health",
             headers={"Origin": "https://staging.dxcon.com.vn"},
         )
-        denied = client.get(
-            "/api/v1/system/health",
-            headers={"Origin": "https://dxcon.com.vn"},
-        )
         self.assertEqual(
             allowed.headers.get("Access-Control-Allow-Origin"),
             "https://staging.dxcon.com.vn",
         )
-        self.assertIsNone(denied.headers.get("Access-Control-Allow-Origin"))
 
+    def test_staging_also_keeps_production_apex_for_mislabelled_api(self):
+        # Production custom domain has been observed with APP_ENV=staging.
+        client = _cors_test_app(app_env="staging", cors_origins=STAGING_ORIGINS).test_client()
+        apex = client.get(
+            "/api/v1/system/health",
+            headers={"Origin": "https://dxcon.com.vn"},
+        )
+        self.assertEqual(
+            apex.headers.get("Access-Control-Allow-Origin"),
+            "https://dxcon.com.vn",
+        )
     def test_no_wildcard_production_cors(self):
         app = _cors_test_app(app_env="production", cors_origins=PRODUCTION_ORIGINS)
         self.assertNotEqual(app.config.get("CORS_ORIGINS"), "*")

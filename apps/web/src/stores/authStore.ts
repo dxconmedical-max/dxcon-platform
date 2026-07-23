@@ -7,7 +7,7 @@ import { clearAuthCookies, setAuthCookies } from "@/lib/cookies";
 import { clearTenantScopedCaches } from "@/lib/tenant-cache";
 import { workspacePathForRole } from "@/lib/roles";
 import { decodeJwtPayload, isTokenExpired } from "@/lib/utils";
-import { normalizeApiError, ApiError } from "@/lib/errors";
+import { loginErrorMessage, ApiError } from "@/lib/errors";
 import {
   fetchCapabilities,
   fetchMe,
@@ -95,7 +95,7 @@ export const useAuthStore = create<AuthState>()(
           const redirect = await get().resolveAfterLogin(remember);
           return { redirect };
         } catch (error) {
-          const message = normalizeApiError(error);
+          const message = loginErrorMessage(error);
           const status: AuthStatus =
             error instanceof ApiError && error.status === 403
               ? "forbidden"

@@ -29,12 +29,25 @@ STAGING_CORS_ORIGINS = (
 )
 
 
+def _split_origins(value: str) -> list[str]:
+    return [origin.strip() for origin in value.split(",") if origin.strip()]
+
+
+def _merge_origins(*groups: str) -> list[str]:
+    merged: list[str] = []
+    for group in groups:
+        for origin in _split_origins(group):
+            if origin not in merged:
+                merged.append(origin)
+    return merged
+
+
 def init_security(app):
     from flask_cors import CORS
 
     from app.core.errors import build_error_response
     from app.core.rate_limit import check_rate_limit
-    from app.infrastructure.production_readiness import app_env, is_relaxed_env, is_strict_env
+    from app.infrastructure.production_readiness import app_env, is_strict_env
 
     cors_origins = (app.config.get("CORS_ORIGINS") or "*").strip()
     env = app_env(app)
@@ -53,11 +66,18 @@ def init_security(app):
             supports_credentials=False,
         )
     else:
-        origins = [
-            origin.strip()
-            for origin in cors_origins.split(",")
-            if origin.strip()
-        ]
+        origins = _split_origins(cors_origins)
+        # Live production previously set CORS_ORIGINS to only the Render hostname
+        # (https://dxcon-ap.onrender.com), which blocks https://dxcon.com.vn login.
+        # Always merge the canonical browser origins for strict environments.
+        if is_strict_env(app):
+            required = (
+                STAGING_CORS_ORIGINS if env == "staging" else PRODUCTION_CORS_ORIGINS
+            )
+            # Production custom domain may still run with APP_ENV=staging misconfig;
+            # always keep apex/www/app allowlisted so browser login cannot break.
+            origins = _merge_origins(cors_origins, required, PRODUCTION_CORS_ORIGINS)
+            app.config["CORS_ORIGINS"] = ",".join(origins)
         CORS(
             app,
             resources={r"/api/*": {"origins": origins}},

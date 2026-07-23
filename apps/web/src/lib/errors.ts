@@ -41,11 +41,34 @@ export function mapResponseToApiError(
       ? (payload as Record<string, unknown>)
       : {};
 
-  const code = String(body.code ?? defaultCodeForStatus(status));
-  const message = String(
-    body.error ?? body.message ?? defaultMessageForStatus(status),
+  const nestedError =
+    body.error && typeof body.error === "object"
+      ? (body.error as Record<string, unknown>)
+      : null;
+  const nestedData =
+    body.data && typeof body.data === "object"
+      ? (body.data as Record<string, unknown>)
+      : null;
+
+  const code = String(
+    nestedError?.code ??
+      body.code ??
+      nestedData?.code ??
+      defaultCodeForStatus(status),
   );
-  const fieldErrors = extractFieldErrors(body);
+
+  const rawMessage =
+    nestedError?.message ??
+    (typeof body.error === "string" ? body.error : null) ??
+    body.message ??
+    nestedData?.error ??
+    nestedData?.message ??
+    null;
+
+  const message = String(rawMessage ?? defaultMessageForStatus(status));
+  const fieldErrors = extractFieldErrors(
+    nestedError ?? nestedData ?? body,
+  );
 
   return new ApiError({
     code,
