@@ -69,7 +69,7 @@ export function SimpleTable<T>({
   columns,
 }: {
   rows: T[];
-  rowKey: (row: T) => string;
+  rowKey: (row: T, index: number) => string;
   columns: Array<{
     key: string;
     label: string;
@@ -90,8 +90,8 @@ export function SimpleTable<T>({
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 bg-white">
-          {rows.map((row) => (
-            <tr key={rowKey(row)} className="hover:bg-slate-50/80">
+          {rows.map((row, index) => (
+            <tr key={rowKey(row, index)} className="hover:bg-slate-50/80">
               {columns.map((column) => (
                 <td key={column.key} className={cn("px-3 py-2 text-slate-800", column.className)}>
                   {column.render(row)}

@@ -2,50 +2,112 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
-import type { ReceptionOrderCreate } from "@/lib/api/reception";
+import {
+  fetchReceptionOrder,
+  type ReceptionOrderCreate,
+  type ReceptionOrderPricing,
+} from "@/lib/api/reception";
+import { normalizeApiError } from "@/lib/errors";
 
 import { SectionHeader } from "../_components/ui";
 import {
-  FulfillmentStep,
+  OrderCreatedStep,
   PatientStep,
   TestsStep,
   type SelectedPatient,
 } from "./OrderSteps";
 
-const STEPS = ["Patient", "Tests & order", "Payment & documents"] as const;
+const STEPS = ["Patient", "Tests & order", "Order created"] as const;
 
 function ReceptionOrderWorkflowPanel() {
-  const { accessToken, activeOrganizationId } = useAuth();
+  const { accessToken, activeOrganizationId, can, role } = useAuth();
   const searchParams = useSearchParams();
   const patientParam = searchParams.get("patient") ?? undefined;
+  const orderParam = searchParams.get("order") ?? undefined;
 
   const [step, setStep] = useState(0);
   const [patient, setPatient] = useState<SelectedPatient | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [orderRef, setOrderRef] = useState<string | null>(null);
-  const [pricing, setPricing] = useState<ReceptionOrderCreate["pricing"] | null>(null);
+  const [pricing, setPricing] = useState<ReceptionOrderPricing | null>(null);
+  const [order, setOrder] = useState<ReceptionOrderCreate["order"] | null>(null);
+  const [reopenError, setReopenError] = useState<string | null>(null);
+  const [reopening, setReopening] = useState(Boolean(orderParam));
+
+  const onQueryChange = useCallback((q: string) => setSearchQuery(q), []);
+
+  const canWrite =
+    can("reception.write") ||
+    can("orders.create") ||
+    can("patients.create") ||
+    ["RECEPTION", "ADMIN", "SUPER_ADMIN", "SYSTEM_ADMIN", "PARTNER_RECEPTION"].includes(
+      role ?? "",
+    );
+
+  useEffect(() => {
+    if (!orderParam || !accessToken) {
+      setReopening(false);
+      return;
+    }
+    let cancelled = false;
+    setReopening(true);
+    setReopenError(null);
+    void fetchReceptionOrder({ token: accessToken, organizationId: activeOrganizationId }, orderParam)
+      .then((result) => {
+        if (cancelled) return;
+        const row = result.order as Record<string, unknown>;
+        setPatient({
+          patientCode: String(row.patient_code ?? row.patient_id ?? ""),
+          patientName: String(row.patient_name ?? row.patient_code ?? "Patient"),
+        });
+        setOrderRef(String(row.order_code ?? orderParam));
+        setPricing(result.pricing);
+        setOrder(result.order);
+        setStep(2);
+      })
+      .catch((err) => {
+        if (!cancelled) setReopenError(normalizeApiError(err));
+      })
+      .finally(() => {
+        if (!cancelled) setReopening(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [orderParam, accessToken, activeOrganizationId]);
 
   function reset() {
     setStep(0);
     setPatient(null);
     setOrderRef(null);
     setPricing(null);
+    setOrder(null);
+    setReopenError(null);
   }
 
   if (!accessToken) {
     return <p className="text-sm text-slate-500">Waiting for session…</p>;
   }
 
+  if (!canWrite) {
+    return (
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        Reception write permission is required to create patients and orders.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
       <SectionHeader
-        title="Reception production workflow"
-        description="Patient search/create, catalog selection, order pricing, payment, barcode, requisition, and QR — all via production APIs."
+        title="Reception Milestone 1 — Patient & order"
+        description="Search or create a patient, select catalog tests, and create an order. Payment and barcode are not included in this milestone."
         actions={
           step > 0 ? (
             <Button size="sm" variant="outline" onClick={reset}>
@@ -69,11 +131,20 @@ function ReceptionOrderWorkflowPanel() {
         ))}
       </div>
 
-      {step === 0 ? (
+      {reopening ? <p className="text-sm text-slate-500">Reopening order…</p> : null}
+      {reopenError ? (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+          {reopenError}
+        </div>
+      ) : null}
+
+      {!reopening && step === 0 ? (
         <PatientStep
           accessToken={accessToken}
           organizationId={activeOrganizationId}
           initialQuery={patientParam}
+          preservedQuery={searchQuery || undefined}
+          onQueryChange={onQueryChange}
           onSelect={(selected) => {
             setPatient(selected);
             setStep(1);
@@ -81,26 +152,28 @@ function ReceptionOrderWorkflowPanel() {
         />
       ) : null}
 
-      {step === 1 && patient ? (
+      {!reopening && step === 1 && patient ? (
         <TestsStep
           accessToken={accessToken}
           organizationId={activeOrganizationId}
           patient={patient}
-          onOrderCreated={(ref, orderPricing) => {
+          onOrderCreated={(ref, orderPricing, createdOrder) => {
             setOrderRef(ref);
             setPricing(orderPricing);
+            setOrder(createdOrder);
             setStep(2);
           }}
         />
       ) : null}
 
-      {step === 2 && patient && orderRef && pricing ? (
-        <FulfillmentStep
+      {!reopening && step === 2 && patient && orderRef && pricing && order ? (
+        <OrderCreatedStep
           accessToken={accessToken}
           organizationId={activeOrganizationId}
           patient={patient}
           orderRef={orderRef}
           pricing={pricing}
+          order={order}
           onReset={reset}
         />
       ) : null}

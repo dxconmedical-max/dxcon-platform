@@ -21,6 +21,7 @@ export type WalkInRegistration = {
   email?: string;
   address?: string;
   national_id?: string;
+  patient_code?: string;
   note?: string;
   force?: boolean;
 };
@@ -30,6 +31,8 @@ export type DuplicateWarning = {
   full_name?: string;
   phone?: string;
   national_id?: string;
+  field?: string;
+  message?: string;
   reason?: string;
   [key: string]: unknown;
 };
@@ -40,6 +43,7 @@ export type ReceptionTest = {
   name: string;
   category?: string | null;
   sample_type?: string | null;
+  turnaround_hours?: number | null;
   price?: number | null;
 };
 
@@ -47,6 +51,7 @@ export type ReceptionOrderPricing = {
   subtotal: number;
   discount: number;
   total: number;
+  tax?: number | null;
 };
 
 export type ReceptionOrderCreate = {
@@ -55,26 +60,17 @@ export type ReceptionOrderCreate = {
   pricing: ReceptionOrderPricing;
 };
 
-export type ReceptionPaymentResult = {
-  payment: Record<string, unknown>;
-  invoice: Record<string, unknown> | null;
-  order_status: string | null;
-  barcodes: ReceptionBarcodes;
+export type ReceptionOrderDetail = {
+  order: Record<string, unknown>;
+  pricing: ReceptionOrderPricing;
 };
 
-export type ReceptionBarcodes = {
-  order_barcode?: string;
-  patient_barcode?: string;
-  patient_qr?: string;
-  collection_barcode?: string | null;
-  sample_barcodes?: Array<{
-    test_code: string;
-    test_name: string;
-    barcode: string;
-  }>;
+type Ctx = {
+  token: string;
+  organizationId?: string | null;
+  signal?: AbortSignal;
+  timeoutMs?: number;
 };
-
-type Ctx = { token: string; organizationId?: string | null };
 
 function asArray(value: unknown): Record<string, unknown>[] {
   return Array.isArray(value) ? (value as Record<string, unknown>[]) : [];
@@ -116,15 +112,35 @@ function mapPatient(row: Record<string, unknown>): ReceptionPatient {
   };
 }
 
+function mapPricing(raw: Record<string, unknown> | undefined): ReceptionOrderPricing {
+  const source = raw ?? {};
+  return {
+    subtotal: Number(source.subtotal ?? 0),
+    discount: Number(source.discount ?? 0),
+    total: Number(source.total ?? source.total_amount ?? 0),
+    tax: source.tax != null ? Number(source.tax) : null,
+  };
+}
+
+function requestOpts(ctx: Ctx, extra: Record<string, unknown> = {}) {
+  return {
+    token: ctx.token,
+    organizationId: ctx.organizationId,
+    signal: ctx.signal,
+    timeoutMs: ctx.timeoutMs,
+    ...extra,
+  };
+}
+
 /** GET /api/v1/reception/workspace/search */
 export async function searchReceptionPatients(
-  { token, organizationId }: Ctx,
+  ctx: Ctx,
   query: string,
 ): Promise<{ items: ReceptionPatient[]; total: number }> {
   const params = new URLSearchParams({ q: query, limit: "25" });
   const response = await apiRequest<Record<string, unknown>>(
     `/api/v1/reception/workspace/search?${params}`,
-    { token, organizationId },
+    requestOpts(ctx),
   );
   const raw = listRowsFromEnvelope(response);
   return {
@@ -135,10 +151,10 @@ export async function searchReceptionPatients(
 
 /**
  * POST /api/v1/reception/workspace/patients/register
- * Throws ApiError 409 with details.warnings when duplicates exist and force is false.
+ * 409 → ApiError with duplicate warnings when force is false.
  */
 export async function registerWalkIn(
-  { token, organizationId }: Ctx,
+  ctx: Ctx,
   registration: WalkInRegistration,
 ): Promise<{
   patient_code: string;
@@ -152,10 +168,7 @@ export async function registerWalkIn(
       success: boolean;
       data: Record<string, unknown>;
     }>("/api/v1/reception/workspace/patients/register", {
-      token,
-      organizationId,
-      method: "POST",
-      body: registration,
+      ...requestOpts(ctx, { method: "POST", body: registration }),
     });
     const data = response.data ?? {};
     const patientRow =
@@ -179,9 +192,7 @@ export async function registerWalkIn(
       message: String(data.message ?? "Patient registered."),
       patient,
       qr_payload:
-        data.qr_payload != null
-          ? String(data.qr_payload)
-          : patient.qr_payload,
+        data.qr_payload != null ? String(data.qr_payload) : patient.qr_payload,
       warnings: asArray(data.warnings) as DuplicateWarning[],
     };
   } catch (error) {
@@ -200,9 +211,25 @@ export async function registerWalkIn(
   }
 }
 
+/** GET /api/v1/reception/workspace/patients/:code — confirm persistence */
+export async function fetchReceptionPatient(
+  ctx: Ctx,
+  patientCode: string,
+): Promise<ReceptionPatient & { orders?: Record<string, unknown>[] }> {
+  const response = await apiRequest<{ success: boolean; data: Record<string, unknown> }>(
+    `/api/v1/reception/workspace/patients/${encodeURIComponent(patientCode)}`,
+    requestOpts(ctx),
+  );
+  const data = response.data ?? {};
+  return {
+    ...mapPatient(data),
+    orders: asArray(data.orders),
+  };
+}
+
 /** GET /api/v1/reception/workspace/tests */
 export async function fetchReceptionTests(
-  { token, organizationId }: Ctx,
+  ctx: Ctx,
   params: { q?: string; category?: string; limit?: number } = {},
 ): Promise<{ items: ReceptionTest[]; total: number }> {
   const qs = new URLSearchParams();
@@ -213,7 +240,7 @@ export async function fetchReceptionTests(
 
   const response = await apiRequest<Record<string, unknown>>(
     `/api/v1/reception/workspace/tests?${qs}`,
-    { token, organizationId },
+    requestOpts(ctx),
   );
   const raw = listRowsFromEnvelope(response);
   return {
@@ -223,15 +250,19 @@ export async function fetchReceptionTests(
       name: String(t.name),
       category: t.category != null ? String(t.category) : null,
       sample_type: t.sample_type != null ? String(t.sample_type) : null,
-      price: t.price != null ? Number(t.price) : null,
+      turnaround_hours:
+        t.turnaround_hours != null && Number.isFinite(Number(t.turnaround_hours))
+          ? Number(t.turnaround_hours)
+          : null,
+      price: t.price != null ? Number(t.price) : t.price_display != null ? Number(t.price_display) : null,
     })),
     total: paginationTotal(response, raw.length),
   };
 }
 
-/** POST /api/v1/reception/workspace/orders */
+/** POST /api/v1/reception/workspace/orders — pricing in response is authoritative */
 export async function createReceptionOrder(
-  { token, organizationId }: Ctx,
+  ctx: Ctx,
   payload: {
     patient_code: string;
     test_catalog_ids: string[];
@@ -243,64 +274,39 @@ export async function createReceptionOrder(
   const response = await apiRequest<{ success: boolean; data: ReceptionOrderCreate }>(
     "/api/v1/reception/workspace/orders",
     {
-      token,
-      organizationId,
-      method: "POST",
-      body: {
-        patient_code: payload.patient_code,
-        test_catalog_ids: payload.test_catalog_ids,
-        discount: payload.discount ?? 0,
-        note: payload.note,
-        queue_entry_id: payload.queue_entry_id,
-      },
+      ...requestOpts(ctx, {
+        method: "POST",
+        body: {
+          patient_code: payload.patient_code,
+          test_catalog_ids: payload.test_catalog_ids,
+          discount: payload.discount ?? 0,
+          note: payload.note,
+          queue_entry_id: payload.queue_entry_id,
+        },
+      }),
     },
   );
-  return response.data;
+  const data = response.data;
+  return {
+    order: data.order,
+    invoice: data.invoice,
+    pricing: mapPricing(data.pricing as unknown as Record<string, unknown>),
+  };
 }
 
-/** POST /api/v1/reception/workspace/orders/:ref/payment */
-export async function collectReceptionPayment(
-  { token, organizationId }: Ctx,
+/** GET /api/v1/reception/workspace/orders/:ref — reopen / refresh persistence */
+export async function fetchReceptionOrder(
+  ctx: Ctx,
   orderRef: string,
-  payload: { payment_method?: string; receipt_number?: string } = {},
-): Promise<ReceptionPaymentResult> {
-  const response = await apiRequest<{ success: boolean; data: ReceptionPaymentResult }>(
-    `/api/v1/reception/workspace/orders/${encodeURIComponent(orderRef)}/payment`,
-    {
-      token,
-      organizationId,
-      method: "POST",
-      body: {
-        payment_method: payload.payment_method ?? "cash",
-        receipt_number: payload.receipt_number,
-      },
-    },
+): Promise<ReceptionOrderDetail> {
+  const response = await apiRequest<{ success: boolean; data: ReceptionOrderDetail }>(
+    `/api/v1/reception/workspace/orders/${encodeURIComponent(orderRef)}`,
+    requestOpts(ctx),
   );
-  return response.data;
-}
-
-/** GET /api/v1/reception/workspace/orders/:ref/barcode */
-export async function fetchReceptionBarcodes(
-  { token, organizationId }: Ctx,
-  orderRef: string,
-): Promise<ReceptionBarcodes> {
-  const response = await apiRequest<{ success: boolean; data: ReceptionBarcodes }>(
-    `/api/v1/reception/workspace/orders/${encodeURIComponent(orderRef)}/barcode`,
-    { token, organizationId },
-  );
-  return response.data;
-}
-
-/** GET /api/v1/reception/workspace/orders/:ref/request-form */
-export async function fetchReceptionRequestForm(
-  { token, organizationId }: Ctx,
-  orderRef: string,
-): Promise<{ html: string }> {
-  const response = await apiRequest<{ success: boolean; data: { html: string } }>(
-    `/api/v1/reception/workspace/orders/${encodeURIComponent(orderRef)}/request-form`,
-    { token, organizationId },
-  );
-  return response.data;
+  return {
+    order: response.data.order,
+    pricing: mapPricing(response.data.pricing as unknown as Record<string, unknown>),
+  };
 }
 
 export function getOrderCode(
@@ -319,4 +325,10 @@ export function getDuplicateWarnings(error: unknown): DuplicateWarning[] {
       ? (error.body as Record<string, unknown>)
       : {};
   return Array.isArray(body.warnings) ? (body.warnings as DuplicateWarning[]) : [];
+}
+
+export function catalogCategories(tests: ReceptionTest[]): string[] {
+  return Array.from(
+    new Set(tests.map((t) => t.category).filter(Boolean) as string[]),
+  ).sort();
 }

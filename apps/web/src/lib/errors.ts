@@ -10,18 +10,41 @@ export class ApiError extends Error {
   }
 }
 
+export function isRequestAborted(error: unknown): boolean {
+  return (
+    error instanceof ApiError &&
+    (error.status === 499 ||
+      (typeof error.body === "object" &&
+        error.body != null &&
+        (error.body as { code?: string }).code === "ABORTED"))
+  );
+}
+
 export function normalizeApiError(error: unknown): string {
   if (error instanceof ApiError) {
+    if (isRequestAborted(error)) {
+      return "Request cancelled.";
+    }
     if (error.status === 429) {
       return "Too many attempts. Please wait and try again.";
     }
+    if (error.status === 408) {
+      return error.message || "Request timed out. Please try again.";
+    }
+    // Never treat HTTP 4xx/5xx as a generic network failure.
     if (error.status === 0) {
       return "Network error — check your connection.";
     }
     if (typeof error.body === "object" && error.body && "error" in error.body) {
       return String((error.body as { error: unknown }).error);
     }
-    return error.message;
+    if (error.status === 403) {
+      return error.message || "You do not have permission for this action.";
+    }
+    if (error.status === 401) {
+      return error.message || "Authentication required.";
+    }
+    return error.message || `Request failed (${error.status})`;
   }
   if (error instanceof Error) {
     return error.message;

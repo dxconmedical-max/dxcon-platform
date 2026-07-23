@@ -105,6 +105,29 @@ def orders_create():
         return {"success": False, "error": str(exc)}, 400
 
 
+@reception_workspace_bp.route("/orders/<order_ref>", methods=["GET"])
+@reception_api_read
+def orders_get(order_ref: str):
+    """Milestone 1 — reopen/refresh persisted order (no payment/barcode)."""
+    from app.business_engine import service as biz
+
+    try:
+        detail = biz.order_to_detail(order_ref)
+        return {
+            "success": True,
+            "data": {
+                "order": detail,
+                "pricing": {
+                    "subtotal": detail.get("subtotal") or 0,
+                    "discount": detail.get("discount") or 0,
+                    "total": detail.get("total_amount") or detail.get("total") or 0,
+                },
+            },
+        }, 200
+    except BusinessEngineError as exc:
+        return {"success": False, "error": str(exc)}, 404
+
+
 @reception_workspace_bp.route("/orders/<order_ref>/payment", methods=["POST"])
 @reception_api_write
 def orders_payment(order_ref: str):

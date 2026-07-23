@@ -16,4 +16,8 @@ describe("normalizeApiError", () => {
       normalizeApiError(new ApiError("x", 401, { error: "Invalid credentials" })),
     ).toBe("Invalid credentials");
   });
+
+  it("does not label 4xx as network error", () => {
+    expect(normalizeApiError(new ApiError("nope", 404))).toBe("nope");
+  });
 });

@@ -45,6 +45,36 @@ class ReceptionWorkspaceTests(unittest.TestCase):
         self.assertIn("data", result)
         self.assertIn("pagination", result)
 
+    def test_milestone1_order_get_route_and_optional_patient_code(self):
+        """GET /orders/:ref is mounted; register_patient accepts patient_code."""
+        from app.reception_workspace.service import register_patient
+
+        code = f"P-M1-{uuid.uuid4().hex[:6].upper()}"
+        phone = f"0900{uuid.uuid4().hex[:6]}"
+        result = register_patient(
+            {
+                "full_name": "E2E RECEPTION TEST UNIT",
+                "phone": phone,
+                "patient_code": code,
+                "force": True,
+            },
+            actor=self.user.email,
+            force=True,
+        )
+        db.session.commit()
+        self.assertTrue(result.get("ok"))
+        self.assertEqual(result["patient"]["patient_code"], code)
+
+        client = self.app.test_client()
+        with client.session_transaction() as sess:
+            sess["user_id"] = self.user.id
+            sess["role"] = self.user.role
+            sess["email"] = self.user.email
+
+        missing = client.get("/api/v1/reception/workspace/orders/DOES-NOT-EXIST-M1")
+        self.assertEqual(missing.status_code, 404)
+        self.assertFalse(missing.get_json().get("success"))
+
     def test_duplicate_warnings_empty(self):
         self.assertEqual(duplicate_warnings(phone="0000000000"), [])
 

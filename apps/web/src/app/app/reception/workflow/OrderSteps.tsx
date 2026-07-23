@@ -1,37 +1,35 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input, Label } from "@/components/ui/Input";
 import {
-  collectReceptionPayment,
   createReceptionOrder,
-  fetchReceptionBarcodes,
-  fetchReceptionRequestForm,
+  fetchReceptionOrder,
+  fetchReceptionPatient,
   fetchReceptionTests,
   getDuplicateWarnings,
   getOrderCode,
   registerWalkIn,
   searchReceptionPatients,
   type DuplicateWarning,
-  type ReceptionBarcodes,
   type ReceptionOrderCreate,
+  type ReceptionOrderPricing,
   type ReceptionPatient,
   type ReceptionTest,
 } from "@/lib/api/reception";
-import { normalizeApiError } from "@/lib/errors";
+import { isRequestAborted, normalizeApiError } from "@/lib/errors";
 
 import { DataState, SectionHeader, SimpleTable } from "../_components/ui";
 
 export type SelectedPatient = {
   patientCode: string;
   patientName: string;
-  qrPayload?: string;
 };
 
-const PAYMENT_METHODS = ["cash", "transfer", "qr", "pos", "corporate", "insurance"] as const;
+const SEARCH_DEBOUNCE_MS = 350;
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value);
@@ -42,7 +40,7 @@ function asFloat(value: string): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-function unique<T>(items: T[]): T[] {
+function uniqueIds(items: string[]): string[] {
   return Array.from(new Set(items));
 }
 
@@ -50,17 +48,21 @@ export function PatientStep({
   accessToken,
   organizationId,
   initialQuery,
+  preservedQuery,
   onSelect,
+  onQueryChange,
 }: {
   accessToken: string;
   organizationId?: string | null;
   initialQuery?: string;
+  preservedQuery?: string;
   onSelect: (patient: SelectedPatient) => void;
+  onQueryChange?: (query: string) => void;
 }) {
-  const [query, setQuery] = useState(initialQuery ?? "");
+  const [query, setQuery] = useState(preservedQuery ?? initialQuery ?? "");
   const [patients, setPatients] = useState<ReceptionPatient[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
+  const [searched, setSearched] = useState(Boolean((preservedQuery ?? initialQuery)?.trim()));
   const [error, setError] = useState<string | null>(null);
   const [create, setCreate] = useState({
     full_name: "",
@@ -68,61 +70,128 @@ export function PatientStep({
     national_id: "",
     gender: "",
     date_of_birth: "",
+    email: "",
+    address: "",
+    patient_code: "",
   });
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [duplicates, setDuplicates] = useState<DuplicateWarning[]>([]);
+  const searchAbortRef = useRef<AbortController | null>(null);
+  const createInFlight = useRef(false);
 
-  async function runSearch(term = query) {
+  async function runSearch(term: string, opts?: { immediate?: boolean }) {
+    const q = term.trim();
+    searchAbortRef.current?.abort();
+    const controller = new AbortController();
+    searchAbortRef.current = controller;
     setLoading(true);
     setError(null);
     setSearched(true);
     try {
       const result = await searchReceptionPatients(
-        { token: accessToken, organizationId },
-        term.trim(),
+        { token: accessToken, organizationId, signal: controller.signal },
+        q,
       );
+      if (controller.signal.aborted) return;
       setPatients(result.items);
     } catch (err) {
+      if (isRequestAborted(err) || controller.signal.aborted) return;
       setPatients([]);
       setError(normalizeApiError(err));
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
+    void opts;
   }
 
   useEffect(() => {
-    if (initialQuery?.trim()) {
-      void runSearch(initialQuery);
+    onQueryChange?.(query);
+  }, [query, onQueryChange]);
+
+  useEffect(() => {
+    const term = query.trim();
+    if (!term) {
+      searchAbortRef.current?.abort();
+      setLoading(false);
+      return;
     }
+    const timer = window.setTimeout(() => {
+      void runSearch(term);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => {
+      window.clearTimeout(timer);
+      searchAbortRef.current?.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialQuery, accessToken, organizationId]);
+  }, [query, accessToken, organizationId]);
+
+  useEffect(() => {
+    if (initialQuery?.trim() && !preservedQuery) {
+      setQuery(initialQuery);
+    }
+  }, [initialQuery, preservedQuery]);
 
   async function submitCreate(force = false) {
+    if (createInFlight.current) return;
     if (!create.full_name.trim() || !create.phone.trim()) {
       setCreateError("Full name and phone are required.");
       return;
     }
+    createInFlight.current = true;
     setCreating(true);
     setCreateError(null);
     if (!force) setDuplicates([]);
     try {
+      if (!force && (create.phone.trim() || create.national_id.trim())) {
+        const probe = await searchReceptionPatients(
+          { token: accessToken, organizationId },
+          create.phone.trim() || create.national_id.trim(),
+        );
+        const matches = probe.items.filter(
+          (p) =>
+            (create.phone.trim() && p.phone === create.phone.trim()) ||
+            (create.national_id.trim() && p.national_id === create.national_id.trim()),
+        );
+        if (matches.length > 0) {
+          setDuplicates(
+            matches.map((p) => ({
+              patient_code: p.patient_code,
+              full_name: p.full_name,
+              phone: p.phone ?? undefined,
+              national_id: p.national_id ?? undefined,
+              message: `Existing patient ${p.full_name}`,
+            })),
+          );
+          setCreateError("Possible duplicate patient. Review matches or register anyway.");
+          return;
+        }
+      }
+
       const response = await registerWalkIn(
-        { token: accessToken, organizationId },
+        { token: accessToken, organizationId, timeoutMs: 30_000 },
         {
           full_name: create.full_name.trim(),
           phone: create.phone.trim(),
           national_id: create.national_id.trim() || undefined,
           gender: create.gender.trim() || undefined,
           date_of_birth: create.date_of_birth.trim() || undefined,
+          email: create.email.trim() || undefined,
+          address: create.address.trim() || undefined,
+          patient_code: create.patient_code.trim() || undefined,
           force,
         },
       );
+
+      const confirmed = await fetchReceptionPatient(
+        { token: accessToken, organizationId },
+        response.patient_code,
+      );
+
       setDuplicates([]);
       onSelect({
-        patientCode: response.patient_code,
-        patientName: response.patient.full_name || create.full_name.trim(),
-        qrPayload: response.qr_payload ?? response.patient.qr_payload,
+        patientCode: confirmed.patient_code,
+        patientName: confirmed.full_name,
       });
     } catch (err) {
       const warnings = getDuplicateWarnings(err);
@@ -133,6 +202,7 @@ export function PatientStep({
         setCreateError(normalizeApiError(err));
       }
     } finally {
+      createInFlight.current = false;
       setCreating(false);
     }
   }
@@ -143,32 +213,23 @@ export function PatientStep({
         <div className="space-y-4">
           <SectionHeader
             title="Patient search"
-            description="Search by patient code, name, phone, or national ID."
+            description="Search by phone, patient code, national ID, or full name."
           />
-          <form
-            className="flex gap-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void runSearch();
-            }}
-          >
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Patient code, name, phone, or national ID"
-            />
-            <Button type="submit" disabled={loading}>
-              Search
-            </Button>
-          </form>
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Phone, patient code, national ID, or name"
+            aria-label="Patient search"
+          />
+          <p className="text-xs text-slate-500">Results update as you type (debounced).</p>
 
           {searched ? (
             <DataState
               loading={loading}
               error={error}
-              empty={patients.length === 0}
+              empty={!loading && patients.length === 0}
               emptyLabel="No patients found. Register a new patient on the right."
-              onRetry={() => void runSearch()}
+              onRetry={() => void runSearch(query)}
             >
               <SimpleTable<ReceptionPatient>
                 rows={patients}
@@ -189,7 +250,6 @@ export function PatientStep({
                           onSelect({
                             patientCode: row.patient_code,
                             patientName: row.full_name,
-                            qrPayload: row.qr_payload,
                           })
                         }
                       >
@@ -202,15 +262,18 @@ export function PatientStep({
             </DataState>
           ) : (
             <p className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500">
-              Search for an existing patient or register a walk-in.
+              Type to search an existing patient or register a walk-in.
             </p>
           )}
         </div>
 
         <Card className="space-y-4">
-          <SectionHeader title="Create new patient" description="Walk-in registration with duplicate detection." />
+          <SectionHeader
+            title="Create new patient"
+            description="Walk-in registration with duplicate detection. Search results stay visible."
+          />
           <div className="grid gap-4 md:grid-cols-2">
-            <div>
+            <div className="md:col-span-2">
               <Label htmlFor="full_name">Full name *</Label>
               <Input
                 id="full_name"
@@ -227,11 +290,23 @@ export function PatientStep({
               />
             </div>
             <div>
+              <Label htmlFor="patient_code">Patient code (optional)</Label>
+              <Input
+                id="patient_code"
+                value={create.patient_code}
+                onChange={(event) =>
+                  setCreate((prev) => ({ ...prev, patient_code: event.target.value }))
+                }
+              />
+            </div>
+            <div>
               <Label htmlFor="national_id">National ID</Label>
               <Input
                 id="national_id"
                 value={create.national_id}
-                onChange={(event) => setCreate((prev) => ({ ...prev, national_id: event.target.value }))}
+                onChange={(event) =>
+                  setCreate((prev) => ({ ...prev, national_id: event.target.value }))
+                }
               />
             </div>
             <div>
@@ -242,7 +317,7 @@ export function PatientStep({
                 onChange={(event) => setCreate((prev) => ({ ...prev, gender: event.target.value }))}
               />
             </div>
-            <div className="md:col-span-2">
+            <div>
               <Label htmlFor="dob">Date of birth</Label>
               <Input
                 id="dob"
@@ -251,6 +326,23 @@ export function PatientStep({
                 onChange={(event) =>
                   setCreate((prev) => ({ ...prev, date_of_birth: event.target.value }))
                 }
+              />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={create.email}
+                onChange={(event) => setCreate((prev) => ({ ...prev, email: event.target.value }))}
+              />
+            </div>
+            <div className="md:col-span-2">
+              <Label htmlFor="address">Address</Label>
+              <Input
+                id="address"
+                value={create.address}
+                onChange={(event) => setCreate((prev) => ({ ...prev, address: event.target.value }))}
               />
             </div>
           </div>
@@ -312,7 +404,11 @@ export function TestsStep({
   accessToken: string;
   organizationId?: string | null;
   patient: SelectedPatient;
-  onOrderCreated: (orderRef: string, pricing: ReceptionOrderCreate["pricing"]) => void;
+  onOrderCreated: (
+    orderRef: string,
+    pricing: ReceptionOrderPricing,
+    order: ReceptionOrderCreate["order"],
+  ) => void;
 }) {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -323,9 +419,12 @@ export function TestsStep({
   const [selectedTestIds, setSelectedTestIds] = useState<string[]>([]);
   const [discount, setDiscount] = useState("0");
   const [note, setNote] = useState("");
+  const catalogAbortRef = useRef<AbortController | null>(null);
+  const createInFlight = useRef(false);
 
   const categories = useMemo(
-    () => unique(tests.map((test) => test.category).filter(Boolean) as string[]).sort(),
+    () =>
+      Array.from(new Set(tests.map((test) => test.category).filter(Boolean) as string[])).sort(),
     [tests],
   );
   const categoryToTestIds = useMemo(() => {
@@ -342,33 +441,44 @@ export function TestsStep({
     () => tests.filter((test) => selectedTestIds.includes(test.id)),
     [tests, selectedTestIds],
   );
-  const subtotal = useMemo(
+  const previewSubtotal = useMemo(
     () => selectedTests.reduce((sum, test) => sum + (test.price ?? 0), 0),
     [selectedTests],
   );
-  const total = Math.max(0, subtotal - asFloat(discount));
+  const previewTotal = Math.max(0, previewSubtotal - asFloat(discount));
 
   async function loadCatalog(q?: string) {
+    catalogAbortRef.current?.abort();
+    const controller = new AbortController();
+    catalogAbortRef.current = controller;
     setLoading(true);
     setError(null);
     try {
       const result = await fetchReceptionTests(
-        { token: accessToken, organizationId },
+        { token: accessToken, organizationId, signal: controller.signal },
         { limit: 100, q: q?.trim() || undefined },
       );
+      if (controller.signal.aborted) return;
       setTests(result.items);
     } catch (err) {
+      if (isRequestAborted(err) || controller.signal.aborted) return;
       setTests([]);
       setError(normalizeApiError(err));
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
   }
 
   useEffect(() => {
-    void loadCatalog();
+    const timer = window.setTimeout(() => {
+      void loadCatalog(catalogQuery);
+    }, catalogQuery ? SEARCH_DEBOUNCE_MS : 0);
+    return () => {
+      window.clearTimeout(timer);
+      catalogAbortRef.current?.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accessToken, organizationId]);
+  }, [catalogQuery, accessToken, organizationId]);
 
   function toggleCategory(category: string) {
     const ids = categoryToTestIds[category] ?? [];
@@ -377,29 +487,42 @@ export function TestsStep({
       isSelected ? prev.filter((value) => value !== category) : [...prev, category],
     );
     setSelectedTestIds((prev) =>
-      isSelected ? prev.filter((id) => !ids.includes(id)) : unique([...prev, ...ids]),
+      isSelected ? prev.filter((id) => !ids.includes(id)) : uniqueIds([...prev, ...ids]),
+    );
+  }
+
+  function toggleTest(id: string) {
+    setSelectedTestIds((prev) =>
+      prev.includes(id) ? prev.filter((value) => value !== id) : uniqueIds([...prev, id]),
     );
   }
 
   async function submitOrder() {
+    if (createInFlight.current) return;
+    if (selectedTestIds.length === 0) {
+      setError("Select at least one test.");
+      return;
+    }
+    createInFlight.current = true;
     setCreating(true);
     setError(null);
     try {
       const response = await createReceptionOrder(
-        { token: accessToken, organizationId },
+        { token: accessToken, organizationId, timeoutMs: 30_000 },
         {
           patient_code: patient.patientCode,
-          test_catalog_ids: selectedTestIds,
+          test_catalog_ids: uniqueIds(selectedTestIds),
           discount: asFloat(discount),
           note: note.trim() || undefined,
         },
       );
       const orderRef = getOrderCode(response.order);
       if (!orderRef) throw new Error("Order code not returned by the API.");
-      onOrderCreated(orderRef, response.pricing);
+      onOrderCreated(orderRef, response.pricing, response.order);
     } catch (err) {
       setError(normalizeApiError(err));
     } finally {
+      createInFlight.current = false;
       setCreating(false);
     }
   }
@@ -410,22 +533,12 @@ export function TestsStep({
         title="Select tests & create order"
         description={`${patient.patientName} · ${patient.patientCode}`}
       />
-      <form
-        className="flex gap-2"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void loadCatalog(catalogQuery);
-        }}
-      >
-        <Input
-          value={catalogQuery}
-          onChange={(event) => setCatalogQuery(event.target.value)}
-          placeholder="Search test catalog"
-        />
-        <Button type="submit" variant="outline" disabled={loading}>
-          Search catalog
-        </Button>
-      </form>
+      <Input
+        value={catalogQuery}
+        onChange={(event) => setCatalogQuery(event.target.value)}
+        placeholder="Search test catalog"
+        aria-label="Catalog search"
+      />
       <DataState
         loading={loading}
         error={error}
@@ -435,7 +548,10 @@ export function TestsStep({
       >
         <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
           <Card className="space-y-3">
-            <p className="text-sm font-medium text-slate-900">Test packages</p>
+            <p className="text-sm font-medium text-slate-900">Packages (by category)</p>
+            <p className="text-xs text-slate-500">
+              Backend has no panel expansion — selecting a package adds its catalog tests.
+            </p>
             {categories.length === 0 ? (
               <p className="text-sm text-slate-500">No packages available.</p>
             ) : (
@@ -459,13 +575,15 @@ export function TestsStep({
             <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3">
               <div>
                 <p className="text-sm text-slate-600">Selected</p>
-                <p className="text-lg font-semibold text-slate-900">{selectedTestIds.length} tests</p>
+                <p className="text-lg font-semibold text-slate-900">
+                  {selectedTestIds.length} tests
+                </p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-slate-600">Estimated total</p>
-                <p className="font-semibold text-slate-900">{formatCurrency(total)}</p>
+                <p className="text-sm text-slate-600">Preview (not final)</p>
+                <p className="font-semibold text-slate-900">{formatCurrency(previewTotal)}</p>
                 <p className="text-xs text-slate-500">
-                  Subtotal {formatCurrency(subtotal)} · Discount {formatCurrency(asFloat(discount))}
+                  Authoritative totals come from the API after create.
                 </p>
               </div>
             </div>
@@ -496,22 +614,27 @@ export function TestsStep({
                     <input
                       type="checkbox"
                       checked={selectedTestIds.includes(row.id)}
-                      onChange={() =>
-                        setSelectedTestIds((prev) =>
-                          prev.includes(row.id)
-                            ? prev.filter((id) => id !== row.id)
-                            : [...prev, row.id],
-                        )
-                      }
+                      onChange={() => toggleTest(row.id)}
                     />
                   ),
                 },
                 { key: "code", label: "Code", render: (row) => row.code },
                 { key: "name", label: "Test", render: (row) => row.name },
+                {
+                  key: "specimen",
+                  label: "Specimen",
+                  render: (row) => row.sample_type ?? "—",
+                },
+                {
+                  key: "tat",
+                  label: "TAT (h)",
+                  render: (row) =>
+                    row.turnaround_hours != null ? String(row.turnaround_hours) : "—",
+                },
                 { key: "category", label: "Package", render: (row) => row.category ?? "—" },
                 {
                   key: "price",
-                  label: "Price",
+                  label: "Catalog price",
                   render: (row) => (row.price != null ? formatCurrency(row.price) : "—"),
                 },
               ]}
@@ -524,9 +647,7 @@ export function TestsStep({
                     key={test.id}
                     type="button"
                     className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs text-slate-700 hover:border-rose-300 hover:text-rose-700"
-                    onClick={() =>
-                      setSelectedTestIds((prev) => prev.filter((id) => id !== test.id))
-                    }
+                    onClick={() => toggleTest(test.id)}
                   >
                     {test.code} ×
                   </button>
@@ -534,7 +655,10 @@ export function TestsStep({
               </div>
             ) : null}
 
-            <Button disabled={creating || selectedTestIds.length === 0} onClick={() => void submitOrder()}>
+            <Button
+              disabled={creating || selectedTestIds.length === 0}
+              onClick={() => void submitOrder()}
+            >
               {creating ? "Creating order…" : "Create order"}
             </Button>
           </div>
@@ -544,86 +668,76 @@ export function TestsStep({
   );
 }
 
-export function FulfillmentStep({
+export function OrderCreatedStep({
   accessToken,
   organizationId,
   patient,
   orderRef,
   pricing,
+  order,
   onReset,
 }: {
   accessToken: string;
   organizationId?: string | null;
   patient: SelectedPatient;
   orderRef: string;
-  pricing: ReceptionOrderCreate["pricing"];
+  pricing: ReceptionOrderPricing;
+  order: ReceptionOrderCreate["order"];
   onReset: () => void;
 }) {
-  const [paymentStatus, setPaymentStatus] = useState<"pending" | "paid">("pending");
-  const [paymentMethod, setPaymentMethod] = useState<string>("cash");
-  const [receiptNumber, setReceiptNumber] = useState("");
-  const [paying, setPaying] = useState(false);
+  const [authoritative, setAuthoritative] = useState(pricing);
+  const [detail, setDetail] = useState(order);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [barcodes, setBarcodes] = useState<ReceptionBarcodes | null>(null);
-  const [requisitionHtml, setRequisitionHtml] = useState<string | null>(null);
-  const [loadingDocs, setLoadingDocs] = useState(false);
 
-  const patientQr =
-    barcodes?.patient_qr ?? patient.qrPayload ?? `dxcon:patient:${patient.patientCode}`;
+  const items = Array.isArray((detail as { items?: unknown }).items)
+    ? ((detail as { items: Record<string, unknown>[] }).items ?? [])
+    : [];
 
-  async function loadDocuments(ref = orderRef, seed?: ReceptionBarcodes) {
-    setLoadingDocs(true);
+  async function refresh() {
+    setLoading(true);
     setError(null);
     try {
-      const [codes, form] = await Promise.all([
-        seed ? Promise.resolve(seed) : fetchReceptionBarcodes({ token: accessToken, organizationId }, ref),
-        fetchReceptionRequestForm({ token: accessToken, organizationId }, ref),
+      const [orderResult, patientResult] = await Promise.all([
+        fetchReceptionOrder({ token: accessToken, organizationId }, orderRef),
+        fetchReceptionPatient({ token: accessToken, organizationId }, patient.patientCode),
       ]);
-      setBarcodes(codes);
-      setRequisitionHtml(form.html);
+      setAuthoritative(orderResult.pricing);
+      setDetail(orderResult.order);
+      if (!patientResult.patient_code) {
+        throw new Error("Patient persistence check failed.");
+      }
     } catch (err) {
       setError(normalizeApiError(err));
     } finally {
-      setLoadingDocs(false);
+      setLoading(false);
     }
   }
 
-  async function submitPayment() {
-    setPaying(true);
-    setError(null);
-    try {
-      const result = await collectReceptionPayment(
-        { token: accessToken, organizationId },
-        orderRef,
-        {
-          payment_method: paymentMethod,
-          receipt_number: receiptNumber.trim() || undefined,
-        },
-      );
-      setPaymentStatus("paid");
-      await loadDocuments(orderRef, result.barcodes);
-    } catch (err) {
-      setError(normalizeApiError(err));
-    } finally {
-      setPaying(false);
-    }
-  }
-
-  function openRequisition() {
-    if (!requisitionHtml) return;
-    const popup = window.open("", "_blank", "noopener,noreferrer");
-    if (!popup) return;
-    popup.document.write(requisitionHtml);
-    popup.document.close();
-  }
+  useEffect(() => {
+    void refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderRef, accessToken, organizationId]);
 
   return (
-    <div className="space-y-5">
+    <Card className="space-y-4">
       <SectionHeader
-        title="Payment & documents"
-        description="Collect payment, then generate barcode, requisition, and patient QR from live order data."
+        title="Order created"
+        description="Milestone 1 complete. Payment and barcode are Milestone 2."
+        actions={
+          <Button size="sm" variant="outline" disabled={loading} onClick={() => void refresh()}>
+            {loading ? "Refreshing…" : "Refresh & verify"}
+          </Button>
+        }
       />
-
+      {error ? (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+          <p>{error}</p>
+          <Button className="mt-2" size="sm" variant="outline" onClick={() => void refresh()}>
+            Retry
+          </Button>
+        </div>
+      ) : null}
       <div className="grid gap-3 md:grid-cols-3">
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
           <p className="text-xs text-slate-500">Patient</p>
@@ -631,112 +745,45 @@ export function FulfillmentStep({
           <p className="text-xs text-slate-500">{patient.patientCode}</p>
         </div>
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-          <p className="text-xs text-slate-500">Order total</p>
-          <p className="font-semibold text-slate-900">{formatCurrency(pricing.total)}</p>
+          <p className="text-xs text-slate-500">Authoritative total (API)</p>
+          <p className="font-semibold text-slate-900">{formatCurrency(authoritative.total)}</p>
           <p className="text-xs text-slate-500">
-            Subtotal {formatCurrency(pricing.subtotal)} · Discount {formatCurrency(pricing.discount)}
+            Subtotal {formatCurrency(authoritative.subtotal)} · Discount{" "}
+            {formatCurrency(authoritative.discount)}
+            {authoritative.tax != null ? ` · Tax ${formatCurrency(authoritative.tax)}` : ""}
           </p>
         </div>
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
           <p className="text-xs text-slate-500">Order code</p>
           <p className="break-all font-mono text-sm">{orderRef}</p>
           <p className="text-xs text-slate-500">
-            Payment status: {paymentStatus === "paid" ? "paid" : "payment pending"}
+            Status: {String((detail as { status?: string }).status ?? "payment_pending")}
           </p>
         </div>
       </div>
-
-      {error ? <p className="text-sm text-rose-600">{error}</p> : null}
-
-      {paymentStatus === "pending" ? (
-        <Card className="space-y-4">
-          <SectionHeader title="Collect payment" description="Persists payment on the production order." />
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <Label htmlFor="payment_method">Payment method</Label>
-              <select
-                id="payment_method"
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
-                value={paymentMethod}
-                onChange={(event) => setPaymentMethod(event.target.value)}
-              >
-                {PAYMENT_METHODS.map((method) => (
-                  <option key={method} value={method}>
-                    {method}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="receipt">Receipt number</Label>
-              <Input
-                id="receipt"
-                value={receiptNumber}
-                onChange={(event) => setReceiptNumber(event.target.value)}
-                placeholder="Optional"
-              />
-            </div>
-          </div>
-          <Button disabled={paying} onClick={() => void submitPayment()}>
-            {paying ? "Recording payment…" : "Mark paid & generate"}
-          </Button>
-        </Card>
-      ) : (
-        <Card className="space-y-4">
-          <SectionHeader
-            title="Generated documents"
-            description="Barcode, requisition, and QR from production APIs."
-            actions={
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={loadingDocs}
-                onClick={() => void loadDocuments()}
-              >
-                Refresh
-              </Button>
-            }
-          />
-          {loadingDocs && !barcodes ? <p className="text-sm text-slate-500">Loading documents…</p> : null}
-
-          {barcodes ? (
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-lg border border-slate-200 p-3">
-                <p className="text-xs text-slate-500">Order barcode</p>
-                <p className="font-mono text-sm text-slate-900">{barcodes.order_barcode ?? "—"}</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 p-3">
-                <p className="text-xs text-slate-500">Patient barcode</p>
-                <p className="font-mono text-sm text-slate-900">{barcodes.patient_barcode ?? "—"}</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 p-3 md:col-span-2">
-                <p className="text-xs text-slate-500">Patient QR payload</p>
-                <p className="break-all font-mono text-sm text-slate-900">{patientQr}</p>
-              </div>
-            </div>
-          ) : null}
-
-          {barcodes?.sample_barcodes && barcodes.sample_barcodes.length > 0 ? (
-            <SimpleTable
-              rows={barcodes.sample_barcodes}
-              rowKey={(row) => `${row.test_code}-${row.barcode}`}
-              columns={[
-                { key: "test", label: "Test", render: (row) => row.test_name },
-                { key: "code", label: "Code", render: (row) => row.test_code },
-                { key: "barcode", label: "Sample barcode", render: (row) => row.barcode },
-              ]}
-            />
-          ) : null}
-
-          <div className="flex flex-wrap gap-3">
-            <Button variant="outline" disabled={!requisitionHtml} onClick={openRequisition}>
-              Open requisition
-            </Button>
-            <Button onClick={onReset}>New order</Button>
-          </div>
-        </Card>
-      )}
-    </div>
+      {items.length > 0 ? (
+        <SimpleTable
+          rows={items}
+          rowKey={(row, index) => String(row.id ?? row.test_code ?? index)}
+          columns={[
+            { key: "code", label: "Code", render: (row) => String(row.test_code ?? "—") },
+            { key: "name", label: "Test", render: (row) => String(row.test_name ?? "—") },
+            {
+              key: "price",
+              label: "Unit price",
+              render: (row) =>
+                row.unit_price != null ? formatCurrency(Number(row.unit_price)) : "—",
+            },
+          ]}
+        />
+      ) : null}
+      <div className="flex flex-wrap gap-3 border-t border-slate-100 pt-4">
+        <Button onClick={onReset}>New order</Button>
+        <a href={`/app/reception/workflow?order=${encodeURIComponent(orderRef)}`}>
+          <Button variant="outline">Reopen order link</Button>
+        </a>
+      </div>
+    </Card>
   );
 }
 

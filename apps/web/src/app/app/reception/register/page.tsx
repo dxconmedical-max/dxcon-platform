@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useRef, useState } from "react";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
@@ -10,8 +10,10 @@ import { Card } from "@/components/ui/Card";
 import { Input, Label } from "@/components/ui/Input";
 import { useAuth } from "@/hooks/useAuth";
 import {
+  fetchReceptionPatient,
   getDuplicateWarnings,
   registerWalkIn,
+  searchReceptionPatients,
   type DuplicateWarning,
 } from "@/lib/api/reception";
 import { normalizeApiError } from "@/lib/errors";
@@ -20,7 +22,9 @@ import { SectionHeader } from "../_components/ui";
 
 function RegisterPanel() {
   const router = useRouter();
-  const { accessToken, activeOrganizationId } = useAuth();
+  const searchParams = useSearchParams();
+  const returnQuery = searchParams.get("q") ?? "";
+  const { accessToken, activeOrganizationId, can, role } = useAuth();
   const [form, setForm] = useState({
     full_name: "",
     phone: "",
@@ -29,23 +33,56 @@ function RegisterPanel() {
     date_of_birth: "",
     email: "",
     address: "",
+    patient_code: "",
   });
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [duplicates, setDuplicates] = useState<DuplicateWarning[]>([]);
+  const inFlight = useRef(false);
+
+  const canWrite =
+    can("reception.write") ||
+    can("patients.create") ||
+    ["RECEPTION", "ADMIN", "SUPER_ADMIN", "SYSTEM_ADMIN", "PARTNER_RECEPTION"].includes(
+      role ?? "",
+    );
 
   async function submit(force = false) {
-    if (!accessToken) return;
+    if (!accessToken || inFlight.current) return;
     if (!form.full_name.trim() || !form.phone.trim()) {
       setError("Full name and phone are required.");
       return;
     }
+    inFlight.current = true;
     setCreating(true);
     setError(null);
     if (!force) setDuplicates([]);
     try {
+      if (!force) {
+        const probe = await searchReceptionPatients(
+          { token: accessToken, organizationId: activeOrganizationId },
+          form.phone.trim() || form.national_id.trim(),
+        );
+        const matches = probe.items.filter(
+          (p) =>
+            (form.phone.trim() && p.phone === form.phone.trim()) ||
+            (form.national_id.trim() && p.national_id === form.national_id.trim()),
+        );
+        if (matches.length > 0) {
+          setDuplicates(
+            matches.map((p) => ({
+              patient_code: p.patient_code,
+              full_name: p.full_name,
+              message: `Existing patient ${p.full_name}`,
+            })),
+          );
+          setError("Possible duplicate patient. Use an existing match or register anyway.");
+          return;
+        }
+      }
+
       const result = await registerWalkIn(
-        { token: accessToken, organizationId: activeOrganizationId },
+        { token: accessToken, organizationId: activeOrganizationId, timeoutMs: 30_000 },
         {
           full_name: form.full_name.trim(),
           phone: form.phone.trim(),
@@ -54,10 +91,17 @@ function RegisterPanel() {
           date_of_birth: form.date_of_birth.trim() || undefined,
           email: form.email.trim() || undefined,
           address: form.address.trim() || undefined,
+          patient_code: form.patient_code.trim() || undefined,
           force,
         },
       );
-      router.push(`/app/reception/workflow?patient=${encodeURIComponent(result.patient_code)}`);
+      await fetchReceptionPatient(
+        { token: accessToken, organizationId: activeOrganizationId },
+        result.patient_code,
+      );
+      router.push(
+        `/app/reception/workflow?patient=${encodeURIComponent(result.patient_code)}`,
+      );
     } catch (err) {
       const warnings = getDuplicateWarnings(err);
       if (warnings.length > 0) {
@@ -67,8 +111,17 @@ function RegisterPanel() {
         setError(normalizeApiError(err));
       }
     } finally {
+      inFlight.current = false;
       setCreating(false);
     }
+  }
+
+  if (!canWrite) {
+    return (
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        Reception write permission is required to register patients.
+      </div>
+    );
   }
 
   return (
@@ -77,9 +130,11 @@ function RegisterPanel() {
         title="Register walk-in patient"
         description="Creates a patient via the production reception workspace API with duplicate detection."
         actions={
-          <Link href="/app/reception/search">
+          <Link
+            href={`/app/reception/search${returnQuery ? `?q=${encodeURIComponent(returnQuery)}` : ""}`}
+          >
             <Button size="sm" variant="outline">
-              Search instead
+              Back to search
             </Button>
           </Link>
         }
@@ -103,11 +158,23 @@ function RegisterPanel() {
             />
           </div>
           <div>
+            <Label htmlFor="patient_code">Patient code (optional)</Label>
+            <Input
+              id="patient_code"
+              value={form.patient_code}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, patient_code: event.target.value }))
+              }
+            />
+          </div>
+          <div>
             <Label htmlFor="national_id">National ID</Label>
             <Input
               id="national_id"
               value={form.national_id}
-              onChange={(event) => setForm((prev) => ({ ...prev, national_id: event.target.value }))}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, national_id: event.target.value }))
+              }
             />
           </div>
           <div>
@@ -138,7 +205,7 @@ function RegisterPanel() {
               onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
             />
           </div>
-          <div className="md:col-span-2">
+          <div>
             <Label htmlFor="address">Address</Label>
             <Input
               id="address"
@@ -189,7 +256,9 @@ function RegisterPanel() {
 export default function ReceptionRegisterPage() {
   return (
     <AppShell title="Register patient" workspacePath="/app/reception">
-      <RegisterPanel />
+      <Suspense fallback={<p className="text-sm text-slate-500">Loading…</p>}>
+        <RegisterPanel />
+      </Suspense>
     </AppShell>
   );
 }

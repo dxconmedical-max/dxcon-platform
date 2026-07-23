@@ -111,6 +111,7 @@ def register_patient(
         date_of_birth=data.get("date_of_birth"),
         address=data.get("address"),
         national_id=data.get("national_id"),
+        patient_code=(str(data["patient_code"]).strip() if data.get("patient_code") else None),
         actor=actor,
     )
     queue_entry = reception_service.create_queue_entry(
