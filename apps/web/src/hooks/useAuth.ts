@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 import { can, canAny, canAll, hasFeature, isOrganizationType, isWorkspace } from "@/lib/permissions";
@@ -29,62 +29,108 @@ export function useAuth() {
   };
 }
 
+const ADMIN_ROLES = new Set([
+  "SUPER_ADMIN",
+  "DXCON_ADMIN",
+  "ADMIN",
+  "SYSTEM_ADMIN",
+]);
+
+/**
+ * Protect workspace routes. Must NOT depend on a freshly-allocated `auth`
+ * object — that re-ran restoreSession on every store tick and left
+ * /app/admin spinning forever after login.
+ */
 export function useRequireAuth(workspacePath?: string) {
   const router = useRouter();
   const pathname = usePathname();
-  const auth = useAuth();
+  const isHydrated = useAuthStore((s) => s.isHydrated);
+  const status = useAuthStore((s) => s.status);
+  const isInitializingSession = useAuthStore((s) => s.isInitializingSession);
+  const error = useAuthStore((s) => s.error);
+  const restoreSession = useAuthStore((s) => s.restoreSession);
+  const bootstrapGeneration = useRef(0);
 
   useEffect(() => {
-    if (!auth.isHydrated) return;
+    if (!isHydrated) return;
 
+    const generation = ++bootstrapGeneration.current;
     let cancelled = false;
 
     const guard = async () => {
-      const status = await auth.restoreSession();
-      if (cancelled) return;
-      if (status === "unauthenticated" || status === "session_expired") {
+      const state = useAuthStore.getState();
+
+      // Post-login navigation already resolved me + capabilities.
+      // Do not flip isInitializingSession again or the shell flashes/spins.
+      if (
+        state.status === "authenticated" &&
+        state.capabilities &&
+        state.accessToken
+      ) {
+        enforceWorkspace(workspacePath, router);
+        return;
+      }
+
+      const next = await restoreSession();
+      if (cancelled || generation !== bootstrapGeneration.current) return;
+
+      if (next === "unauthenticated" || next === "session_expired") {
         router.replace(
-          status === "session_expired"
+          next === "session_expired"
             ? "/login?reason=session-expired"
             : "/login",
         );
         return;
       }
-      if (status === "organization_required") {
+      if (next === "organization_required") {
         router.replace("/select-organization");
         return;
       }
-      if (status === "forbidden") {
+      if (next === "forbidden") {
         router.replace("/forbidden");
         return;
       }
 
-      if (workspacePath && auth.capabilities) {
-        const home = auth.capabilities.workspace;
-        const adminRoles = new Set([
-          "SUPER_ADMIN",
-          "DXCON_ADMIN",
-          "ADMIN",
-          "SYSTEM_ADMIN",
-        ]);
-        const role = (auth.role ?? "").toUpperCase();
-        const isAdmin = adminRoles.has(role);
-        if (
-          !isAdmin &&
-          workspacePath !== home &&
-          workspacePath !== "/app" &&
-          isWorkspacePath(workspacePath)
-        ) {
-          router.replace(home || "/app");
-        }
-      }
+      enforceWorkspace(workspacePath, router);
     };
 
     void guard();
     return () => {
       cancelled = true;
     };
-  }, [auth.isHydrated, workspacePath, pathname, auth, router]);
+    // Intentionally omit unstable auth object — use stable store selectors only.
+  }, [isHydrated, workspacePath, pathname, restoreSession, router]);
 
-  return auth;
+  const auth = useAuth();
+  return {
+    ...auth,
+    // Prefer live selector values for shell gates (avoid stale spread).
+    isHydrated,
+    status,
+    isInitializingSession: isInitializingSession || !isHydrated,
+    error,
+    isAuthenticated: status === "authenticated",
+  };
+}
+
+function enforceWorkspace(
+  workspacePath: string | undefined,
+  router: ReturnType<typeof useRouter>,
+) {
+  if (!workspacePath) return;
+  const state = useAuthStore.getState();
+  const capabilities = state.capabilities;
+  if (!capabilities) return;
+
+  const home = capabilities.workspace;
+  const role = (state.role ?? "").toUpperCase();
+  const isAdmin = ADMIN_ROLES.has(role);
+  if (
+    !isAdmin &&
+    workspacePath !== home &&
+    workspacePath !== "/app" &&
+    isWorkspacePath(workspacePath)
+  ) {
+    router.replace(home || "/app");
+  }
 }

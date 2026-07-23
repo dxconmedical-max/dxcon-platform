@@ -112,3 +112,82 @@ export const LEGACY_AUTH_STORAGE_KEYS = [
   "dxcon-auth-v1",
   "dxcon-auth-v2",
 ] as const;
+
+export type MeResponse = {
+  user: AuthUser;
+  active_organization_id: string | null;
+  memberships: unknown[];
+  requires_organization_selection: boolean;
+};
+
+export type CapabilitiesResponse = {
+  workspace: string;
+  default_workspace?: string;
+  permissions?: string[];
+  features?: string[];
+  user?: AuthUser;
+  organization?: unknown;
+  membership?: unknown;
+};
+
+/** Parse `/api/v1/auth/me` envelope or flat body. */
+export function parseMeResponse(payload: unknown): MeResponse {
+  const root = asRecord(payload);
+  if (!root) {
+    throw new ApiError("Malformed profile response", 502, {
+      code: "MALFORMED_ME_RESPONSE",
+    });
+  }
+  const data = asRecord(root.data) ?? root;
+  const user = parseUser(data.user, asNonEmptyString(data.role));
+  if (!user) {
+    throw new ApiError("Malformed profile response", 502, {
+      code: "MALFORMED_ME_RESPONSE",
+    });
+  }
+  const memberships = Array.isArray(data.memberships) ? data.memberships : [];
+  return {
+    user,
+    active_organization_id:
+      (data.active_organization_id as string | null | undefined) ??
+      user.organization_id ??
+      null,
+    memberships,
+    requires_organization_selection: Boolean(
+      data.requires_organization_selection,
+    ),
+  };
+}
+
+/** Parse `/api/v1/auth/capabilities` envelope or flat body. */
+export function parseCapabilitiesResponse(
+  payload: unknown,
+): CapabilitiesResponse {
+  const root = asRecord(payload);
+  if (!root) {
+    throw new ApiError("Malformed capabilities response", 502, {
+      code: "MALFORMED_CAPABILITIES_RESPONSE",
+    });
+  }
+  const data = asRecord(root.data) ?? root;
+  const workspace =
+    asNonEmptyString(data.workspace) ??
+    asNonEmptyString(data.default_workspace);
+  if (!workspace) {
+    throw new ApiError("Malformed capabilities response", 502, {
+      code: "MALFORMED_CAPABILITIES_RESPONSE",
+    });
+  }
+  return {
+    workspace,
+    default_workspace:
+      asNonEmptyString(data.default_workspace) ?? workspace,
+    permissions: Array.isArray(data.permissions)
+      ? (data.permissions as string[])
+      : [],
+    features: Array.isArray(data.features) ? (data.features as string[]) : [],
+    user: parseUser(data.user, null) ?? undefined,
+    organization: data.organization,
+    membership: data.membership,
+  };
+}

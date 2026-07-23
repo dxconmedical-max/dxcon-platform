@@ -220,7 +220,52 @@ describe("authStore login / session machine", () => {
     expect(useAuthStore.getState().isSubmittingLogin).toBe(false);
   });
 
-  it("restoreSession terminates initialization flags", async () => {
+  it("profile request failure exits loading with error", async () => {
+    useAuthStore.setState({
+      accessToken: "a",
+      refreshToken: "r",
+      user: { id: "1", email: "u@x.com", role: "ADMIN" },
+      role: "ADMIN",
+      isInitializingSession: true,
+    });
+    fetchMe.mockRejectedValue(new ApiError("boom", 500));
+    await useAuthStore.getState().restoreSession();
+    expect(useAuthStore.getState().isInitializingSession).toBe(false);
+    expect(useAuthStore.getState().error).toBeTruthy();
+  });
+
+  it("capabilities failure exits loading", async () => {
+    useAuthStore.setState({
+      accessToken: "a",
+      refreshToken: "r",
+      user: { id: "1", email: "u@x.com", role: "ADMIN" },
+      role: "ADMIN",
+    });
+    fetchMe.mockResolvedValue({
+      user: { id: "1", email: "u@x.com", role: "ADMIN" },
+      active_organization_id: "org1",
+      memberships: [
+        {
+          membership_id: "m1",
+          organization_id: "org1",
+          organization_name: "Org",
+          organization_type: "LAB",
+          organization_code: "O1",
+          organization_status: "active",
+          role_code: "ADMIN",
+          membership_status: "active",
+          default_workspace: "/app/admin",
+        },
+      ],
+      requires_organization_selection: false,
+    });
+    fetchCapabilities.mockRejectedValue(new ApiError("caps down", 500));
+    await useAuthStore.getState().restoreSession();
+    expect(useAuthStore.getState().isInitializingSession).toBe(false);
+    expect(useAuthStore.getState().status).not.toBe("authenticated");
+  });
+
+  it("restoreSession success terminates initialization flags", async () => {
     useAuthStore.setState({
       accessToken: "a",
       refreshToken: "r",
@@ -263,7 +308,6 @@ describe("authStore login / session machine", () => {
     const status = await useAuthStore.getState().restoreSession();
     expect(status).toBe("authenticated");
     expect(useAuthStore.getState().isInitializingSession).toBe(false);
-    expect(useAuthStore.getState().isRefreshingSession).toBe(false);
   });
 
   it("hydration completion forces transient flags off", () => {

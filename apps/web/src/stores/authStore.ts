@@ -38,7 +38,7 @@ export type AuthStatus =
   | "organization_required"
   | "workspace_required";
 
-const SESSION_RESTORE_TIMEOUT_MS = 15_000;
+const SESSION_RESTORE_TIMEOUT_MS = 12_000;
 
 type AuthState = {
   status: AuthStatus;
@@ -416,14 +416,23 @@ export const useAuthStore = create<AuthState>()(
               } catch (error) {
                 if (error instanceof ApiError && error.status === 401) {
                   await get().logout();
-                  set({ status: "session_expired" });
+                  set({
+                    status: "session_expired",
+                    error: "Your session has expired. Please sign in again.",
+                  });
                   return "session_expired" as AuthStatus;
                 }
                 if (error instanceof ApiError && error.status === 403) {
-                  set({ status: "forbidden" });
+                  set({
+                    status: "forbidden",
+                    error: normalizeApiError(error),
+                  });
                   return "forbidden" as AuthStatus;
                 }
-                set({ status: "unauthenticated" });
+                set({
+                  status: "unauthenticated",
+                  error: normalizeApiError(error),
+                });
                 return "unauthenticated" as AuthStatus;
               }
             })(),
@@ -432,7 +441,10 @@ export const useAuthStore = create<AuthState>()(
           );
         } catch (error) {
           console.debug("[authStore.restoreSession] failed/timeout", error);
-          set({ status: "unauthenticated" });
+          set({
+            status: "unauthenticated",
+            error: normalizeApiError(error),
+          });
           return "unauthenticated";
         } finally {
           set({

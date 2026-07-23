@@ -38,6 +38,32 @@ describe("parseLoginResponse", () => {
   });
 });
 
+describe("parseMeResponse / parseCapabilitiesResponse", () => {
+  it("parses /auth/me envelope", async () => {
+    const { parseMeResponse } = await import("@/lib/auth/session");
+    const me = parseMeResponse({
+      success: true,
+      data: {
+        user: { id: "1", email: "a@b.com", role: "ADMIN" },
+        active_organization_id: "org1",
+        memberships: [],
+        requires_organization_selection: false,
+      },
+    });
+    expect(me.user.email).toBe("a@b.com");
+    expect(me.active_organization_id).toBe("org1");
+  });
+
+  it("parses /auth/capabilities envelope", async () => {
+    const { parseCapabilitiesResponse } = await import("@/lib/auth/session");
+    const caps = parseCapabilitiesResponse({
+      success: true,
+      data: { workspace: "/app/admin", permissions: ["users.read"] },
+    });
+    expect(caps.workspace).toBe("/app/admin");
+  });
+});
+
 describe("migratePersistedAuth", () => {
   beforeEach(() => {
     sessionStorage.clear();
