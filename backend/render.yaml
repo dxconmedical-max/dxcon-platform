@@ -12,6 +12,10 @@ services:
         value: json
       - key: STARTUP_VALIDATE_DB
         value: "true"
+      - key: CORS_ORIGINS
+        value: https://dxcon.com.vn,https://www.dxcon.com.vn,https://app.dxcon.com.vn
+      - key: DEMO_MODE
+        value: "false"
       - key: SECRET_KEY
         generateValue: true
       - key: JWT_SECRET_KEY
