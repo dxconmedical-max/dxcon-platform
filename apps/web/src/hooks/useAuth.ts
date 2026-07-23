@@ -9,10 +9,14 @@ import { useAuthStore } from "@/stores/authStore";
 
 export function useAuth() {
   const store = useAuthStore();
+  const isInitializing = !store.isHydrated || store.status === "loading";
   return {
     ...store,
     isAuthenticated: store.status === "authenticated",
-    isLoading: store.status === "loading",
+    /** Session bootstrap / restore — never use for the login submit button. */
+    isInitializing,
+    /** @deprecated Prefer isInitializing for session, local isSubmittingLogin for login. */
+    isLoading: isInitializing,
     capabilities: store.capabilities,
     can: (permission: string) => can(store.capabilities, permission),
     canAny: (permissions: string[]) => canAny(store.capabilities, permissions),
@@ -35,8 +39,11 @@ export function useRequireAuth(workspacePath?: string) {
   useEffect(() => {
     if (!auth.isHydrated) return;
 
+    let cancelled = false;
+
     const guard = async () => {
       const status = await auth.restoreSession();
+      if (cancelled) return;
       if (status === "unauthenticated" || status === "session_expired") {
         router.replace(
           status === "session_expired"
@@ -76,6 +83,9 @@ export function useRequireAuth(workspacePath?: string) {
     };
 
     void guard();
+    return () => {
+      cancelled = true;
+    };
   }, [auth.isHydrated, workspacePath, pathname, auth, router]);
 
   return auth;

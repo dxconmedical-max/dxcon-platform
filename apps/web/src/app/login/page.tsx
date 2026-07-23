@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useEffect, useState, Suspense } from "react";
+import { FormEvent, useEffect, useRef, useState, Suspense } from "react";
 import { Activity, Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
@@ -21,10 +21,10 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  // Submit loading only — never tied to auth session bootstrap (`status === "loading"`).
-  // Binding the button to store status left the form permanently disabled because
-  // the store initializes as status:"loading" and the login page never clears it.
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Submit-only flag. Never bind the button to auth bootstrap / isLoading /
+  // status==="loading" — that leaves "Signing in..." stuck on first paint.
+  const [isSubmittingLogin, setIsSubmittingLogin] = useState(false);
+  const submittingRef = useRef(false);
   const [formError, setFormError] = useState<string | null>(
     searchParams.get("reason") === "session-expired"
       ? "Your session has expired. Please sign in again."
@@ -33,7 +33,7 @@ function LoginForm() {
 
   const emailValid = email.trim().length > 0 && email.includes("@");
   const passwordValid = password.length > 0;
-  const canSubmit = emailValid && passwordValid && !isSubmitting;
+  const canSubmit = emailValid && passwordValid && !isSubmittingLogin;
 
   useEffect(() => {
     if (!isHydrated) return;
@@ -44,16 +44,21 @@ function LoginForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    console.debug("[login] handleSubmit start", { canSubmit, email: email.trim() });
-    if (!canSubmit) {
-      console.debug("[login] handleSubmit blocked: canSubmit=false");
+    console.debug("[login] handleSubmit start", {
+      canSubmit,
+      isSubmittingLogin,
+      email: email.trim(),
+    });
+    if (!canSubmit || isSubmittingLogin || submittingRef.current) {
+      console.debug("[login] handleSubmit blocked (duplicate or invalid)");
       return;
     }
+    submittingRef.current = true;
     clearError();
     setFormError(null);
-    setIsSubmitting(true);
+    setIsSubmittingLogin(true);
     try {
-      console.debug("[login] calling authStore.login()");
+      console.debug("[login] calling authStore.login() → POST /api/v1/auth/login");
       const { redirect } = await login(email.trim(), password, remember);
       console.debug("[login] authStore.login() resolved", { redirect });
       router.replace(safeRedirectPath(searchParams.get("next"), redirect));
@@ -61,8 +66,9 @@ function LoginForm() {
       console.debug("[login] authStore.login() rejected", err);
       setFormError(loginErrorMessage(err));
     } finally {
-      console.debug("[login] handleSubmit finally → isSubmitting=false");
-      setIsSubmitting(false);
+      console.debug("[login] handleSubmit finally → isSubmittingLogin=false");
+      submittingRef.current = false;
+      setIsSubmittingLogin(false);
     }
   }
 
@@ -147,7 +153,7 @@ function LoginForm() {
               </p>
             )}
             <Button type="submit" className="w-full" disabled={!canSubmit}>
-              {isSubmitting ? "Signing in..." : "Sign in"}
+              {isSubmittingLogin ? "Signing in..." : "Sign in"}
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-slate-500">

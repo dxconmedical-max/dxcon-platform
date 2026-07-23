@@ -28,6 +28,9 @@ export type AuthStatus =
   | "organization_required"
   | "workspace_required";
 
+const SESSION_RESTORE_TIMEOUT_MS = 15_000;
+export const AUTH_STORAGE_KEY = "dxcon-auth-v2";
+
 type AuthState = {
   status: AuthStatus;
   user: AuthUser | null;
@@ -60,10 +63,46 @@ function tokenExpiry(accessToken: string | null): number | null {
   return payload?.exp ? payload.exp * 1000 : null;
 }
 
+async function withTimeout<T>(
+  promise: Promise<T>,
+  ms: number,
+  label: string,
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timer = setTimeout(() => {
+          reject(new ApiError(`${label} timed out`, 408, { code: "TIMEOUT" }));
+        }, ms);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+/** Drop transient fields if an older build ever persisted them. */
+export function sanitizePersistedAuth(persisted: unknown): Record<string, unknown> {
+  if (!persisted || typeof persisted !== "object") return {};
+  const state = { ...(persisted as Record<string, unknown>) };
+  delete state.status;
+  delete state.error;
+  delete state.isHydrated;
+  delete state.isLoading;
+  delete state.isSubmittingLogin;
+  delete state.memberships;
+  delete state.capabilities;
+  return state;
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      status: "loading",
+      // Never start as "loading" — that previously drove the login button.
+      // Session restore sets "loading" only while a token is being validated.
+      status: "unauthenticated",
       user: null,
       role: null,
       accessToken: null,
@@ -81,7 +120,8 @@ export const useAuthStore = create<AuthState>()(
 
       login: async (email, password, remember = false) => {
         console.debug("[authStore.login] start");
-        set({ status: "loading", error: null });
+        // Do not set status:"loading" here — that is session init, not submit.
+        set({ error: null });
         try {
           console.debug("[authStore.login] calling loginRequest → POST /api/v1/auth/login");
           const response = await loginRequest(email, password);
@@ -107,12 +147,6 @@ export const useAuthStore = create<AuthState>()(
               : "unauthenticated";
           set({ status, error: message });
           throw error;
-        } finally {
-          // Never leave the store stuck on bootstrap/submit "loading".
-          if (get().status === "loading") {
-            console.debug("[authStore.login] finally → unauthenticated");
-            set({ status: "unauthenticated" });
-          }
         }
       },
 
@@ -125,12 +159,16 @@ export const useAuthStore = create<AuthState>()(
         const me = await fetchMe(accessToken);
         set({ memberships: me.memberships });
 
-        if (me.requires_organization_selection || me.memberships.length > 1 && !me.active_organization_id) {
+        if (
+          me.requires_organization_selection ||
+          (me.memberships.length > 1 && !me.active_organization_id)
+        ) {
           set({ status: "organization_required" });
           return "/select-organization";
         }
 
-        const orgId = me.active_organization_id ?? me.memberships[0]?.organization_id ?? null;
+        const orgId =
+          me.active_organization_id ?? me.memberships[0]?.organization_id ?? null;
         let capabilities: AuthCapabilities;
         try {
           capabilities = await fetchCapabilities(accessToken, orgId);
@@ -165,6 +203,10 @@ export const useAuthStore = create<AuthState>()(
           const message = normalizeApiError(error);
           set({ status: "forbidden", error: message });
           return "/forbidden";
+        } finally {
+          if (get().status === "loading") {
+            set({ status: "unauthenticated" });
+          }
         }
       },
 
@@ -200,61 +242,85 @@ export const useAuthStore = create<AuthState>()(
           return "unauthenticated";
         }
 
-        let token = accessToken;
-        if (isTokenExpired(token)) {
-          if (!refreshToken) {
-            await get().logout();
-            set({ status: "session_expired" });
-            return "session_expired";
-          }
-          try {
-            const refreshed = await refreshAccessToken(refreshToken);
-            token = refreshed.access_token;
-            set({
-              accessToken: token,
-              tokenExpiresAt: tokenExpiry(token),
-            });
-          } catch {
-            await get().logout();
-            set({ status: "session_expired" });
-            return "session_expired";
-          }
-        }
-
+        set({ status: "loading" });
         try {
-          const me = await fetchMe(token);
-          set({ memberships: me.memberships, user: me.user, role: me.user.role });
-          if (me.requires_organization_selection) {
-            set({ status: "organization_required" });
-            return "organization_required";
-          }
-          const orgId =
-            me.active_organization_id ?? me.memberships[0]?.organization_id ?? null;
-          const capabilities = await fetchCapabilities(token, orgId);
-          set({
-            capabilities,
-            activeOrganizationId: orgId,
-            status: "authenticated",
-          });
-          setAuthCookies(me.user.role, orgId);
-          return "authenticated";
+          return await withTimeout(
+            (async () => {
+              let token = accessToken;
+              if (isTokenExpired(token)) {
+                if (!refreshToken) {
+                  await get().logout();
+                  set({ status: "session_expired" });
+                  return "session_expired" as AuthStatus;
+                }
+                try {
+                  const refreshed = await refreshAccessToken(refreshToken);
+                  token = refreshed.access_token;
+                  set({
+                    accessToken: token,
+                    tokenExpiresAt: tokenExpiry(token),
+                  });
+                } catch {
+                  await get().logout();
+                  set({ status: "session_expired" });
+                  return "session_expired" as AuthStatus;
+                }
+              }
+
+              try {
+                const me = await fetchMe(token);
+                set({
+                  memberships: me.memberships,
+                  user: me.user,
+                  role: me.user.role,
+                });
+                if (me.requires_organization_selection) {
+                  set({ status: "organization_required" });
+                  return "organization_required" as AuthStatus;
+                }
+                const orgId =
+                  me.active_organization_id ??
+                  me.memberships[0]?.organization_id ??
+                  null;
+                const capabilities = await fetchCapabilities(token, orgId);
+                set({
+                  capabilities,
+                  activeOrganizationId: orgId,
+                  status: "authenticated",
+                });
+                setAuthCookies(me.user.role, orgId);
+                return "authenticated" as AuthStatus;
+              } catch (error) {
+                if (error instanceof ApiError && error.status === 401) {
+                  await get().logout();
+                  set({ status: "session_expired" });
+                  return "session_expired" as AuthStatus;
+                }
+                if (error instanceof ApiError && error.status === 403) {
+                  set({ status: "forbidden" });
+                  return "forbidden" as AuthStatus;
+                }
+                set({ status: "unauthenticated" });
+                return "unauthenticated" as AuthStatus;
+              }
+            })(),
+            SESSION_RESTORE_TIMEOUT_MS,
+            "Session restore",
+          );
         } catch (error) {
-          if (error instanceof ApiError && error.status === 401) {
-            await get().logout();
-            set({ status: "session_expired" });
-            return "session_expired";
-          }
-          if (error instanceof ApiError && error.status === 403) {
-            set({ status: "forbidden" });
-            return "forbidden";
-          }
+          console.debug("[authStore.restoreSession] failed/timeout", error);
           set({ status: "unauthenticated" });
           return "unauthenticated";
+        } finally {
+          if (get().status === "loading") {
+            set({ status: "unauthenticated" });
+          }
         }
       },
     }),
     {
-      name: "dxcon-auth-v2",
+      name: AUTH_STORAGE_KEY,
+      version: 2,
       storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         accessToken: state.accessToken,
@@ -264,10 +330,25 @@ export const useAuthStore = create<AuthState>()(
         tokenExpiresAt: state.tokenExpiresAt,
         activeOrganizationId: state.activeOrganizationId,
       }),
-      onRehydrateStorage: () => (state) => {
-        // status is not persisted; leave bootstrap "loading" only when a token
-        // exists (session restore). Otherwise unlock the login form immediately.
-        if (!state) return;
+      migrate: (persisted) => sanitizePersistedAuth(persisted),
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.debug("[authStore.rehydrate] error → unauthenticated", error);
+          useAuthStore.setState({
+            isHydrated: true,
+            status: "unauthenticated",
+          });
+          return;
+        }
+        // status is not persisted; never leave bootstrap "loading" active.
+        // Only keep "loading" briefly when a token exists (session restore).
+        if (!state) {
+          useAuthStore.setState({
+            isHydrated: true,
+            status: "unauthenticated",
+          });
+          return;
+        }
         const nextStatus = state.accessToken ? "loading" : "unauthenticated";
         console.debug("[authStore.rehydrate] setHydrated", {
           hasToken: Boolean(state.accessToken),
@@ -276,6 +357,7 @@ export const useAuthStore = create<AuthState>()(
         useAuthStore.setState({
           isHydrated: true,
           status: nextStatus,
+          error: null,
         });
       },
     },
