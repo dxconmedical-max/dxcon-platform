@@ -52,13 +52,24 @@ const freezeDocOk = fs.existsSync(freezeDoc);
 const freezeDocText = freezeDocOk ? fs.readFileSync(freezeDoc, "utf8") : "";
 const freezeDocMentionsReview =
   freezeDocOk &&
-  /dedicated regression review/i.test(freezeDocText) &&
+  /dedicated regression (review|approval)/i.test(freezeDocText) &&
   /bootstrapPhase/i.test(freezeDocText);
+const freezeDocHasPersistence =
+  freezeDocOk &&
+  /session persistence strategy/i.test(freezeDocText) &&
+  /sessionStorage/i.test(freezeDocText) &&
+  /dxcon-auth-v3/i.test(freezeDocText);
+const freezeDocHasRouteGuards =
+  freezeDocOk &&
+  /route-guard behavior/i.test(freezeDocText) &&
+  /useRequireAuth/i.test(freezeDocText);
 
 const report = {
   status:
     freezeDocOk &&
     freezeDocMentionsReview &&
+    freezeDocHasPersistence &&
+    freezeDocHasRouteGuards &&
     missingFrozen.length === 0 &&
     missingTests.length === 0
       ? "PASS"
@@ -66,6 +77,8 @@ const report = {
   freeze_doc: "docs/AUTH_FREEZE.md",
   freeze_doc_present: freezeDocOk,
   freeze_doc_mentions_review: freezeDocMentionsReview,
+  freeze_doc_has_persistence: freezeDocHasPersistence,
+  freeze_doc_has_route_guards: freezeDocHasRouteGuards,
   frozen_files: frozenFiles,
   missing_frozen_files: missingFrozen,
   required_tests: requiredTests,
@@ -85,6 +98,14 @@ if (report.status !== "PASS") {
   if (!freezeDocOk) console.error("Missing docs/AUTH_FREEZE.md");
   if (!freezeDocMentionsReview) {
     console.error("docs/AUTH_FREEZE.md missing required freeze policy text");
+  }
+  if (!freezeDocHasPersistence) {
+    console.error(
+      "docs/AUTH_FREEZE.md missing Session persistence strategy (sessionStorage / dxcon-auth-v3)",
+    );
+  }
+  if (!freezeDocHasRouteGuards) {
+    console.error("docs/AUTH_FREEZE.md missing Route-guard behavior section");
   }
   if (missingFrozen.length) {
     console.error("Missing frozen files:", missingFrozen.join(", "));

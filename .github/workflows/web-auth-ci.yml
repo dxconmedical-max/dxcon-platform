@@ -1,5 +1,8 @@
 name: DxCon Web Auth Freeze CI
 
+# Required status check on main: job id "auth-freeze-regression"
+# (GitHub UI name: "DxCon Web Auth Freeze CI / auth-freeze-regression")
+
 on:
   push:
     branches: [main]
@@ -7,15 +10,23 @@ on:
       - "apps/web/**"
       - "docs/AUTH_FREEZE.md"
       - ".github/workflows/web-auth-ci.yml"
+      - ".cursor/rules/auth-freeze.mdc"
   pull_request:
     branches: [main]
     paths:
       - "apps/web/**"
       - "docs/AUTH_FREEZE.md"
       - ".github/workflows/web-auth-ci.yml"
+      - ".cursor/rules/auth-freeze.mdc"
+  workflow_dispatch:
+
+concurrency:
+  group: web-auth-freeze-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   auth-freeze-regression:
+    name: auth-freeze-regression
     runs-on: ubuntu-latest
     defaults:
       run:

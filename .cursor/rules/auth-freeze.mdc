@@ -1,0 +1,34 @@
+---
+description: Authentication module is production-frozen — do not change runtime auth
+alwaysApply: true
+---
+
+# Authentication Freeze
+
+Authentication is **production-verified and frozen**. Policy: `docs/AUTH_FREEZE.md`.
+
+## Do not modify (runtime)
+
+- `apps/web/src/stores/authStore.ts`
+- `apps/web/src/components/providers/AuthProvider.tsx`
+- `apps/web/src/components/providers/AuthErrorBoundary.tsx`
+- `apps/web/src/hooks/useAuth.ts`
+- `apps/web/src/components/layout/AppShell.tsx`
+- `apps/web/src/middleware.ts`
+- `apps/web/src/lib/auth/session.ts`
+- `apps/web/src/lib/auth/bootstrapDebug.ts`
+- `apps/web/src/lib/cookies.ts`
+- `apps/web/src/services/auth.ts`
+- `apps/web/src/app/login/page.tsx`
+- Auth wiring in `apps/web/src/app/layout.tsx`
+
+## Product work (e.g. Reception)
+
+Use existing `useAuth` / `AppShell` as-is. Do **not** change bootstrap, restore, cookies, persist, or route-guard semantics.
+
+## Allowed without freeze break
+
+- Freeze docs (`docs/AUTH_FREEZE.md`)
+- CI guard (`.github/workflows/web-auth-ci.yml`, `verify_auth_freeze.mjs`, auth regression tests only)
+
+Any intentional auth change needs dedicated regression approval and must pass `test:auth-freeze` + `verify:auth-freeze`.

@@ -1,56 +1,43 @@
 # Authentication Module Freeze
 
-**Status:** PRODUCTION-STABLE (AUTH GATE 1 PASSED)  
-**Runtime baseline:** `3176630`  
+**Status:** PRODUCTION-VERIFIED AND FROZEN  
+**Verified:** Authentication confirmed working in production (AUTH GATE 1).  
+**Runtime baseline (no further runtime edits under this freeze):** `3176630`  
+**Freeze documentation baseline:** `cbe047e` (initial freeze) — this document is the policy of record.  
 **Freeze tags:** `authentication-production-stable`, `auth-module-freeze`  
-**Scope:** Frontend web authentication only. Do not modify runtime authentication under this freeze.
+**Scope:** Frontend web authentication only.
 
-Gate 1 verified in production: login works, session restores, `/app/admin` renders, no redirect loop, no false “Redirecting to sign in…”.
-
----
-
-## Frozen surfaces
-
-### authStore
-`apps/web/src/stores/authStore.ts`
-
-Owns login, logout, `restoreSession`, `resolveAfterLogin`, persist (`dxcon-auth-v3` / sessionStorage), and `bootstrapPhase` transitions. Frozen — no casual refactors.
-
-### AuthProvider
-`apps/web/src/components/providers/AuthProvider.tsx`  
-Wired from `apps/web/src/app/layout.tsx`
-
-Sole owner that starts `restoreSession` when `bootstrapPhase === "idle"`. AppShell / route guards must not call restore on mount.
-
-### useAuth
-`apps/web/src/hooks/useAuth.ts` (`useAuth` export)
-
-Field selectors over the store; exposes `isBootstrapping`, `isAuthenticated`, capabilities helpers. Do not reintroduce whole-store subscriptions.
-
-### useRequireAuth
-`apps/web/src/hooks/useAuth.ts` (`useRequireAuth` export)
-
-Route guard only. Waits through pending bootstrap. Redirects only after terminal anonymous / session_expired — never while restoring, and never when `status === "authenticated"`.
-
-### middleware auth
-`apps/web/src/middleware.ts`
-
-May require auth cookie for protected `/app/*` routes. Must **not** redirect `/login` → workspace based on cookie alone (avoids cookie/session mismatch loops).
-
-### session bootstrap
-`apps/web/src/lib/auth/session.ts`  
-`apps/web/src/lib/auth/bootstrapDebug.ts`  
-`apps/web/src/components/layout/AppShell.tsx`  
-`apps/web/src/components/providers/AuthErrorBoundary.tsx`
-
-Persist parse/migrate, bootstrap diagnostics, AppShell loading / diagnostic / shell render. AppShell must not show “Redirecting to sign in…” when the session is already authenticated.
-
-### Supporting frozen paths
-`apps/web/src/services/auth.ts`, `apps/web/src/lib/cookies.ts`, `apps/web/src/app/login/page.tsx`
+**Do not modify runtime authentication during Reception or any other product work.**  
+Any auth change requires dedicated regression approval (see below).
 
 ---
 
-## Session bootstrap state machine
+## Frozen auth files
+
+| Surface | Path |
+|---------|------|
+| authStore | `apps/web/src/stores/authStore.ts` |
+| AuthProvider | `apps/web/src/components/providers/AuthProvider.tsx` |
+| AuthErrorBoundary | `apps/web/src/components/providers/AuthErrorBoundary.tsx` |
+| Root layout wiring | `apps/web/src/app/layout.tsx` |
+| useAuth / useRequireAuth | `apps/web/src/hooks/useAuth.ts` |
+| AppShell bootstrap UI | `apps/web/src/components/layout/AppShell.tsx` |
+| middleware auth | `apps/web/src/middleware.ts` |
+| Session migrate/parse | `apps/web/src/lib/auth/session.ts` |
+| Bootstrap diagnostics | `apps/web/src/lib/auth/bootstrapDebug.ts` |
+| Auth API client | `apps/web/src/services/auth.ts` |
+| Auth cookies | `apps/web/src/lib/cookies.ts` |
+| Login page | `apps/web/src/app/login/page.tsx` |
+
+Supporting scripts (guards only; not runtime):
+
+- `apps/web/scripts/verify_auth_freeze.mjs`
+- `apps/web/package.json` scripts: `test:auth-freeze`, `verify:auth-freeze`
+- `.github/workflows/web-auth-ci.yml`
+
+---
+
+## Approved auth state machine
 
 ```
 idle → restoring → authenticated
@@ -58,32 +45,73 @@ idle → restoring → authenticated
                  → failed
 ```
 
-1. Pending (`idle` / `restoring`, or not hydrated): wait — no login redirect.
-2. Login success: set `status` and `bootstrapPhase` to authenticated in the **same** update.
+Rules:
+
+1. Pending (`idle` / `restoring`, or not hydrated): wait — never treat as anonymous for redirects.
+2. Login success (`resolveAfterLogin`): set `status: "authenticated"` and `bootstrapPhase: "authenticated"` in the **same** store update.
 3. Logout: terminal `anonymous` (not `idle`).
-4. AuthProvider alone starts restore from `idle`.
+4. `AuthProvider` is the **sole** owner that starts `restoreSession` when `bootstrapPhase === "idle"`.
+5. AppShell / `useRequireAuth` must **not** call `restoreSession` on mount.
+6. Stale `bootstrapPhase: "anonymous"` while `status === "authenticated"` must **not** redirect; heal phase to `authenticated`.
 
 ---
 
-## Redirect rules
+## Session persistence strategy
+
+| Layer | Mechanism | Purpose |
+|-------|-----------|---------|
+| Client session | Zustand `persist` → **sessionStorage** key `dxcon-auth-v3` | Survives refresh within the tab; cleared when the tab session ends |
+| Persisted fields | `accessToken`, `refreshToken`, `user`, `role`, `tokenExpiresAt`, `activeOrganizationId` | Tokens + identity only — not bootstrap flags, not submit/loading flags |
+| Migration | `migratePersistedAuth` / legacy key clear (`dxcon-auth`, `v1`, `v2`) | Prevents old loading/bootstrap state from reviving |
+| Rehydrate | `onRehydrateStorage` sets `isHydrated`; does **not** call `restoreSession` | Avoids recursive restore |
+| Middleware cookies | Presence cookies via `setAuthCookies` / `clearAuthCookies` (`AUTH_COOKIE`, role, org) | Soft gate for `/app/*`; **not** proof of a valid client session |
+| Restore | AuthProvider → `restoreSession` (single-flight) after hydrate when phase is `idle` and tokens exist | Validates session with backend; sets terminal phase |
+
+**Invariant:** Cookie alone must never bounce `/login` ↔ workspace. Client session + bootstrap phase own the outcome.
+
+---
+
+## Route-guard behavior
+
+### `useRequireAuth` (client)
 
 | Condition | Action |
 |-----------|--------|
-| `bootstrapPhase` idle or restoring | Do not redirect |
-| Terminal `anonymous` and not authenticated | `/login` |
-| `session_expired` | `/login?reason=session-expired` |
-| Authenticated (even if phase briefly stale `anonymous`) | Stay / render shell — **do not** redirect |
-| Cookie present, no client session | Client owns outcome; middleware must not bounce login↔app on cookie alone |
-| Authenticated + capabilities | Render workspace (e.g. `/app/admin`) |
+| Not hydrated, or `bootstrapPhase` idle/restoring | Wait — no redirect |
+| `status === "session_expired"` | `/login?reason=session-expired` |
+| Terminal `anonymous` **and** `status !== "authenticated"` | `/login` |
+| `anonymous` phase **but** `status === "authenticated"` | Stay — skip stale phase (do not redirect) |
+| `organization_required` | `/select-organization` |
+| `forbidden` | `/forbidden` |
+| Authenticated + capabilities | Allow workspace render |
+
+### `AppShell`
+
+| Condition | Action |
+|-----------|--------|
+| Bootstrapping (pending phase) | Loading spinner (bounded timeout → diagnostic) |
+| Terminal anonymous **and** not authenticated | “Redirecting to sign in…” only |
+| Authenticated (including brief stale anonymous phase) | Render shell — **never** false Redirecting UI |
+| Authenticated without capabilities | Diagnostic (permissions not loaded) |
+
+### `middleware.ts`
+
+- May require auth cookie for protected `/app/*`.
+- Must **not** redirect `/login` → workspace based on cookie alone.
 
 ---
 
-## Mandatory CI regression tests
+## Mandatory regression tests (required CI)
 
-Locked by `.github/workflows/web-auth-ci.yml`:
+Enforced by GitHub Actions workflow **`DxCon Web Auth Freeze CI`**  
+Job / check name: **`auth-freeze-regression`**
 
-- `npm run test:auth-freeze` (from `apps/web`)
-- `npm run verify:auth-freeze` → `scripts/verify_auth_freeze.mjs`
+This check **must** remain a required status check on `main` for PRs that touch `apps/web/**` or auth freeze docs/workflow.
+
+Steps:
+
+1. `node scripts/verify_auth_freeze.mjs` (`npm run verify:auth-freeze`)
+2. `npm run test:auth-freeze`
 
 Required suites:
 
@@ -96,7 +124,9 @@ Required suites:
 - `src/hooks/gate1Auth.regression.test.tsx`
 - `src/lib/auth/session.test.ts`
 - `src/services/api.auth.test.ts`
-- `src/auth/e2e.login.hardening.test.ts` (offline; live probe only if `AUTH_LIVE_PROBE=1`)
+- `src/auth/e2e.login.hardening.test.ts` (offline by default; live probe only if `AUTH_LIVE_PROBE=1`)
+
+Prove on any freeze-breaking change: anonymous → `/login`; authenticated → admin shell; logout → anonymous; no redirect loop; no false Redirecting UI.
 
 ---
 
@@ -108,8 +138,8 @@ PRs that touch frozen auth files or cookie/persist semantics must:
 
 1. State that they break the Authentication freeze.
 2. Pass `test:auth-freeze` + `verify:auth-freeze`.
-3. Prove: anonymous → `/login`; authenticated → admin shell; logout → anonymous; no loop; no false Redirecting UI.
-4. Not mix auth edits with unrelated product work.
+3. Not mix auth edits with Reception or other product work.
+4. Leave runtime behavior unchanged unless the approved change is intentional and fully regression-covered.
 
 Do not modify runtime authentication without that review.
 
@@ -117,4 +147,4 @@ Do not modify runtime authentication without that review.
 
 ## Out of scope
 
-Backend auth APIs, CORS, DNS, CSP, Reception, Lab, and other product modules.
+Backend auth APIs, CORS, DNS, CSP, Reception Phase 1+, Lab, Collector, and other product modules — none of these may edit frozen auth files under this freeze.
