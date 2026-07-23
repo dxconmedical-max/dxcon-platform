@@ -1,7 +1,9 @@
 name: DxCon Web Auth Freeze CI
 
-# Required status check on main: job id "auth-freeze-regression"
-# (GitHub UI name: "DxCon Web Auth Freeze CI / auth-freeze-regression")
+# Required status check on main (exact job/check name):
+#   auth-freeze-regression
+# GitHub UI displays: "DxCon Web Auth Freeze CI / auth-freeze-regression"
+# Keep this job name stable — branch protection depends on it.
 
 on:
   push:

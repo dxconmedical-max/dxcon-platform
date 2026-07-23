@@ -63,6 +63,15 @@ const freezeDocHasRouteGuards =
   freezeDocOk &&
   /route-guard behavior/i.test(freezeDocText) &&
   /useRequireAuth/i.test(freezeDocText);
+const freezeDocHasBootstrapOwnership =
+  freezeDocOk &&
+  /bootstrap ownership/i.test(freezeDocText) &&
+  /AuthProvider/i.test(freezeDocText) &&
+  /restoreSession/i.test(freezeDocText);
+const freezeDocHasRedirectBehavior =
+  freezeDocOk && /redirect behavior/i.test(freezeDocText);
+const freezeDocHasProductionReverified =
+  freezeDocOk && /production re-verified/i.test(freezeDocText);
 
 const report = {
   status:
@@ -70,6 +79,9 @@ const report = {
     freezeDocMentionsReview &&
     freezeDocHasPersistence &&
     freezeDocHasRouteGuards &&
+    freezeDocHasBootstrapOwnership &&
+    freezeDocHasRedirectBehavior &&
+    freezeDocHasProductionReverified &&
     missingFrozen.length === 0 &&
     missingTests.length === 0
       ? "PASS"
@@ -79,6 +91,9 @@ const report = {
   freeze_doc_mentions_review: freezeDocMentionsReview,
   freeze_doc_has_persistence: freezeDocHasPersistence,
   freeze_doc_has_route_guards: freezeDocHasRouteGuards,
+  freeze_doc_has_bootstrap_ownership: freezeDocHasBootstrapOwnership,
+  freeze_doc_has_redirect_behavior: freezeDocHasRedirectBehavior,
+  freeze_doc_has_production_reverified: freezeDocHasProductionReverified,
   frozen_files: frozenFiles,
   missing_frozen_files: missingFrozen,
   required_tests: requiredTests,
@@ -106,6 +121,15 @@ if (report.status !== "PASS") {
   }
   if (!freezeDocHasRouteGuards) {
     console.error("docs/AUTH_FREEZE.md missing Route-guard behavior section");
+  }
+  if (!freezeDocHasBootstrapOwnership) {
+    console.error("docs/AUTH_FREEZE.md missing Bootstrap ownership section");
+  }
+  if (!freezeDocHasRedirectBehavior) {
+    console.error("docs/AUTH_FREEZE.md missing Redirect behavior section");
+  }
+  if (!freezeDocHasProductionReverified) {
+    console.error("docs/AUTH_FREEZE.md missing production re-verified marker");
   }
   if (missingFrozen.length) {
     console.error("Missing frozen files:", missingFrozen.join(", "));

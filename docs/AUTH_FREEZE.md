@@ -1,9 +1,20 @@
 # Authentication Module Freeze
 
 **Status:** PRODUCTION-VERIFIED AND FROZEN  
-**Verified:** Authentication confirmed working in production (AUTH GATE 1).  
+**Production re-verified:** 2026-07-24 (user-confirmed).  
+**Verified checklist (all passed):**
+
+| Check | Result |
+|-------|--------|
+| Login works | Pass |
+| `/app/admin` renders | Pass |
+| Refresh preserves session | Pass |
+| No React error #185 | Pass |
+| No redirect race / loop | Pass |
+| Logout → login works | Pass |
+
 **Runtime baseline (no further runtime edits under this freeze):** `3176630`  
-**Freeze documentation baseline:** `cbe047e` (initial freeze) — this document is the policy of record.  
+**Prior freeze commits:** `cbe047e` (initial), `42e7130` (docs/CI strengthen) — this document remains the policy of record.  
 **Freeze tags:** `authentication-production-stable`, `auth-module-freeze`  
 **Scope:** Frontend web authentication only.
 
@@ -34,6 +45,7 @@ Supporting scripts (guards only; not runtime):
 - `apps/web/scripts/verify_auth_freeze.mjs`
 - `apps/web/package.json` scripts: `test:auth-freeze`, `verify:auth-freeze`
 - `.github/workflows/web-auth-ci.yml`
+- `.cursor/rules/auth-freeze.mdc`
 
 ---
 
@@ -50,9 +62,18 @@ Rules:
 1. Pending (`idle` / `restoring`, or not hydrated): wait — never treat as anonymous for redirects.
 2. Login success (`resolveAfterLogin`): set `status: "authenticated"` and `bootstrapPhase: "authenticated"` in the **same** store update.
 3. Logout: terminal `anonymous` (not `idle`).
-4. `AuthProvider` is the **sole** owner that starts `restoreSession` when `bootstrapPhase === "idle"`.
-5. AppShell / `useRequireAuth` must **not** call `restoreSession` on mount.
-6. Stale `bootstrapPhase: "anonymous"` while `status === "authenticated"` must **not** redirect; heal phase to `authenticated`.
+4. Stale `bootstrapPhase: "anonymous"` while `status === "authenticated"` must **not** redirect; heal phase to `authenticated`.
+
+---
+
+## Bootstrap ownership
+
+| Owner | Responsibility |
+|-------|----------------|
+| `AuthProvider` | **Sole** owner that starts `restoreSession` when `bootstrapPhase === "idle"` (after hydrate, single-flight). |
+| `authStore` | Holds tokens, status, `bootstrapPhase`; persist rehydrate sets `isHydrated` only — does **not** call `restoreSession`. |
+| AppShell / `useRequireAuth` | Consume auth state for UI and guards; must **not** call `restoreSession` on mount. |
+| Login page | Calls login / `resolveAfterLogin` only; does not own restore. |
 
 ---
 
@@ -98,6 +119,19 @@ Rules:
 
 - May require auth cookie for protected `/app/*`.
 - Must **not** redirect `/login` → workspace based on cookie alone.
+
+---
+
+## Redirect behavior
+
+| Scenario | Expected behavior |
+|----------|-------------------|
+| Anonymous on protected `/app/*` | Client redirects to `/login` only after terminal anonymous (never while restoring) |
+| Authenticated visiting `/login` | Stay or navigate to workspace per login flow — **no** middleware cookie-only bounce |
+| Session expired | `/login?reason=session-expired` |
+| Logout | Clear tokens/cookies → terminal `anonymous` → `/login`; subsequent login must succeed |
+| Hard refresh while authenticated | sessionStorage rehydrate → AuthProvider restore → stay on workspace (e.g. `/app/admin`) |
+| Stale phase vs status | Prefer `status === "authenticated"` over stale `bootstrapPhase: "anonymous"` — no redirect race |
 
 ---
 
