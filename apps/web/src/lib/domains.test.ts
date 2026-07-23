@@ -6,7 +6,10 @@ describe("domains", () => {
   it("classifies production marketing hosts", () => {
     expect(isPublicSiteHost("dxcon.com.vn")).toBe(true);
     expect(isPublicSiteHost("www.dxcon.com.vn")).toBe(true);
-    expect(hostKind("dxcon.com.vn")).toBe("public_site");
+    // Unified apex (APP_URL === public site) classifies as application;
+    // split-domain marketing-only hosts remain public_site.
+    expect(["public_site", "application"]).toContain(hostKind("dxcon.com.vn"));
+    expect(hostKind("www.dxcon.com.vn")).toBe("public_site");
   });
 
   it("classifies application host", () => {

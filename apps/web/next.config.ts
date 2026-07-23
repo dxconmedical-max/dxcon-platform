@@ -27,6 +27,20 @@ if (isProduction || isStaging) {
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api.dxcon.com.vn";
+const canonicalApiOrigin = "https://api.dxcon.com.vn";
+const connectSrcOrigins = Array.from(
+  new Set(
+    [apiBaseUrl, canonicalApiOrigin]
+      .map((value) => {
+        try {
+          return new URL(value).origin;
+        } catch {
+          return "";
+        }
+      })
+      .filter(Boolean),
+  ),
+).join(" ");
 
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -43,7 +57,7 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
-      `connect-src 'self' ${apiBaseUrl}`,
+      `connect-src 'self' ${connectSrcOrigins}`,
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

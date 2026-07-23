@@ -62,6 +62,27 @@ export function collectEnvErrors(): string[] {
     if (appUrl && isLocalhostUrl(appUrl)) {
       errors.push(`NEXT_PUBLIC_APP_URL must not use localhost in ${label}`);
     }
+    if (apiBase) {
+      try {
+        const host = new URL(apiBase).hostname.toLowerCase();
+        if (
+          host === "api.example.com" ||
+          host === "example.com" ||
+          host.endsWith(".example.com")
+        ) {
+          errors.push(
+            `NEXT_PUBLIC_API_BASE_URL must not use example.com hosts in ${label}`,
+          );
+        }
+        if (isProduction && host !== "api.dxcon.com.vn") {
+          errors.push(
+            "NEXT_PUBLIC_API_BASE_URL must be https://api.dxcon.com.vn in production",
+          );
+        }
+      } catch {
+        errors.push(`NEXT_PUBLIC_API_BASE_URL is not a valid URL in ${label}`);
+      }
+    }
   }
 
   return errors;

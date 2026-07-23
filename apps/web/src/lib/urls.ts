@@ -1,5 +1,5 @@
 import { APP_ENV, APP_URL, IS_PRODUCTION } from "@/lib/constants";
-import { isPublicSiteHost } from "@/lib/domains";
+import { hostFromUrl, isPublicSiteHost, normalizeHost } from "@/lib/domains";
 
 /**
  * Returns a safe relative path for post-login redirects.
@@ -19,12 +19,20 @@ function usesSplitDomains(): boolean {
   return IS_PRODUCTION || APP_ENV === "staging";
 }
 
+/** True when APP_URL is on a different host than the current request host. */
+function appHostDiffersFrom(host?: string | null): boolean {
+  const current = normalizeHost(host);
+  const appHost = hostFromUrl(APP_URL);
+  return Boolean(current && appHost && current !== appHost);
+}
+
 /**
- * Sign-in URL: on production/staging marketing hosts, route to the app subdomain.
+ * Sign-in URL: on split-domain marketing hosts, route to APP_URL.
+ * When APP_URL shares the current host (unified apex), keep a relative path.
  */
 export function loginUrl(host?: string | null): string {
   if (!usesSplitDomains()) return "/login";
-  if (isPublicSiteHost(host)) {
+  if (isPublicSiteHost(host) && appHostDiffersFrom(host)) {
     return `${APP_URL.replace(/\/$/, "")}/login`;
   }
   return "/login";
@@ -35,14 +43,14 @@ export function loginUrl(host?: string | null): string {
  */
 export function appPathUrl(path: string, host?: string | null): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  if (usesSplitDomains() && isPublicSiteHost(host)) {
+  if (usesSplitDomains() && isPublicSiteHost(host) && appHostDiffersFrom(host)) {
     return `${APP_URL.replace(/\/$/, "")}${normalized}`;
   }
   return normalized;
 }
 
 export function bookDemoUrl(host?: string | null): string {
-  if (usesSplitDomains() && isPublicSiteHost(host)) {
+  if (usesSplitDomains() && isPublicSiteHost(host) && appHostDiffersFrom(host)) {
     return `${APP_URL.replace(/\/$/, "")}/book-demo`;
   }
   return "/book-demo";

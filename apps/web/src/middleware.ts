@@ -4,6 +4,13 @@ import { NextResponse } from "next/server";
 import { APP_URL, AUTH_COOKIE, ROLE_COOKIE } from "@/lib/constants";
 import { isPublicSiteHost, normalizeHost } from "@/lib/domains";
 import { parseCookieValue } from "@/lib/cookies";
+import {
+  publicSiteAppRedirectTarget,
+  normalizePathname,
+  sameHostPathSearch,
+  sameNormalizedUrl,
+  wwwToApexTarget,
+} from "@/lib/redirects";
 import { WORKSPACE_ROUTES, workspacePathForRole } from "@/lib/roles";
 import { loginUrl, safeRedirectPath } from "@/lib/urls";
 
@@ -43,19 +50,65 @@ function isKnownWorkspacePath(pathname: string): boolean {
   );
 }
 
+/** Never issue a redirect when destination equals the current request URL. */
+function redirectUnlessSame(
+  request: NextRequest,
+  destination: URL,
+  status?: number,
+): NextResponse | null {
+  const host = normalizeHost(request.headers.get("host"));
+  const currentPath = normalizePathname(request.nextUrl.pathname);
+  const destPath = normalizePathname(destination.pathname);
+  const samePublicHostPath =
+    Boolean(host) &&
+    host === normalizeHost(destination.hostname) &&
+    currentPath === destPath &&
+    request.nextUrl.search === destination.search;
+
+  if (
+    samePublicHostPath ||
+    sameNormalizedUrl(request.url, destination) ||
+    sameHostPathSearch(request.url, destination)
+  ) {
+    return null;
+  }
+  return status === undefined
+    ? NextResponse.redirect(destination)
+    : NextResponse.redirect(destination, status);
+}
+
 export function middleware(request: NextRequest) {
   const host = normalizeHost(request.headers.get("host"));
   const { pathname, search } = request.nextUrl;
 
+  // One-way www → apex (308). Never reverse apex → www.
+  const apexTarget = wwwToApexTarget(request.url, host);
+  if (apexTarget) {
+    const redirected = redirectUnlessSame(request, apexTarget, 308);
+    if (redirected) return redirected;
+  }
+
+  // Only bounce public-site application routes to APP_URL when the target
+  // origin is genuinely different (split-domain deployments). Never redirect
+  // when APP_URL shares the current host/path (unified apex).
   if (isPublicSiteHost(host) && isApplicationPath(pathname)) {
-    const target = new URL(`${pathname}${search}`, APP_URL);
-    return NextResponse.redirect(target);
+    const target = publicSiteAppRedirectTarget(
+      request.url,
+      pathname,
+      search,
+      APP_URL,
+      host,
+    );
+    if (target) {
+      const redirected = redirectUnlessSame(request, target);
+      if (redirected) return redirected;
+    }
   }
 
   if (LEGACY_REDIRECTS[pathname]) {
-    return NextResponse.redirect(
-      new URL(LEGACY_REDIRECTS[pathname], request.url),
-    );
+    const target = new URL(LEGACY_REDIRECTS[pathname], request.url);
+    const redirected = redirectUnlessSame(request, target);
+    if (redirected) return redirected;
   }
 
   const cookieHeader = request.headers.get("cookie") ?? undefined;
@@ -67,7 +120,9 @@ export function middleware(request: NextRequest) {
       request.nextUrl.searchParams.get("next"),
       workspacePathForRole(role),
     );
-    return NextResponse.redirect(new URL(next, request.url));
+    const target = new URL(next, request.url);
+    const redirected = redirectUnlessSame(request, target);
+    if (redirected) return redirected;
   }
 
   const isProtected = WORKSPACE_ROUTES.some(
@@ -77,7 +132,8 @@ export function middleware(request: NextRequest) {
   if (isProtected && !isAuthenticated) {
     const login = new URL(loginUrl(host), request.url);
     login.searchParams.set("next", pathname);
-    return NextResponse.redirect(login);
+    const redirected = redirectUnlessSame(request, login);
+    if (redirected) return redirected;
   }
 
   if (
@@ -90,7 +146,9 @@ export function middleware(request: NextRequest) {
   }
 
   if (pathname === "/select-organization" && !isAuthenticated) {
-    return NextResponse.redirect(new URL(loginUrl(host), request.url));
+    const target = new URL(loginUrl(host), request.url);
+    const redirected = redirectUnlessSame(request, target);
+    if (redirected) return redirected;
   }
 
   return NextResponse.next();
