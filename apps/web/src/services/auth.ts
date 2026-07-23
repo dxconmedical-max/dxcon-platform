@@ -71,6 +71,7 @@ export async function login(
   email: string,
   password: string,
 ): Promise<LoginResponse> {
+  console.debug("[services/auth.login] POST /api/v1/auth/login");
   return apiRequest<LoginResponse>("/api/v1/auth/login", {
     method: "POST",
     body: { email, password },

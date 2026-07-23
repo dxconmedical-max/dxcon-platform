@@ -28,3 +28,22 @@ export function normalizeApiError(error: unknown): string {
   }
   return "An unexpected error occurred";
 }
+
+export function loginErrorMessage(error: unknown): string {
+  if (!(error instanceof ApiError)) {
+    return normalizeApiError(error);
+  }
+  switch (error.status) {
+    case 401:
+      return "Invalid email or password.";
+    case 403:
+      return "This account has been disabled.";
+    case 429:
+      return "Too many login attempts. Please wait and try again.";
+    case 0:
+    case 408:
+      return "Network error — check your connection and try again.";
+    default:
+      return error.message;
+  }
+}

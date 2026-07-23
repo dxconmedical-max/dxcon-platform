@@ -57,6 +57,7 @@ export async function apiRequest<T>(
 
   let response: Response;
   try {
+    console.debug("[apiRequest] fetch", { method, path: `${API_BASE_URL}${path}` });
     response = await fetch(`${API_BASE_URL}${path}`, {
       method,
       headers: requestHeaders,
@@ -64,7 +65,9 @@ export async function apiRequest<T>(
       cache: "no-store",
       signal: controller.signal,
     });
+    console.debug("[apiRequest] response", { status: response.status, path });
   } catch (error) {
+    console.debug("[apiRequest] fetch failed", error);
     if (error instanceof Error && error.name === "AbortError") {
       throw new ApiError("Request timed out", 408, { code: "TIMEOUT" });
     }

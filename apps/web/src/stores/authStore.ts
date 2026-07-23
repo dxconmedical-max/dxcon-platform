@@ -80,9 +80,12 @@ export const useAuthStore = create<AuthState>()(
       clearError: () => set({ error: null }),
 
       login: async (email, password, remember = false) => {
+        console.debug("[authStore.login] start");
         set({ status: "loading", error: null });
         try {
+          console.debug("[authStore.login] calling loginRequest → POST /api/v1/auth/login");
           const response = await loginRequest(email, password);
+          console.debug("[authStore.login] loginRequest resolved");
           set({
             accessToken: response.access_token,
             refreshToken: response.refresh_token,
@@ -91,9 +94,12 @@ export const useAuthStore = create<AuthState>()(
             tokenExpiresAt: tokenExpiry(response.access_token),
             activeOrganizationId: response.user.organization_id ?? null,
           });
+          console.debug("[authStore.login] resolveAfterLogin");
           const redirect = await get().resolveAfterLogin(remember);
+          console.debug("[authStore.login] done", { redirect });
           return { redirect };
         } catch (error) {
+          console.debug("[authStore.login] error", error);
           const message = normalizeApiError(error);
           const status: AuthStatus =
             error instanceof ApiError && error.status === 403
@@ -101,6 +107,12 @@ export const useAuthStore = create<AuthState>()(
               : "unauthenticated";
           set({ status, error: message });
           throw error;
+        } finally {
+          // Never leave the store stuck on bootstrap/submit "loading".
+          if (get().status === "loading") {
+            console.debug("[authStore.login] finally → unauthenticated");
+            set({ status: "unauthenticated" });
+          }
         }
       },
 
@@ -253,7 +265,18 @@ export const useAuthStore = create<AuthState>()(
         activeOrganizationId: state.activeOrganizationId,
       }),
       onRehydrateStorage: () => (state) => {
-        state?.setHydrated(true);
+        // status is not persisted; leave bootstrap "loading" only when a token
+        // exists (session restore). Otherwise unlock the login form immediately.
+        if (!state) return;
+        const nextStatus = state.accessToken ? "loading" : "unauthenticated";
+        console.debug("[authStore.rehydrate] setHydrated", {
+          hasToken: Boolean(state.accessToken),
+          nextStatus,
+        });
+        useAuthStore.setState({
+          isHydrated: true,
+          status: nextStatus,
+        });
       },
     },
   ),
