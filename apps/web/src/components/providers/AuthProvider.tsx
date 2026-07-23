@@ -6,6 +6,7 @@ import {
   isBootstrapPending,
   useAuthStore,
 } from "@/stores/authStore";
+import { logAuthBootstrap } from "@/lib/auth/bootstrapDebug";
 
 const HYDRATION_FALLBACK_MS = 3_000;
 /** If phase stays idle/restoring with no completion, force a failed terminal state. */
@@ -57,7 +58,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isHydrated) return;
     if (bootstrapPhase !== "idle") return;
-    console.debug("[AuthProvider] sole restoreSession owner starting");
+    const s = useAuthStore.getState();
+    logAuthBootstrap("AuthProvider", {
+      status: s.status,
+      bootstrapPhase,
+      sessionAuthenticated: s.status === "authenticated",
+      hasToken: Boolean(s.accessToken),
+      redirectReason: "starting_restoreSession",
+    });
     void restoreSession();
   }, [isHydrated, bootstrapPhase, restoreSession]);
 

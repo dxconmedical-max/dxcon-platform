@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 import { can, canAny, canAll, hasFeature, isOrganizationType, isWorkspace } from "@/lib/permissions";
+import { logAuthBootstrap } from "@/lib/auth/bootstrapDebug";
 import { isWorkspacePath, workspacePathForRole } from "@/lib/roles";
 import {
   isBootstrapPending,
@@ -114,12 +115,26 @@ export function useRequireAuth(workspacePath?: string) {
     if (!isHydrated) return;
     // Must wait for restoreSession to finish — do NOT treat default
     // status:"unauthenticated" as anonymous while phase is still pending.
-    if (isBootstrapPending(bootstrapPhase)) return;
+    if (isBootstrapPending(bootstrapPhase)) {
+      logAuthBootstrap("useRequireAuth", {
+        status,
+        bootstrapPhase,
+        pathname,
+        sessionAuthenticated: status === "authenticated",
+        redirectReason: "waiting_bootstrap",
+        hasCapabilities: Boolean(capabilities),
+      });
+      return;
+    }
 
-    // Premature redirect: bootstrapPhase can still be "anonymous" from the
-    // /login hydrate while resolveAfterLogin has already set status to
-    // "authenticated" (cookies exist). Never treat that as anonymous.
     if (status === "session_expired") {
+      logAuthBootstrap("useRequireAuth", {
+        status,
+        bootstrapPhase,
+        pathname,
+        sessionAuthenticated: false,
+        redirectReason: "session_expired",
+      });
       if (!pathname.startsWith("/login")) {
         safeReplace(
           routerRef.current,
@@ -130,20 +145,54 @@ export function useRequireAuth(workspacePath?: string) {
       return;
     }
 
+    // Stale anonymous phase after login must NOT redirect authenticated users.
     if (bootstrapPhase === "anonymous" && status !== "authenticated") {
+      logAuthBootstrap("useRequireAuth", {
+        status,
+        bootstrapPhase,
+        pathname,
+        sessionAuthenticated: false,
+        redirectReason: "terminal_anonymous",
+      });
       if (!pathname.startsWith("/login")) {
         safeReplace(routerRef.current, pathname, "/login");
       }
       return;
     }
 
+    if (bootstrapPhase === "anonymous" && status === "authenticated") {
+      logAuthBootstrap("useRequireAuth", {
+        status,
+        bootstrapPhase,
+        pathname,
+        sessionAuthenticated: true,
+        redirectReason: "skip_stale_anonymous_while_authenticated",
+        hasCapabilities: Boolean(capabilities),
+      });
+      return;
+    }
+
     if (status === "organization_required") {
+      logAuthBootstrap("useRequireAuth", {
+        status,
+        bootstrapPhase,
+        pathname,
+        sessionAuthenticated: true,
+        redirectReason: "organization_required",
+      });
       safeReplace(routerRef.current, pathname, "/select-organization");
       return;
     }
 
     if (status === "forbidden" || bootstrapPhase === "failed") {
       if (status === "forbidden") {
+        logAuthBootstrap("useRequireAuth", {
+          status,
+          bootstrapPhase,
+          pathname,
+          sessionAuthenticated: false,
+          redirectReason: "forbidden",
+        });
         safeReplace(routerRef.current, pathname, "/forbidden");
       }
       return;
@@ -160,6 +209,14 @@ export function useRequireAuth(workspacePath?: string) {
       workspacePath !== "/app" &&
       isWorkspacePath(workspacePath)
     ) {
+      logAuthBootstrap("useRequireAuth", {
+        status,
+        bootstrapPhase,
+        pathname,
+        sessionAuthenticated: true,
+        redirectReason: `workspace_mismatch→${home || "/app"}`,
+        hasCapabilities: true,
+      });
       safeReplace(routerRef.current, pathname, home || "/app");
     }
   }, [

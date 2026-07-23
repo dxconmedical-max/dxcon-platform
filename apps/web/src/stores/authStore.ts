@@ -11,6 +11,7 @@ import {
   parseLoginResponse,
 } from "@/lib/auth/session";
 import { clearAuthCookies, setAuthCookies } from "@/lib/cookies";
+import { logAuthBootstrap } from "@/lib/auth/bootstrapDebug";
 import { workspacePathForRole } from "@/lib/roles";
 import { decodeJwtPayload, isTokenExpired } from "@/lib/utils";
 import { normalizeApiError, ApiError } from "@/lib/errors";
@@ -425,6 +426,13 @@ export const useAuthStore = create<AuthState>()(
 
         const { accessToken, refreshToken, user } = state;
         if (!accessToken || !user) {
+          logAuthBootstrap("restoreSession", {
+            status: "unauthenticated",
+            bootstrapPhase: "anonymous",
+            sessionAuthenticated: false,
+            hasToken: Boolean(accessToken),
+            redirectReason: "no_token_or_user→anonymous",
+          });
           patchChanged(set, get, {
             status: "unauthenticated",
             bootstrapPhase: "anonymous",
@@ -513,6 +521,14 @@ export const useAuthStore = create<AuthState>()(
                     error: null,
                   });
                   setAuthCookies(me.user.role, orgId);
+                  logAuthBootstrap("restoreSession", {
+                    status: "authenticated",
+                    bootstrapPhase: "authenticated",
+                    sessionAuthenticated: true,
+                    hasToken: true,
+                    hasCapabilities: true,
+                    redirectReason: "restore_ok",
+                  });
                   return "authenticated" as AuthStatus;
                 } catch (error) {
                   if (error instanceof ApiError && error.status === 401) {

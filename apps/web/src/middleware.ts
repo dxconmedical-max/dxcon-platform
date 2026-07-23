@@ -17,7 +17,8 @@ const LEGACY_REDIRECTS: Record<string, string> = {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const cookieHeader = request.headers.get("cookie") ?? undefined;
-  const hasAuthCookie = parseCookieValue(cookieHeader, AUTH_COOKIE) === "1";
+  const cookieAuthenticated =
+    parseCookieValue(cookieHeader, AUTH_COOKIE) === "1";
 
   if (LEGACY_REDIRECTS[pathname]) {
     return NextResponse.redirect(
@@ -26,22 +27,41 @@ export function middleware(request: NextRequest) {
   }
 
   // Do NOT bounce /login → workspace based on the cookie alone.
-  // Cookie can outlive sessionStorage tokens; client AuthProvider/restoreSession
-  // owns authenticated vs anonymous. Cookie-based bounce caused:
-  // /app/admin (cookie) → client "Redirecting…" → /login → middleware → /app/admin.
+  // Client AuthProvider/restoreSession owns authenticated vs anonymous.
 
   const isProtected = WORKSPACE_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 
-  if (isProtected && !hasAuthCookie) {
+  if (isProtected && !cookieAuthenticated) {
+    console.info("[auth-bootstrap:middleware]", {
+      pathname,
+      cookieAuthenticated,
+      sessionAuthenticated: null,
+      redirectReason: "no_auth_cookie→login",
+    });
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (pathname === "/select-organization" && !hasAuthCookie) {
+  if (pathname === "/select-organization" && !cookieAuthenticated) {
+    console.info("[auth-bootstrap:middleware]", {
+      pathname,
+      cookieAuthenticated,
+      sessionAuthenticated: null,
+      redirectReason: "no_auth_cookie→login",
+    });
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (isProtected) {
+    console.info("[auth-bootstrap:middleware]", {
+      pathname,
+      cookieAuthenticated,
+      sessionAuthenticated: null,
+      redirectReason: "allow_protected_route",
+    });
   }
 
   return NextResponse.next();

@@ -286,6 +286,35 @@ describe("AppShell after single-owner bootstrap", () => {
     expect(screen.getByText("Redirecting to sign in…")).toBeInTheDocument();
   });
 
+  it("does not show Redirecting when status is authenticated with stale anonymous phase", () => {
+    authState = {
+      ...authState,
+      bootstrapPhase: "anonymous",
+      isBootstrapping: false,
+      isAuthenticated: true,
+      status: "authenticated",
+      error: null,
+      capabilities: {
+        workspace: "/app/admin",
+        permissions: ["*"],
+        features: [],
+        user: { id: "1", email: "a@b.com", role: "SUPER_ADMIN" },
+      },
+      role: "SUPER_ADMIN",
+    };
+    storeState.bootstrapPhase = "anonymous";
+    storeState.status = "authenticated";
+    storeState.capabilities = authState.capabilities;
+    render(
+      <AppShell title="Administration" workspacePath="/app/admin">
+        <div>Admin workspace</div>
+      </AppShell>,
+    );
+    expect(screen.queryByText("Redirecting to sign in…")).not.toBeInTheDocument();
+    expect(screen.getByText("Administration")).toBeInTheDocument();
+    expect(screen.getByText("Admin workspace")).toBeInTheDocument();
+  });
+
   it("keeps spinner while restoring even when isAuthenticated is false", () => {
     authState = {
       ...authState,

@@ -8,6 +8,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { AuthErrorBoundary } from "@/components/providers/AuthErrorBoundary";
 import { Button } from "@/components/ui/Button";
 import { useRequireAuth } from "@/hooks/useAuth";
+import { logAuthBootstrap } from "@/lib/auth/bootstrapDebug";
 import {
   isBootstrapPending,
   useAuthStore,
@@ -86,6 +87,11 @@ export function AppShell({
   const bootstrapping =
     !auth.isHydrated || isBootstrapPending(auth.bootstrapPhase);
 
+  // CRITICAL RACE: after login, status can be "authenticated" while
+  // bootstrapPhase is still the /login hydrate value "anonymous".
+  const staleAnonymousWhileAuthenticated =
+    auth.bootstrapPhase === "anonymous" && auth.isAuthenticated;
+
   useEffect(() => {
     if (!bootstrapping) {
       setBootstrapTimedOut(false);
@@ -118,6 +124,44 @@ export function AppShell({
     }, APP_SHELL_BOOTSTRAP_TIMEOUT_MS);
     return () => window.clearTimeout(timer);
   }, [bootstrapping]);
+
+  useEffect(() => {
+    logAuthBootstrap("AppShell", {
+      status: auth.status,
+      bootstrapPhase: auth.bootstrapPhase,
+      pathname:
+        typeof window !== "undefined" ? window.location.pathname : undefined,
+      sessionAuthenticated: auth.isAuthenticated,
+      hasToken: Boolean(auth.accessToken),
+      hasCapabilities: Boolean(auth.capabilities),
+      redirectReason: bootstrapping
+        ? "waiting_bootstrap"
+        : staleAnonymousWhileAuthenticated
+          ? "heal_stale_anonymous_phase"
+          : auth.bootstrapPhase === "anonymous" && !auth.isAuthenticated
+            ? "terminal_anonymous_redirect_ui"
+            : auth.bootstrapPhase === "authenticated" && auth.isAuthenticated
+              ? "render_shell"
+              : storePhase === "failed"
+                ? "failed"
+                : "pending_or_ambiguous",
+    });
+  }, [
+    auth.status,
+    auth.bootstrapPhase,
+    auth.isAuthenticated,
+    auth.accessToken,
+    auth.capabilities,
+    bootstrapping,
+    staleAnonymousWhileAuthenticated,
+    storePhase,
+  ]);
+
+  useEffect(() => {
+    if (!staleAnonymousWhileAuthenticated) return;
+    // Heal the one-render race — phase must match authenticated status.
+    useAuthStore.setState({ bootstrapPhase: "authenticated" });
+  }, [staleAnonymousWhileAuthenticated]);
 
   const retryBootstrap = () => {
     setBootstrapTimedOut(false);
@@ -178,8 +222,8 @@ export function AppShell({
     );
   }
 
-  // Redirect UI only after terminal anonymous — never while restoring.
-  if (auth.bootstrapPhase === "anonymous") {
+  // Redirect UI only for true anonymous — never when session is authenticated.
+  if (auth.bootstrapPhase === "anonymous" && !auth.isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <p className="text-sm text-slate-500">Redirecting to sign in…</p>
@@ -187,8 +231,10 @@ export function AppShell({
     );
   }
 
-  if (auth.bootstrapPhase !== "authenticated" || !auth.isAuthenticated) {
-    // Pending/ambiguous — keep waiting UI rather than false anonymous redirect.
+  if (
+    (!auth.isAuthenticated || auth.bootstrapPhase !== "authenticated") &&
+    !staleAnonymousWhileAuthenticated
+  ) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-slate-50">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />
