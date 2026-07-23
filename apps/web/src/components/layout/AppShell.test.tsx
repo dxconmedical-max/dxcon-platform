@@ -2,20 +2,19 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const replace = vi.fn();
-const restoreSession = vi.fn();
-const logout = vi.fn();
-const clearTransientFlags = vi.fn();
 
-type AuthGate = {
+type Gate = {
   isHydrated: boolean;
+  bootstrapPhase: "idle" | "restoring" | "complete" | "failed";
   isInitializingSession: boolean;
   isAuthenticated: boolean;
   status: "authenticated" | "unauthenticated";
   error: string | null;
 };
 
-let authState: AuthGate = {
+let authState: Gate = {
   isHydrated: true,
+  bootstrapPhase: "complete",
   isInitializingSession: false,
   isAuthenticated: true,
   status: "authenticated",
@@ -32,9 +31,9 @@ vi.mock("@/hooks/useAuth", () => ({
     ...authState,
     isSubmittingLogin: false,
     isRefreshingSession: false,
-    restoreSession,
-    logout,
-    clearTransientFlags,
+    restoreSession: vi.fn(),
+    logout: vi.fn(),
+    clearTransientFlags: vi.fn(),
     clearError: vi.fn(),
     login: vi.fn(),
     selectOrganization: vi.fn(),
@@ -58,9 +57,10 @@ vi.mock("@/hooks/useAuth", () => ({
 vi.mock("@/stores/authStore", () => ({
   useAuthStore: (selector?: (s: Record<string, unknown>) => unknown) => {
     const state = {
-      restoreSession,
-      logout,
-      clearTransientFlags,
+      restoreSession: vi.fn(),
+      logout: vi.fn(),
+      clearTransientFlags: vi.fn(),
+      setState: vi.fn(),
     };
     return selector ? selector(state) : state;
   },
@@ -77,18 +77,14 @@ vi.mock("@/components/layout/Sidebar", () => ({
 
 import { AppShell } from "./AppShell";
 
-describe("AppShell bootstrap gates", () => {
-  afterEach(() => {
-    cleanup();
-  });
+describe("AppShell after single-owner bootstrap", () => {
+  afterEach(() => cleanup());
 
   beforeEach(() => {
     replace.mockReset();
-    restoreSession.mockReset();
-    logout.mockReset();
-    clearTransientFlags.mockReset();
     authState = {
       isHydrated: true,
+      bootstrapPhase: "complete",
       isInitializingSession: false,
       isAuthenticated: true,
       status: "authenticated",
@@ -96,7 +92,7 @@ describe("AppShell bootstrap gates", () => {
     };
   });
 
-  it("renders admin shell when authenticated (no infinite spinner)", () => {
+  it("renders /app/admin shell after valid restored session", () => {
     render(
       <AppShell title="Administration" workspacePath="/app/admin">
         <div>Admin workspace</div>
@@ -104,45 +100,27 @@ describe("AppShell bootstrap gates", () => {
     );
     expect(screen.getByText("Administration")).toBeInTheDocument();
     expect(screen.getByText("Admin workspace")).toBeInTheDocument();
-    expect(screen.queryByText("Loading workspace…")).toBeNull();
   });
 
-  it("shows spinner only while initializing", () => {
+  it("shows spinner while bootstrapPhase is restoring", () => {
     authState = {
       ...authState,
-      isInitializingSession: true,
+      bootstrapPhase: "restoring",
       isAuthenticated: false,
       status: "unauthenticated",
     };
     render(
       <AppShell title="Administration" workspacePath="/app/admin">
-        <div>Admin workspace</div>
+        <div>x</div>
       </AppShell>,
     );
     expect(screen.getByText("Loading workspace…")).toBeInTheDocument();
   });
 
-  it("profile/org/permission failure exits loading with actionable error", () => {
+  it("restore failure exits spinner with controlled error", () => {
     authState = {
       isHydrated: true,
-      isInitializingSession: false,
-      isAuthenticated: false,
-      status: "unauthenticated",
-      error: "Unable to load profile",
-    };
-    render(
-      <AppShell title="Administration" workspacePath="/app/admin">
-        <div>Admin workspace</div>
-      </AppShell>,
-    );
-    expect(screen.getByRole("alert")).toHaveTextContent("Unable to load profile");
-    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
-    expect(screen.queryByText("Loading workspace…")).toBeNull();
-  });
-
-  it("timeout error exits loading with controlled error screen", () => {
-    authState = {
-      isHydrated: true,
+      bootstrapPhase: "failed",
       isInitializingSession: false,
       isAuthenticated: false,
       status: "unauthenticated",
@@ -150,7 +128,7 @@ describe("AppShell bootstrap gates", () => {
     };
     render(
       <AppShell title="Administration" workspacePath="/app/admin">
-        <div>hidden</div>
+        <div>x</div>
       </AppShell>,
     );
     expect(

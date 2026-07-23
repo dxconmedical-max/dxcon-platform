@@ -26,10 +26,6 @@ import {
   type Membership,
 } from "@/services/auth";
 
-/**
- * Domain session status — never encode submit/init/refresh loading here.
- * Loading is represented only by the explicit boolean flags below.
- */
 export type AuthStatus =
   | "unauthenticated"
   | "authenticated"
@@ -38,10 +34,14 @@ export type AuthStatus =
   | "organization_required"
   | "workspace_required";
 
+/** Single-flight bootstrap lifecycle — never encoded as shared isLoading. */
+export type BootstrapPhase = "idle" | "restoring" | "complete" | "failed";
+
 const SESSION_RESTORE_TIMEOUT_MS = 12_000;
 
 type AuthState = {
   status: AuthStatus;
+  bootstrapPhase: BootstrapPhase;
   user: AuthUser | null;
   role: string | null;
   accessToken: string | null;
@@ -52,11 +52,8 @@ type AuthState = {
   capabilities: AuthCapabilities | null;
   error: string | null;
   isHydrated: boolean;
-  /** Persist/rehydrate + restoreSession in progress. */
   isInitializingSession: boolean;
-  /** Login form submit in progress — only flag the Sign in button may use. */
   isSubmittingLogin: boolean;
-  /** Token refresh in progress. */
   isRefreshingSession: boolean;
 
   setHydrated: (value: boolean) => void;
@@ -123,10 +120,6 @@ function isValidPersistedUser(value: unknown): value is AuthUser {
   );
 }
 
-/**
- * Persist migration: strip every transient/loading field and keep only a
- * structurally valid session snapshot.
- */
 export function migratePersistedAuth(
   persisted: unknown,
   _fromVersion?: number,
@@ -139,6 +132,7 @@ export function migratePersistedAuth(
   for (const key of TRANSIENT_AUTH_KEYS) {
     delete raw[key];
   }
+  delete raw.bootstrapPhase;
 
   const accessToken =
     typeof raw.accessToken === "string" && raw.accessToken.length > 0
@@ -158,7 +152,6 @@ export function migratePersistedAuth(
       ? raw.activeOrganizationId
       : null;
 
-  // Discard incomplete / incompatible snapshots entirely.
   if (!accessToken || !user) {
     return {};
   }
@@ -173,17 +166,46 @@ export function migratePersistedAuth(
   };
 }
 
-/** @deprecated use migratePersistedAuth */
 export function sanitizePersistedAuth(persisted: unknown): Record<string, unknown> {
   return migratePersistedAuth(persisted);
 }
 
 export { AUTH_STORAGE_KEY, AUTH_PERSIST_VERSION };
 
+/** Module-level single-flight promise — survives Strict Mode double-invoke. */
+let restoreInFlight: Promise<AuthStatus> | null = null;
+
+/** Test-only: clear in-flight restore between cases. */
+export function resetAuthRestoreForTests(): void {
+  restoreInFlight = null;
+}
+
+function patchChanged(
+  set: (partial: Partial<AuthState>) => void,
+  get: () => AuthState,
+  partial: Partial<AuthState>,
+): boolean {
+  const current = get();
+  const next: Partial<AuthState> = {};
+  let changed = false;
+  for (const [key, value] of Object.entries(partial) as [
+    keyof AuthState,
+    AuthState[keyof AuthState],
+  ][]) {
+    if (!Object.is(current[key], value)) {
+      (next as Record<string, unknown>)[key as string] = value;
+      changed = true;
+    }
+  }
+  if (changed) set(next);
+  return changed;
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       status: "unauthenticated",
+      bootstrapPhase: "idle",
       user: null,
       role: null,
       accessToken: null,
@@ -198,12 +220,12 @@ export const useAuthStore = create<AuthState>()(
       isSubmittingLogin: false,
       isRefreshingSession: false,
 
-      setHydrated: (value) => set({ isHydrated: value }),
+      setHydrated: (value) => patchChanged(set, get, { isHydrated: value }),
 
-      clearError: () => set({ error: null }),
+      clearError: () => patchChanged(set, get, { error: null }),
 
       clearTransientFlags: () =>
-        set({
+        patchChanged(set, get, {
           isInitializingSession: false,
           isSubmittingLogin: false,
           isRefreshingSession: false,
@@ -212,20 +234,14 @@ export const useAuthStore = create<AuthState>()(
 
       login: async (email, password, remember = false) => {
         if (get().isSubmittingLogin) {
-          console.debug("[authStore.login] blocked — already submitting");
           throw new ApiError("Login already in progress", 429, {
             code: "LOGIN_IN_PROGRESS",
           });
         }
-        console.debug("[authStore.login] start → POST /api/v1/auth/login");
-        set({
-          isSubmittingLogin: true,
-          error: null,
-        });
+        set({ isSubmittingLogin: true, error: null });
         try {
           const raw = await loginRequest(email, password);
           const session = parseLoginResponse(raw);
-          console.debug("[authStore.login] parsed session");
           set({
             accessToken: session.accessToken,
             refreshToken: session.refreshToken,
@@ -235,16 +251,20 @@ export const useAuthStore = create<AuthState>()(
             activeOrganizationId: session.user.organization_id ?? null,
           });
           const redirect = await get().resolveAfterLogin(remember);
-          console.debug("[authStore.login] done", { redirect });
+          // Login path already bootstrapped — mark complete so AuthProvider
+          // does not start a second restoreSession.
+          set({
+            bootstrapPhase: "complete",
+            isInitializingSession: false,
+          });
           return { redirect };
         } catch (error) {
-          console.debug("[authStore.login] error", error);
           const message = normalizeApiError(error);
           const status: AuthStatus =
             error instanceof ApiError && error.status === 403
               ? "forbidden"
               : "unauthenticated";
-          set({ status, error: message });
+          set({ status, error: message, bootstrapPhase: "failed" });
           throw error;
         } finally {
           set({ isSubmittingLogin: false });
@@ -254,11 +274,11 @@ export const useAuthStore = create<AuthState>()(
       resolveAfterLogin: async (remember = false) => {
         const { accessToken, user, role } = get();
         if (!accessToken || !user) {
-          set({ status: "unauthenticated" });
+          set({ status: "unauthenticated", bootstrapPhase: "failed" });
           return "/login";
         }
         const me = await fetchMe(accessToken);
-        set({ memberships: me.memberships });
+        set({ memberships: me.memberships as Membership[] });
 
         if (
           me.requires_organization_selection ||
@@ -269,7 +289,9 @@ export const useAuthStore = create<AuthState>()(
         }
 
         const orgId =
-          me.active_organization_id ?? me.memberships[0]?.organization_id ?? null;
+          me.active_organization_id ??
+          (me.memberships[0] as Membership | undefined)?.organization_id ??
+          null;
         let capabilities: AuthCapabilities;
         try {
           capabilities = await fetchCapabilities(accessToken, orgId);
@@ -297,12 +319,13 @@ export const useAuthStore = create<AuthState>()(
             capabilities,
             activeOrganizationId: organizationId,
             status: "authenticated",
+            bootstrapPhase: "complete",
           });
           setAuthCookies(role ?? user?.role ?? "", organizationId);
           return capabilities.workspace;
         } catch (error) {
           const message = normalizeApiError(error);
-          set({ status: "forbidden", error: message });
+          set({ status: "forbidden", error: message, bootstrapPhase: "failed" });
           return "/forbidden";
         } finally {
           set({ isInitializingSession: false });
@@ -315,7 +338,7 @@ export const useAuthStore = create<AuthState>()(
           try {
             await logoutRequest(refreshToken);
           } catch {
-            // proceed with local cleanup
+            // proceed
           }
         }
         clearAuthCookies();
@@ -325,8 +348,10 @@ export const useAuthStore = create<AuthState>()(
         } catch {
           // ignore
         }
+        restoreInFlight = null;
         set({
           status: "unauthenticated",
+          bootstrapPhase: "idle",
           user: null,
           role: null,
           accessToken: null,
@@ -342,116 +367,161 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      restoreSession: async () => {
+      restoreSession: () => {
+        // Idempotent: share in-flight promise (Strict Mode safe).
+        // NOTE: must NOT be an `async` function — that would wrap the shared
+        // promise in a new outer Promise on every call (React #185 / dup work).
+        if (restoreInFlight) {
+          return restoreInFlight;
+        }
+
         const state = get();
+
+        // Already bootstrapped with a usable session — no store write.
+        if (
+          state.bootstrapPhase === "complete" &&
+          state.status === "authenticated" &&
+          state.capabilities &&
+          state.accessToken
+        ) {
+          return Promise.resolve("authenticated" as AuthStatus);
+        }
+
         const { accessToken, refreshToken, user } = state;
         if (!accessToken || !user) {
-          set({
+          patchChanged(set, get, {
             status: "unauthenticated",
+            bootstrapPhase: "complete",
             isInitializingSession: false,
             isRefreshingSession: false,
           });
-          return "unauthenticated";
+          return Promise.resolve("unauthenticated" as AuthStatus);
         }
 
-        set({ isInitializingSession: true, error: null });
-        try {
-          return await withTimeout(
-            (async () => {
-              let token = accessToken;
-              if (isTokenExpired(token)) {
-                if (!refreshToken) {
-                  await get().logout();
-                  set({ status: "session_expired" });
-                  return "session_expired" as AuthStatus;
-                }
-                set({ isRefreshingSession: true });
-                try {
-                  const refreshed = await refreshAccessToken(refreshToken);
-                  const access =
-                    refreshed.access_token ||
-                    (refreshed as { token?: string }).token;
-                  if (!access) {
-                    throw new ApiError("Malformed refresh response", 502, {
-                      code: "MALFORMED_REFRESH_RESPONSE",
+        restoreInFlight = (async () => {
+          set({
+            bootstrapPhase: "restoring",
+            isInitializingSession: true,
+            error: null,
+          });
+          try {
+            return await withTimeout(
+              (async () => {
+                let token = accessToken;
+                if (isTokenExpired(token)) {
+                  if (!refreshToken) {
+                    await get().logout();
+                    set({
+                      status: "session_expired",
+                      bootstrapPhase: "complete",
                     });
+                    return "session_expired" as AuthStatus;
                   }
-                  token = access;
-                  set({
-                    accessToken: token,
-                    tokenExpiresAt: tokenExpiry(token),
-                  });
-                } catch {
-                  await get().logout();
-                  set({ status: "session_expired" });
-                  return "session_expired" as AuthStatus;
-                } finally {
-                  set({ isRefreshingSession: false });
+                  set({ isRefreshingSession: true });
+                  try {
+                    const refreshed = await refreshAccessToken(refreshToken);
+                    const access =
+                      refreshed.access_token ||
+                      (refreshed as { token?: string }).token;
+                    if (!access) {
+                      throw new ApiError("Malformed refresh response", 502, {
+                        code: "MALFORMED_REFRESH_RESPONSE",
+                      });
+                    }
+                    token = access;
+                    set({
+                      accessToken: token,
+                      tokenExpiresAt: tokenExpiry(token),
+                    });
+                  } catch {
+                    await get().logout();
+                    set({
+                      status: "session_expired",
+                      bootstrapPhase: "complete",
+                    });
+                    return "session_expired" as AuthStatus;
+                  } finally {
+                    set({ isRefreshingSession: false });
+                  }
                 }
-              }
 
-              try {
-                const me = await fetchMe(token);
-                set({
-                  memberships: me.memberships,
-                  user: me.user,
-                  role: me.user.role,
-                });
-                if (me.requires_organization_selection) {
-                  set({ status: "organization_required" });
-                  return "organization_required" as AuthStatus;
-                }
-                const orgId =
-                  me.active_organization_id ??
-                  me.memberships[0]?.organization_id ??
-                  null;
-                const capabilities = await fetchCapabilities(token, orgId);
-                set({
-                  capabilities,
-                  activeOrganizationId: orgId,
-                  status: "authenticated",
-                });
-                setAuthCookies(me.user.role, orgId);
-                return "authenticated" as AuthStatus;
-              } catch (error) {
-                if (error instanceof ApiError && error.status === 401) {
-                  await get().logout();
+                try {
+                  const me = await fetchMe(token);
                   set({
-                    status: "session_expired",
-                    error: "Your session has expired. Please sign in again.",
+                    memberships: me.memberships as Membership[],
+                    user: me.user,
+                    role: me.user.role,
                   });
-                  return "session_expired" as AuthStatus;
-                }
-                if (error instanceof ApiError && error.status === 403) {
+                  if (me.requires_organization_selection) {
+                    set({
+                      status: "organization_required",
+                      bootstrapPhase: "complete",
+                    });
+                    return "organization_required" as AuthStatus;
+                  }
+                  const orgId =
+                    me.active_organization_id ??
+                    (me.memberships[0] as Membership | undefined)
+                      ?.organization_id ??
+                    null;
+                  const capabilities = await fetchCapabilities(token, orgId);
                   set({
-                    status: "forbidden",
+                    capabilities,
+                    activeOrganizationId: orgId,
+                    status: "authenticated",
+                    bootstrapPhase: "complete",
+                    isInitializingSession: false,
+                    error: null,
+                  });
+                  setAuthCookies(me.user.role, orgId);
+                  return "authenticated" as AuthStatus;
+                } catch (error) {
+                  if (error instanceof ApiError && error.status === 401) {
+                    await get().logout();
+                    set({
+                      status: "session_expired",
+                      bootstrapPhase: "complete",
+                      error: "Your session has expired. Please sign in again.",
+                    });
+                    return "session_expired" as AuthStatus;
+                  }
+                  if (error instanceof ApiError && error.status === 403) {
+                    set({
+                      status: "forbidden",
+                      bootstrapPhase: "failed",
+                      error: normalizeApiError(error),
+                    });
+                    return "forbidden" as AuthStatus;
+                  }
+                  set({
+                    status: "unauthenticated",
+                    bootstrapPhase: "failed",
                     error: normalizeApiError(error),
                   });
-                  return "forbidden" as AuthStatus;
+                  return "unauthenticated" as AuthStatus;
                 }
-                set({
-                  status: "unauthenticated",
-                  error: normalizeApiError(error),
-                });
-                return "unauthenticated" as AuthStatus;
-              }
-            })(),
-            SESSION_RESTORE_TIMEOUT_MS,
-            "Session restore",
-          );
-        } catch (error) {
-          console.debug("[authStore.restoreSession] failed/timeout", error);
-          set({
-            status: "unauthenticated",
-            error: normalizeApiError(error),
-          });
-          return "unauthenticated";
-        } finally {
-          set({
-            isInitializingSession: false,
-            isRefreshingSession: false,
-          });
-        }
+              })(),
+              SESSION_RESTORE_TIMEOUT_MS,
+              "Session restore",
+            );
+          } catch (error) {
+            console.debug("[authStore.restoreSession] failed/timeout", error);
+            set({
+              status: "unauthenticated",
+              bootstrapPhase: "failed",
+              error: normalizeApiError(error),
+            });
+            return "unauthenticated" as AuthStatus;
+          } finally {
+            set({
+              isInitializingSession: false,
+              isRefreshingSession: false,
+            });
+            restoreInFlight = null;
+          }
+        })();
+
+        return restoreInFlight;
       },
     }),
     {
@@ -469,35 +539,42 @@ export const useAuthStore = create<AuthState>()(
       migrate: (persisted, fromVersion) =>
         migratePersistedAuth(persisted, fromVersion),
       onRehydrateStorage: () => (state, error) => {
-        const finish = (patch: Partial<AuthState>) => {
+        // Hydration only — NEVER call restoreSession here (would recurse).
+        if (error) {
           useAuthStore.setState({
             isHydrated: true,
+            bootstrapPhase: "complete",
             isInitializingSession: false,
             isSubmittingLogin: false,
             isRefreshingSession: false,
+            status: "unauthenticated",
             error: null,
-            ...patch,
           });
-        };
-
-        if (error) {
-          console.debug("[authStore.rehydrate] failure → anonymous", error);
-          finish({ status: "unauthenticated" });
           return;
         }
 
         if (!state?.accessToken || !state.user) {
-          console.debug("[authStore.rehydrate] anonymous");
-          finish({ status: "unauthenticated" });
+          useAuthStore.setState({
+            isHydrated: true,
+            bootstrapPhase: "complete",
+            isInitializingSession: false,
+            isSubmittingLogin: false,
+            isRefreshingSession: false,
+            status: "unauthenticated",
+            error: null,
+          });
           return;
         }
 
-        // Token present: leave anonymous until restoreSession validates.
-        // Never leave isSubmittingLogin or a shared isLoading stuck.
-        console.debug("[authStore.rehydrate] token present → await restore");
-        finish({
-          status: "unauthenticated",
+        // Token present: AuthProvider is the sole owner that calls restoreSession.
+        useAuthStore.setState({
+          isHydrated: true,
+          bootstrapPhase: "idle",
           isInitializingSession: true,
+          isSubmittingLogin: false,
+          isRefreshingSession: false,
+          status: "unauthenticated",
+          error: null,
         });
       },
     },

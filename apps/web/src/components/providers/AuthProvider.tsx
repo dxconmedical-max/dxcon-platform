@@ -7,67 +7,39 @@ import { useAuthStore } from "@/stores/authStore";
 const HYDRATION_FALLBACK_MS = 3_000;
 
 /**
- * Ensures persist hydration always terminates and never leaves transient
- * loading flags stuck — especially on the public login page.
+ * Sole owner of initial session restoration for the browser app.
+ * AppShell / useRequireAuth must NOT call restoreSession on mount.
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const isHydrated = useAuthStore((s) => s.isHydrated);
+  const bootstrapPhase = useAuthStore((s) => s.bootstrapPhase);
+  const restoreSession = useAuthStore((s) => s.restoreSession);
+
+  // Finish persist hydration if onRehydrateStorage is slow / missing.
   useEffect(() => {
-    const unlockAnonymous = () => {
+    const timer = window.setTimeout(() => {
+      const s = useAuthStore.getState();
+      if (s.isHydrated) return;
+      console.debug("[AuthProvider] hydrate timeout → complete anonymous");
       useAuthStore.setState({
         isHydrated: true,
+        bootstrapPhase: "complete",
         isInitializingSession: false,
         isSubmittingLogin: false,
         isRefreshingSession: false,
         status: "unauthenticated",
-        error: null,
       });
-    };
-
-    const finishIfNeeded = () => {
-      const state = useAuthStore.getState();
-      if (state.isHydrated) {
-        // Force-clear submit flag if a previous tab crash left it somehow.
-        if (state.isSubmittingLogin) {
-          useAuthStore.setState({ isSubmittingLogin: false });
-        }
-        return;
-      }
-      if (!state.accessToken) {
-        console.debug("[AuthProvider] hydrate → anonymous");
-        unlockAnonymous();
-        return;
-      }
-      console.debug("[AuthProvider] hydrate → session restore pending");
-      useAuthStore.setState({
-        isHydrated: true,
-        isInitializingSession: true,
-        isSubmittingLogin: false,
-        isRefreshingSession: false,
-        error: null,
-      });
-    };
-
-    finishIfNeeded();
-
-    const timer = window.setTimeout(() => {
-      const state = useAuthStore.getState();
-      if (!state.isHydrated) {
-        console.debug("[AuthProvider] hydrate timeout → anonymous");
-        unlockAnonymous();
-        return;
-      }
-      // Login page never calls restoreSession; do not leave init spinning.
-      if (state.isInitializingSession && !state.accessToken) {
-        useAuthStore.setState({ isInitializingSession: false });
-      }
-      if (state.isSubmittingLogin) {
-        console.debug("[AuthProvider] clear stale isSubmittingLogin");
-        useAuthStore.setState({ isSubmittingLogin: false });
-      }
     }, HYDRATION_FALLBACK_MS);
-
     return () => window.clearTimeout(timer);
   }, []);
+
+  // Single restore owner — must not depend on user/session fields.
+  useEffect(() => {
+    if (!isHydrated) return;
+    if (bootstrapPhase !== "idle") return;
+    console.debug("[AuthProvider] sole restoreSession owner starting");
+    void restoreSession();
+  }, [isHydrated, bootstrapPhase, restoreSession]);
 
   return <>{children}</>;
 }

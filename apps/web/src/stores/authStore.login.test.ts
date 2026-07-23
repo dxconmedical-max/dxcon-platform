@@ -22,12 +22,14 @@ vi.mock("@/lib/cookies", () => ({
 }));
 
 import { ApiError } from "@/lib/errors";
-import { useAuthStore } from "@/stores/authStore";
+import { resetAuthRestoreForTests, useAuthStore } from "@/stores/authStore";
 
 function resetStore() {
   sessionStorage.clear();
+  resetAuthRestoreForTests();
   useAuthStore.setState({
     status: "unauthenticated",
+    bootstrapPhase: "idle",
     user: null,
     role: null,
     accessToken: null,

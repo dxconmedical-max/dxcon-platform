@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { Header, MobileNav } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { AuthErrorBoundary } from "@/components/providers/AuthErrorBoundary";
 import { Button } from "@/components/ui/Button";
 import { useRequireAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/stores/authStore";
@@ -22,7 +23,13 @@ export function AppShell({
   const logout = useAuthStore((s) => s.logout);
   const clearTransientFlags = useAuthStore((s) => s.clearTransientFlags);
 
-  if (!auth.isHydrated || auth.isInitializingSession) {
+  const restoring =
+    !auth.isHydrated ||
+    auth.bootstrapPhase === "idle" ||
+    auth.bootstrapPhase === "restoring" ||
+    auth.isInitializingSession;
+
+  if (restoring) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-slate-50">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />
@@ -31,7 +38,10 @@ export function AppShell({
     );
   }
 
-  if (auth.error && !auth.isAuthenticated) {
+  if (
+    (auth.bootstrapPhase === "failed" || auth.error) &&
+    !auth.isAuthenticated
+  ) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
         <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
@@ -39,13 +49,14 @@ export function AppShell({
             Unable to load workspace
           </h1>
           <p className="mt-2 text-sm text-slate-600" role="alert">
-            {auth.error}
+            {auth.error || "Session restoration failed."}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button
               type="button"
               onClick={() => {
                 clearTransientFlags();
+                useAuthStore.setState({ bootstrapPhase: "idle" });
                 void restoreSession();
               }}
             >
@@ -80,13 +91,15 @@ export function AppShell({
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Header title={title} />
-        <main className="flex-1 p-4 lg:p-6">{children}</main>
-        <MobileNav />
+    <AuthErrorBoundary fallbackTitle="Workspace failed to render">
+      <div className="flex min-h-screen bg-slate-50">
+        <Sidebar />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <Header title={title} />
+          <main className="flex-1 p-4 lg:p-6">{children}</main>
+          <MobileNav />
+        </div>
       </div>
-    </div>
+    </AuthErrorBoundary>
   );
 }

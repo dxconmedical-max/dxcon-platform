@@ -100,6 +100,7 @@ export const TRANSIENT_AUTH_KEYS = [
   "isInitializingSession",
   "isSubmittingLogin",
   "isRefreshingSession",
+  "bootstrapPhase",
   "memberships",
   "capabilities",
 ] as const;
