@@ -7,7 +7,7 @@ import { clearAuthCookies, setAuthCookies } from "@/lib/cookies";
 import { clearTenantScopedCaches } from "@/lib/tenant-cache";
 import { workspacePathForRole } from "@/lib/roles";
 import { decodeJwtPayload, isTokenExpired } from "@/lib/utils";
-import { loginErrorMessage, ApiError } from "@/lib/errors";
+import { loginErrorMessage, normalizeApiError, ApiError } from "@/lib/errors";
 import {
   fetchCapabilities,
   fetchMe,
