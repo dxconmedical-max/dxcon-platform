@@ -8,7 +8,10 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { AuthErrorBoundary } from "@/components/providers/AuthErrorBoundary";
 import { Button } from "@/components/ui/Button";
 import { useRequireAuth } from "@/hooks/useAuth";
-import { useAuthStore } from "@/stores/authStore";
+import {
+  isBootstrapPending,
+  useAuthStore,
+} from "@/stores/authStore";
 
 /** Hard ceiling for the shell spinner — never spin forever. */
 export const APP_SHELL_BOOTSTRAP_TIMEOUT_MS = 15_000;
@@ -79,12 +82,9 @@ export function AppShell({
     typeof performance !== "undefined" ? performance.now() : Date.now(),
   );
 
-  // Bound the spinner: idle/restoring must resolve or we surface diagnostics.
-  // Do not fold remapped isInitializingSession into this gate.
+  // Wait through idle/restoring — never classify anonymous until terminal.
   const bootstrapping =
-    !auth.isHydrated ||
-    auth.bootstrapPhase === "idle" ||
-    auth.bootstrapPhase === "restoring";
+    !auth.isHydrated || isBootstrapPending(auth.bootstrapPhase);
 
   useEffect(() => {
     if (!bootstrapping) {
@@ -94,9 +94,7 @@ export function AppShell({
     const timer = window.setTimeout(() => {
       const s = useAuthStore.getState();
       const stillBootstrapping =
-        !s.isHydrated ||
-        s.bootstrapPhase === "idle" ||
-        s.bootstrapPhase === "restoring";
+        !s.isHydrated || isBootstrapPending(s.bootstrapPhase);
       if (!stillBootstrapping) return;
       console.error("[AppShell] bootstrap timed out", {
         bootstrapPhase: s.bootstrapPhase,
@@ -155,11 +153,9 @@ export function AppShell({
       : null);
 
   if (
-    !auth.isAuthenticated &&
-    (bootstrapTimedOut ||
-      storePhase === "failed" ||
-      auth.bootstrapPhase === "failed" ||
-      Boolean(diagnosticError))
+    bootstrapTimedOut ||
+    storePhase === "failed" ||
+    auth.bootstrapPhase === "failed"
   ) {
     return (
       <BootstrapDiagnostic
@@ -182,7 +178,8 @@ export function AppShell({
     );
   }
 
-  if (!auth.isAuthenticated) {
+  // Redirect UI only after terminal anonymous — never while restoring.
+  if (auth.bootstrapPhase === "anonymous") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <p className="text-sm text-slate-500">Redirecting to sign in…</p>
@@ -190,7 +187,16 @@ export function AppShell({
     );
   }
 
-  // Restore/login marked complete but permissions never landed — do not spin.
+  if (auth.bootstrapPhase !== "authenticated" || !auth.isAuthenticated) {
+    // Pending/ambiguous — keep waiting UI rather than false anonymous redirect.
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-slate-50">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />
+        <p className="text-sm text-slate-500">Loading workspace…</p>
+      </div>
+    );
+  }
+
   if (!auth.capabilities) {
     return (
       <BootstrapDiagnostic

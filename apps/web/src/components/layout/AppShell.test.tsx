@@ -5,7 +5,7 @@ const replace = vi.fn();
 
 type Gate = {
   isHydrated: boolean;
-  bootstrapPhase: "idle" | "restoring" | "complete" | "failed";
+  bootstrapPhase: "idle" | "restoring" | "authenticated" | "anonymous" | "failed";
   isInitializingSession: boolean;
   isBootstrapping: boolean;
   isAuthenticated: boolean;
@@ -17,7 +17,7 @@ type Gate = {
 
 let authState: Gate = {
   isHydrated: true,
-  bootstrapPhase: "complete",
+  bootstrapPhase: "authenticated",
   isInitializingSession: false,
   isBootstrapping: false,
   isAuthenticated: true,
@@ -67,7 +67,7 @@ const storeState: {
   restoreSession: ReturnType<typeof vi.fn>;
   logout: ReturnType<typeof vi.fn>;
   clearTransientFlags: ReturnType<typeof vi.fn>;
-  bootstrapPhase: "idle" | "restoring" | "complete" | "failed";
+  bootstrapPhase: "idle" | "restoring" | "authenticated" | "anonymous" | "failed";
   status: "authenticated" | "unauthenticated";
   isHydrated: boolean;
   accessToken: string | null;
@@ -79,7 +79,7 @@ const storeState: {
   restoreSession: vi.fn(),
   logout: vi.fn(async () => undefined),
   clearTransientFlags: vi.fn(),
-  bootstrapPhase: "complete",
+  bootstrapPhase: "authenticated",
   status: "authenticated",
   isHydrated: true,
   accessToken: "tok",
@@ -90,6 +90,8 @@ const storeState: {
 };
 
 vi.mock("@/stores/authStore", () => {
+  const isBootstrapPending = (phase: string) =>
+    phase === "idle" || phase === "restoring";
   const useAuthStore = Object.assign(
     (selector?: (s: typeof storeState) => unknown) =>
       selector ? selector(storeState) : storeState,
@@ -100,7 +102,14 @@ vi.mock("@/stores/authStore", () => {
       getState: () => storeState,
     },
   );
-  return { useAuthStore };
+  return {
+    useAuthStore,
+    isBootstrapPending,
+    isBootstrapTerminal: (phase: string) =>
+      phase === "authenticated" ||
+      phase === "anonymous" ||
+      phase === "failed",
+  };
 });
 
 vi.mock("@/components/layout/Header", () => ({
@@ -125,7 +134,7 @@ describe("AppShell after single-owner bootstrap", () => {
 
   beforeEach(() => {
     replace.mockReset();
-    storeState.bootstrapPhase = "complete";
+    storeState.bootstrapPhase = "authenticated";
     storeState.status = "authenticated";
     storeState.isHydrated = true;
     storeState.accessToken = "tok";
@@ -135,7 +144,7 @@ describe("AppShell after single-owner bootstrap", () => {
     storeState.isInitializingSession = false;
     authState = {
       isHydrated: true,
-      bootstrapPhase: "complete",
+      bootstrapPhase: "authenticated",
       isInitializingSession: false,
       isBootstrapping: false,
       isAuthenticated: true,
@@ -240,7 +249,7 @@ describe("AppShell after single-owner bootstrap", () => {
     authState = {
       ...authState,
       capabilities: null,
-      bootstrapPhase: "complete",
+      bootstrapPhase: "authenticated",
       isBootstrapping: false,
       isAuthenticated: true,
       status: "authenticated",
@@ -254,5 +263,48 @@ describe("AppShell after single-owner bootstrap", () => {
       screen.getByRole("heading", { name: /Permissions not loaded/i }),
     ).toBeInTheDocument();
     expect(screen.queryByText("Loading workspace…")).not.toBeInTheDocument();
+  });
+
+  it("shows Redirecting only for terminal anonymous", () => {
+    authState = {
+      ...authState,
+      bootstrapPhase: "anonymous",
+      isBootstrapping: false,
+      isAuthenticated: false,
+      status: "unauthenticated",
+      error: null,
+      capabilities: null,
+      role: null,
+    };
+    storeState.bootstrapPhase = "anonymous";
+    storeState.status = "unauthenticated";
+    render(
+      <AppShell title="Administration" workspacePath="/app/admin">
+        <div>x</div>
+      </AppShell>,
+    );
+    expect(screen.getByText("Redirecting to sign in…")).toBeInTheDocument();
+  });
+
+  it("keeps spinner while restoring even when isAuthenticated is false", () => {
+    authState = {
+      ...authState,
+      bootstrapPhase: "restoring",
+      isBootstrapping: true,
+      isAuthenticated: false,
+      status: "unauthenticated",
+      error: null,
+      capabilities: null,
+    };
+    storeState.bootstrapPhase = "restoring";
+    render(
+      <AppShell title="Administration" workspacePath="/app/admin">
+        <div>x</div>
+      </AppShell>,
+    );
+    expect(screen.getByText("Loading workspace…")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Redirecting to sign in…"),
+    ).not.toBeInTheDocument();
   });
 });

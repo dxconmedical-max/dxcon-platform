@@ -34,8 +34,32 @@ export type AuthStatus =
   | "organization_required"
   | "workspace_required";
 
-/** Single-flight bootstrap lifecycle — never encoded as shared isLoading. */
-export type BootstrapPhase = "idle" | "restoring" | "complete" | "failed";
+/**
+ * Single-flight bootstrap lifecycle — never encoded as shared isLoading.
+ *
+ * idle → restoring → authenticated | anonymous | failed
+ *
+ * Protected routes MUST wait through idle/restoring.
+ * Redirect only after terminal anonymous (or failed).
+ */
+export type BootstrapPhase =
+  | "idle"
+  | "restoring"
+  | "authenticated"
+  | "anonymous"
+  | "failed";
+
+export function isBootstrapPending(phase: BootstrapPhase): boolean {
+  return phase === "idle" || phase === "restoring";
+}
+
+export function isBootstrapTerminal(phase: BootstrapPhase): boolean {
+  return (
+    phase === "authenticated" ||
+    phase === "anonymous" ||
+    phase === "failed"
+  );
+}
 
 const SESSION_RESTORE_TIMEOUT_MS = 12_000;
 
@@ -251,10 +275,10 @@ export const useAuthStore = create<AuthState>()(
             activeOrganizationId: session.user.organization_id ?? null,
           });
           const redirect = await get().resolveAfterLogin(remember);
-          // Login path already bootstrapped — mark complete so AuthProvider
-          // does not start a second restoreSession.
+          // Login path already bootstrapped — terminal authenticated so
+          // AuthProvider does not start a second restoreSession.
           set({
-            bootstrapPhase: "complete",
+            bootstrapPhase: "authenticated",
             isInitializingSession: false,
           });
           return { redirect };
@@ -310,6 +334,10 @@ export const useAuthStore = create<AuthState>()(
           capabilities,
           activeOrganizationId: orgId,
           status: "authenticated",
+          // Same tick as status — otherwise login page useEffect navigates to
+          // /app/admin while bootstrapPhase is still "anonymous" from hydrate,
+          // and useRequireAuth immediately sends the user back to /login.
+          bootstrapPhase: "authenticated",
         });
         setAuthCookies(role ?? user.role, orgId, remember);
         return capabilities.workspace || workspacePathForRole(role ?? user.role);
@@ -325,7 +353,7 @@ export const useAuthStore = create<AuthState>()(
             capabilities,
             activeOrganizationId: organizationId,
             status: "authenticated",
-            bootstrapPhase: "complete",
+            bootstrapPhase: "authenticated",
           });
           setAuthCookies(role ?? user?.role ?? "", organizationId);
           return capabilities.workspace;
@@ -355,12 +383,11 @@ export const useAuthStore = create<AuthState>()(
           // ignore
         }
         restoreInFlight = null;
-        // Cleared session is a finished bootstrap (anonymous). Do NOT set
-        // phase to "idle" — that re-triggers AuthProvider restore and leaves
-        // AppShell spinning until a no-op restore completes.
+        // Cleared session is terminal anonymous. Do NOT set phase to "idle" —
+        // that re-triggers AuthProvider restore and leaves AppShell spinning.
         set({
           status: "unauthenticated",
-          bootstrapPhase: "complete",
+          bootstrapPhase: "anonymous",
           user: null,
           role: null,
           accessToken: null,
@@ -388,7 +415,7 @@ export const useAuthStore = create<AuthState>()(
 
         // Already bootstrapped with a usable session — no store write.
         if (
-          state.bootstrapPhase === "complete" &&
+          state.bootstrapPhase === "authenticated" &&
           state.status === "authenticated" &&
           state.capabilities &&
           state.accessToken
@@ -400,7 +427,7 @@ export const useAuthStore = create<AuthState>()(
         if (!accessToken || !user) {
           patchChanged(set, get, {
             status: "unauthenticated",
-            bootstrapPhase: "complete",
+            bootstrapPhase: "anonymous",
             isInitializingSession: false,
             isRefreshingSession: false,
           });
@@ -422,7 +449,7 @@ export const useAuthStore = create<AuthState>()(
                     await get().logout();
                     set({
                       status: "session_expired",
-                      bootstrapPhase: "complete",
+                      bootstrapPhase: "anonymous",
                     });
                     return "session_expired" as AuthStatus;
                   }
@@ -446,7 +473,7 @@ export const useAuthStore = create<AuthState>()(
                     await get().logout();
                     set({
                       status: "session_expired",
-                      bootstrapPhase: "complete",
+                      bootstrapPhase: "anonymous",
                     });
                     return "session_expired" as AuthStatus;
                   } finally {
@@ -464,7 +491,7 @@ export const useAuthStore = create<AuthState>()(
                   if (me.requires_organization_selection) {
                     set({
                       status: "organization_required",
-                      bootstrapPhase: "complete",
+                      bootstrapPhase: "authenticated",
                     });
                     return "organization_required" as AuthStatus;
                   }
@@ -481,7 +508,7 @@ export const useAuthStore = create<AuthState>()(
                     capabilities,
                     activeOrganizationId: orgId,
                     status: "authenticated",
-                    bootstrapPhase: "complete",
+                    bootstrapPhase: "authenticated",
                     isInitializingSession: false,
                     error: null,
                   });
@@ -492,7 +519,7 @@ export const useAuthStore = create<AuthState>()(
                     await get().logout();
                     set({
                       status: "session_expired",
-                      bootstrapPhase: "complete",
+                      bootstrapPhase: "anonymous",
                       error: "Your session has expired. Please sign in again.",
                     });
                     return "session_expired" as AuthStatus;
@@ -555,7 +582,7 @@ export const useAuthStore = create<AuthState>()(
         if (error) {
           useAuthStore.setState({
             isHydrated: true,
-            bootstrapPhase: "complete",
+            bootstrapPhase: "anonymous",
             isInitializingSession: false,
             isSubmittingLogin: false,
             isRefreshingSession: false,
@@ -566,9 +593,14 @@ export const useAuthStore = create<AuthState>()(
         }
 
         if (!state?.accessToken || !state.user) {
+          // No persisted session — terminal anonymous. AuthProvider must NOT
+          // treat this as "still restoring" and must NOT skip ahead from idle
+          // without tokens (that previously used phase "complete" and caused
+          // AppShell to redirect before any restore attempt when cookies alone
+          // allowed the protected route).
           useAuthStore.setState({
             isHydrated: true,
-            bootstrapPhase: "complete",
+            bootstrapPhase: "anonymous",
             isInitializingSession: false,
             isSubmittingLogin: false,
             isRefreshingSession: false,
@@ -579,6 +611,7 @@ export const useAuthStore = create<AuthState>()(
         }
 
         // Token present: AuthProvider is the sole owner that calls restoreSession.
+        // Stay idle (pending) until restore finishes — never redirect yet.
         useAuthStore.setState({
           isHydrated: true,
           bootstrapPhase: "idle",

@@ -127,7 +127,7 @@ describe("restoreSession single-flight / idempotency", () => {
 
     resolveMe(mePayload);
     await p1;
-    expect(useAuthStore.getState().bootstrapPhase).toBe("complete");
+    expect(useAuthStore.getState().bootstrapPhase).toBe("authenticated");
     expect(useAuthStore.getState().status).toBe("authenticated");
   });
 
@@ -138,7 +138,7 @@ describe("restoreSession single-flight / idempotency", () => {
       user: { id: "1", email: "u@x.com", role: "ADMIN" },
       role: "ADMIN",
       status: "authenticated",
-      bootstrapPhase: "complete",
+      bootstrapPhase: "authenticated",
       capabilities: capsPayload as never,
       isHydrated: true,
     });
@@ -169,7 +169,7 @@ describe("restoreSession single-flight / idempotency", () => {
     });
 
     await waitFor(() => {
-      expect(useAuthStore.getState().bootstrapPhase).toBe("complete");
+      expect(useAuthStore.getState().bootstrapPhase).toBe("authenticated");
       expect(useAuthStore.getState().status).toBe("authenticated");
     });
     expect(fetchMe).toHaveBeenCalledTimes(1);

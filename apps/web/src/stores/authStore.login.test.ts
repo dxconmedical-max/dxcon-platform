@@ -113,7 +113,66 @@ describe("authStore login / session machine", () => {
     expect(result.redirect).toBe("/app/admin");
     expect(useAuthStore.getState().isSubmittingLogin).toBe(false);
     expect(useAuthStore.getState().status).toBe("authenticated");
+    expect(useAuthStore.getState().bootstrapPhase).toBe("authenticated");
     expect(useAuthStore.getState().accessToken).toBe("a");
+  });
+
+  it("resolveAfterLogin sets bootstrapPhase authenticated in the same update as status", async () => {
+    useAuthStore.setState({
+      accessToken: "a",
+      refreshToken: "r",
+      user: { id: "1", email: "u@x.com", role: "SUPER_ADMIN" },
+      role: "SUPER_ADMIN",
+      // Simulate /login hydrate terminal anonymous before login finishes.
+      bootstrapPhase: "anonymous",
+      status: "unauthenticated",
+      isHydrated: true,
+    });
+    fetchMe.mockResolvedValue({
+      user: { id: "1", email: "u@x.com", role: "SUPER_ADMIN" },
+      active_organization_id: "org1",
+      memberships: [
+        {
+          membership_id: "m1",
+          organization_id: "org1",
+          organization_name: "Org",
+          organization_type: "LAB",
+          organization_code: "O1",
+          organization_status: "active",
+          role_code: "ADMIN",
+          membership_status: "active",
+          default_workspace: "/app/admin",
+        },
+      ],
+      requires_organization_selection: false,
+    });
+    fetchCapabilities.mockResolvedValue({
+      user: { id: "1", email: "u@x.com", role: "SUPER_ADMIN" },
+      organization: null,
+      membership: {
+        membership_id: "m1",
+        organization_id: "org1",
+        role_code: "ADMIN",
+        membership_status: "active",
+      },
+      workspace: "/app/admin",
+      default_workspace: "/app/admin",
+      permissions: ["*"],
+      features: [],
+    });
+
+    const phases: string[] = [];
+    const unsub = useAuthStore.subscribe((s) => {
+      phases.push(`${s.status}:${s.bootstrapPhase}`);
+    });
+    await useAuthStore.getState().resolveAfterLogin(false);
+    unsub();
+
+    const s = useAuthStore.getState();
+    expect(s.status).toBe("authenticated");
+    expect(s.bootstrapPhase).toBe("authenticated");
+    // Never observe authenticated status paired with anonymous phase.
+    expect(phases.some((p) => p === "authenticated:anonymous")).toBe(false);
   });
 
   it("failed login resets isSubmittingLogin and keeps anonymous", async () => {
@@ -351,12 +410,12 @@ describe("authStore login / session machine", () => {
       user: { id: "1", email: "u@x.com", role: "ADMIN" },
       isSubmittingLogin: true,
       isInitializingSession: true,
-      bootstrapPhase: "complete",
+      bootstrapPhase: "authenticated",
     });
     await useAuthStore.getState().logout();
     const s = useAuthStore.getState();
     expect(s.status).toBe("unauthenticated");
-    expect(s.bootstrapPhase).toBe("complete");
+    expect(s.bootstrapPhase).toBe("anonymous");
     expect(s.accessToken).toBeNull();
     expect(s.isSubmittingLogin).toBe(false);
     expect(s.isInitializingSession).toBe(false);

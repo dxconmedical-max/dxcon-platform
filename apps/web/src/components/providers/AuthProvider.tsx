@@ -2,7 +2,10 @@
 
 import { useEffect } from "react";
 
-import { useAuthStore } from "@/stores/authStore";
+import {
+  isBootstrapPending,
+  useAuthStore,
+} from "@/stores/authStore";
 
 const HYDRATION_FALLBACK_MS = 3_000;
 /** If phase stays idle/restoring with no completion, force a failed terminal state. */
@@ -11,6 +14,8 @@ const RESTORE_WATCHDOG_MS = 14_000;
 /**
  * Sole owner of initial session restoration for the browser app.
  * AppShell / useRequireAuth must NOT call restoreSession on mount.
+ *
+ * Bootstrap: idle → restoring → authenticated | anonymous | failed
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isHydrated = useAuthStore((s) => s.isHydrated);
@@ -35,10 +40,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         return;
       }
-      console.debug("[AuthProvider] hydrate timeout → complete anonymous");
+      console.debug("[AuthProvider] hydrate timeout → terminal anonymous");
       useAuthStore.setState({
         isHydrated: true,
-        bootstrapPhase: "complete",
+        bootstrapPhase: "anonymous",
         isInitializingSession: false,
         isSubmittingLogin: false,
         isRefreshingSession: false,
@@ -48,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => window.clearTimeout(timer);
   }, []);
 
-  // Single restore owner — must not depend on user/session fields.
+  // Single restore owner — only when phase is idle (tokens pending restore).
   useEffect(() => {
     if (!isHydrated) return;
     if (bootstrapPhase !== "idle") return;
@@ -59,12 +64,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Safety net if restore never settles (hung promise, missing owner, etc.).
   useEffect(() => {
     if (!isHydrated) return;
-    if (bootstrapPhase !== "idle" && bootstrapPhase !== "restoring") return;
+    if (!isBootstrapPending(bootstrapPhase)) return;
     const timer = window.setTimeout(() => {
       const s = useAuthStore.getState();
-      if (s.bootstrapPhase !== "idle" && s.bootstrapPhase !== "restoring") {
-        return;
-      }
+      if (!isBootstrapPending(s.bootstrapPhase)) return;
       console.error("[AuthProvider] restore watchdog fired", {
         bootstrapPhase: s.bootstrapPhase,
         status: s.status,

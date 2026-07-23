@@ -5,7 +5,10 @@ import { useRouter, usePathname } from "next/navigation";
 
 import { can, canAny, canAll, hasFeature, isOrganizationType, isWorkspace } from "@/lib/permissions";
 import { isWorkspacePath, workspacePathForRole } from "@/lib/roles";
-import { useAuthStore } from "@/stores/authStore";
+import {
+  isBootstrapPending,
+  useAuthStore,
+} from "@/stores/authStore";
 
 /**
  * Prefer field selectors — never subscribe to the entire store object
@@ -34,12 +37,7 @@ export function useAuth() {
   const clearTransientFlags = useAuthStore((s) => s.clearTransientFlags);
   const setHydrated = useAuthStore((s) => s.setHydrated);
 
-  // Explicit bootstrap gate — do NOT fold idle/restoring into isInitializingSession
-  // (AppShell used to double-count that flag and could spin after restore finished).
-  const isBootstrapping =
-    !isHydrated ||
-    bootstrapPhase === "idle" ||
-    bootstrapPhase === "restoring";
+  const isBootstrapping = !isHydrated || isBootstrapPending(bootstrapPhase);
 
   return {
     status,
@@ -96,6 +94,9 @@ function safeReplace(
 /**
  * Route guard only — does NOT own restoreSession.
  * AuthProvider is the sole bootstrap owner.
+ *
+ * CRITICAL: never redirect while bootstrap is idle/restoring.
+ * Redirect only after terminal phase === "anonymous" (or session_expired).
  */
 export function useRequireAuth(workspacePath?: string) {
   const router = useRouter();
@@ -106,23 +107,32 @@ export function useRequireAuth(workspacePath?: string) {
   const isHydrated = useAuthStore((s) => s.isHydrated);
   const bootstrapPhase = useAuthStore((s) => s.bootstrapPhase);
   const status = useAuthStore((s) => s.status);
-  const error = useAuthStore((s) => s.error);
   const role = useAuthStore((s) => s.role);
   const capabilities = useAuthStore((s) => s.capabilities);
 
   useEffect(() => {
     if (!isHydrated) return;
-    // Wait until the single AuthProvider restore finishes.
-    if (bootstrapPhase === "idle" || bootstrapPhase === "restoring") return;
+    // Must wait for restoreSession to finish — do NOT treat default
+    // status:"unauthenticated" as anonymous while phase is still pending.
+    if (isBootstrapPending(bootstrapPhase)) return;
 
-    if (status === "unauthenticated" || status === "session_expired") {
-      const target =
-        status === "session_expired"
-          ? "/login?reason=session-expired"
-          : "/login";
-      // Avoid replace loops when already on /login.
+    // Premature redirect: bootstrapPhase can still be "anonymous" from the
+    // /login hydrate while resolveAfterLogin has already set status to
+    // "authenticated" (cookies exist). Never treat that as anonymous.
+    if (status === "session_expired") {
       if (!pathname.startsWith("/login")) {
-        safeReplace(routerRef.current, pathname, target);
+        safeReplace(
+          routerRef.current,
+          pathname,
+          "/login?reason=session-expired",
+        );
+      }
+      return;
+    }
+
+    if (bootstrapPhase === "anonymous" && status !== "authenticated") {
+      if (!pathname.startsWith("/login")) {
+        safeReplace(routerRef.current, pathname, "/login");
       }
       return;
     }
@@ -132,11 +142,14 @@ export function useRequireAuth(workspacePath?: string) {
       return;
     }
 
-    if (status === "forbidden") {
-      safeReplace(routerRef.current, pathname, "/forbidden");
+    if (status === "forbidden" || bootstrapPhase === "failed") {
+      if (status === "forbidden") {
+        safeReplace(routerRef.current, pathname, "/forbidden");
+      }
       return;
     }
 
+    if (bootstrapPhase !== "authenticated") return;
     if (!workspacePath || !capabilities) return;
     const home = capabilities.workspace;
     const roleCode = (role ?? "").toUpperCase();
@@ -149,7 +162,6 @@ export function useRequireAuth(workspacePath?: string) {
     ) {
       safeReplace(routerRef.current, pathname, home || "/app");
     }
-    // No router / restoreSession in deps — prevents update-depth loops.
   }, [
     isHydrated,
     bootstrapPhase,

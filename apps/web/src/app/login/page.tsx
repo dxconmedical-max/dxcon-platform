@@ -20,6 +20,7 @@ function LoginForm() {
     error,
     clearError,
     isAuthenticated,
+    bootstrapPhase,
     workspacePath,
     isHydrated,
     isSubmittingLogin,
@@ -43,10 +44,19 @@ function LoginForm() {
 
   useEffect(() => {
     if (!isHydrated) return;
-    if (isAuthenticated) {
-      router.replace(safeRedirectPath(searchParams.get("next"), workspacePath));
-    }
-  }, [isAuthenticated, isHydrated, workspacePath, router, searchParams]);
+    // Wait until bootstrap terminal authenticated — status alone can flip one
+    // render before bootstrapPhase catches up after login.
+    if (!isAuthenticated) return;
+    if (bootstrapPhase !== "authenticated") return;
+    router.replace(safeRedirectPath(searchParams.get("next"), workspacePath));
+  }, [
+    isAuthenticated,
+    isHydrated,
+    bootstrapPhase,
+    workspacePath,
+    router,
+    searchParams,
+  ]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

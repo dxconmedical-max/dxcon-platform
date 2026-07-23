@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 import { AUTH_COOKIE } from "@/lib/constants";
 import { parseCookieValue } from "@/lib/cookies";
-import { WORKSPACE_ROUTES, workspacePathForRole } from "@/lib/roles";
+import { WORKSPACE_ROUTES } from "@/lib/roles";
 
 const LEGACY_REDIRECTS: Record<string, string> = {
   "/admin": "/app/admin",
@@ -17,8 +17,7 @@ const LEGACY_REDIRECTS: Record<string, string> = {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const cookieHeader = request.headers.get("cookie") ?? undefined;
-  const isAuthenticated = parseCookieValue(cookieHeader, AUTH_COOKIE) === "1";
-  const role = parseCookieValue(cookieHeader, "dxcon_role");
+  const hasAuthCookie = parseCookieValue(cookieHeader, AUTH_COOKIE) === "1";
 
   if (LEGACY_REDIRECTS[pathname]) {
     return NextResponse.redirect(
@@ -26,23 +25,22 @@ export function middleware(request: NextRequest) {
     );
   }
 
-  if (pathname === "/login" && isAuthenticated) {
-    return NextResponse.redirect(
-      new URL(workspacePathForRole(role), request.url),
-    );
-  }
+  // Do NOT bounce /login → workspace based on the cookie alone.
+  // Cookie can outlive sessionStorage tokens; client AuthProvider/restoreSession
+  // owns authenticated vs anonymous. Cookie-based bounce caused:
+  // /app/admin (cookie) → client "Redirecting…" → /login → middleware → /app/admin.
 
   const isProtected = WORKSPACE_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 
-  if (isProtected && !isAuthenticated) {
+  if (isProtected && !hasAuthCookie) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (pathname === "/select-organization" && !isAuthenticated) {
+  if (pathname === "/select-organization" && !hasAuthCookie) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

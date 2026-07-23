@@ -32,6 +32,7 @@ vi.mock("@/hooks/useAuth", () => ({
     isSubmittingLogin,
     isRefreshingSession: false,
     status: "unauthenticated",
+    bootstrapPhase: "anonymous",
   }),
 }));
 

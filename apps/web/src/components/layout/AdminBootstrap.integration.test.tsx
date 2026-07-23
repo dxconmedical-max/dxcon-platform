@@ -135,7 +135,7 @@ describe("Admin shell after restoreSession succeeds", () => {
     expect(screen.getByText("Loading workspace…")).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(useAuthStore.getState().bootstrapPhase).toBe("complete");
+      expect(useAuthStore.getState().bootstrapPhase).toBe("authenticated");
       expect(useAuthStore.getState().status).toBe("authenticated");
     });
 
@@ -182,7 +182,7 @@ describe("Admin shell after restoreSession succeeds", () => {
 
     useAuthStore.setState({
       isHydrated: true,
-      bootstrapPhase: "complete",
+      bootstrapPhase: "authenticated",
       status: "unauthenticated",
     });
 
@@ -190,7 +190,7 @@ describe("Admin shell after restoreSession succeeds", () => {
       await useAuthStore.getState().login("admin@dxcon.test", "secret");
     });
 
-    expect(useAuthStore.getState().bootstrapPhase).toBe("complete");
+    expect(useAuthStore.getState().bootstrapPhase).toBe("authenticated");
     expect(useAuthStore.getState().status).toBe("authenticated");
     expect(useAuthStore.getState().capabilities?.user?.role).toBe("ADMIN");
 
@@ -224,10 +224,10 @@ describe("Admin shell after restoreSession succeeds", () => {
     ).not.toThrow();
   });
 
-  it("logout leaves bootstrap complete so shell does not spin forever", async () => {
+  it("logout leaves bootstrap anonymous so shell does not spin forever", async () => {
     useAuthStore.setState({
       status: "authenticated",
-      bootstrapPhase: "complete",
+      bootstrapPhase: "authenticated",
       accessToken: "a",
       refreshToken: "r",
       user: { id: "1", email: "a@b.com", role: "ADMIN" },
@@ -238,7 +238,7 @@ describe("Admin shell after restoreSession succeeds", () => {
     await useAuthStore.getState().logout();
     const s = useAuthStore.getState();
     expect(s.status).toBe("unauthenticated");
-    expect(s.bootstrapPhase).toBe("complete");
+    expect(s.bootstrapPhase).toBe("anonymous");
     expect(s.accessToken).toBeNull();
   });
 });
