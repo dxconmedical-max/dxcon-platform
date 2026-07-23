@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/Button";
 
 export default function SelectOrganizationPage() {
   const router = useRouter();
-  const { memberships, selectOrganization, isInitializingSession } = useAuth();
+  const { memberships, selectOrganization, isBootstrapping } = useAuth();
 
-  if (isInitializingSession) {
+  if (isBootstrapping) {
     return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
   }
 

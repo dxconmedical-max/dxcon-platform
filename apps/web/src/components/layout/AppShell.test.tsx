@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const replace = vi.fn();
@@ -7,18 +7,29 @@ type Gate = {
   isHydrated: boolean;
   bootstrapPhase: "idle" | "restoring" | "complete" | "failed";
   isInitializingSession: boolean;
+  isBootstrapping: boolean;
   isAuthenticated: boolean;
   status: "authenticated" | "unauthenticated";
   error: string | null;
+  capabilities: Record<string, unknown> | null;
+  role: string | null;
 };
 
 let authState: Gate = {
   isHydrated: true,
   bootstrapPhase: "complete",
   isInitializingSession: false,
+  isBootstrapping: false,
   isAuthenticated: true,
   status: "authenticated",
   error: null,
+  capabilities: {
+    workspace: "/app/admin",
+    permissions: ["*"],
+    features: [],
+    user: { id: "1", email: "a@b.com", role: "ADMIN" },
+  },
+  role: "ADMIN",
 };
 
 vi.mock("next/navigation", () => ({
@@ -40,11 +51,9 @@ vi.mock("@/hooks/useAuth", () => ({
     resolveAfterLogin: vi.fn(),
     setHydrated: vi.fn(),
     user: { id: "1", email: "a@b.com", role: "ADMIN" },
-    role: "ADMIN",
     accessToken: "tok",
     refreshToken: "ref",
     workspacePath: "/app/admin",
-    capabilities: { workspace: "/app/admin", permissions: [], features: [] },
     can: () => true,
     canAny: () => true,
     canAll: () => true,
@@ -54,17 +63,45 @@ vi.mock("@/hooks/useAuth", () => ({
   }),
 }));
 
-vi.mock("@/stores/authStore", () => ({
-  useAuthStore: (selector?: (s: Record<string, unknown>) => unknown) => {
-    const state = {
-      restoreSession: vi.fn(),
-      logout: vi.fn(),
-      clearTransientFlags: vi.fn(),
-      setState: vi.fn(),
-    };
-    return selector ? selector(state) : state;
-  },
-}));
+const storeState: {
+  restoreSession: ReturnType<typeof vi.fn>;
+  logout: ReturnType<typeof vi.fn>;
+  clearTransientFlags: ReturnType<typeof vi.fn>;
+  bootstrapPhase: "idle" | "restoring" | "complete" | "failed";
+  status: "authenticated" | "unauthenticated";
+  isHydrated: boolean;
+  accessToken: string | null;
+  capabilities: Record<string, unknown> | null;
+  role: string | null;
+  error: string | null;
+  isInitializingSession: boolean;
+} = {
+  restoreSession: vi.fn(),
+  logout: vi.fn(async () => undefined),
+  clearTransientFlags: vi.fn(),
+  bootstrapPhase: "complete",
+  status: "authenticated",
+  isHydrated: true,
+  accessToken: "tok",
+  capabilities: authState.capabilities,
+  role: "ADMIN",
+  error: null,
+  isInitializingSession: false,
+};
+
+vi.mock("@/stores/authStore", () => {
+  const useAuthStore = Object.assign(
+    (selector?: (s: typeof storeState) => unknown) =>
+      selector ? selector(storeState) : storeState,
+    {
+      setState: (partial: Partial<typeof storeState>) => {
+        Object.assign(storeState, partial);
+      },
+      getState: () => storeState,
+    },
+  );
+  return { useAuthStore };
+});
 
 vi.mock("@/components/layout/Header", () => ({
   Header: ({ title }: { title: string }) => <div>{title}</div>,
@@ -75,20 +112,42 @@ vi.mock("@/components/layout/Sidebar", () => ({
   Sidebar: () => <nav>Sidebar</nav>,
 }));
 
-import { AppShell } from "./AppShell";
+import {
+  APP_SHELL_BOOTSTRAP_TIMEOUT_MS,
+  AppShell,
+} from "./AppShell";
 
 describe("AppShell after single-owner bootstrap", () => {
-  afterEach(() => cleanup());
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
 
   beforeEach(() => {
     replace.mockReset();
+    storeState.bootstrapPhase = "complete";
+    storeState.status = "authenticated";
+    storeState.isHydrated = true;
+    storeState.accessToken = "tok";
+    storeState.capabilities = authState.capabilities;
+    storeState.role = "ADMIN";
+    storeState.error = null;
+    storeState.isInitializingSession = false;
     authState = {
       isHydrated: true,
       bootstrapPhase: "complete",
       isInitializingSession: false,
+      isBootstrapping: false,
       isAuthenticated: true,
       status: "authenticated",
       error: null,
+      capabilities: {
+        workspace: "/app/admin",
+        permissions: ["*"],
+        features: [],
+        user: { id: "1", email: "a@b.com", role: "ADMIN" },
+      },
+      role: "ADMIN",
     };
   });
 
@@ -100,12 +159,14 @@ describe("AppShell after single-owner bootstrap", () => {
     );
     expect(screen.getByText("Administration")).toBeInTheDocument();
     expect(screen.getByText("Admin workspace")).toBeInTheDocument();
+    expect(screen.queryByText("Loading workspace…")).not.toBeInTheDocument();
   });
 
   it("shows spinner while bootstrapPhase is restoring", () => {
     authState = {
       ...authState,
       bootstrapPhase: "restoring",
+      isBootstrapping: true,
       isAuthenticated: false,
       status: "unauthenticated",
     };
@@ -122,9 +183,12 @@ describe("AppShell after single-owner bootstrap", () => {
       isHydrated: true,
       bootstrapPhase: "failed",
       isInitializingSession: false,
+      isBootstrapping: false,
       isAuthenticated: false,
       status: "unauthenticated",
       error: "Session restore timed out",
+      capabilities: null,
+      role: null,
     };
     render(
       <AppShell title="Administration" workspacePath="/app/admin">
@@ -135,5 +199,60 @@ describe("AppShell after single-owner bootstrap", () => {
       screen.getByRole("heading", { name: /Unable to load workspace/i }),
     ).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent(/timed out/i);
+  });
+
+  it("bounded bootstrap timeout replaces indefinite spinner with diagnostics", () => {
+    vi.useFakeTimers();
+    authState = {
+      ...authState,
+      bootstrapPhase: "restoring",
+      isBootstrapping: true,
+      isAuthenticated: false,
+      status: "unauthenticated",
+      error: null,
+      capabilities: null,
+    };
+    storeState.bootstrapPhase = "restoring";
+    storeState.status = "unauthenticated";
+    storeState.capabilities = null;
+    storeState.accessToken = "tok";
+
+    render(
+      <AppShell title="Administration" workspacePath="/app/admin">
+        <div>x</div>
+      </AppShell>,
+    );
+    expect(screen.getByText("Loading workspace…")).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(APP_SHELL_BOOTSTRAP_TIMEOUT_MS + 50);
+    });
+
+    expect(
+      screen.getByRole("heading", { name: /Unable to load workspace/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(/timed out/i);
+    expect(screen.getByText(/phase=failed/)).toBeInTheDocument();
+    expect(screen.queryByText("Loading workspace…")).not.toBeInTheDocument();
+  });
+
+  it("authenticated without capabilities shows diagnostic, not spinner", () => {
+    authState = {
+      ...authState,
+      capabilities: null,
+      bootstrapPhase: "complete",
+      isBootstrapping: false,
+      isAuthenticated: true,
+      status: "authenticated",
+    };
+    render(
+      <AppShell title="Administration" workspacePath="/app/admin">
+        <div>Admin workspace</div>
+      </AppShell>,
+    );
+    expect(
+      screen.getByRole("heading", { name: /Permissions not loaded/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Loading workspace…")).not.toBeInTheDocument();
   });
 });

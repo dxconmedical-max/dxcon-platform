@@ -300,6 +300,12 @@ export const useAuthStore = create<AuthState>()(
           return "/forbidden";
         }
 
+        // Capabilities payloads sometimes omit nested user — never leave nav
+        // reading capabilities.user.role on undefined after a "successful" login.
+        if (!capabilities.user) {
+          capabilities = { ...capabilities, user };
+        }
+
         set({
           capabilities,
           activeOrganizationId: orgId,
@@ -349,9 +355,12 @@ export const useAuthStore = create<AuthState>()(
           // ignore
         }
         restoreInFlight = null;
+        // Cleared session is a finished bootstrap (anonymous). Do NOT set
+        // phase to "idle" — that re-triggers AuthProvider restore and leaves
+        // AppShell spinning until a no-op restore completes.
         set({
           status: "unauthenticated",
-          bootstrapPhase: "idle",
+          bootstrapPhase: "complete",
           user: null,
           role: null,
           accessToken: null,
@@ -464,7 +473,10 @@ export const useAuthStore = create<AuthState>()(
                     (me.memberships[0] as Membership | undefined)
                       ?.organization_id ??
                     null;
-                  const capabilities = await fetchCapabilities(token, orgId);
+                  let capabilities = await fetchCapabilities(token, orgId);
+                  if (!capabilities.user) {
+                    capabilities = { ...capabilities, user: me.user };
+                  }
                   set({
                     capabilities,
                     activeOrganizationId: orgId,

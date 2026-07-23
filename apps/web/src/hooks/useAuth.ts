@@ -34,11 +34,12 @@ export function useAuth() {
   const clearTransientFlags = useAuthStore((s) => s.clearTransientFlags);
   const setHydrated = useAuthStore((s) => s.setHydrated);
 
-  const restoring =
+  // Explicit bootstrap gate — do NOT fold idle/restoring into isInitializingSession
+  // (AppShell used to double-count that flag and could spin after restore finished).
+  const isBootstrapping =
     !isHydrated ||
     bootstrapPhase === "idle" ||
-    bootstrapPhase === "restoring" ||
-    isInitializingSession;
+    bootstrapPhase === "restoring";
 
   return {
     status,
@@ -52,7 +53,8 @@ export function useAuth() {
     capabilities,
     error,
     isHydrated,
-    isInitializingSession: restoring,
+    isBootstrapping,
+    isInitializingSession,
     isSubmittingLogin,
     isRefreshingSession,
     isAuthenticated: status === "authenticated",

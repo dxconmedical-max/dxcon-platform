@@ -36,7 +36,7 @@ export type Organization = {
 };
 
 export type AuthCapabilities = {
-  user: AuthUser;
+  user?: AuthUser;
   organization: Organization | null;
   membership: {
     membership_id: string | null;

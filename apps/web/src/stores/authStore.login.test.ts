@@ -351,10 +351,12 @@ describe("authStore login / session machine", () => {
       user: { id: "1", email: "u@x.com", role: "ADMIN" },
       isSubmittingLogin: true,
       isInitializingSession: true,
+      bootstrapPhase: "complete",
     });
     await useAuthStore.getState().logout();
     const s = useAuthStore.getState();
     expect(s.status).toBe("unauthenticated");
+    expect(s.bootstrapPhase).toBe("complete");
     expect(s.accessToken).toBeNull();
     expect(s.isSubmittingLogin).toBe(false);
     expect(s.isInitializingSession).toBe(false);
