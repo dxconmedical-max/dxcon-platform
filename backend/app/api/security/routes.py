@@ -1,4 +1,5 @@
 from app.core.audit import write_audit
+from app.core.authz import roles_required
 from app.core.passwords import hash_password
 from app.core.roles import ALL_ROLES
 from app.core.validation import (
@@ -19,8 +20,11 @@ security_api_bp = Blueprint(
     url_prefix="/api/v1/security"
 )
 
+_ADMIN = ("SUPER_ADMIN", "SYSTEM_ADMIN", "ADMIN")
+
 
 @security_api_bp.route("/roles")
+@roles_required(*_ADMIN)
 def roles():
     return {
         "roles": ALL_ROLES
@@ -28,6 +32,7 @@ def roles():
 
 
 @security_api_bp.route("/users")
+@roles_required(*_ADMIN)
 def users():
     items = User.query.all()
 
@@ -41,6 +46,7 @@ def users():
 
 
 @security_api_bp.route("/users", methods=["POST"])
+@roles_required(*_ADMIN)
 def create_user():
     data = get_json_body()
     require_fields(data, "email", "password")
@@ -81,6 +87,7 @@ def create_user():
 
 
 @security_api_bp.route("/users/<user_id>/role", methods=["POST"])
+@roles_required(*_ADMIN)
 def update_role(user_id):
     data = get_json_body()
     require_fields(data, "role")
@@ -107,6 +114,7 @@ def update_role(user_id):
 
 
 @security_api_bp.route("/users/<user_id>/disable", methods=["POST", "GET"])
+@roles_required(*_ADMIN)
 def disable_user(user_id):
 
     user = User.query.get(user_id)

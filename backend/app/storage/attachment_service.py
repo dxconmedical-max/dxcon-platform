@@ -92,9 +92,10 @@ class AttachmentService:
             raise ValueError(validation["error"])
 
         app = current_app._get_current_object()
-        if token is not None and expires is not None:
-            if not verify_signed_url(file_id, token, int(expires), secret=app.config["SECRET_KEY"]):
-                raise PermissionError("invalid or expired signed URL")
+        if not token or expires is None:
+            raise PermissionError("signed token and expires are required")
+        if not verify_signed_url(file_id, token, int(expires), secret=app.config["SECRET_KEY"]):
+            raise PermissionError("invalid or expired signed URL")
         provider = get_storage_provider(app)
         data = provider.get(row.storage_key)
         digest = hashlib.sha256(data).hexdigest()

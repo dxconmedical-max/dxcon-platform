@@ -68,13 +68,24 @@ def _issue_tokens(user):
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
+    """Public self-registration is PATIENT-only (RC P0 privilege escalation fix)."""
+    from flask import current_app
+
+    from app.infrastructure.production_readiness import is_strict_env
+
     data = get_json_body()
     require_fields(data, "email", "password")
 
     email = validate_email(data.get("email"))
     password = validate_password(data.get("password"))
     phone = data.get("phone")
-    role = validate_role(data.get("role", "PATIENT"), ALL_ROLES)
+    requested_role = (data.get("role") or "PATIENT").strip().upper()
+    # Never allow privileged roles via public register — staff are provisioned by admins.
+    if requested_role != "PATIENT":
+        return {"error": "Public registration only allows PATIENT role"}, 403
+    if is_strict_env(current_app) and current_app.config.get("ALLOW_PUBLIC_REGISTER") is False:
+        return {"error": "Public registration is disabled"}, 403
+    role = validate_role("PATIENT", ALL_ROLES)
 
     existing_user = User.query.filter_by(
         email=email,
