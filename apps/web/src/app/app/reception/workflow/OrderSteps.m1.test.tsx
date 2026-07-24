@@ -169,7 +169,7 @@ describe("Reception Milestone 1 UI integration", () => {
     await screen.findByText("Packages (by category)");
     const packageCheckbox = screen.getAllByRole("checkbox")[0];
     await user.click(packageCheckbox);
-    await user.click(screen.getByRole("button", { name: "Create order" }));
+    await user.click(screen.getByRole("button", { name: "Create laboratory order" }));
     await waitFor(() => expect(createReceptionOrder).toHaveBeenCalledTimes(1));
     const payload = vi.mocked(createReceptionOrder).mock.calls[0]?.[1];
     expect(payload?.test_catalog_ids).toEqual(expect.arrayContaining(["t1", "t2"]));
@@ -208,10 +208,10 @@ describe("Reception Milestone 1 UI integration", () => {
     const table = screen.getByRole("table");
     const testCheckbox = within(table).getByRole("checkbox");
     await user.click(testCheckbox);
-    expect(screen.getByText(/1 tests/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 test ·/i)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /CBC ×/i }));
-    expect(screen.getByText(/0 tests/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Create order" })).toBeDisabled();
+    expect(screen.getByText(/0 tests ·/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Create laboratory order" })).toBeDisabled();
   });
 
   it("prevents duplicate order submit while in flight", async () => {
@@ -237,7 +237,7 @@ describe("Reception Milestone 1 UI integration", () => {
     );
     await screen.findAllByText("CBC");
     await user.click(within(screen.getByRole("table")).getByRole("checkbox"));
-    const createBtn = screen.getByRole("button", { name: "Create order" });
+    const createBtn = screen.getByRole("button", { name: "Create laboratory order" });
     await user.click(createBtn);
     await user.click(createBtn);
     expect(createReceptionOrder).toHaveBeenCalledTimes(1);
@@ -246,7 +246,7 @@ describe("Reception Milestone 1 UI integration", () => {
       invoice: {},
       pricing: { subtotal: 100, discount: 0, total: 100 },
     });
-    await waitFor(() => expect(screen.getByRole("button", { name: "Create order" })).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Create laboratory order" })).toBeEnabled());
   });
 
   it("shows partial failure from order create without advancing", async () => {
@@ -269,7 +269,7 @@ describe("Reception Milestone 1 UI integration", () => {
     );
     await screen.findAllByText("CBC");
     await user.click(within(screen.getByRole("table")).getByRole("checkbox"));
-    await user.click(screen.getByRole("button", { name: "Create order" }));
+    await user.click(screen.getByRole("button", { name: "Create laboratory order" }));
     expect(await screen.findByText("Patient not found")).toBeInTheDocument();
     expect(onOrderCreated).not.toHaveBeenCalled();
   });
@@ -307,7 +307,7 @@ describe("Reception Milestone 1 UI integration", () => {
     const table = screen.getByRole("table");
     const testCheckbox = within(table).getByRole("checkbox");
     await user.click(testCheckbox);
-    await user.click(screen.getByRole("button", { name: "Create order" }));
+    await user.click(screen.getByRole("button", { name: "Create laboratory order" }));
     await waitFor(() => expect(createReceptionOrder).toHaveBeenCalled());
     const payload = vi.mocked(createReceptionOrder).mock.calls[0]?.[1];
     expect(payload?.test_catalog_ids).toEqual(["t1"]);

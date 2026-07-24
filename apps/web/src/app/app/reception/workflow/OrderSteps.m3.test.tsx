@@ -81,8 +81,8 @@ describe("Reception Milestone 3 documents UI", () => {
     expect(await screen.findByText("BC-ORD-1")).toBeInTheDocument();
     expect(screen.getByText("dxcon:patient:P1")).toBeInTheDocument();
     expect(screen.getByText("QR format valid")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Print labels" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Open requisition" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Print barcode labels" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Print order form" })).toBeInTheDocument();
   });
 
   it("shows backend eligibility error", async () => {
