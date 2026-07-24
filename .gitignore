@@ -27,6 +27,7 @@ __MACOSX/
 
 # Upload scratch space
 uploads/tmp/
+backend/uploads/reports/
 
 # Flutter build
 build/

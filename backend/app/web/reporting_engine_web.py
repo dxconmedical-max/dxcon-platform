@@ -88,6 +88,7 @@ def doctor_review_detail(order_ref: str):
       <form method="post" action="/app/business/orders/{_h(order_ref)}/approve" style="display:inline"><input type="hidden" name="doctor_note" value="Approved via review workspace"/><button class="launch-btn launch-btn-sm" type="submit">Approve</button></form>
       <form method="post" action="/app/business/orders/{_h(order_ref)}/release" style="display:inline"><button class="launch-btn-outline launch-btn-sm" type="submit">Release</button></form>
       <a class="launch-btn-outline launch-btn-sm" href="/app/reports/{rc}/preview">Preview Report</a>
+      <a class="launch-btn-outline launch-btn-sm" href="/api/v1/reporting/reports/{rc}/pdf">Download PDF</a>
     </div>
     """
     body = (
@@ -124,7 +125,12 @@ def reports_search():
             _h(r.get("order_code", "")),
             _h(r.get("patient_id", "")),
             status_badge(r.get("report_status", "")),
-            f'<a href="/app/reports/{rc}/preview">Preview</a>',
+            f'<a href="/app/reports/{rc}/preview">Preview</a>'
+            + (
+                f' · <a href="/api/v1/reporting/reports/{rc}/pdf">PDF</a>'
+                if r.get("pdf_path") and r.get("report_status") in ("approved", "released", "amended")
+                else ""
+            ),
         ])
     body = (
         '<div class="launch-action-row"><a class="launch-btn-outline launch-btn-sm" href="/app/doctor/review">Doctor Review</a></div>'
@@ -141,10 +147,23 @@ def report_preview(report_code: str):
     if not report:
         return render_page("Preview", '<div class="launch-card"><p>Report not found.</p></div>', active_nav="/app/reports")
     html_content = report.html_content or "<p>Report not generated yet.</p>"
+    pdf_link = ""
+    if report.pdf_path and report.report_status in ("approved", "released", "amended"):
+        pdf_link = (
+            f'<div class="launch-action-row">'
+            f'<a class="launch-btn launch-btn-sm" href="/api/v1/reporting/reports/{_h(report_code)}/pdf">Download PDF</a>'
+            f'<form method="post" action="/api/v1/reporting/reports/{_h(report_code)}/reprint" style="display:inline">'
+            f'<button class="launch-btn-outline launch-btn-sm" type="submit">Reprint PDF</button></form>'
+            f'<button class="launch-btn-outline launch-btn-sm" type="button" onclick="window.print()">Print</button>'
+            f'</div>'
+        )
     body = (
         f'<a class="launch-btn-outline launch-btn-sm" href="/app/reports">← Reports</a>'
-        f'<div class="launch-card report-preview">{html_content}</div>'
-        + f'<p class="launch-hint">Hash: <code>{_h(report.report_hash or "—")}</code> · Version {report.report_version}</p>'
+        + pdf_link
+        + f'<div class="launch-card report-preview">{html_content}</div>'
+        + f'<p class="launch-hint">Hash: <code>{_h(report.report_hash or "—")}</code> · Version {report.report_version}'
+        + (f' · PDF ready' if report.pdf_path else ' · PDF pending')
+        + '</p>'
     )
     return render_page(f"Report {report_code}", body, active_nav="/app/reports")
 

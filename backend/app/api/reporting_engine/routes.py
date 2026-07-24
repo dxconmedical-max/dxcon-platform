@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flask import Blueprint, request, session
+from flask import Blueprint, Response, request, session
 
 from app.business_engine.service import BusinessEngineError
 from app.extensions.db import db
@@ -14,7 +14,9 @@ from app.reporting_engine.service import (
     audit_timeline,
     create_report_amendment,
     doctor_review_report,
+    get_report_pdf,
     patient_released_reports,
+    production_report_pdf_report,
     reject_report,
     release_report,
     report_security_report,
@@ -26,6 +28,7 @@ from app.reporting_engine.service import (
     start_review,
     critical_result_report,
     report_versions,
+    verify_clinical_report,
 )
 from app.reporting_engine.report_generation_service import build_report_payload, prepare_pdf_payload, render_html_report
 from app.models.clinical_report import ClinicalReport, CriticalResultAlert
@@ -36,6 +39,21 @@ reporting_engine_bp = Blueprint("reporting_engine", __name__, url_prefix="/api/v
 def _actor() -> str | None:
     return session.get("email") or request.headers.get("X-Actor")
 
+
+def _pdf_response(bundle: dict) -> Response:
+    return Response(
+        bundle["bytes"],
+        mimetype=bundle["content_type"],
+        headers={
+            "Content-Disposition": f'attachment; filename="{bundle["filename"]}"',
+            "X-Report-Code": bundle["report_code"],
+            "X-Report-Version": str(bundle["report_version"]),
+            "X-Report-Hash": bundle.get("report_hash") or "",
+            "X-Report-Template": f"{bundle.get('template_id')}@{bundle.get('template_version')}",
+            "X-Report-Reprint": str(bundle.get("reprint_number") or 0),
+            "Cache-Control": "no-store",
+        },
+    )
 
 @reporting_engine_bp.route("/review-queue", methods=["GET"])
 @report_api_read
@@ -144,8 +162,70 @@ def api_preview(report_code: str):
     if not report:
         return {"success": False, "error": "not found"}, 404
     payload = build_report_payload(report.order_id)
-    html = report.html_content or render_html_report(payload, report_code=report.report_code, doctor_note=report.doctor_note)
-    return {"success": True, "data": {"html": html, "pdf_payload": prepare_pdf_payload(payload, html)}}, 200
+    html = report.html_content or render_html_report(
+        payload,
+        report_code=report.report_code,
+        doctor_note=report.doctor_note,
+        report_version=report.report_version,
+        report_status=report.report_status,
+        report_hash=report.report_hash,
+        approved_by=report.approved_by,
+        approved_at=report.approved_at.isoformat() if report.approved_at else None,
+        amendment_reason=report.amendment_reason,
+    )
+    return {
+        "success": True,
+        "data": {
+            "html": html,
+            "pdf_payload": prepare_pdf_payload(
+                payload,
+                html,
+                pdf_ready=bool(report.pdf_path),
+                pdf_path=report.pdf_path,
+            ),
+            "pdf_available": bool(report.pdf_path) and report.report_status in ("approved", "released", "amended"),
+        },
+    }, 200
+
+
+@reporting_engine_bp.route("/reports/<report_code>/pdf", methods=["GET"])
+@report_api_read
+def api_report_pdf(report_code: str):
+    try:
+        bundle = get_report_pdf(report_code, actor=_actor(), as_reprint=False)
+        return _pdf_response(bundle)
+    except ReportingEngineError as exc:
+        return {"success": False, "error": str(exc)}, 403 if "only after" in str(exc).lower() or "not visible" in str(exc).lower() else 404
+
+
+@reporting_engine_bp.route("/reports/<report_code>/reprint", methods=["POST"])
+@report_api_read
+def api_report_reprint(report_code: str):
+    try:
+        bundle = get_report_pdf(report_code, actor=_actor(), as_reprint=True)
+        db.session.commit()
+        return _pdf_response(bundle)
+    except ReportingEngineError as exc:
+        db.session.rollback()
+        return {"success": False, "error": str(exc)}, 400
+
+
+@reporting_engine_bp.route("/patient/<patient_code>/reports/<report_code>/pdf", methods=["GET"])
+@patient_report_read
+def api_patient_report_pdf(patient_code: str, report_code: str):
+    try:
+        bundle = get_report_pdf(report_code, actor=_actor(), patient_code=patient_code)
+        return _pdf_response(bundle)
+    except ReportingEngineError as exc:
+        return {"success": False, "error": str(exc)}, 403
+
+
+@reporting_engine_bp.route("/verify/<report_code>", methods=["GET"])
+def api_verify_report(report_code: str):
+    """Public authenticity check — minimal certificate fields only."""
+    data = verify_clinical_report(report_code, hash_prefix=request.args.get("hash"))
+    status = 200 if data.get("valid") else 404
+    return {"success": bool(data.get("valid")), "data": data}, status
 
 
 @reporting_engine_bp.route("/reports/<report_code>/versions", methods=["GET"])
@@ -221,3 +301,9 @@ def api_security_report():
 @report_api_read
 def api_critical_report():
     return {"success": True, "data": critical_result_report()}, 200
+
+
+@reporting_engine_bp.route("/pdf-report", methods=["GET"])
+@report_api_read
+def api_pdf_report():
+    return {"success": True, "data": production_report_pdf_report()}, 200
