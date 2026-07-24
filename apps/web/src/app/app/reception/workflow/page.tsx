@@ -23,7 +23,7 @@ import {
   type SelectedPatient,
 } from "./OrderSteps";
 
-const STEPS = ["Patient", "Tests & order", "Payment & receipt"] as const;
+const STEPS = ["Patient", "Tests & order number", "Payment & documents"] as const;
 
 function ReceptionOrderWorkflowPanel() {
   const { accessToken, activeOrganizationId, can, role, user } = useAuth();
@@ -119,8 +119,8 @@ function ReceptionOrderWorkflowPanel() {
   return (
     <div className="space-y-5">
       <SectionHeader
-        title="Reception — Order, payment & documents"
-        description="Patient and order (M1), payment and receipt (M2), barcode/QR and requisition (M3)."
+        title="Reception Phase 1 — Order workflow"
+        description="Patient → test catalog → laboratory order number → payment → barcode labels → printable order form."
         actions={
           step > 0 ? (
             <Button size="sm" variant="outline" onClick={reset}>

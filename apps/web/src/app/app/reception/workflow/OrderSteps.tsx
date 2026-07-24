@@ -543,15 +543,32 @@ export function TestsStep({
   return (
     <div className="space-y-5">
       <SectionHeader
-        title="Select tests & create order"
-        description={`${patient.patientName} · ${patient.patientCode}`}
+        title="Select tests & create laboratory order"
+        description={`${patient.patientName} · ${patient.patientCode}. Catalog prices come from the backend; the order number is issued on create.`}
       />
-      <Input
-        value={catalogQuery}
-        onChange={(event) => setCatalogQuery(event.target.value)}
-        placeholder="Search test catalog"
-        aria-label="Catalog search"
-      />
+      <form
+        className="flex flex-col gap-3 sm:flex-row sm:items-end"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void loadCatalog(catalogQuery);
+        }}
+      >
+        <div className="min-w-0 flex-1">
+          <Label htmlFor="reception-catalog-search" className="sr-only">
+            Search test catalog
+          </Label>
+          <Input
+            id="reception-catalog-search"
+            value={catalogQuery}
+            onChange={(event) => setCatalogQuery(event.target.value)}
+            placeholder="Search test catalog by code or name"
+            aria-label="Catalog search"
+          />
+        </div>
+        <Button type="submit" variant="outline" disabled={loading}>
+          {loading ? "Loading…" : "Refresh catalog"}
+        </Button>
+      </form>
       <DataState
         loading={loading}
         error={error}
@@ -668,11 +685,22 @@ export function TestsStep({
               </div>
             ) : null}
 
+            <div className="rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-950">
+              <p className="font-medium">Order preview</p>
+              <p className="mt-1">
+                {selectedTests.length} test{selectedTests.length === 1 ? "" : "s"} · Subtotal{" "}
+                {formatCurrency(previewSubtotal)} · Est. total {formatCurrency(previewTotal)}
+              </p>
+              <p className="mt-2 text-xs text-sky-800">
+                Creating the order asks the backend for a unique laboratory order number (ORD-…).
+              </p>
+            </div>
+
             <Button
               disabled={creating || selectedTestIds.length === 0}
               onClick={() => void submitOrder()}
             >
-              {creating ? "Creating order…" : "Create order"}
+              {creating ? "Creating order…" : "Create laboratory order"}
             </Button>
           </div>
         </div>
@@ -873,6 +901,14 @@ export function PaymentStep({
             </Button>
           }
         />
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
+            Laboratory order number
+          </p>
+          <p className="mt-1 break-all font-mono text-lg font-semibold text-emerald-950">
+            {orderRef}
+          </p>
+        </div>
         {error ? (
           <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
             <p>{error}</p>
@@ -1145,8 +1181,8 @@ ${sampleRows}
     <div className="space-y-5">
       <Card className="space-y-4">
         <SectionHeader
-          title="Barcode, QR & requisition"
-          description="Backend-generated identifiers for the paid order. Reprint returns the same codes."
+          title="Barcode, QR & order form"
+          description="Backend-generated specimen identifiers and printable laboratory requisition for the paid order."
           actions={
             <Button size="sm" variant="outline" disabled={loading} onClick={() => void loadDocuments()}>
               {loading ? "Loading…" : barcodes?.reprint ? "Reprint / refresh" : "Generate / refresh"}
@@ -1229,10 +1265,10 @@ ${sampleRows}
           ) : null}
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={openLabels}>
-              Print labels
+              Print barcode labels
             </Button>
             <Button variant="outline" disabled={!requisitionHtml} onClick={openRequisition}>
-              Open requisition
+              Print order form
             </Button>
             <Button variant="ghost" onClick={() => void loadDocuments()}>
               Reprint
