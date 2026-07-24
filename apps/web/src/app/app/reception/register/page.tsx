@@ -140,114 +140,137 @@ function RegisterPanel() {
         }
       />
       <Card className="space-y-4">
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <Label htmlFor="full_name">Full name *</Label>
-            <Input
-              id="full_name"
-              value={form.full_name}
-              onChange={(event) => setForm((prev) => ({ ...prev, full_name: event.target.value }))}
-            />
+        <p className="text-sm text-slate-600">
+          Required fields are marked with *. Duplicate phone or national ID is detected before create.
+        </p>
+        <form
+          className="space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void submit(false);
+          }}
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <Label htmlFor="full_name">Full name *</Label>
+              <Input
+                id="full_name"
+                required
+                autoComplete="name"
+                value={form.full_name}
+                onChange={(event) => setForm((prev) => ({ ...prev, full_name: event.target.value }))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="phone">Phone *</Label>
+              <Input
+                id="phone"
+                required
+                autoComplete="tel"
+                inputMode="tel"
+                value={form.phone}
+                onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="patient_code">Patient code (optional)</Label>
+              <Input
+                id="patient_code"
+                value={form.patient_code}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, patient_code: event.target.value }))
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="national_id">National ID</Label>
+              <Input
+                id="national_id"
+                value={form.national_id}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, national_id: event.target.value }))
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="gender">Gender</Label>
+              <Input
+                id="gender"
+                value={form.gender}
+                onChange={(event) => setForm((prev) => ({ ...prev, gender: event.target.value }))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="dob">Date of birth</Label>
+              <Input
+                id="dob"
+                type="date"
+                value={form.date_of_birth}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, date_of_birth: event.target.value }))
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                value={form.email}
+                onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="address">Address</Label>
+              <Input
+                id="address"
+                autoComplete="street-address"
+                value={form.address}
+                onChange={(event) => setForm((prev) => ({ ...prev, address: event.target.value }))}
+              />
+            </div>
           </div>
-          <div>
-            <Label htmlFor="phone">Phone *</Label>
-            <Input
-              id="phone"
-              value={form.phone}
-              onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
-            />
-          </div>
-          <div>
-            <Label htmlFor="patient_code">Patient code (optional)</Label>
-            <Input
-              id="patient_code"
-              value={form.patient_code}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, patient_code: event.target.value }))
-              }
-            />
-          </div>
-          <div>
-            <Label htmlFor="national_id">National ID</Label>
-            <Input
-              id="national_id"
-              value={form.national_id}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, national_id: event.target.value }))
-              }
-            />
-          </div>
-          <div>
-            <Label htmlFor="gender">Gender</Label>
-            <Input
-              id="gender"
-              value={form.gender}
-              onChange={(event) => setForm((prev) => ({ ...prev, gender: event.target.value }))}
-            />
-          </div>
-          <div>
-            <Label htmlFor="dob">Date of birth</Label>
-            <Input
-              id="dob"
-              type="date"
-              value={form.date_of_birth}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, date_of_birth: event.target.value }))
-              }
-            />
-          </div>
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={form.email}
-              onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-            />
-          </div>
-          <div>
-            <Label htmlFor="address">Address</Label>
-            <Input
-              id="address"
-              value={form.address}
-              onChange={(event) => setForm((prev) => ({ ...prev, address: event.target.value }))}
-            />
-          </div>
-        </div>
-        {error ? <p className="text-sm text-rose-600">{error}</p> : null}
-        {duplicates.length > 0 ? (
-          <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
-            <p className="text-sm font-medium text-amber-900">Duplicate detection</p>
-            <ul className="space-y-2 text-sm text-amber-900">
-              {duplicates.map((warning, index) => (
-                <li
-                  key={`${warning.patient_code ?? warning.field ?? "dup"}-${index}`}
-                  className="flex flex-wrap items-center justify-between gap-2"
-                >
-                  <span>
-                    {String(warning.message ?? warning.reason ?? "Possible match")}
-                    {warning.patient_code ? ` (${warning.patient_code})` : ""}
-                  </span>
-                  {warning.patient_code ? (
-                    <Link
-                      href={`/app/reception/workflow?patient=${encodeURIComponent(String(warning.patient_code))}`}
-                    >
-                      <Button size="sm" variant="outline">
-                        Use existing
-                      </Button>
-                    </Link>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-            <Button variant="secondary" disabled={creating} onClick={() => void submit(true)}>
-              {creating ? "Registering…" : "Register anyway"}
-            </Button>
-          </div>
-        ) : null}
-        <Button disabled={creating || !accessToken} onClick={() => void submit(false)}>
-          {creating ? "Registering…" : "Register patient"}
-        </Button>
+          {error ? <p className="text-sm text-rose-600">{error}</p> : null}
+          {duplicates.length > 0 ? (
+            <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
+              <p className="text-sm font-medium text-amber-900">Duplicate detection</p>
+              <ul className="space-y-2 text-sm text-amber-900">
+                {duplicates.map((warning, index) => (
+                  <li
+                    key={`${warning.patient_code ?? warning.field ?? "dup"}-${index}`}
+                    className="flex flex-wrap items-center justify-between gap-2"
+                  >
+                    <span>
+                      {String(warning.message ?? warning.reason ?? "Possible match")}
+                      {warning.patient_code ? ` (${warning.patient_code})` : ""}
+                    </span>
+                    {warning.patient_code ? (
+                      <Link
+                        href={`/app/reception/workflow?patient=${encodeURIComponent(String(warning.patient_code))}`}
+                      >
+                        <Button size="sm" variant="outline" type="button">
+                          Use existing
+                        </Button>
+                      </Link>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={creating}
+                onClick={() => void submit(true)}
+              >
+                {creating ? "Registering…" : "Register anyway"}
+              </Button>
+            </div>
+          ) : null}
+          <Button type="submit" disabled={creating || !accessToken}>
+            {creating ? "Registering…" : "Register patient"}
+          </Button>
+        </form>
       </Card>
     </div>
   );
