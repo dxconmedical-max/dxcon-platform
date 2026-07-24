@@ -45,6 +45,15 @@ class LabAccessionRecord(db.Model):
     accessioned_at = db.Column(db.DateTime)
     laboratory_id = db.Column(db.String(36))
     status = db.Column(db.String(30), default="active")
+    processing_status = db.Column(db.String(40), default="accessioned")
+    bench_id = db.Column(db.String(100))
+    instrument_id = db.Column(db.String(100))
+    technician = db.Column(db.String(255))
+    identifiers_verified = db.Column(db.Boolean, default=False)
+    verified_at = db.Column(db.DateTime)
+    rejection_reason = db.Column(db.String(80))
+    processing_started_at = db.Column(db.DateTime)
+    processing_completed_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self) -> dict:
@@ -59,6 +68,20 @@ class LabAccessionRecord(db.Model):
             "accessioned_at": self.accessioned_at.isoformat() if self.accessioned_at else None,
             "laboratory_id": self.laboratory_id,
             "status": self.status,
+            "processing_status": self.processing_status,
+            "bench_id": self.bench_id,
+            "instrument_id": self.instrument_id,
+            "technician": self.technician,
+            "identifiers_verified": bool(self.identifiers_verified),
+            "verified_at": self.verified_at.isoformat() if self.verified_at else None,
+            "rejection_reason": self.rejection_reason,
+            "processing_started_at": (
+                self.processing_started_at.isoformat() if self.processing_started_at else None
+            ),
+            "processing_completed_at": (
+                self.processing_completed_at.isoformat() if self.processing_completed_at else None
+            ),
+            "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 
 

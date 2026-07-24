@@ -7,7 +7,13 @@ from functools import wraps
 from flask import session
 
 from app.core.authz import roles_required
-from app.lab_workspace.security import LAB_ADMIN_ROLES, LAB_READ_ROLES, LAB_SUPERVISOR_ROLES, LAB_WRITE_ROLES
+from app.lab_workspace.security import (
+    LAB_ADMIN_ROLES,
+    LAB_MEDICAL_ROLES,
+    LAB_READ_ROLES,
+    LAB_SUPERVISOR_ROLES,
+    LAB_WRITE_ROLES,
+)
 
 
 def _session_role_ok(roles: frozenset) -> bool:
@@ -40,3 +46,7 @@ def lab_api_supervisor(fn):
 
 def lab_api_admin(fn):
     return _dual_auth(LAB_ADMIN_ROLES, fn)
+
+
+def lab_api_medical(fn):
+    return _dual_auth(LAB_MEDICAL_ROLES, fn)

@@ -8,15 +8,24 @@ export default function LabPage() {
     <AppShell title="Laboratory" workspacePath="/app/lab">
       <WorkspaceHome
         title="Laboratory workspace"
-        subtitle="Worklists, QC, and result verification."
+        subtitle="Specimen receipt, accession, processing, result entry, and validation."
         statusCards={[
-          { label: "Worklist", value: "—" },
-          { label: "Pending verify", value: "—" },
-          { label: "Instruments", value: "—" },
-          { label: "TAT", value: "—" },
+          { label: "Receive", value: "Live" },
+          { label: "Accession", value: "Live" },
+          { label: "Results", value: "Live" },
+          { label: "Validation", value: "Live" },
         ]}
         actions={[
-          { label: "Sample worklist", href: "/app/lab", description: "Processing queue.", comingSoon: true },
+          {
+            label: "Lab worklist",
+            href: "/app/lab/queue",
+            description: "Incoming and in-process specimens.",
+          },
+          {
+            label: "Lab workflow",
+            href: "/app/lab/workflow",
+            description: "Receive → accession → process → results → tech & medical validation.",
+          },
         ]}
       />
     </AppShell>

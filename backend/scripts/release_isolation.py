@@ -561,6 +561,18 @@ RELEASES: tuple[ReleaseSpec, ...] = (
         "backend/app/web/logistics_v2.py",
         "backend/scripts/verify_logistics",
     )),
+    ReleaseSpec("laboratory-workflow", "Laboratory Workflow", (
+        "backend/app/lab_workspace/",
+        "backend/app/api/lab_workspace/",
+        "backend/app/models/lab_lis.py",
+        "backend/app/models/biz_order.py",
+        "backend/migrations/007_lab_workflow.sql",
+        "backend/scripts/verify_laboratory_workflow.py",
+        "backend/tests/test_laboratory_workflow.py",
+        "backend/tests/test_lab_workspace.py",
+        "apps/web/src/app/app/lab/",
+        "apps/web/src/lib/api/labWorkflow.ts",
+    )),
     ReleaseSpec("3.2", "Laboratory Operations Platform", (
         "backend/app/models/lab_facility.py",
         "backend/app/models/lab_accession.py",

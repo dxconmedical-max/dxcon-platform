@@ -226,6 +226,10 @@ class BizResultItem(db.Model):
             "unit": self.unit,
             "reference_range": self.reference_range,
             "flag": self.flag,
+            "instrument": self.instrument,
+            "technician": self.technician,
+            "result_time": self.result_time.isoformat() if self.result_time else None,
+            "entry_note": self.entry_note,
         }
 
 
