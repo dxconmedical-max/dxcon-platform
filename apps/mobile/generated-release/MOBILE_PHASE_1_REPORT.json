@@ -66,6 +66,5 @@
     "android_release_signing_secrets",
     "ios_provisioning_profiles",
     "mobile_device_token_api"
-  ],
-  "legacy_alias": "MOBILE_PHASE_1_REPORT"
+  ]
 }

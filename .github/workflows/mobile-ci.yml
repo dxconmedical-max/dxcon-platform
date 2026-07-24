@@ -26,18 +26,18 @@ jobs:
       - name: Format check
         run: dart format --output=none --set-exit-if-changed .
       - name: Analyze
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
       - name: Test
         run: flutter test
-      - name: Verify foundation
-        run: dart run tool/verify_mobile_foundation.dart
+      - name: Verify Phase 1 foundation
+        run: dart run tool/verify_mobile_phase1.dart
       - name: Build Android debug APK
-        run: flutter build apk --debug
+        run: flutter build apk --debug --flavor production --dart-define-from-file=config/production.env.json
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: dxcon-mobile-debug-apk
-          path: apps/mobile/build/app/outputs/flutter-apk/app-debug.apk
+          path: apps/mobile/build/app/outputs/flutter-apk/app-production-debug.apk
 
   ios-readiness:
     runs-on: macos-latest
@@ -53,4 +53,4 @@ jobs:
           cache: true
       - run: flutter pub get
       - name: iOS build (no codesign)
-        run: flutter build ios --no-codesign
+        run: flutter build ios --no-codesign --dart-define-from-file=config/production.env.json

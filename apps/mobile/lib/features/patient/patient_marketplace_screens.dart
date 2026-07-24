@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:dxcon_mobile/design_system/components.dart';
 import 'package:dxcon_mobile/features/patient/patient_home_screen.dart';
-import 'package:dxcon_mobile/services/marketplace_repository.dart';
 
 class PatientCompareScreen extends ConsumerStatefulWidget {
   const PatientCompareScreen({super.key, this.listingIds = const []});

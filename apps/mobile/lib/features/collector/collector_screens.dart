@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:dxcon_mobile/core/auth/auth_provider.dart';
-import 'package:dxcon_mobile/core/api/api_client.dart';
 import 'package:dxcon_mobile/design_system/components.dart';
-import 'package:dxcon_mobile/features/patient/patient_home_screen.dart';
 import 'package:dxcon_mobile/services/collector_api_repository.dart';
 
 final collectorApiProvider = Provider<CollectorApiRepository>((ref) {
@@ -150,7 +148,6 @@ class CollectorJobDetailScreen extends ConsumerWidget {
         if (!snapshot.hasData) return const DxLoadingState();
         if (snapshot.hasError) return DxErrorState(message: snapshot.error.toString());
         final job = snapshot.data!;
-        final assignment = job['assignment'] as Map<String, dynamic>? ?? {};
         final booking = job['booking'] as Map<String, dynamic>? ?? {};
         return ListView(
           padding: const EdgeInsets.all(16),
