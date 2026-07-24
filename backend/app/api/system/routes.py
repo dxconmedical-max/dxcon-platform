@@ -119,11 +119,12 @@ def liveness():
 
 def _ready_response():
     app = current_app._get_current_object()
-    migration = app.extensions.get("dxcon_deployment", {}).get("migration_status", {})
 
     try:
+        # Always re-verify under the current request app context.
+        # Cached startup migration_status can be stale/wrong if startup ran without context.
         verify_database_connection(app, retries=1, delay_seconds=0)
-        migration = migration or verify_migrations(app)
+        migration = verify_migrations(app)
         if migration.get("ready"):
             email = EmailProvider().health_check()
             email_dry_run = bool(os.environ.get("EMAIL_DRY_RUN", "").lower() in ("1", "true", "yes"))
