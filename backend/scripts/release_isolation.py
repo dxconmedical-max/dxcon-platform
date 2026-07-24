@@ -591,6 +591,18 @@ RELEASES: tuple[ReleaseSpec, ...] = (
         "backend/scripts/verify_results.py",
         "backend/tests/test_results.py",
     )),
+    ReleaseSpec("sample-collection-production", "Sample Collection Production Workflow", (
+        "backend/app/sample_collection_workspace/",
+        "backend/app/services/sample_collection_workflow.py",
+        "backend/app/services/collector_operations.py",
+        "backend/app/models/sample_collection.py",
+        "backend/app/api/sample_collections/",
+        "backend/app/api/collector_operations/",
+        "backend/app/api/order_lifecycle/",
+        "backend/tests/test_sample_collection_production.py",
+        "apps/web/src/lib/api/sampleCollection.ts",
+        "apps/web/src/app/app/collector/",
+    )),
 )
 
 

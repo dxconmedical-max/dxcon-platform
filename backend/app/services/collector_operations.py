@@ -534,6 +534,11 @@ class CollectorOperationsService:
         note=None,
         actor_email="SYSTEM",
         ip_address="",
+        *,
+        specimen_type=None,
+        scanned_barcode=None,
+        collection_location=None,
+        require_barcode=False,
     ):
         CollectorOperationsService._get_collector_or_raise(collector_id)
         collection, sample = SampleCollectionWorkflowService.record_collection(
@@ -544,6 +549,12 @@ class CollectorOperationsService:
             longitude=longitude,
             actor_email=actor_email,
             ip_address=ip_address,
+            specimen_type=specimen_type,
+            scanned_barcode=scanned_barcode,
+            collection_location=collection_location,
+            require_barcode=require_barcode,
+            patient_verified=True,
+            order_verified=True,
         )
 
         CollectorOperationsService._write_timeline(

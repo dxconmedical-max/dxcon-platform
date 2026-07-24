@@ -117,6 +117,12 @@ def collect_sample(booking_id):
             longitude=data.get("longitude"),
             actor_email=_actor_email(),
             ip_address=_client_ip(),
+            specimen_type=data.get("specimen_type"),
+            scanned_barcode=data.get("scanned_barcode") or data.get("barcode"),
+            collection_location=data.get("collection_location") or data.get("location"),
+            require_barcode=bool(data.get("require_barcode", False)),
+            patient_verified=data.get("patient_verified"),
+            order_verified=data.get("order_verified"),
         )
     except SampleCollectionWorkflowError as exc:
         return {"error": exc.message}, exc.status_code
@@ -139,6 +145,12 @@ def dispatch_sample(booking_id):
             note=data.get("note"),
             actor_email=_actor_email(),
             ip_address=_client_ip(),
+            vehicle_id=data.get("vehicle_id"),
+            driver_id=data.get("driver_id"),
+            distance_km=data.get("distance_km"),
+            eta_minutes=data.get("eta_minutes"),
+            temperature_c=data.get("temperature_c"),
+            iot_device_id=data.get("iot_device_id"),
         )
     except SampleCollectionWorkflowError as exc:
         return {"error": exc.message}, exc.status_code
