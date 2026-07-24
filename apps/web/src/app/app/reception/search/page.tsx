@@ -6,7 +6,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Input, Label } from "@/components/ui/Input";
 import { useAuth } from "@/hooks/useAuth";
 import { searchReceptionPatients, type ReceptionPatient } from "@/lib/api/reception";
 import { isRequestAborted, normalizeApiError } from "@/lib/errors";
@@ -109,48 +109,71 @@ function SearchPanel() {
           </>
         }
       />
-      <Input
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder="Phone, patient code, national ID, or name"
-        aria-label="Patient search"
-      />
+      <form
+        className="flex flex-col gap-3 sm:flex-row sm:items-end"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void runSearch(query);
+        }}
+      >
+        <div className="min-w-0 flex-1">
+          <Label htmlFor="reception-patient-search" className="sr-only">
+            Patient search
+          </Label>
+          <Input
+            id="reception-patient-search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Phone, patient code, national ID, or name"
+            aria-label="Patient search"
+            autoComplete="off"
+          />
+        </div>
+        <Button type="submit" disabled={!accessToken || loading || !query.trim()}>
+          {loading ? "Searching…" : "Search"}
+        </Button>
+      </form>
 
       {searched ? (
         <DataState
           loading={loading}
           error={error}
           empty={!loading && patients.length === 0}
-          emptyLabel="No patients found."
+          emptyLabel="No patients matched that query. Register a walk-in or refine the search."
           onRetry={() => void runSearch(query)}
         >
-          <SimpleTable<ReceptionPatient>
-            rows={patients}
-            rowKey={(row) => row.patient_code}
-            columns={[
-              { key: "code", label: "Code", render: (row) => row.patient_code },
-              { key: "name", label: "Name", render: (row) => row.full_name },
-              { key: "phone", label: "Phone", render: (row) => row.phone ?? "—" },
-              { key: "nid", label: "National ID", render: (row) => row.national_id ?? "—" },
-              {
-                key: "action",
-                label: "",
-                render: (row) => (
-                  <Link
-                    href={`/app/reception/workflow?patient=${encodeURIComponent(row.patient_code)}`}
-                  >
-                    <Button size="sm" variant="outline">
-                      Order
-                    </Button>
-                  </Link>
-                ),
-              },
-            ]}
-          />
+          <div className="space-y-3">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+              {patients.length} result{patients.length === 1 ? "" : "s"}
+            </p>
+            <SimpleTable<ReceptionPatient>
+              rows={patients}
+              rowKey={(row) => row.patient_code}
+              columns={[
+                { key: "code", label: "Code", render: (row) => row.patient_code },
+                { key: "name", label: "Name", render: (row) => row.full_name },
+                { key: "phone", label: "Phone", render: (row) => row.phone ?? "—" },
+                { key: "nid", label: "National ID", render: (row) => row.national_id ?? "—" },
+                {
+                  key: "action",
+                  label: "",
+                  render: (row) => (
+                    <Link
+                      href={`/app/reception/workflow?patient=${encodeURIComponent(row.patient_code)}`}
+                    >
+                      <Button size="sm" variant="outline">
+                        Order
+                      </Button>
+                    </Link>
+                  ),
+                },
+              ]}
+            />
+          </div>
         </DataState>
       ) : (
         <p className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500">
-          Start typing to search. Query is preserved in the URL when you open Register.
+          Start typing or press Search. The query is preserved in the URL when you open Register.
         </p>
       )}
     </div>
