@@ -103,7 +103,12 @@ export function PatientStep({
     setSearched(true);
     try {
       const result = await searchReceptionPatients(
-        { token: accessToken, organizationId, signal: controller.signal },
+        {
+          token: accessToken,
+          organizationId,
+          signal: controller.signal,
+          timeoutMs: 30_000,
+        },
         q,
       );
       if (controller.signal.aborted) return;
@@ -126,7 +131,6 @@ export function PatientStep({
     const term = query.trim();
     if (!term) {
       searchAbortRef.current?.abort();
-      setLoading(false);
       return;
     }
     const timer = window.setTimeout(() => {
@@ -140,10 +144,12 @@ export function PatientStep({
   }, [query, accessToken, organizationId]);
 
   useEffect(() => {
-    if (initialQuery?.trim() && !preservedQuery) {
-      setQuery(initialQuery);
+    if (initialQuery?.trim() && !preservedQuery && initialQuery !== query) {
+      const timer = window.setTimeout(() => setQuery(initialQuery), 0);
+      return () => window.clearTimeout(timer);
     }
-  }, [initialQuery, preservedQuery]);
+    return undefined;
+  }, [initialQuery, preservedQuery, query]);
 
   async function submitCreate(force = false) {
     if (createInFlight.current) return;
@@ -774,7 +780,10 @@ export function PaymentStep({
   }
 
   useEffect(() => {
-    void refresh();
+    const timer = window.setTimeout(() => {
+      void refresh();
+    }, 0);
+    return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderRef, accessToken, organizationId]);
 
@@ -1075,7 +1084,10 @@ export function DocumentsStep({
   }
 
   useEffect(() => {
-    void loadDocuments();
+    const timer = window.setTimeout(() => {
+      void loadDocuments();
+    }, 0);
+    return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderRef, accessToken, organizationId]);
 
