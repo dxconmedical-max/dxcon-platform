@@ -1,23 +1,37 @@
-import { AppShell } from "@/components/layout/AppShell";
-import { WorkspaceHome } from "@/components/layout/WorkspaceHome";
+"use client";
 
-export const metadata = { title: "Doctor" };
+import { useMemo } from "react";
+
+import { AppShell } from "@/components/layout/AppShell";
+import { RoleDashboardHome } from "@/components/layout/RoleDashboardHome";
+
+const ACTIONS = [
+  {
+    label: "Result inbox",
+    href: "/app/doctor",
+    description: "Pending medical validation and critical flags (aggregate metrics live).",
+  },
+];
 
 export default function DoctorPage() {
+  const fallbackCards = useMemo(
+    () => [
+      { label: "Pending reviews", value: "—" },
+      { label: "Critical flags", value: "—" },
+      { label: "Completed reports", value: "—" },
+      { label: "Overdue", value: "—" },
+    ],
+    [],
+  );
+
   return (
     <AppShell title="Doctor workspace" workspacePath="/app/doctor">
-      <WorkspaceHome
+      <RoleDashboardHome
         title="Doctor workspace"
-        subtitle="Review results and manage patient care."
-        statusCards={[
-          { label: "Pending reviews", value: "—" },
-          { label: "Patients", value: "—" },
-          { label: "Critical flags", value: "—" },
-          { label: "Messages", value: "—" },
-        ]}
-        actions={[
-          { label: "Result inbox", href: "/app/doctor", description: "Verified results.", comingSoon: true },
-        ]}
+        subtitle="Review pending results, critical flags, and completed reports."
+        role="doctor"
+        fallbackCards={fallbackCards}
+        actions={ACTIONS}
       />
     </AppShell>
   );

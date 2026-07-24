@@ -1,32 +1,42 @@
-import { AppShell } from "@/components/layout/AppShell";
-import { WorkspaceHome } from "@/components/layout/WorkspaceHome";
+"use client";
 
-export const metadata = { title: "Laboratory" };
+import { useMemo } from "react";
+
+import { AppShell } from "@/components/layout/AppShell";
+import { RoleDashboardHome } from "@/components/layout/RoleDashboardHome";
+
+const ACTIONS = [
+  {
+    label: "Lab worklist",
+    href: "/app/lab/queue",
+    description: "Incoming and in-process specimens.",
+  },
+  {
+    label: "Lab workflow",
+    href: "/app/lab/workflow",
+    description: "Receive → accession → process → results → tech & medical validation.",
+  },
+];
 
 export default function LabPage() {
+  const fallbackCards = useMemo(
+    () => [
+      { label: "Incoming", value: "—" },
+      { label: "Lab queue", value: "—" },
+      { label: "Pending validation", value: "—" },
+      { label: "Critical / abnormal", value: "—" },
+    ],
+    [],
+  );
+
   return (
     <AppShell title="Laboratory" workspacePath="/app/lab">
-      <WorkspaceHome
+      <RoleDashboardHome
         title="Laboratory workspace"
         subtitle="Specimen receipt, accession, processing, result entry, and validation."
-        statusCards={[
-          { label: "Receive", value: "Live" },
-          { label: "Accession", value: "Live" },
-          { label: "Results", value: "Live" },
-          { label: "Validation", value: "Live" },
-        ]}
-        actions={[
-          {
-            label: "Lab worklist",
-            href: "/app/lab/queue",
-            description: "Incoming and in-process specimens.",
-          },
-          {
-            label: "Lab workflow",
-            href: "/app/lab/workflow",
-            description: "Receive → accession → process → results → tech & medical validation.",
-          },
-        ]}
+        role="laboratory"
+        fallbackCards={fallbackCards}
+        actions={ACTIONS}
       />
     </AppShell>
   );

@@ -1,23 +1,37 @@
-import { AppShell } from "@/components/layout/AppShell";
-import { WorkspaceHome } from "@/components/layout/WorkspaceHome";
+"use client";
 
-export const metadata = { title: "Patient" };
+import { useMemo } from "react";
+
+import { AppShell } from "@/components/layout/AppShell";
+import { RoleDashboardHome } from "@/components/layout/RoleDashboardHome";
+
+const ACTIONS = [
+  {
+    label: "My results",
+    href: "/app/patient",
+    description: "Released reports when linked to your patient record.",
+  },
+];
 
 export default function PatientPage() {
+  const fallbackCards = useMemo(
+    () => [
+      { label: "Results", value: "—" },
+      { label: "Orders / visits", value: "—" },
+      { label: "Home visits", value: "—" },
+      { label: "Messages", value: "—" },
+    ],
+    [],
+  );
+
   return (
     <AppShell title="Patient portal" workspacePath="/app/patient">
-      <WorkspaceHome
+      <RoleDashboardHome
         title="Patient portal"
-        subtitle="Results, appointments, and home collection."
-        statusCards={[
-          { label: "Results", value: "—" },
-          { label: "Appointments", value: "—" },
-          { label: "Home visits", value: "—" },
-          { label: "Messages", value: "—" },
-        ]}
-        actions={[
-          { label: "My results", href: "/app/patient", description: "Released reports.", comingSoon: true },
-        ]}
+        subtitle="Your released results and visit activity (aggregates only — no shared PII)."
+        role="patient"
+        fallbackCards={fallbackCards}
+        actions={ACTIONS}
       />
     </AppShell>
   );

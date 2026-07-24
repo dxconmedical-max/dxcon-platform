@@ -19,6 +19,7 @@ SHARED_WIRING = {
     "backend/app/__init__.py",
     "backend/app/core/statuses.py",
     "backend/app/models/__init__.py",
+    "backend/app/bootstrap/blueprints.py",
     "backend/scripts/production_staging_lib.py",
 }
 
@@ -602,6 +603,22 @@ RELEASES: tuple[ReleaseSpec, ...] = (
         "backend/app/web/result_gateway.py",
         "backend/scripts/verify_results.py",
         "backend/tests/test_results.py",
+    )),
+    ReleaseSpec("dashboard-e2e-golive", "Dashboard and End-to-End Go-Live Validation", (
+        "backend/app/role_dashboards/",
+        "backend/app/api/role_dashboards/",
+        "backend/scripts/e2e_dashboard_go_live.py",
+        "backend/scripts/verify_role_dashboards.py",
+        "backend/tests/test_role_dashboards.py",
+        "apps/web/src/lib/api/roleDashboards.ts",
+        "apps/web/src/lib/api/roleDashboards.test.ts",
+        "apps/web/src/components/layout/RoleDashboardHome.tsx",
+        "apps/web/src/app/app/admin/page.tsx",
+        "apps/web/src/app/app/reception/page.tsx",
+        "apps/web/src/app/app/lab/page.tsx",
+        "apps/web/src/app/app/collector/page.tsx",
+        "apps/web/src/app/app/doctor/page.tsx",
+        "apps/web/src/app/app/patient/page.tsx",
     )),
     ReleaseSpec("sample-collection-production", "Sample Collection Production Workflow", (
         "backend/app/sample_collection_workspace/",
