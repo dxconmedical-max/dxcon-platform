@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -15,7 +14,7 @@ import {
 } from "@/lib/api/reception";
 import { normalizeApiError } from "@/lib/errors";
 
-import { SectionHeader } from "../_components/ui";
+import { JourneyStepper, SectionHeader } from "../_components/ui";
 import {
   PaymentStep,
   PatientStep,
@@ -136,13 +135,7 @@ function ReceptionOrderWorkflowPanel() {
         }
       />
 
-      <div className="flex flex-wrap gap-2">
-        {STEPS.map((label, index) => (
-          <Badge key={label} tone={index === step ? "info" : index < step ? "success" : "default"}>
-            {index + 1}. {label}
-          </Badge>
-        ))}
-      </div>
+      <JourneyStepper steps={STEPS} activeIndex={step} />
 
       {reopening ? <p className="text-sm text-slate-500">Reopening order…</p> : null}
       {reopenError ? (

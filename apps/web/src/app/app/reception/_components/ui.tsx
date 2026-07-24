@@ -23,6 +23,37 @@ export function SectionHeader({
   );
 }
 
+export function JourneyStepper({
+  steps,
+  activeIndex,
+}: {
+  steps: readonly string[];
+  activeIndex: number;
+}) {
+  return (
+    <ol className="flex flex-wrap gap-2" aria-label="Reception workflow steps">
+      {steps.map((label, index) => {
+        const state =
+          index === activeIndex ? "active" : index < activeIndex ? "done" : "upcoming";
+        return (
+          <li
+            key={label}
+            className={cn(
+              "rounded-full border px-3 py-1 text-xs font-medium",
+              state === "active" && "border-sky-300 bg-sky-50 text-sky-900",
+              state === "done" && "border-emerald-300 bg-emerald-50 text-emerald-900",
+              state === "upcoming" && "border-slate-200 bg-white text-slate-500",
+            )}
+            aria-current={state === "active" ? "step" : undefined}
+          >
+            {index + 1}. {label}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 export function DataState({
   loading,
   error,
