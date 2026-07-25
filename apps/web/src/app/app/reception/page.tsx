@@ -7,9 +7,9 @@ import { RoleDashboardHome } from "@/components/layout/RoleDashboardHome";
 
 const ACTIONS = [
   {
-    label: "Create order & documents",
+    label: "Create laboratory order",
     href: "/app/reception/workflow",
-    description: "Patient → tests → payment → barcode/QR → requisition.",
+    description: "Patient → tests → review pricing → create order (Milestone 1).",
   },
   {
     label: "Patient search",
@@ -38,7 +38,7 @@ export default function ReceptionPage() {
     <AppShell title="Reception" workspacePath="/app/reception">
       <RoleDashboardHome
         title="Reception workspace"
-        subtitle="Patient intake, orders, payment, barcodes/QR, and laboratory requisitions."
+        subtitle="Patient intake, test catalog, authoritative pricing, and laboratory order creation."
         role="reception"
         fallbackCards={fallbackCards}
         actions={ACTIONS}
