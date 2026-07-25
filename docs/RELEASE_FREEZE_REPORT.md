@@ -132,8 +132,14 @@ Supporting artifacts:
 
 ## 11. Stop conditions honored
 
-- Release Freeze complete  
+- Release Freeze complete **locally** on `release/v1.0.0` @ `ec53905`
+- Freeze tip published to `origin/freeze/v1.0.0-release` for PR merge (direct push to protected `release/v1.0.0` rejected)
+- Annotated tag `v1.0.0` created **locally** at freeze tip (remote tag still points at prior `0b345bb` until admin force-updates)
 - Release 2 **not** started  
 - Auth / Admin freeze boundaries preserved  
+
+**Remote completion required (owner):**
+1. Open/merge PR: https://github.com/dxconmedical-max/dxcon-platform/compare/release/v1.0.0...freeze/v1.0.0-release?expand=1  
+2. After merge, move remote tag: `git push origin refs/tags/v1.0.0 --force` (admin)
 
 **STOP.**
