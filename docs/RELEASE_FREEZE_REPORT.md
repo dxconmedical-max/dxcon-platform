@@ -65,7 +65,7 @@
 | Name | `v1.0.0` |
 | Annotated message | DxCon Release 1.0.0 Freeze |
 | Previous `v1.0.0` target | `0b345bbdaa822238f6aaf476efb410f6b7a01be6` (ancestor GA) |
-| New target | Freeze tip on `release/v1.0.0` after freeze docs commit |
+| New target | Freeze tip on `release/v1.0.0` 8f24a041cb74c800d36cd0d8fe10cb200c7ccc75 |
 | Retag rationale | Explicit Release Manager Freeze instruction to create `v1.0.0` for this release line |
 
 ---
