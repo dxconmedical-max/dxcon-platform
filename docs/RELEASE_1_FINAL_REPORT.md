@@ -15,7 +15,7 @@
 | Tag | `v1.0.0` |
 | Branch | `release/v1.0.0` |
 | Freeze merge commit | `86f3d8516bb6a5315314076b78cc224a737539b8` |
-| Freeze tip (tagged) | `26ef537bbfeced6a25d0be1d7f0ba705e1afa462` |
+| Freeze tip (tagged) | tag `v1.0.0` |
 | Pre-merge tip | `c3183a50efb1fa60effa83765e15af87c436df7e` |
 | Feature tip merged | `7729a9c15c969372c699dd19e41a576bc4493026` (`feature/reception-m1`) |
 
@@ -61,7 +61,7 @@ Commits brought onto `release/v1.0.0` by the freeze merge (plus merge commit):
 | Item | Value |
 |------|--------|
 | Tag | `v1.0.0` |
-| Points to | `26ef537bbfeced6a25d0be1d7f0ba705e1afa462` |
+| Points to | tag `v1.0.0` |
 | Prior tag object (superseded on same name) | Annotated tag previously at `0b345bb` (2026-07-02 GA ancestor) — moved to Release 1 freeze tip by explicit Release Manager freeze |
 
 ---

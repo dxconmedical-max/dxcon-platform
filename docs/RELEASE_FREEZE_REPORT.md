@@ -65,7 +65,7 @@
 | Name | `v1.0.0` |
 | Annotated message | DxCon Release 1.0.0 Freeze |
 | Previous `v1.0.0` target | `0b345bbdaa822238f6aaf476efb410f6b7a01be6` (ancestor GA) |
-| New target | `26ef537bbfeced6a25d0be1d7f0ba705e1afa462` |
+| New target | Tag `v1.0.0` → `release/v1.0.0` freeze tip (`git rev-parse v1.0.0^{}`) |
 | Retag rationale | Explicit Release Manager Freeze instruction to create `v1.0.0` for this release line |
 
 ---

@@ -12,7 +12,7 @@
 | Git tag | `v1.0.0` |
 | Release branch | `release/v1.0.0` |
 | Freeze merge commit | `86f3d8516bb6a5315314076b78cc224a737539b8` |
-| Freeze tip (tagged) | `26ef537bbfeced6a25d0be1d7f0ba705e1afa462` |
+| Freeze tip (tagged) | Tag `v1.0.0` on `release/v1.0.0` (authoritative) |
 | Feature tip merged | `feature/reception-m1` @ `7729a9c15c969372c699dd19e41a576bc4493026` |
 | Pre-merge base | `c3183a50efb1fa60effa83765e15af87c436df7e` |
 | Build env `BUILD_VERSION` | `1.0.0` |
