@@ -1,36 +1,58 @@
-# Release Notes — DxCon v1.0.0-rc1
+# Release Notes — DxCon v1.0.0
 
 ## Summary
 
-First Production Release Candidate for the DxCon clinical operations platform (web + API + Flutter Phase 1). Authentication is production-verified and **frozen**.
+**DxCon Release 1.0.0 is frozen.**  
+Branch `feature/reception-m1` is merged into `release/v1.0.0` and tagged `v1.0.0`. Authentication remains **frozen**. Admin module was unchanged by this merge. Release 2 has **not** been started.
+
+| Field | Value |
+|-------|--------|
+| Version | `1.0.0` |
+| Tag | `v1.0.0` |
+| Branch | `release/v1.0.0` |
+| Freeze merge | `86f3d8516bb6a5315314076b78cc224a737539b8` |
+| Auth | Frozen |
 
 ## What’s in
 
 - End-to-end clinical path: Reception → Collection → Laboratory → PDF report → role dashboards
-- Hardened production API gate for previously open high-risk endpoints
-- Health / live / ready probes, structured logging with correlation IDs
-- Mobile Phase 1: secure session storage, login/logout, role routing, API client, offline-safe reads
+- **Reception M1 UI:** patient search/create, test catalog, authoritative pricing, order create/confirmation
+- Production API security gate (rc1): JWT/session on high-risk APIs, PATIENT-only register, demo/seed locks, signed downloads
+- Health / live / ready probes (including `/ready` migration re-verify)
+- Flutter Mobile Phase 1 foundation
+- Auth freeze CI guards
 
-## What’s not (yet)
+## What’s not (Release 2+ / later)
 
-- Alembic-managed migrations (manual SQL still required)
-- Fully wired production workers/schedulers in Docker Compose
-- Flutter Phase 2/3 (patient portal / collector field workflows)
-- Hardened CSP without `unsafe-inline` / `unsafe-eval` (requires auth freeze exception for token storage redesign)
+- Reception M2 payment & receipt product track (as a new release)
+- Reception barcode / QR / requisition UX completion track
+- Alembic-managed migrations
+- Flutter Phase 2/3
+- Hardened CSP without `unsafe-inline` / `unsafe-eval`
 
 ## Upgrade notes
 
-1. Set `API_AUTH_GATE_ENABLED=true`, `DEMO_MODE=false`.
-2. Apply migrations including renamed `016_reporting_engine.sql`.
-3. Expect **401** on anonymous calls to legacy patients/orders/billing/files/security APIs.
-4. Staff users must be provisioned by admins — public register is PATIENT-only.
+1. Set `BUILD_VERSION=1.0.0`, `API_AUTH_GATE_ENABLED=true`, `DEMO_MODE=false`.
+2. Deploy web from `v1.0.0` / `release/v1.0.0`; deploy API matching the same tip when promoting.
+3. Apply outstanding SQL migrations per ops runbook.
+4. Keep auth freeze paths untouched except via hotfix policy.
+5. Staff users must be provisioned by admins — public register is PATIENT-only.
 
-## Verification
+## Verification (Release Freeze)
 
-- Backend: `python -m unittest tests.test_rc_security_gate -v`
-- Auth freeze: `npm run test:auth-freeze` / `npm run verify:auth-freeze` (apps/web)
-- E2E: `backend/scripts/e2e_dashboard_go_live.py` (prefer Postgres)
+| Gate | Result |
+|------|--------|
+| Auth frozen / unchanged | PASS |
+| Admin unchanged | PASS |
+| Reception M1 production verification | PASS (RM acceptance) |
+| Auth-freeze Vitest + verify | PASS |
+| Reception M1 Vitest | PASS |
+| Backend reception + RC security | PASS |
+| Frontend production build | PASS |
 
 ## Support
 
-Ops runbooks: `docs/GO_LIVE_CHECKLIST.md`, `docs/DEPLOYMENT.md`, `docs/INCIDENT_RESPONSE.md`.
+- `docs/RELEASE_1_FINAL_REPORT.md`
+- `docs/RELEASE_FREEZE_REPORT.md`
+- `docs/AUTH_FREEZE.md`
+- `docs/DEPLOYMENT.md`

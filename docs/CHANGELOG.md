@@ -2,6 +2,34 @@
 
 All notable changes for DxCon production releases.
 
+## [1.0.0] — 2026-07-25 — RELEASE FREEZE
+
+**Status:** Release 1 **FROZEN** on `release/v1.0.0`.  
+**Tag:** `v1.0.0`  
+**Merge:** `feature/reception-m1` → `release/v1.0.0` (`86f3d85`)
+
+### Added
+- Reception Milestone 1 production workflow UI: patient search/create, catalog selection, authoritative pricing, order create/confirmation (`7729a9c`).
+- Go-live verification report (`21b8978`).
+- Release freeze package: `docs/RELEASE_1_FINAL_REPORT.md`, `docs/RELEASE_FREEZE_REPORT.md`, project status / system baseline / M1 sign-off artifacts.
+
+### Fixed
+- `/ready` re-verifies migrations in request context (`ad0beb1`).
+
+### Security (carried from rc1)
+- Production API auth gate, PATIENT-only public register, demo/seed locks, signed file downloads, HSTS in strict envs.
+
+### Verification (freeze gate)
+- Auth freeze unchanged — PASS
+- Admin module unchanged — PASS
+- Reception M1 production verification — PASS (Release Manager acceptance)
+- Local CI gates (auth-freeze, M1 Vitest, backend reception+RC security) — PASS
+- Frontend production build — PASS
+
+### Known
+- Residual: post-create browser order GET `status 0` observed once during automated PV; tracked for hotfix policy (see freeze report).
+- Release 2 not started.
+
 ## [1.0.0-rc1] — 2026-07-24
 
 ### Security
