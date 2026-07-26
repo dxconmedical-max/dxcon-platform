@@ -371,6 +371,94 @@ def create_invoice_from_order(order_ref: str, actor: str | None = None) -> BizIn
     return invoice
 
 
+def _order_paid_amount(order: BizOrder) -> float:
+    payments = BizPayment.query.filter_by(order_id=order.id).all()
+    return round(sum(float(p.amount or 0) for p in payments), 2)
+
+
+def record_order_payment(
+    order_ref: str,
+    *,
+    payment_method: str,
+    amount: float,
+    receipt_number: str | None = None,
+    actor: str | None = None,
+) -> BizPayment:
+    """Record a payment against an order invoice.
+
+    Supports partial amounts. Transitions invoice/order to paid only when
+    cumulative payments cover the invoice amount. Reuses order/invoice services.
+    """
+    if not payment_method or not payment_method.strip():
+        raise BusinessEngineError("payment_method is required")
+    pay_amount = round(float(amount), 2)
+    if pay_amount <= 0:
+        raise BusinessEngineError("Payment amount must be greater than zero")
+
+    order = _get_order(order_ref)
+    if order.status not in {ORDER_PAYMENT_PENDING, ORDER_DRAFT}:
+        if order.status != ORDER_PAID:
+            raise BusinessEngineError(f"Order not payable in status {order.status}")
+
+    if order.status == ORDER_DRAFT:
+        _transition_order(order, ORDER_PAYMENT_PENDING, action="order.submit", actor=actor)
+
+    invoice = create_invoice_from_order(order.order_code, actor=actor)
+    if invoice.status == INVOICE_PAID:
+        existing = (
+            BizPayment.query.filter_by(invoice_id=invoice.id)
+            .order_by(BizPayment.paid_at.desc())
+            .first()
+        )
+        if existing:
+            return existing
+
+    invoice_amount = round(float(invoice.amount or order.total_amount or 0), 2)
+    already_paid = _order_paid_amount(order)
+    outstanding = round(max(0.0, invoice_amount - already_paid), 2)
+    if pay_amount > outstanding + 0.009:
+        raise BusinessEngineError(
+            f"Overpayment is not allowed (outstanding={outstanding})"
+        )
+
+    receipt = receipt_number or _code("RCT")
+    payment = BizPayment(
+        invoice_id=invoice.id,
+        order_id=order.id,
+        payment_method=payment_method.strip(),
+        receipt_number=receipt,
+        amount=pay_amount,
+        paid_at=_utcnow(),
+        created_by=actor,
+    )
+    db.session.add(payment)
+    db.session.flush()
+
+    new_paid = round(already_paid + pay_amount, 2)
+    fully_paid = new_paid + 0.009 >= invoice_amount
+    if fully_paid:
+        invoice.status = INVOICE_PAID
+        if order.status == ORDER_PAYMENT_PENDING:
+            _transition_order(
+                order, ORDER_PAID, action="order.mark_paid", note=receipt, actor=actor
+            )
+        if not order.barcode_value and table_has_column("biz_orders", "barcode_value"):
+            order.barcode_value = f"BC-{order.order_code}"
+        audit_status = INVOICE_PAID
+    else:
+        audit_status = INVOICE_UNPAID
+
+    write_biz_audit(
+        action="payment.record",
+        entity_type="payment",
+        entity_id=receipt,
+        new_status=audit_status,
+        note=f"method={payment_method};amount={pay_amount};paid_total={new_paid}",
+        actor=actor,
+    )
+    return payment
+
+
 def mark_order_paid(
     order_ref: str,
     *,
@@ -378,47 +466,37 @@ def mark_order_paid(
     receipt_number: str | None = None,
     actor: str | None = None,
 ) -> BizPayment:
-    if not payment_method or not payment_method.strip():
-        raise BusinessEngineError("payment_method is required")
+    """Pay the full outstanding balance (compatibility wrapper)."""
     order = _get_order(order_ref)
-    if order.status not in {ORDER_PAYMENT_PENDING, ORDER_DRAFT}:
-        if order.status != ORDER_PAID:
-            raise BusinessEngineError(f"Order not payable in status {order.status}")
     invoice = create_invoice_from_order(order.order_code, actor=actor)
     if invoice.status == INVOICE_PAID:
-        payment = BizPayment.query.filter_by(invoice_id=invoice.id).first()
-        if payment:
-            return payment
-    receipt = receipt_number or _code("RCT")
-    paid_at = _utcnow()
-    payment = BizPayment(
-        invoice_id=invoice.id,
-        order_id=order.id,
-        payment_method=payment_method.strip(),
-        receipt_number=receipt,
-        amount=invoice.amount,
-        paid_at=paid_at,
-        created_by=actor,
+        existing = (
+            BizPayment.query.filter_by(invoice_id=invoice.id)
+            .order_by(BizPayment.paid_at.desc())
+            .first()
+        )
+        if existing:
+            return existing
+    outstanding = round(
+        max(0.0, float(invoice.amount or order.total_amount or 0) - _order_paid_amount(order)),
+        2,
     )
-    invoice.status = INVOICE_PAID
-    db.session.add(payment)
-    db.session.flush()
-    if order.status == ORDER_PAYMENT_PENDING:
-        _transition_order(order, ORDER_PAID, action="order.mark_paid", note=receipt, actor=actor)
-    elif order.status == ORDER_DRAFT:
-        _transition_order(order, ORDER_PAYMENT_PENDING, action="order.submit", actor=actor)
-        _transition_order(order, ORDER_PAID, action="order.mark_paid", note=receipt, actor=actor)
-    if not order.barcode_value and table_has_column("biz_orders", "barcode_value"):
-        order.barcode_value = f"BC-{order.order_code}"
-    write_biz_audit(
-        action="payment.record",
-        entity_type="payment",
-        entity_id=receipt,
-        new_status=INVOICE_PAID,
-        note=f"method={payment_method}",
+    if outstanding <= 0:
+        existing = (
+            BizPayment.query.filter_by(order_id=order.id)
+            .order_by(BizPayment.paid_at.desc())
+            .first()
+        )
+        if existing:
+            return existing
+        raise BusinessEngineError("Nothing outstanding to pay")
+    return record_order_payment(
+        order_ref,
+        payment_method=payment_method,
+        amount=outstanding,
+        receipt_number=receipt_number,
         actor=actor,
     )
-    return payment
 
 
 # --- Collection ---

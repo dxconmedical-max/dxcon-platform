@@ -10,11 +10,15 @@ from app.models.test_catalog import TestCatalog
 from app.models.biz_order import (
     BizCollection,
     BizInvoice,
+    BizLabQueueItem,
     BizOrder,
     BizOrderItem,
     BizPayment,
+    BizReceipt,
     BizResult,
     BizResultItem,
+    BizSampleQueueEvent,
+    BizSampleQueueItem,
     BizWorkflowAudit,
 )
 from app.models.mdm import MdmImportBatch, MdmImportRow, MdmMasterRecord

@@ -16,6 +16,8 @@ from app.models.patient_profile import PatientProfile
 from app.models.reception_queue_entry import ReceptionQueueEntry
 from app.models.test_catalog import TestCatalog
 from app.reception_workspace.audit import log_reception_activity, write_reception_audit
+from app.reception_workspace.errors import ReceptionWorkspaceError
+from app.reception_workspace import payment_engine as payeng
 from app.services import reception_service
 from app.services.reception_service import (
     STATUS_CHECKED_IN,
@@ -45,8 +47,10 @@ WORKFLOW_SAMPLING = "SAMPLING"
 WORKFLOW_COMPLETED = "COMPLETED"
 WORKFLOW_CANCELLED = "CANCELLED"
 
-PAYMENT_METHODS = ("cash", "transfer", "qr", "pos", "corporate", "insurance")
+# Re-export engine constants for existing imports/tests.
+PAYMENT_METHODS = payeng.PAYMENT_METHODS
 PAYMENT_STATUSES = ("paid", "pending", "partial", "waived")
+
 
 # Order already visible on laboratory incoming / past receive.
 _LAB_HANDED_OFF_STATUSES = frozenset(
@@ -58,10 +62,6 @@ _LAB_HANDED_OFF_STATUSES = frozenset(
         "released",
     }
 )
-
-
-class ReceptionWorkspaceError(ValueError):
-    pass
 
 
 def _collection_is_lab_received(collection: BizCollection | None) -> bool:
@@ -245,41 +245,14 @@ def create_reception_order(
 
 
 def payment_summary_for_order(order: BizOrder) -> dict[str, Any]:
-    payments = BizPayment.query.filter_by(order_id=order.id).all()
-    paid_amount = round(sum(float(p.amount or 0) for p in payments), 2)
-    order_total = round(float(order.total_amount or 0), 2)
-    outstanding_amount = round(max(0.0, order_total - paid_amount), 2)
-    if paid_amount <= 0:
-        status = "unpaid"
-    elif outstanding_amount <= 0 or order.status == ORDER_PAID:
-        status = "paid"
-    else:
-        status = "partial"
-    return {
-        "order_total": order_total,
-        "paid_amount": paid_amount,
-        "outstanding_amount": outstanding_amount,
-        "discount": round(float(order.discount or 0), 2),
-        "subtotal": round(float(order.subtotal or 0), 2),
-        "tax": None,
-        "status": status,
-        "payment_methods_supported": list(PAYMENT_METHODS),
-        "partial_payments_supported": False,
-    }
+    return payeng.build_payment_summary(order)
 
 
 def get_order_with_payment(order_ref: str) -> dict[str, Any]:
     detail = biz.order_to_detail(order_ref)
-    order = BizOrder.query.filter(
-        or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)
-    ).first()
-    if not order:
-        raise ReceptionWorkspaceError("Order not found")
-    payment = (
-        BizPayment.query.filter_by(order_id=order.id)
-        .order_by(BizPayment.paid_at.desc())
-        .first()
-    )
+    order = payeng.resolve_order(order_ref)
+    history = payeng.list_payment_history(order)
+    payment = history[-1] if history else None
     invoice = BizInvoice.query.filter_by(order_id=order.id).first()
     summary = payment_summary_for_order(order)
     return {
@@ -291,8 +264,19 @@ def get_order_with_payment(order_ref: str) -> dict[str, Any]:
             "tax": summary["tax"],
         },
         "payment_summary": summary,
-        "payment": payment.to_dict() if payment else None,
+        "payment": payment,
+        "payments": history,
         "invoice": invoice.to_dict() if invoice else None,
+    }
+
+
+def get_payment_history(order_ref: str) -> dict[str, Any]:
+    order = payeng.resolve_order(order_ref)
+    history = payeng.list_payment_history(order)
+    return {
+        "order_code": order.order_code,
+        "payment_summary": payment_summary_for_order(order),
+        "payments": history,
     }
 
 
@@ -304,8 +288,10 @@ def _payment_collect_result(
 ) -> dict[str, Any]:
     invoice = BizInvoice.query.filter_by(order_id=order.id).first()
     db.session.refresh(order)
+    history = payeng.list_payment_history(order)
     return {
         "payment": payment.to_dict(),
+        "payments": history,
         "invoice": invoice.to_dict() if invoice else None,
         "order_status": order.status,
         "payment_summary": payment_summary_for_order(order),
@@ -322,15 +308,8 @@ def collect_payment(
     idempotency_key: str | None = None,
     actor: str | None = None,
 ) -> dict[str, Any]:
-    method = (payment_method or "").strip().lower()
-    if method not in PAYMENT_METHODS:
-        raise ReceptionWorkspaceError(f"Invalid payment method: {payment_method}")
-
-    order = BizOrder.query.filter(
-        or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)
-    ).first()
-    if not order:
-        raise ReceptionWorkspaceError("Order not found")
+    """Collect payment via Payment Engine (supports partial + multi-method)."""
+    order = payeng.resolve_order(order_ref)
 
     key = (idempotency_key or "").strip() or None
     receipt = (receipt_number or "").strip() or key
@@ -340,7 +319,12 @@ def collect_payment(
             order_id=order.id, receipt_number=key
         ).first()
         if existing_by_key:
-            return _payment_collect_result(order, existing_by_key, idempotent_replay=True)
+            from app.reception_workspace.receipt_engine import ensure_receipt_for_payment
+
+            receipt_doc = ensure_receipt_for_payment(existing_by_key, actor=actor)
+            result = _payment_collect_result(order, existing_by_key, idempotent_replay=True)
+            result["receipt"] = receipt_doc.to_dict()
+            return result
 
     summary = payment_summary_for_order(order)
     if summary["status"] == "paid" or order.status == ORDER_PAID:
@@ -350,27 +334,23 @@ def collect_payment(
             .first()
         )
         if existing:
-            return _payment_collect_result(order, existing, idempotent_replay=True)
+            from app.reception_workspace.receipt_engine import ensure_receipt_for_payment
 
-    outstanding = float(summary["outstanding_amount"])
-    pay_amount = float(amount) if amount is not None else outstanding
-    if pay_amount <= 0:
-        raise ReceptionWorkspaceError("Payment amount must be greater than zero")
-    if pay_amount > outstanding + 0.009:
-        raise ReceptionWorkspaceError(
-            f"Overpayment is not allowed (outstanding={outstanding})"
-        )
-    if pay_amount < outstanding - 0.009:
-        raise ReceptionWorkspaceError(
-            "Partial payments are not supported. Collect the full outstanding amount."
-        )
+            receipt_doc = ensure_receipt_for_payment(existing, actor=actor)
+            result = _payment_collect_result(order, existing, idempotent_replay=True)
+            result["receipt"] = receipt_doc.to_dict()
+            return result
 
-    payment = biz.mark_order_paid(
+    payment = payeng.record_payment(
         order_ref,
-        payment_method=method,
+        payment_method=payment_method,
+        amount=amount,
         receipt_number=receipt,
         actor=actor,
     )
+    from app.reception_workspace.receipt_engine import ensure_receipt_for_payment
+
+    receipt_doc = ensure_receipt_for_payment(payment, actor=actor)
     invoice = BizInvoice.query.filter_by(order_id=order.id).first()
     _sync_queue_after_payment(order, invoice, actor=actor)
     write_reception_audit(
@@ -380,7 +360,9 @@ def collect_payment(
         actor=actor,
     )
     db.session.refresh(order)
-    return _payment_collect_result(order, payment, idempotent_replay=False)
+    result = _payment_collect_result(order, payment, idempotent_replay=False)
+    result["receipt"] = receipt_doc.to_dict()
+    return result
 
 
 def _sync_queue_after_payment(order: BizOrder | None, invoice: BizInvoice | None, *, actor: str | None = None) -> None:
@@ -391,12 +373,33 @@ def _sync_queue_after_payment(order: BizOrder | None, invoice: BizInvoice | None
         entry = ReceptionQueueEntry.query.filter_by(patient_id=order.patient_code, queue_date=datetime.utcnow().date()).order_by(
             ReceptionQueueEntry.created_at.desc()
         ).first()
-    if entry:
+    if not entry:
+        return
+    summary = payment_summary_for_order(order)
+    if invoice:
+        entry.invoice_id = invoice.id
+    if summary["status"] == "paid":
         entry.payment_status = "PAID"
         entry.workflow_status = WORKFLOW_PAID
-        if invoice:
-            entry.invoice_id = invoice.id
-        log_reception_activity("PAYMENT_COLLECTED", patient_id=order.patient_code, queue_entry_id=entry.id, actor=actor)
+        log_reception_activity(
+            "PAYMENT_COLLECTED",
+            patient_id=order.patient_code,
+            queue_entry_id=entry.id,
+            actor=actor,
+        )
+    elif summary["status"] == "partial":
+        entry.payment_status = "PARTIAL"
+        entry.workflow_status = WORKFLOW_PAYMENT_PENDING
+        log_reception_activity(
+            "PAYMENT_PARTIAL",
+            patient_id=order.patient_code,
+            queue_entry_id=entry.id,
+            actor=actor,
+        )
+    else:
+        entry.payment_status = "PENDING"
+        entry.workflow_status = WORKFLOW_PAYMENT_PENDING
+
 
 
 def create_collection_after_payment(
@@ -500,7 +503,14 @@ def handoff_to_laboratory(
         entry = ReceptionQueueEntry.query.filter_by(order_id=order.id).first()
         if entry:
             entry.workflow_status = WORKFLOW_SAMPLING
-        return _handoff_payload(
+        from app.reception_workspace.lab_queue_engine import ensure_lab_queue_item
+
+        lab_queue = ensure_lab_queue_item(
+            order.order_code,
+            laboratory_name=laboratory_name,
+            actor=actor,
+        )
+        payload = _handoff_payload(
             order,
             existing,
             barcodes=barcodes,
@@ -509,6 +519,8 @@ def handoff_to_laboratory(
             idempotent_replay=True,
             actor=actor,
         )
+        payload["lab_queue"] = lab_queue
+        return payload
 
     idempotent_replay = False
     collection = existing
@@ -562,7 +574,22 @@ def handoff_to_laboratory(
         actor=actor,
     )
 
-    return _handoff_payload(
+    from app.reception_workspace.lab_queue_engine import ensure_lab_queue_item
+
+    lab_queue = ensure_lab_queue_item(
+        order.order_code,
+        laboratory_name=laboratory_name,
+        queue_reference=(
+            collection.accession_number
+            or collection.sample_code
+            or collection.barcode_value
+            or collection.id
+            if collection
+            else None
+        ),
+        actor=actor,
+    )
+    payload = _handoff_payload(
         order,
         collection,
         barcodes=barcodes,
@@ -571,6 +598,8 @@ def handoff_to_laboratory(
         idempotent_replay=idempotent_replay,
         actor=actor,
     )
+    payload["lab_queue"] = lab_queue
+    return payload
 
 
 def _handoff_payload(

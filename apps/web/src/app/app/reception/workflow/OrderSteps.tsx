@@ -731,7 +731,7 @@ export function PaymentStep({
     tax: pricing.tax ?? null,
     status: "unpaid",
     payment_methods_supported: [...RECEPTION_PAYMENT_METHODS],
-    partial_payments_supported: false,
+    partial_payments_supported: true,
   }));
   const [payment, setPayment] = useState<ReceptionPaymentRecord | null>(null);
   const [loading, setLoading] = useState(false);
@@ -740,7 +740,7 @@ export function PaymentStep({
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [amountInput, setAmountInput] = useState(String(pricing.total));
   const [showDocuments, setShowDocuments] = useState(false);
-  const [idempotencyKey] = useState(() =>
+  const [idempotencyKey, setIdempotencyKey] = useState(() =>
     typeof crypto !== "undefined" && crypto.randomUUID
       ? `pay-${crypto.randomUUID()}`
       : `pay-${Date.now()}`,
@@ -787,14 +787,14 @@ export function PaymentStep({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderRef, accessToken, organizationId]);
 
-  function validateAmount(raw: string, outstanding: number): number {
+  function validateAmount(raw: string, outstanding: number, allowPartial: boolean): number {
     const value = Number(raw);
     if (!Number.isFinite(value)) throw new Error("Enter a valid payment amount.");
     if (value <= 0) throw new Error("Payment amount must be greater than zero.");
     if (value > outstanding + 0.0001) {
       throw new Error(`Overpayment not allowed. Outstanding is ${formatCurrency(outstanding)}.`);
     }
-    if (value + 0.0001 < outstanding) {
+    if (!allowPartial && value + 0.0001 < outstanding) {
       throw new Error(
         "Partial payments are not supported. Amount must equal the outstanding balance.",
       );
@@ -807,7 +807,11 @@ export function PaymentStep({
     setError(null);
     let amount: number;
     try {
-      amount = validateAmount(amountInput, summary.outstanding_amount);
+      amount = validateAmount(
+        amountInput,
+        summary.outstanding_amount,
+        Boolean(summary.partial_payments_supported),
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Invalid amount");
       return;
@@ -822,6 +826,14 @@ export function PaymentStep({
       );
       setSummary(result.payment_summary);
       setPayment(result.payment);
+      if (result.payment_summary.status !== "paid") {
+        setIdempotencyKey(
+          typeof crypto !== "undefined" && crypto.randomUUID
+            ? `pay-${crypto.randomUUID()}`
+            : `pay-${Date.now()}`,
+        );
+        setAmountInput(String(result.payment_summary.outstanding_amount));
+      }
       await refresh();
     } catch (err) {
       setError(normalizeApiError(err));

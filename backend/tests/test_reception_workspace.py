@@ -86,7 +86,7 @@ class ReceptionWorkspaceTests(unittest.TestCase):
 
 
     def test_milestone2_payment_collect_idempotent_and_overpay(self):
-        """Full collect, idempotent replay, overpay, and partial reject."""
+        """Full collect, idempotent replay, overpay, and partial collect."""
         from app.reception_workspace.service import (
             collect_payment,
             get_order_with_payment,
@@ -124,17 +124,27 @@ class ReceptionWorkspaceTests(unittest.TestCase):
         detail = get_order_with_payment(order_code)
         self.assertEqual(detail["payment_summary"]["status"], "unpaid")
         self.assertEqual(detail["payment_summary"]["outstanding_amount"], total)
-        self.assertFalse(detail["payment_summary"]["partial_payments_supported"])
+        self.assertTrue(detail["payment_summary"]["partial_payments_supported"])
         self.assertIsNone(detail["payment"])
+        self.assertEqual(detail["payments"], [])
         self.assertIn("pricing", detail)
 
-        with self.assertRaisesRegex(Exception, "Partial payments"):
-            collect_payment(
-                order_code,
-                payment_method="cash",
-                amount=total / 2,
-                actor=self.user.email,
-            )
+        half = round(total / 2, 2)
+        if half <= 0 or half >= total:
+            half = round(max(total - 1, 1), 2)
+        partial = collect_payment(
+            order_code,
+            payment_method="cash",
+            amount=half,
+            idempotency_key=f"PART-{uuid.uuid4().hex[:8]}",
+            actor=self.user.email,
+        )
+        db.session.commit()
+        self.assertEqual(partial["payment_summary"]["status"], "partial")
+        self.assertAlmostEqual(
+            partial["payment_summary"]["paid_amount"], half, places=2
+        )
+        self.assertEqual(len(partial["payments"]), 1)
 
         with self.assertRaisesRegex(Exception, "Overpayment|overpay"):
             collect_payment(
@@ -161,18 +171,21 @@ class ReceptionWorkspaceTests(unittest.TestCase):
             )
 
         key = f"IDEM-{uuid.uuid4().hex[:10].upper()}"
+        remaining = float(partial["payment_summary"]["outstanding_amount"])
         first = collect_payment(
             order_code,
-            payment_method="cash",
-            amount=total,
+            payment_method="bank_transfer",
+            amount=remaining,
             idempotency_key=key,
             actor=self.user.email,
         )
         db.session.commit()
         self.assertFalse(first.get("idempotent_replay"))
         self.assertEqual(first["payment"]["receipt_number"], key)
+        self.assertEqual(first["payment"]["payment_method"], "transfer")
         self.assertEqual(first["payment_summary"]["status"], "paid")
         self.assertEqual(first["payment_summary"]["outstanding_amount"], 0)
+        self.assertEqual(len(first["payments"]), 2)
 
         replay = collect_payment(
             order_code,

@@ -2,6 +2,30 @@
 
 All notable changes for DxCon production releases.
 
+## [2.0.0-rc1] — 2026-07-26 — RECEPTION M2 RC
+
+**Status:** Release 2 Reception M2 **RC frozen** on `release/v2.0.0`.  
+**Report:** `docs/RELEASE_2_RC_REPORT.md`
+
+### Added
+- Payment Engine (partial collect, methods, history)
+- Receipt Module (preview / thermal / PDF / reprint / cancel)
+- Barcode Module (order / sample / collection labels + printers)
+- QR Module (payment / VNPay / static / dynamic / sample / tracking + verify)
+- Laboratory Queue (waiting → verified, priority, live refresh)
+- Sample Queue (collected → completed, tracking, history, audit)
+- Migrations `017`–`019`
+
+### Verification (RC gates)
+- Typecheck, M2 lint, auth freeze, reception Vitest, production build — PASS
+- Backend payment/receipt/barcode/QR/queue engines — PASS
+
+### Known
+- Full-repo ESLint residuals in auth-freeze / collector / lab pages (not M2)
+- Working tree may require named commit/PR before production promote
+
+---
+
 ## [1.0.0] — 2026-07-25 — RELEASE FREEZE
 
 **Status:** Release 1 **FROZEN** on `release/v1.0.0`.  

@@ -3,21 +3,18 @@
 **DxCon Platform**
 
 ```
-1.0.0
+2.0.0-rc1
 ```
 
 | Field | Value |
 |-------|--------|
-| Codename | Release 1.0.0 — FROZEN |
-| Git tag | `v1.0.0` |
-| Release branch | `release/v1.0.0` |
-| Freeze merge commit | `86f3d8516bb6a5315314076b78cc224a737539b8` |
-| Freeze tip (tagged) | Tag `v1.0.0` on `release/v1.0.0` (authoritative) |
-| Feature tip merged | `feature/reception-m1` @ `7729a9c15c969372c699dd19e41a576bc4493026` |
-| Pre-merge base | `c3183a50efb1fa60effa83765e15af87c436df7e` |
-| Build env `BUILD_VERSION` | `1.0.0` |
+| Codename | Release 2.0.0-rc1 — Reception M2 RC |
+| Release branch | `release/v2.0.0` |
+| R1 tag (frozen) | `v1.0.0` on `release/v1.0.0` |
+| R2 RC report | `docs/RELEASE_2_RC_REPORT.md` |
+| Build env `BUILD_VERSION` | `2.0.0-rc1` |
 | Auth freeze | Active |
+| Reception M2 | **RC frozen** (payment → sample queue) |
 | Flutter mobile | Phase 1 only |
-| Release 2 | **Not started** |
 
-See `docs/CHANGELOG.md`, `docs/RELEASE_NOTES.md`, `docs/RELEASE_1_FINAL_REPORT.md`, `docs/RELEASE_FREEZE_REPORT.md`.
+See `docs/RELEASE_2_RC_NOTES.md`, `docs/RELEASE_2_GO_LIVE_CHECKLIST.md`, `docs/RELEASE_2_DEPLOYMENT_CHECKLIST.md`, `docs/RELEASE_1_FREEZE.md`.

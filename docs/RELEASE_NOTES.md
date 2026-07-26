@@ -1,9 +1,24 @@
+# Release Notes — DxCon
+
+## [2.0.0-rc1] — Reception M2 RC (2026-07-26)
+
+Reception Milestone 2 is packaged as Release Candidate `2.0.0-rc1` on `release/v2.0.0`.
+
+Includes payment desk, receipts, barcodes, QR, lab queue, and sample queue. Auth remains frozen. Release 1 (`v1.0.0`) remains hotfix-only.
+
+Full notes: `docs/RELEASE_2_RC_NOTES.md`  
+RC report: `docs/RELEASE_2_RC_REPORT.md`  
+Go-live: `docs/RELEASE_2_GO_LIVE_CHECKLIST.md`  
+Deploy: `docs/RELEASE_2_DEPLOYMENT_CHECKLIST.md`
+
+---
+
 # Release Notes — DxCon v1.0.0
 
 ## Summary
 
 **DxCon Release 1.0.0 is frozen.**  
-Branch `feature/reception-m1` is merged into `release/v1.0.0` and tagged `v1.0.0`. Authentication remains **frozen**. Admin module was unchanged by this merge. Release 2 has **not** been started.
+Branch `feature/reception-m1` is merged into `release/v1.0.0` and tagged `v1.0.0`. Authentication remains **frozen**. Admin module was unchanged by this merge. Release 2 Reception M2 is tracked separately as `2.0.0-rc1`.
 
 | Field | Value |
 |-------|--------|

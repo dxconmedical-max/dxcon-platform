@@ -32,7 +32,7 @@ const unpaidDetail = {
     outstanding_amount: 100000,
     status: "unpaid",
     payment_methods_supported: ["cash", "transfer", "qr"],
-    partial_payments_supported: false,
+    partial_payments_supported: true,
   },
   payment: null,
 };
@@ -46,7 +46,7 @@ const paidDetail = {
     outstanding_amount: 0,
     status: "paid",
     payment_methods_supported: ["cash", "transfer", "qr"],
-    partial_payments_supported: false,
+    partial_payments_supported: true,
   },
   payment: {
     receipt_number: "RCT-1",
@@ -95,16 +95,41 @@ describe("Reception Milestone 2 PaymentStep", () => {
     expect(collectReceptionPayment).not.toHaveBeenCalled();
   });
 
-  it("rejects partial payment client-side", async () => {
+  it("allows partial payment when engine flag is enabled", async () => {
     const user = userEvent.setup();
+    vi.mocked(collectReceptionPayment).mockResolvedValue({
+      payment: {
+        receipt_number: "RCT-PART",
+        payment_method: "cash",
+        amount: 50000,
+        paid_at: "2026-07-24T01:00:00Z",
+        created_by: "cashier@dxcon.test",
+      },
+      invoice: { invoice_no: "INV-1", status: "unpaid" },
+      order_status: "payment_pending",
+      payment_summary: {
+        order_total: 100000,
+        paid_amount: 50000,
+        outstanding_amount: 50000,
+        status: "partial",
+        payment_methods_supported: ["cash", "transfer", "qr"],
+        partial_payments_supported: true,
+      },
+      idempotent_replay: false,
+    });
     renderPayment();
     await screen.findByRole("button", { name: "Collect payment" });
     const amount = screen.getByLabelText("Amount due");
     await user.clear(amount);
     await user.type(amount, "50000");
     await user.click(screen.getByRole("button", { name: "Collect payment" }));
-    expect(await screen.findByText(/Partial payments are not supported/i)).toBeInTheDocument();
-    expect(collectReceptionPayment).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(collectReceptionPayment).toHaveBeenCalledWith(
+        expect.objectContaining({ token: "t" }),
+        "ORD-1",
+        expect.objectContaining({ amount: 50000 }),
+      ),
+    );
   });
 
   it("collects full payment and shows receipt", async () => {

@@ -35,7 +35,7 @@ services:
       - key: SMTP_PASSWORD
         sync: false
       - key: BUILD_VERSION
-        value: "1.0.0-rc1"
+        value: "2.0.0-rc1"
 
 databases:
   - name: dxcon-postgres
