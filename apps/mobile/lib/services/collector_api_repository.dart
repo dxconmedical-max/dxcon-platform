@@ -26,7 +26,10 @@ class CollectorApiRepository {
     return res['data'] as List<dynamic>? ?? [];
   }
 
-  Future<Map<String, dynamic>> jobDetail(String collectorId, String assignmentId) async {
+  Future<Map<String, dynamic>> jobDetail(
+    String collectorId,
+    String assignmentId,
+  ) async {
     final res = await _api.get<Map<String, dynamic>>(
       '/api/v1/mobile/collector/jobs/$assignmentId',
       queryParameters: {'collector_id': collectorId},
@@ -60,15 +63,24 @@ class CollectorApiRepository {
     );
   }
 
-  Future<void> recordPickup(String bookingId, Map<String, dynamic> payload) async {
-    await _api.post('/api/v1/collector-operations/bookings/$bookingId/pickup', body: payload);
+  Future<void> recordPickup(
+    String bookingId,
+    Map<String, dynamic> payload,
+  ) async {
+    await _api.post(
+      '/api/v1/collector-operations/bookings/$bookingId/pickup',
+      body: payload,
+    );
   }
 
   Future<void> recordHandover(Map<String, dynamic> payload) async {
     await _api.post('/api/v1/collector-operations/handovers', body: payload);
   }
 
-  Future<void> syncOffline(String collectorId, List<Map<String, dynamic>> events) async {
+  Future<void> syncOffline(
+    String collectorId,
+    List<Map<String, dynamic>> events,
+  ) async {
     await _api.post(
       '/api/v1/collector-operations/collectors/$collectorId/offline/sync',
       body: {'events': events},

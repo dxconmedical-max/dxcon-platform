@@ -31,7 +31,9 @@ void main() {
     checks['file:$p'] = File('$rootPath/$p').existsSync();
   }
 
-  final router = File('$rootPath/lib/core/navigation/app_router.dart').readAsStringSync();
+  final router = File(
+    '$rootPath/lib/core/navigation/app_router.dart',
+  ).readAsStringSync();
   for (final route in [
     '/patient/home',
     '/patient/marketplace',
@@ -48,13 +50,20 @@ void main() {
     checks['route:$route'] = router.contains(route);
   }
 
-  checks['real_api_client'] = File('$rootPath/lib/core/api/api_client.dart').existsSync();
-  checks['offline_queue'] = File('$rootPath/lib/core/sync/sync_queue.dart').existsSync();
-  checks['no_demo_auth'] = !File('$rootPath/lib/features/auth/login_screen.dart')
-      .readAsStringSync()
-      .contains('demo@');
+  checks['real_api_client'] = File(
+    '$rootPath/lib/core/api/api_client.dart',
+  ).existsSync();
+  checks['offline_queue'] = File(
+    '$rootPath/lib/core/sync/sync_queue.dart',
+  ).existsSync();
+  checks['no_demo_auth'] = !File(
+    '$rootPath/lib/features/auth/login_screen.dart',
+  ).readAsStringSync().contains('demo@');
 
-  final critical = checks.entries.where((e) => !e.value).map((e) => e.key).toList();
+  final critical = checks.entries
+      .where((e) => !e.value)
+      .map((e) => e.key)
+      .toList();
   final status = critical.isEmpty ? 'PASS' : 'FAIL';
   final now = DateTime.now().toUtc().toIso8601String();
 
@@ -67,12 +76,21 @@ void main() {
   writeReport('PATIENT_APP_MVP_REPORT.json', {
     'generated_at': now,
     'status': status,
-    'checks': Map.fromEntries(checks.entries.where((e) => e.key.contains('patient') || e.key.startsWith('route:/patient'))),
+    'checks': Map.fromEntries(
+      checks.entries.where(
+        (e) => e.key.contains('patient') || e.key.startsWith('route:/patient'),
+      ),
+    ),
   });
   writeReport('COLLECTOR_APP_MVP_REPORT.json', {
     'generated_at': now,
     'status': status,
-    'checks': Map.fromEntries(checks.entries.where((e) => e.key.contains('collector') || e.key.startsWith('route:/collector'))),
+    'checks': Map.fromEntries(
+      checks.entries.where(
+        (e) =>
+            e.key.contains('collector') || e.key.startsWith('route:/collector'),
+      ),
+    ),
   });
   writeReport('MOBILE_MVP_SECURITY_REPORT.json', {
     'generated_at': now,

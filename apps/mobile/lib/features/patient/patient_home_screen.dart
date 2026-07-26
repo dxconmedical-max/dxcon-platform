@@ -64,16 +64,35 @@ class _PatientHomeScreenState extends ConsumerState<PatientHomeScreen> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text('Xin chào, $greeting', style: Theme.of(context).textTheme.headlineSmall),
+          Text(
+            'Xin chào, $greeting',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
           const SizedBox(height: 16),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              _QuickAction('Đặt xét nghiệm', Icons.science_outlined, () => context.go('/patient/marketplace')),
-              _QuickAction('So sánh', Icons.compare_arrows, () => context.go('/patient/compare')),
-              _QuickAction('Kết quả', Icons.description_outlined, () => context.go('/patient/results')),
-              _QuickAction('Thanh toán', Icons.payment_outlined, () => context.go('/patient/payments')),
+              _QuickAction(
+                'Đặt xét nghiệm',
+                Icons.science_outlined,
+                () => context.go('/patient/marketplace'),
+              ),
+              _QuickAction(
+                'So sánh',
+                Icons.compare_arrows,
+                () => context.go('/patient/compare'),
+              ),
+              _QuickAction(
+                'Kết quả',
+                Icons.description_outlined,
+                () => context.go('/patient/results'),
+              ),
+              _QuickAction(
+                'Thanh toán',
+                Icons.payment_outlined,
+                () => context.go('/patient/payments'),
+              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -81,10 +100,15 @@ class _PatientHomeScreenState extends ConsumerState<PatientHomeScreen> {
             Card(
               child: ListTile(
                 title: const Text('Đặt lịch đang hoạt động'),
-                subtitle: Text((_data!['active_booking'] as Map)['booking_code']?.toString() ?? ''),
+                subtitle: Text(
+                  (_data!['active_booking'] as Map)['booking_code']
+                          ?.toString() ??
+                      '',
+                ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
-                  final id = (_data!['active_booking'] as Map)['id']?.toString();
+                  final id = (_data!['active_booking'] as Map)['id']
+                      ?.toString();
                   if (id != null) context.go('/patient/booking/$id');
                 },
               ),
@@ -92,7 +116,9 @@ class _PatientHomeScreenState extends ConsumerState<PatientHomeScreen> {
           if ((_data?['unread_notifications'] as int? ?? 0) > 0)
             ListTile(
               leading: const Icon(Icons.notifications_outlined),
-              title: Text('${_data!['unread_notifications']} thông báo chưa đọc'),
+              title: Text(
+                '${_data!['unread_notifications']} thông báo chưa đọc',
+              ),
               onTap: () => context.go('/patient/notifications'),
             ),
         ],
@@ -121,10 +147,12 @@ class PatientMarketplaceScreen extends ConsumerStatefulWidget {
   const PatientMarketplaceScreen({super.key});
 
   @override
-  ConsumerState<PatientMarketplaceScreen> createState() => _PatientMarketplaceScreenState();
+  ConsumerState<PatientMarketplaceScreen> createState() =>
+      _PatientMarketplaceScreenState();
 }
 
-class _PatientMarketplaceScreenState extends ConsumerState<PatientMarketplaceScreen> {
+class _PatientMarketplaceScreenState
+    extends ConsumerState<PatientMarketplaceScreen> {
   final _query = TextEditingController();
   List<dynamic> _items = [];
   String? _error;
@@ -136,9 +164,14 @@ class _PatientMarketplaceScreenState extends ConsumerState<PatientMarketplaceScr
       _error = null;
     });
     try {
-      final res = await ref.read(marketplaceRepoProvider).search(q: _query.text);
+      final res = await ref
+          .read(marketplaceRepoProvider)
+          .search(q: _query.text);
       setState(() {
-        _items = (res['items'] as List<dynamic>?) ?? (res['listings'] as List<dynamic>?) ?? [];
+        _items =
+            (res['items'] as List<dynamic>?) ??
+            (res['listings'] as List<dynamic>?) ??
+            [];
         _loading = false;
       });
     } catch (e) {
@@ -160,7 +193,9 @@ class _PatientMarketplaceScreenState extends ConsumerState<PatientMarketplaceScr
               Expanded(
                 child: TextField(
                   controller: _query,
-                  decoration: const InputDecoration(hintText: 'Tìm xét nghiệm, gói, nhà cung cấp...'),
+                  decoration: const InputDecoration(
+                    hintText: 'Tìm xét nghiệm, gói, nhà cung cấp...',
+                  ),
                   onSubmitted: (_) => _search(),
                 ),
               ),
@@ -169,21 +204,35 @@ class _PatientMarketplaceScreenState extends ConsumerState<PatientMarketplaceScr
           ),
         ),
         if (_loading) const Expanded(child: DxLoadingState()),
-        if (_error != null) Expanded(child: DxErrorState(message: _error!, onRetry: _search)),
+        if (_error != null)
+          Expanded(
+            child: DxErrorState(message: _error!, onRetry: _search),
+          ),
         if (!_loading && _error == null)
           Expanded(
             child: _items.isEmpty
-                ? const DxEmptyState(title: 'Chưa có kết quả', subtitle: 'Thử từ khóa khác')
+                ? const DxEmptyState(
+                    title: 'Chưa có kết quả',
+                    subtitle: 'Thử từ khóa khác',
+                  )
                 : ListView.builder(
                     itemCount: _items.length,
                     itemBuilder: (context, index) {
                       final item = _items[index] as Map<String, dynamic>;
                       return ListTile(
-                        title: Text(item['title']?.toString() ?? item['listing_code']?.toString() ?? 'Dịch vụ'),
-                        subtitle: Text('${item['base_price'] ?? ''} ${item['currency'] ?? 'VND'}'),
+                        title: Text(
+                          item['title']?.toString() ??
+                              item['listing_code']?.toString() ??
+                              'Dịch vụ',
+                        ),
+                        subtitle: Text(
+                          '${item['base_price'] ?? ''} ${item['currency'] ?? 'VND'}',
+                        ),
                         onTap: () {
-                          final providerId = item['provider']?['id'] ?? item['provider_id'];
-                          if (providerId != null) context.go('/patient/provider/$providerId');
+                          final providerId =
+                              item['provider']?['id'] ?? item['provider_id'];
+                          if (providerId != null)
+                            context.go('/patient/provider/$providerId');
                         },
                       );
                     },

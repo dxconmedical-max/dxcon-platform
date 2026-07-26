@@ -111,11 +111,16 @@ describe("LoginPage submit loading state", () => {
     render(<LoginPage />);
     fillCredentials();
     fireEvent.submit(submitButton().closest("form")!);
+    // Wait for the async rejection UI — button stays "Sign in" while login is
+    // in flight (mock does not re-render on isSubmittingLogin), so alert must
+    // be asserted inside waitFor or CI races before formError is set.
     await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Invalid email or password.",
+      );
       expect(submitButton()).toHaveTextContent("Sign in");
       expect(submitButton()).toBeEnabled();
     });
-    expect(screen.getByRole("alert")).toHaveTextContent("Invalid email or password.");
   });
 
   it("API 500 resets the button and preserves message", async () => {

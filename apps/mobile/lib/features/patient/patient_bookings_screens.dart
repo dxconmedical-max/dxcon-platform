@@ -9,7 +9,8 @@ class PatientBookingsScreen extends ConsumerStatefulWidget {
   const PatientBookingsScreen({super.key});
 
   @override
-  ConsumerState<PatientBookingsScreen> createState() => _PatientBookingsScreenState();
+  ConsumerState<PatientBookingsScreen> createState() =>
+      _PatientBookingsScreenState();
 }
 
 class _PatientBookingsScreenState extends ConsumerState<PatientBookingsScreen> {
@@ -62,14 +63,18 @@ class PatientBookingDetailScreen extends ConsumerWidget {
       future: ref.read(patientApiProvider).bookingDetail(bookingId),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const DxLoadingState();
-        if (snapshot.hasError) return DxErrorState(message: snapshot.error.toString());
+        if (snapshot.hasError)
+          return DxErrorState(message: snapshot.error.toString());
         final data = snapshot.data!;
         final booking = data['booking'] as Map<String, dynamic>? ?? {};
         final timeline = data['timeline'] as List<dynamic>? ?? [];
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text(booking['booking_code']?.toString() ?? '', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              booking['booking_code']?.toString() ?? '',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             DxStatusChip(label: booking['booking_status']?.toString() ?? ''),
             const SizedBox(height: 16),
             const Text('Tiến trình'),
@@ -92,7 +97,8 @@ class PatientResultsScreen extends ConsumerStatefulWidget {
   const PatientResultsScreen({super.key});
 
   @override
-  ConsumerState<PatientResultsScreen> createState() => _PatientResultsScreenState();
+  ConsumerState<PatientResultsScreen> createState() =>
+      _PatientResultsScreenState();
 }
 
 class _PatientResultsScreenState extends ConsumerState<PatientResultsScreen> {
@@ -135,12 +141,16 @@ class PatientResultDetailScreen extends ConsumerWidget {
       future: ref.read(patientApiProvider).resultDetail(reportCode),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const DxLoadingState();
-        if (snapshot.hasError) return DxErrorState(message: snapshot.error.toString());
+        if (snapshot.hasError)
+          return DxErrorState(message: snapshot.error.toString());
         final r = snapshot.data!;
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text(r['report_code']?.toString() ?? '', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              r['report_code']?.toString() ?? '',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             Text('Phiên bản: ${r['version'] ?? 1}'),
             Text('Phát hành: ${r['released_at'] ?? '—'}'),
           ],
@@ -153,13 +163,15 @@ class PatientResultDetailScreen extends ConsumerWidget {
 class PatientPaymentsScreen extends StatelessWidget {
   const PatientPaymentsScreen({super.key});
   @override
-  Widget build(BuildContext context) => const DxEmptyState(title: 'Lịch sử thanh toán', icon: Icons.payment);
+  Widget build(BuildContext context) =>
+      const DxEmptyState(title: 'Lịch sử thanh toán', icon: Icons.payment);
 }
 
 class PatientInvoicesScreen extends StatelessWidget {
   const PatientInvoicesScreen({super.key});
   @override
-  Widget build(BuildContext context) => const DxEmptyState(title: 'Hóa đơn', icon: Icons.receipt_long);
+  Widget build(BuildContext context) =>
+      const DxEmptyState(title: 'Hóa đơn', icon: Icons.receipt_long);
 }
 
 class PatientConsultationsScreen extends StatelessWidget {
@@ -178,10 +190,12 @@ class PatientNotificationsScreen extends ConsumerStatefulWidget {
   const PatientNotificationsScreen({super.key});
 
   @override
-  ConsumerState<PatientNotificationsScreen> createState() => _PatientNotificationsScreenState();
+  ConsumerState<PatientNotificationsScreen> createState() =>
+      _PatientNotificationsScreenState();
 }
 
-class _PatientNotificationsScreenState extends ConsumerState<PatientNotificationsScreen> {
+class _PatientNotificationsScreenState
+    extends ConsumerState<PatientNotificationsScreen> {
   List<dynamic> _items = [];
 
   @override
@@ -211,5 +225,6 @@ class _PatientNotificationsScreenState extends ConsumerState<PatientNotification
 class PatientProfileScreen extends StatelessWidget {
   const PatientProfileScreen({super.key});
   @override
-  Widget build(BuildContext context) => const DxEmptyState(title: 'Hồ sơ bệnh nhân', icon: Icons.person_outline);
+  Widget build(BuildContext context) =>
+      const DxEmptyState(title: 'Hồ sơ bệnh nhân', icon: Icons.person_outline);
 }

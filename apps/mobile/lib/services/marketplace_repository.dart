@@ -32,44 +32,45 @@ class MarketplaceRepository {
       _api.get('/api/v1/marketplace/catalog/providers/$providerId');
 
   Future<Map<String, dynamic>> compare(List<String> listingIds) => _api.post(
-        '/api/v1/marketplace/catalog/compare',
-        body: {'listing_ids': listingIds},
-      );
+    '/api/v1/marketplace/catalog/compare',
+    body: {'listing_ids': listingIds},
+  );
 
-  Future<Map<String, dynamic>> quote(String listingId, {String? promotionCode, double distanceKm = 0}) =>
-      _api.post(
-        '/api/v1/marketplace/catalog/quote',
-        body: {
-          'listing_id': listingId,
-          if (promotionCode != null) 'promotion_code': promotionCode,
-          'distance_km': distanceKm,
-        },
-      );
+  Future<Map<String, dynamic>> quote(
+    String listingId, {
+    String? promotionCode,
+    double distanceKm = 0,
+  }) => _api.post(
+    '/api/v1/marketplace/catalog/quote',
+    body: {
+      'listing_id': listingId,
+      if (promotionCode != null) 'promotion_code': promotionCode,
+      'distance_km': distanceKm,
+    },
+  );
 
   Future<Map<String, dynamic>> checkServiceability(
     String providerId,
     double lat,
     double lng,
-  ) =>
-      _api.post(
-        '/api/v1/marketplace/catalog/serviceability',
-        body: {'provider_id': providerId, 'lat': lat, 'lng': lng},
-      );
+  ) => _api.post(
+    '/api/v1/marketplace/catalog/serviceability',
+    body: {'provider_id': providerId, 'lat': lat, 'lng': lng},
+  );
 
   Future<Map<String, dynamic>> createBooking(
     Map<String, dynamic> payload, {
     required String idempotencyKey,
-  }) =>
-      _api.post(
-        '/api/v1/marketplace/v2/bookings',
-        body: payload,
-        idempotencyKey: idempotencyKey,
-      );
+  }) => _api.post(
+    '/api/v1/marketplace/v2/bookings',
+    body: payload,
+    idempotencyKey: idempotencyKey,
+  );
 
   Future<Map<String, dynamic>> createQrPayment(String bookingId) => _api.post(
-        '/api/v1/marketplace/v2/payments/qr',
-        body: {'booking_id': bookingId},
-      );
+    '/api/v1/marketplace/v2/payments/qr',
+    body: {'booking_id': bookingId},
+  );
 
   Future<Map<String, dynamic>> paymentStatus(String paymentReference) =>
       _api.get('/api/v1/marketplace/v2/payments/$paymentReference/status');
