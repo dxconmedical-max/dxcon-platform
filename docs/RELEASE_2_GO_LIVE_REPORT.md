@@ -1,46 +1,23 @@
 # Release 2 Go-Live Report — Reception M2 (`2.0.0-rc1`)
 
 **Date (UTC):** 2026-07-26  
-**Branch / tip:** `release/v2.0.0` @ `15cc36f`  
-**Overall:** **GO LIVE PARTIAL — FRONTEND LIVE; API CUTOVER REQUIRED**  
-**Go-Live decision:** **NOT PASS**
+**Overall:** **PARTIAL GO-LIVE** — production frontend auth + admin shell verified  
+**Go-Live decision:** **PARTIAL** (not full Reception M2 GA; **do not start Release 3**)
 
 ---
 
 ## Executive summary
 
-Reception M2 UI is **live on production** (`https://dxcon.com.vn`) from commit `15cc36f`, with all M2 routes auth-gated. The production API (`https://api.dxcon.com.vn`) is **not yet running this tip**: M2 endpoints return **404**, and `/api/v1/system/ready` returns **503**. Migrations `017`–`019` were **not** applied from the go-live session.
+User-confirmed production:
 
-**Redis methodology correction:** Prior “Redis FAIL because hostname does not resolve” from **local** DNS/TCP/PING of Render internal `red-*` is **invalid**. Local DNS = **NOT APPLICABLE**.  
+- Login **PASS** on `https://dxcon-platform.vercel.app`
+- `/app/admin` **PASS**
+- Auth bootstrap **PASS** (`authenticated` / cookies / session)
+- CORS **PASS**; Admin KPIs load
 
-**Current Redis status (separate components):**
+Public self-registration is **not** part of Release 2. The login “Create account” link to missing `/register` caused Next.js prefetch **404** — link removed (nav-only; auth state machine unchanged).
 
-| Component | Status |
-|-----------|--------|
-| API Redis | **NOT VERIFIED** — `GET /api/v1/system/diagnostics/redis` implemented (`3544d62`) but **not deployed** (prod **404**); PASS only when runtime returns `ping=true` |
-| Worker Redis | **NOT VERIFIED** |
-| Scheduler Redis | **NOT VERIFIED** |
-| Local DNS | **NOT APPLICABLE** |
-
-Payment → Sample E2E remains **BLOCKED**. Render deploy of the diagnostic commit is required before API Redis can be marked PASS (no Free-plan shell; provide `RENDER_API_KEY` or dashboard deploy).
-
-Do **not** declare full Reception M2 GA until backend deploy + Redis PASS (in-Render) + migrations complete and verification is re-run.
-
----
-
-## What shipped this session
-
-| Action | Result |
-|--------|--------|
-| Commit Reception M2 RC | `15cc36f` |
-| Push `origin/release/v2.0.0` | **PASS** (new remote branch) |
-| Vercel production deploy | **PASS** — `dpl_7vLhsf3nASxgM34mVQLdrtS6Sh6d` → `dxcon.com.vn` |
-| Render API deploy | **NOT EXECUTED** (no Render API credentials; service not on R2 tip) |
-| Postgres migrations 017–019 | **NOT EXECUTED** |
-| Redis methodology | **CORRECTED** — env-aware verifier + SUPER_ADMIN diagnostic |
-| Redis diagnostic deploy | **BLOCKED** — no Render API key; prod route **404** |
-| Redis API runtime | **NOT VERIFIED** |
-| Dedicated workers deploy | **N/A** — none in `render.yaml` |
+Redis remains component-split: API / Worker / Scheduler **NOT VERIFIED**; Local DNS **NOT APPLICABLE**.
 
 ---
 
@@ -48,42 +25,17 @@ Do **not** declare full Reception M2 GA until backend deploy + Redis PASS (in-Re
 
 | Area | Result |
 |------|--------|
-| Frontend M2 routes | **PASS** (307 → login) |
-| Auth freeze redirect | **PASS** |
-| Payment / receipt / barcode / QR / queues (E2E) | **BLOCKED** — API tip missing R2 routes |
+| Frontend login | **PASS** |
+| Post-login admin shell | **PASS** |
+| Auth bootstrap | **PASS** |
+| CORS | **PASS** |
+| `/register` prefetch 404 | **FIXED** (link removed) |
 | API Redis | **NOT VERIFIED** |
 | Worker Redis | **NOT VERIFIED** |
 | Scheduler Redis | **NOT VERIFIED** |
 | Local Redis DNS | **NOT APPLICABLE** |
-| API ready | **FAIL** (503) |
-| Go-Live | **NOT PASS** |
-
-Details: `docs/RELEASE_2_PRODUCTION_VERIFICATION.md`  
-Deploy details: `docs/RELEASE_2_DEPLOYMENT_REPORT.md`  
-Verifier: `backend/scripts/verify_release_2_redis.py`
-
----
-
-## Immediate ops checklist (to finish go-live)
-
-1. [ ] Render: deploy `dxcon-api` from `release/v2.0.0` including `3544d62` (Redis diagnostic)
-2. [ ] Call `GET /api/v1/system/diagnostics/redis` as SUPER_ADMIN → expect `ping=true` (do **not** use laptop DNS)
-3. [ ] Confirm `REDIS_URL` Internal URL on `dxcon-api` if diagnostic fails (do not change if already correct)
-4. [ ] Run SQL migrations `017`, `018`, `019`
-5. [ ] Confirm `BUILD_VERSION=2.0.0-rc1` and prefer `APP_ENV=production`
-6. [ ] Re-probe M2 APIs → expect **401** unauth / **200** with reception token
-7. [ ] Execute smoke from `docs/RELEASE_2_GO_LIVE_CHECKLIST.md` (payment → sample queue)
-8. [ ] Update this report to **PASS** and tag `v2.0.0-rc1` if process requires
-
----
-
-## Rollback
-
-| Layer | Action |
-|-------|--------|
-| Frontend | Redeploy previous Vercel production deployment (pre-`dpl_7vLhsf3n…`) |
-| Backend | No R2 tip change applied — no API rollback needed for this session |
-| DB | No R2 migrations applied — no schema rollback needed |
+| Full M2 E2E | **NOT COMPLETE** |
+| Release 3 | **NOT STARTED** |
 
 ---
 
@@ -91,11 +43,9 @@ Verifier: `backend/scripts/verify_release_2_redis.py`
 
 | Question | Answer |
 |----------|--------|
-| Frontend go-live? | **YES** |
-| Full Reception M2 go-live? | **NO — blocked on API tip + API Redis + migrations** |
-| Safe to market as M2 live E2E? | **NO** until verification re-run PASS |
-| Local Redis DNS used as FAIL? | **NO — retracted (NOT APPLICABLE)** |
-| API Redis PASS? | **NO — NOT VERIFIED** (diagnostic not on prod yet) |
-| Payment → Sample E2E unblocked? | **NO** |
+| Frontend auth go-live? | **YES** (verified) |
+| Full Reception M2 go-live? | **NO — PARTIAL** |
+| Safe to start Release 3? | **NO** |
+| API Redis PASS? | **NO — NOT VERIFIED** |
 
-**STOP.** Go-Live remains **NOT PASS**.
+**STOP** after this finalize. Remaining Redis/worker/scheduler and M2 API cutover stay open.
