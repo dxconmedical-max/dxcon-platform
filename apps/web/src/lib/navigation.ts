@@ -95,7 +95,10 @@ export function buildNavItems(capabilities: AuthCapabilities | null): NavItem[] 
 
   const workspace = capabilities.workspace;
   const adminRoles = new Set(["SUPER_ADMIN", "DXCON_ADMIN", "ADMIN", "SYSTEM_ADMIN"]);
-  const isAdmin = adminRoles.has((capabilities.user.role ?? "").toUpperCase());
+  // user may be absent on partial capability payloads — never throw in nav.
+  const isAdmin = adminRoles.has(
+    (capabilities.user?.role ?? "").toUpperCase(),
+  );
   const hasWildcard = (capabilities.permissions ?? []).includes("*");
 
   return ALL_NAV.filter((item) => {

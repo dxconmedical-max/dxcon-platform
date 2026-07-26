@@ -9,7 +9,9 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:auth-freeze": "vitest run src/app/login/page.test.tsx src/stores/authStore.login.test.ts src/components/providers/AuthProvider.test.tsx src/components/layout/AppShell.test.tsx src/components/layout/AdminBootstrap.integration.test.tsx src/hooks/useRequireAuth.bootstrap.test.tsx src/hooks/gate1Auth.regression.test.tsx src/lib/auth/session.test.ts src/services/api.auth.test.ts src/auth/e2e.login.hardening.test.ts",
     "verify": "node scripts/verify_auth_platform.mjs",
+    "verify:auth-freeze": "node scripts/verify_auth_freeze.mjs",
     "verify:integration-ui": "node scripts/verify_integration_center_ui.mjs"
   },
   "dependencies": {

@@ -16,6 +16,8 @@ from app.models.patient_profile import PatientProfile
 from app.models.reception_queue_entry import ReceptionQueueEntry
 from app.models.test_catalog import TestCatalog
 from app.reception_workspace.audit import log_reception_activity, write_reception_audit
+from app.reception_workspace.errors import ReceptionWorkspaceError
+from app.reception_workspace import payment_engine as payeng
 from app.services import reception_service
 from app.services.reception_service import (
     STATUS_CHECKED_IN,
@@ -25,7 +27,17 @@ from app.services.reception_service import (
     serialize_queue,
     today_queue_entries,
 )
-from app.business_engine.statuses import COLLECTION_ASSIGNED, ORDER_PAID, ORDER_PAYMENT_PENDING
+from app.business_engine.statuses import (
+    COLLECTION_ASSIGNED,
+    COLLECTION_DELIVERED,
+    ORDER_COLLECTED,
+    ORDER_IN_TRANSIT,
+    ORDER_LAB_RECEIVED,
+    ORDER_PAID,
+    ORDER_PAYMENT_PENDING,
+    ORDER_SAMPLING,
+    ORDER_TESTING,
+)
 
 WORKFLOW_WAITING = "WAITING"
 WORKFLOW_CHECKED_IN = "CHECKED_IN"
@@ -35,12 +47,27 @@ WORKFLOW_SAMPLING = "SAMPLING"
 WORKFLOW_COMPLETED = "COMPLETED"
 WORKFLOW_CANCELLED = "CANCELLED"
 
-PAYMENT_METHODS = ("cash", "transfer", "qr", "pos", "corporate", "insurance")
+# Re-export engine constants for existing imports/tests.
+PAYMENT_METHODS = payeng.PAYMENT_METHODS
 PAYMENT_STATUSES = ("paid", "pending", "partial", "waived")
 
 
-class ReceptionWorkspaceError(ValueError):
-    pass
+# Order already visible on laboratory incoming / past receive.
+_LAB_HANDED_OFF_STATUSES = frozenset(
+    {
+        ORDER_LAB_RECEIVED,
+        ORDER_TESTING,
+        "pending_review",
+        "approved",
+        "released",
+    }
+)
+
+
+def _collection_is_lab_received(collection: BizCollection | None) -> bool:
+    if not collection:
+        return False
+    return bool(collection.accession_number) or collection.status == COLLECTION_DELIVERED
 
 
 def duplicate_warnings(*, phone: str | None = None, national_id: str | None = None) -> list[dict]:
@@ -111,6 +138,7 @@ def register_patient(
         date_of_birth=data.get("date_of_birth"),
         address=data.get("address"),
         national_id=data.get("national_id"),
+        patient_code=(str(data["patient_code"]).strip() if data.get("patient_code") else None),
         actor=actor,
     )
     queue_entry = reception_service.create_queue_entry(
@@ -216,35 +244,125 @@ def create_reception_order(
     }
 
 
+def payment_summary_for_order(order: BizOrder) -> dict[str, Any]:
+    return payeng.build_payment_summary(order)
+
+
+def get_order_with_payment(order_ref: str) -> dict[str, Any]:
+    detail = biz.order_to_detail(order_ref)
+    order = payeng.resolve_order(order_ref)
+    history = payeng.list_payment_history(order)
+    payment = history[-1] if history else None
+    invoice = BizInvoice.query.filter_by(order_id=order.id).first()
+    summary = payment_summary_for_order(order)
+    return {
+        "order": detail,
+        "pricing": {
+            "subtotal": summary["subtotal"],
+            "discount": summary["discount"],
+            "total": summary["order_total"],
+            "tax": summary["tax"],
+        },
+        "payment_summary": summary,
+        "payment": payment,
+        "payments": history,
+        "invoice": invoice.to_dict() if invoice else None,
+    }
+
+
+def get_payment_history(order_ref: str) -> dict[str, Any]:
+    order = payeng.resolve_order(order_ref)
+    history = payeng.list_payment_history(order)
+    return {
+        "order_code": order.order_code,
+        "payment_summary": payment_summary_for_order(order),
+        "payments": history,
+    }
+
+
+def _payment_collect_result(
+    order: BizOrder,
+    payment: BizPayment,
+    *,
+    idempotent_replay: bool,
+) -> dict[str, Any]:
+    invoice = BizInvoice.query.filter_by(order_id=order.id).first()
+    db.session.refresh(order)
+    history = payeng.list_payment_history(order)
+    return {
+        "payment": payment.to_dict(),
+        "payments": history,
+        "invoice": invoice.to_dict() if invoice else None,
+        "order_status": order.status,
+        "payment_summary": payment_summary_for_order(order),
+        "idempotent_replay": idempotent_replay,
+    }
+
+
 def collect_payment(
     order_ref: str,
     *,
     payment_method: str = "cash",
     receipt_number: str | None = None,
     amount: float | None = None,
+    idempotency_key: str | None = None,
     actor: str | None = None,
 ) -> dict[str, Any]:
-    if payment_method.lower() not in PAYMENT_METHODS:
-        raise ReceptionWorkspaceError(f"Invalid payment method: {payment_method}")
-    payment = biz.mark_order_paid(
+    """Collect payment via Payment Engine (supports partial + multi-method)."""
+    order = payeng.resolve_order(order_ref)
+
+    key = (idempotency_key or "").strip() or None
+    receipt = (receipt_number or "").strip() or key
+
+    if key:
+        existing_by_key = BizPayment.query.filter_by(
+            order_id=order.id, receipt_number=key
+        ).first()
+        if existing_by_key:
+            from app.reception_workspace.receipt_engine import ensure_receipt_for_payment
+
+            receipt_doc = ensure_receipt_for_payment(existing_by_key, actor=actor)
+            result = _payment_collect_result(order, existing_by_key, idempotent_replay=True)
+            result["receipt"] = receipt_doc.to_dict()
+            return result
+
+    summary = payment_summary_for_order(order)
+    if summary["status"] == "paid" or order.status == ORDER_PAID:
+        existing = (
+            BizPayment.query.filter_by(order_id=order.id)
+            .order_by(BizPayment.paid_at.desc())
+            .first()
+        )
+        if existing:
+            from app.reception_workspace.receipt_engine import ensure_receipt_for_payment
+
+            receipt_doc = ensure_receipt_for_payment(existing, actor=actor)
+            result = _payment_collect_result(order, existing, idempotent_replay=True)
+            result["receipt"] = receipt_doc.to_dict()
+            return result
+
+    payment = payeng.record_payment(
         order_ref,
         payment_method=payment_method,
-        receipt_number=receipt_number,
+        amount=amount,
+        receipt_number=receipt,
         actor=actor,
     )
-    order = BizOrder.query.filter(
-        or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)
-    ).first()
-    invoice = BizInvoice.query.filter_by(order_id=order.id).first() if order else None
+    from app.reception_workspace.receipt_engine import ensure_receipt_for_payment
+
+    receipt_doc = ensure_receipt_for_payment(payment, actor=actor)
+    invoice = BizInvoice.query.filter_by(order_id=order.id).first()
     _sync_queue_after_payment(order, invoice, actor=actor)
-    write_reception_audit(action="payment_collected", object_type="payment", object_id=payment.receipt_number, actor=actor)
-    barcodes = generate_barcodes(order.order_code) if order else {}
-    return {
-        "payment": payment.to_dict(),
-        "invoice": invoice.to_dict() if invoice else None,
-        "order_status": order.status if order else None,
-        "barcodes": barcodes,
-    }
+    write_reception_audit(
+        action="payment_collected",
+        object_type="payment",
+        object_id=payment.receipt_number,
+        actor=actor,
+    )
+    db.session.refresh(order)
+    result = _payment_collect_result(order, payment, idempotent_replay=False)
+    result["receipt"] = receipt_doc.to_dict()
+    return result
 
 
 def _sync_queue_after_payment(order: BizOrder | None, invoice: BizInvoice | None, *, actor: str | None = None) -> None:
@@ -255,12 +373,33 @@ def _sync_queue_after_payment(order: BizOrder | None, invoice: BizInvoice | None
         entry = ReceptionQueueEntry.query.filter_by(patient_id=order.patient_code, queue_date=datetime.utcnow().date()).order_by(
             ReceptionQueueEntry.created_at.desc()
         ).first()
-    if entry:
+    if not entry:
+        return
+    summary = payment_summary_for_order(order)
+    if invoice:
+        entry.invoice_id = invoice.id
+    if summary["status"] == "paid":
         entry.payment_status = "PAID"
         entry.workflow_status = WORKFLOW_PAID
-        if invoice:
-            entry.invoice_id = invoice.id
-        log_reception_activity("PAYMENT_COLLECTED", patient_id=order.patient_code, queue_entry_id=entry.id, actor=actor)
+        log_reception_activity(
+            "PAYMENT_COLLECTED",
+            patient_id=order.patient_code,
+            queue_entry_id=entry.id,
+            actor=actor,
+        )
+    elif summary["status"] == "partial":
+        entry.payment_status = "PARTIAL"
+        entry.workflow_status = WORKFLOW_PAYMENT_PENDING
+        log_reception_activity(
+            "PAYMENT_PARTIAL",
+            patient_id=order.patient_code,
+            queue_entry_id=entry.id,
+            actor=actor,
+        )
+    else:
+        entry.payment_status = "PENDING"
+        entry.workflow_status = WORKFLOW_PAYMENT_PENDING
+
 
 
 def create_collection_after_payment(
@@ -270,52 +409,394 @@ def create_collection_after_payment(
     pickup_address: str = "Reception Desk",
     actor: str | None = None,
 ) -> dict[str, Any]:
+    """Create collection job after payment (paid → sampling). Prefer handoff_to_laboratory for M4."""
     collection = biz.create_collection_job(
         order_ref,
         collector_name=collector_name,
         pickup_address=pickup_address,
         actor=actor,
     )
-    order = BizOrder.query.filter(or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)).first()
+    order = BizOrder.query.filter(
+        or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)
+    ).first()
     entry = ReceptionQueueEntry.query.filter_by(order_id=order.id).first() if order else None
     if entry:
         entry.workflow_status = WORKFLOW_SAMPLING
-    write_reception_audit(action="collection_created", object_type="collection", object_id=collection.id, actor=actor)
-    return {"collection": collection.to_dict(), "queue_entry": entry.to_dict() if entry else None}
+    write_reception_audit(
+        action="collection_created",
+        object_type="collection",
+        object_id=collection.id,
+        actor=actor,
+    )
+    return {
+        "collection": collection.to_dict(),
+        "queue_entry": entry.to_dict() if entry else None,
+    }
+
+
+def handoff_to_laboratory(
+    order_ref: str,
+    *,
+    collector_name: str = "Reception Desk",
+    pickup_address: str = "Reception Desk",
+    laboratory_name: str = "Central Laboratory",
+    laboratory_id: str | None = None,
+    actor: str | None = None,
+    desk_complete: bool = True,
+) -> dict[str, Any]:
+    """
+    Milestone 4 — paid + documented order → laboratory queue (single insertion).
+
+    Transition path (walk-in desk):
+      paid → sampling (collection) → collected → in_transit → lab_received
+
+    Idempotent: if already handed off / collection exists at target, returns existing
+    without creating a second queue row.
+    """
+    order = BizOrder.query.filter(
+        or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)
+    ).first()
+    if not order:
+        raise ReceptionWorkspaceError("Order not found")
+
+    status = (order.status or "").lower()
+    if status in {"cancelled", "canceled", "void"}:
+        raise ReceptionWorkspaceError(
+            f"Cannot hand off order in status {order.status}"
+        )
+
+    summary = payment_summary_for_order(order)
+    paid_or_beyond = summary["status"] == "paid" or status in {
+        ORDER_PAID,
+        ORDER_SAMPLING,
+        ORDER_COLLECTED,
+        ORDER_IN_TRANSIT,
+        *_LAB_HANDED_OFF_STATUSES,
+    }
+    if not paid_or_beyond:
+        raise ReceptionWorkspaceError(
+            "Order must be paid before laboratory handoff"
+        )
+
+    # Require specimen identifiers + requisition readiness (stable backend codes).
+    try:
+        barcodes = generate_barcodes(order.order_code)
+    except ReceptionWorkspaceError as exc:
+        raise ReceptionWorkspaceError(
+            f"Specimen identifiers required before handoff: {exc}"
+        ) from exc
+    if not barcodes.get("order_barcode") or not barcodes.get("sample_barcodes"):
+        raise ReceptionWorkspaceError(
+            "Specimen barcodes are missing; generate barcode/QR before handoff"
+        )
+    try:
+        requisition = render_request_form(order.order_code)
+    except ReceptionWorkspaceError as exc:
+        raise ReceptionWorkspaceError(
+            f"Requisition required before handoff: {exc}"
+        ) from exc
+    if not (requisition.get("html") or "").strip():
+        raise ReceptionWorkspaceError("Requisition HTML is empty; cannot hand off")
+
+    existing = BizCollection.query.filter_by(order_id=order.id).first()
+    if order.status in _LAB_HANDED_OFF_STATUSES or _collection_is_lab_received(existing):
+        entry = ReceptionQueueEntry.query.filter_by(order_id=order.id).first()
+        if entry:
+            entry.workflow_status = WORKFLOW_SAMPLING
+        from app.reception_workspace.lab_queue_engine import ensure_lab_queue_item
+
+        lab_queue = ensure_lab_queue_item(
+            order.order_code,
+            laboratory_name=laboratory_name,
+            actor=actor,
+        )
+        payload = _handoff_payload(
+            order,
+            existing,
+            barcodes=barcodes,
+            laboratory_name=laboratory_name,
+            laboratory_id=laboratory_id,
+            idempotent_replay=True,
+            actor=actor,
+        )
+        payload["lab_queue"] = lab_queue
+        return payload
+
+    idempotent_replay = False
+    collection = existing
+    try:
+        # create_collection_job requires paid; resume from an existing collection
+        # (e.g. create_collection_after_payment) without re-calling it.
+        # Do not session.refresh() mid-flow — that can reload pre-flush status.
+        if collection is None:
+            if order.status != ORDER_PAID:
+                raise ReceptionWorkspaceError(
+                    f"Cannot create collection for order in status {order.status}"
+                )
+            collection = biz.create_collection_job(
+                order.order_code,
+                collector_name=collector_name,
+                pickup_address=pickup_address,
+                actor=actor,
+            )
+        else:
+            collection = existing
+
+        if desk_complete and collection:
+            # Advance walk-in desk sample into the laboratory incoming/received queue once.
+            if order.status == ORDER_SAMPLING:
+                collection = biz.collect_sample(order.order_code, actor=actor)
+            if order.status == ORDER_COLLECTED:
+                collection = biz.handover_sample(order.order_code, actor=actor)
+            if order.status == ORDER_IN_TRANSIT:
+                collection = biz.receive_sample_at_lab(
+                    order.order_code,
+                    received_by=actor or laboratory_name,
+                    actor=actor,
+                )
+    except BusinessEngineError as exc:
+        raise ReceptionWorkspaceError(str(exc)) from exc
+
+    entry = ReceptionQueueEntry.query.filter_by(order_id=order.id).first()
+    if entry:
+        entry.workflow_status = WORKFLOW_SAMPLING
+
+    write_reception_audit(
+        action="lab_handoff",
+        object_type="order",
+        object_id=order.order_code,
+        actor=actor,
+    )
+    log_reception_activity(
+        "LAB_HANDOFF",
+        patient_id=order.patient_code,
+        queue_entry_id=entry.id if entry else None,
+        actor=actor,
+    )
+
+    from app.reception_workspace.lab_queue_engine import ensure_lab_queue_item
+
+    lab_queue = ensure_lab_queue_item(
+        order.order_code,
+        laboratory_name=laboratory_name,
+        queue_reference=(
+            collection.accession_number
+            or collection.sample_code
+            or collection.barcode_value
+            or collection.id
+            if collection
+            else None
+        ),
+        actor=actor,
+    )
+    payload = _handoff_payload(
+        order,
+        collection,
+        barcodes=barcodes,
+        laboratory_name=laboratory_name,
+        laboratory_id=laboratory_id,
+        idempotent_replay=idempotent_replay,
+        actor=actor,
+    )
+    payload["lab_queue"] = lab_queue
+    return payload
+
+
+def _handoff_payload(
+    order: BizOrder,
+    collection: BizCollection | None,
+    *,
+    barcodes: dict[str, Any],
+    laboratory_name: str,
+    laboratory_id: str | None,
+    idempotent_replay: bool,
+    actor: str | None,
+) -> dict[str, Any]:
+    entry = ReceptionQueueEntry.query.filter_by(order_id=order.id).first()
+    accepted_at = None
+    if collection and collection.received_at:
+        accepted_at = collection.received_at.isoformat()
+    elif collection and collection.updated_at:
+        accepted_at = collection.updated_at.isoformat()
+    elif collection and collection.created_at:
+        accepted_at = collection.created_at.isoformat()
+
+    queue_reference = None
+    if collection:
+        queue_reference = (
+            collection.accession_number
+            or collection.sample_code
+            or collection.barcode_value
+            or collection.id
+        )
+
+    return {
+        "order_code": order.order_code,
+        "order_status": order.status,
+        "collection": collection.to_dict() if collection else None,
+        "queue_entry": entry.to_dict() if entry else None,
+        "queue_reference": queue_reference,
+        "laboratory": {
+            "id": laboratory_id,
+            "name": laboratory_name,
+        },
+        "accepted_at": accepted_at,
+        "barcodes": {
+            "order_barcode": barcodes.get("order_barcode"),
+            "patient_qr": barcodes.get("patient_qr"),
+            "sample_count": len(barcodes.get("sample_barcodes") or []),
+        },
+        "handed_off": order.status in _LAB_HANDED_OFF_STATUSES
+        or _collection_is_lab_received(collection),
+        "idempotent_replay": idempotent_replay,
+        "actor": actor,
+    }
+
+
+def get_lab_handoff_status(order_ref: str) -> dict[str, Any]:
+    """Refresh persistence for Milestone 4 handoff status."""
+    order = BizOrder.query.filter(
+        or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)
+    ).first()
+    if not order:
+        raise ReceptionWorkspaceError("Order not found")
+    collection = BizCollection.query.filter_by(order_id=order.id).first()
+    barcodes = None
+    try:
+        if (
+            payment_summary_for_order(order)["status"] == "paid"
+            or order.status == ORDER_PAID
+            or collection
+        ):
+            barcodes = generate_barcodes(order.order_code)
+    except ReceptionWorkspaceError:
+        barcodes = None
+    handed_off = order.status in _LAB_HANDED_OFF_STATUSES or _collection_is_lab_received(
+        collection
+    )
+    return _handoff_payload(
+        order,
+        collection,
+        barcodes=barcodes or {},
+        laboratory_name="Central Laboratory",
+        laboratory_id=None,
+        idempotent_replay=handed_off,
+        actor=None,
+    )
+
+
+def _assert_order_document_eligible(order: BizOrder) -> None:
+    """Milestone 3 — barcodes/requisition require a paid, non-cancelled order."""
+    status = (order.status or "").lower()
+    if status in {"cancelled", "canceled", "void"}:
+        raise ReceptionWorkspaceError(
+            f"Cannot generate documents for order in status {order.status}"
+        )
+    summary = payment_summary_for_order(order)
+    if summary["status"] != "paid" and status != ORDER_PAID:
+        raise ReceptionWorkspaceError(
+            "Order must be paid before barcode, QR, or requisition generation"
+        )
 
 
 def generate_barcodes(order_ref: str) -> dict[str, Any]:
+    """Return stable backend identifiers. Reprint returns the same codes (no new IDs)."""
     order = BizOrder.query.filter(or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)).first()
     if not order:
         raise ReceptionWorkspaceError("Order not found")
+    _assert_order_document_eligible(order)
+
     patient = Patient.query.get(order.patient_code)
     collection = BizCollection.query.filter_by(order_id=order.id).first()
+
+    had_order_barcode = bool(order.barcode_value)
+    order_barcode = order.barcode_value or f"BC-{order.order_code}"
+    if not order.barcode_value:
+        try:
+            from app.business_engine.service import table_has_column
+
+            if table_has_column("biz_orders", "barcode_value"):
+                order.barcode_value = order_barcode
+                db.session.flush()
+        except Exception:
+            # Column may be absent in some environments — still return deterministic code.
+            pass
+
+    patient_code = order.patient_code
+    patient_barcode = f"BC-PAT-{patient_code}"
+    patient_qr = f"dxcon:patient:{patient_code}"
+    if not patient_qr.startswith("dxcon:patient:") or not patient_code:
+        raise ReceptionWorkspaceError("Invalid patient QR payload")
+
     samples = []
     for item in order.items:
         sample_code = f"SMP-{item.test_code}-{order.order_code}"
         samples.append({
             "test_code": item.test_code,
             "test_name": item.test_name,
-            "sample_type": item.test_name,
+            "sample_type": getattr(item, "sample_type", None) or item.test_name,
+            "specimen_code": sample_code,
             "barcode": f"BC-{sample_code}",
+            "collection_requirement": "Follow standard collection SOP",
         })
+
+    generated_at = datetime.utcnow().isoformat() + "Z"
     payload = {
-        "order_barcode": order.barcode_value or f"BC-{order.order_code}",
-        "patient_barcode": f"BC-PAT-{order.patient_code}",
-        "patient_qr": f"dxcon:patient:{order.patient_code}",
+        "order_code": order.order_code,
+        "patient_code": patient_code,
+        "patient_name": order.patient_name or (patient.full_name if patient else None),
+        "order_barcode": order_barcode,
+        "patient_barcode": patient_barcode,
+        "patient_qr": patient_qr,
         "sample_barcodes": samples,
         "collection_barcode": collection.barcode_value if collection else None,
+        "generated_at": generated_at,
+        "reprint": had_order_barcode,
+        "status": order.status,
     }
-    write_reception_audit(action="barcode_printed", object_type="order", object_id=order.order_code)
+    write_reception_audit(
+        action="barcode_printed" if had_order_barcode else "barcode_generated",
+        object_type="order",
+        object_id=order.order_code,
+    )
     return payload
 
 
-def render_request_form(order_ref: str) -> str:
+def render_request_form(order_ref: str) -> dict[str, Any]:
+    """Return requisition HTML plus embedded identifier metadata for reprint stability."""
     order = BizOrder.query.filter(or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)).first()
     if not order:
         raise ReceptionWorkspaceError("Order not found")
+    _assert_order_document_eligible(order)
+    barcodes = generate_barcodes(order_ref)
+    html = biz.render_request_form_html(order)
+    # Enrich with QR + specimen identifiers for printable requisition.
+    sample_rows = "".join(
+        f"<li>{s['test_name']} ({s['test_code']}) — specimen {s['specimen_code']} — barcode {s['barcode']}</li>"
+        for s in barcodes.get("sample_barcodes") or []
+    )
+    enrichment = (
+        f"<section><h2>Identifiers</h2>"
+        f"<p>Order barcode: {barcodes['order_barcode']}</p>"
+        f"<p>Patient barcode: {barcodes['patient_barcode']}</p>"
+        f"<p>Patient QR: {barcodes['patient_qr']}</p>"
+        f"<p>Generated at: {barcodes['generated_at']}</p>"
+        f"<ul>{sample_rows or '<li>No specimen lines</li>'}</ul>"
+        f"</section>"
+    )
+    if "</body>" in html:
+        html = html.replace("</body>", enrichment + "</body>")
+    else:
+        html = html + enrichment
     write_reception_audit(action="request_form_printed", object_type="order", object_id=order.order_code)
-    return biz.render_request_form_html(order)
+    return {
+        "html": html,
+        "order_code": order.order_code,
+        "patient_code": order.patient_code,
+        "barcodes": barcodes,
+        "reprint": barcodes.get("reprint", False),
+        "generated_at": barcodes.get("generated_at"),
+    }
 
 
 def workspace_dashboard() -> dict[str, Any]:

@@ -1,0 +1,70 @@
+{
+  "generated_at": "2026-07-24T04:08:55.734138Z",
+  "phase": 1,
+  "status": "PASS_WITH_WARNINGS",
+  "gate": "STOP_AFTER_PHASE_1_AWAIT_PRODUCTION_VERIFICATION",
+  "web_go_live_commit": "f5d2f45",
+  "checks": {
+    "file:lib/main.dart": true,
+    "file:lib/config/environment.dart": true,
+    "file:lib/core/api/api_client.dart": true,
+    "file:lib/core/auth/auth_repository.dart": true,
+    "file:lib/core/auth/auth_provider.dart": true,
+    "file:lib/core/storage/secure_token_storage.dart": true,
+    "file:lib/core/navigation/app_router.dart": true,
+    "file:lib/core/navigation/role_routing.dart": true,
+    "file:lib/core/errors/api_error.dart": true,
+    "file:lib/core/offline/offline_read_cache.dart": true,
+    "file:lib/core/offline/offline_reader.dart": true,
+    "file:lib/core/offline/offline_read_state.dart": true,
+    "file:lib/core/security/release_guards.dart": true,
+    "file:lib/bootstrap/app_bootstrap.dart": true,
+    "file:lib/features/auth/login_screen.dart": true,
+    "file:config/production.env.json": true,
+    "file:config/staging.env.json": true,
+    "file:config/development.env.json": true,
+    "file:docs/PHASE_1_FOUNDATION.md": true,
+    "file:docs/ENVIRONMENT_SETUP.md": true,
+    "file:docs/MOBILE_TOKEN_SECURITY.md": true,
+    "file:docs/ANDROID_RELEASE.md": true,
+    "file:docs/IOS_RELEASE.md": true,
+    "file:../../.github/workflows/mobile-ci.yml": true,
+    "file:test/core/auth_repository_test.dart": true,
+    "file:test/core/role_routing_test.dart": true,
+    "file:test/core/offline_read_cache_test.dart": true,
+    "file:test/core/release_guards_test.dart": true,
+    "api_url_production": true,
+    "demo_mode_disabled": true,
+    "clinic_role_routing": true,
+    "lab_role_routing": true,
+    "prod_env_demo_false": true,
+    "prod_env_no_sentry_secret": true,
+    "android_flavors": true,
+    "android_sdk": false
+  },
+  "warnings": [
+    "android_sdk_not_configured"
+  ],
+  "critical": [],
+  "scope": [
+    "mobile_architecture",
+    "environment_configuration",
+    "secure_token_session_storage",
+    "login_logout",
+    "role_routing",
+    "api_client",
+    "error_handling",
+    "offline_safe_read_states"
+  ],
+  "out_of_scope": [
+    "phase_2_patient_portal",
+    "phase_3_collector"
+  ],
+  "phase_2_blockers": [
+    "production_device_auth_verification",
+    "firebase_push_configuration",
+    "android_release_signing_secrets",
+    "ios_provisioning_profiles",
+    "mobile_device_token_api"
+  ]
+}

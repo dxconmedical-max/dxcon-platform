@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dxcon_mobile/core/permissions/capability_helpers.dart';
-import 'package:dxcon_mobile/models/auth_models.dart';
 import 'package:dxcon_mobile/services/scanner_service.dart';
 
 void main() {

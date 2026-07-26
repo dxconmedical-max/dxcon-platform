@@ -74,6 +74,12 @@ class Config:
         "true",
     ).lower() in {"1", "true", "yes", "on"}
 
+    # Production deny-by-default for high-risk /api/v1 prefixes (see api_auth_gate.py).
+    API_AUTH_GATE_ENABLED = os.getenv(
+        "API_AUTH_GATE_ENABLED",
+        "true",
+    ).lower() in {"1", "true", "yes", "on"}
+
     DB_POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "5"))
     DB_MAX_OVERFLOW = int(os.getenv("DB_MAX_OVERFLOW", "10"))
     DB_POOL_RECYCLE = int(os.getenv("DB_POOL_RECYCLE", "280"))

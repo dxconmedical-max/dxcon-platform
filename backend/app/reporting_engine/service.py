@@ -10,15 +10,30 @@ from sqlalchemy import or_
 
 from app.business_engine import service as biz
 from app.business_engine.service import BusinessEngineError
-from app.business_engine.statuses import ORDER_PENDING_REVIEW, ORDER_RELEASED, RESULT_APPROVED, RESULT_PENDING_REVIEW, RESULT_RELEASED
+from app.business_engine.statuses import (
+    ORDER_APPROVED,
+    ORDER_RELEASED,
+    RESULT_APPROVED,
+    RESULT_PENDING_REVIEW,
+    RESULT_RELEASED,
+)
 from app.extensions.db import db
-from app.models.biz_order import BizCollection, BizOrder, BizResult, BizResultItem, BizWorkflowAudit
+from app.models.audit_log import AuditLog
+from app.models.biz_order import BizCollection, BizOrder, BizResult, BizWorkflowAudit
 from app.models.clinical_report import ClinicalReport, CriticalResultAlert, ReportDigitalSignature, ReportNotificationEvent
 from app.models.lab_lis import LabAccessionRecord
-from app.models.patient import Patient
 from app.reporting_engine.audit import write_report_audit
+from app.reporting_engine.pdf_service import (
+    REPORT_PDF_TEMPLATE_ID,
+    REPORT_PDF_TEMPLATE_VERSION,
+    ReportPdfError,
+    read_pdf_bytes,
+    resolve_pdf_path,
+    write_report_pdf,
+)
 from app.reporting_engine.report_generation_service import (
     build_report_payload,
+    build_verify_url,
     generate_qr_payload,
     generate_report_code,
     generate_report_hash,
@@ -173,8 +188,21 @@ def review_detail(order_ref: str) -> dict[str, Any]:
         "lab_note": report.lab_note,
         "doctor_note": report.doctor_note or (result.doctor_note if result else None),
         "ai_interpretation": {"placeholder": True, "advisory": "Human review required"},
-        "report_preview_html": report.html_content or render_html_report(payload, report_code=report.report_code, doctor_note=report.doctor_note),
+        "report_preview_html": report.html_content or render_html_report(
+            payload,
+            report_code=report.report_code,
+            doctor_note=report.doctor_note,
+            report_version=report.report_version,
+            report_status=report.report_status,
+            report_hash=report.report_hash,
+            approved_by=report.approved_by,
+            approved_at=report.approved_at.isoformat() if report.approved_at else None,
+            released_by=report.released_by,
+            released_at=report.released_at.isoformat() if report.released_at else None,
+            amendment_reason=report.amendment_reason,
+        ),
         "audit_timeline": timeline,
+        "pdf_available": bool(report.pdf_path) and report.report_status in ("approved", "released", "amended"),
     }
 
 
@@ -190,6 +218,54 @@ def start_review(order_ref: str, *, actor: str | None = None) -> dict:
     return report.to_dict()
 
 
+def _freeze_and_render_pdf(report: ClinicalReport, payload: dict[str, Any], *, actor: str | None) -> dict[str, Any]:
+    """Freeze HTML + PDF from authoritative payload. PDF only after approval metadata set."""
+    if not payload.get("items"):
+        raise ReportingEngineError("Cannot generate report PDF without finalized result items")
+    report_hash = generate_report_hash(payload)
+    verify_url = build_verify_url(report.report_code, report_hash)
+    qr = generate_qr_payload(report.report_code)
+    html = render_html_report(
+        payload,
+        report_code=report.report_code,
+        doctor_note=report.doctor_note,
+        report_version=report.report_version,
+        report_status=report.report_status,
+        report_hash=report_hash,
+        approved_by=report.approved_by,
+        approved_at=report.approved_at.isoformat() if report.approved_at else None,
+        released_by=report.released_by,
+        released_at=report.released_at.isoformat() if report.released_at else None,
+        amendment_reason=report.amendment_reason,
+        verify_url=verify_url,
+    )
+    report.report_hash = report_hash
+    report.qr_payload = qr
+    report.html_content = html
+    try:
+        pdf_path = write_report_pdf(
+            payload=payload,
+            report_code=report.report_code,
+            report_version=report.report_version,
+            report_hash=report_hash,
+            report_status=report.report_status,
+            approved_by=report.approved_by,
+            approved_at=report.approved_at,
+            released_by=report.released_by,
+            released_at=report.released_at,
+            doctor_note=report.doctor_note,
+            amendment_reason=report.amendment_reason,
+            qr_payload=qr,
+            verify_url=verify_url,
+            reported_at=report.generated_at or report.approved_at,
+        )
+    except ReportPdfError as exc:
+        raise ReportingEngineError(f"PDF generation failed: {exc}") from exc
+    report.pdf_path = str(pdf_path)
+    write_report_audit(action="report_pdf_generated", object_type="clinical_report", object_id=report.report_code, actor=actor)
+    return prepare_pdf_payload(payload, html, pdf_ready=True, pdf_path=str(pdf_path))
+
+
 def approve_report(order_ref: str, *, doctor_note: str | None = None, actor: str | None = None) -> dict:
     order = BizOrder.query.filter(or_(BizOrder.order_code == order_ref, BizOrder.id == order_ref)).first()
     if not order:
@@ -199,23 +275,33 @@ def approve_report(order_ref: str, *, doctor_note: str | None = None, actor: str
         report = ensure_clinical_report(order)
     if report.report_status == "released":
         raise ReportingEngineError("Report already released")
-    if report.report_status == "approved":
-        return report.to_dict()
+    if report.report_status == "approved" and report.pdf_path:
+        payload = build_report_payload(order.id)
+        html = report.html_content or ""
+        return {
+            **report.to_dict(),
+            "pdf_payload": prepare_pdf_payload(payload, html, pdf_ready=True, pdf_path=report.pdf_path),
+        }
 
-    biz.approve_result(order.order_code, doctor_note=doctor_note, actor=actor)
+    result = BizResult.query.filter_by(order_id=order.id).first()
+    already_approved = order.status in {ORDER_APPROVED, ORDER_RELEASED} or (
+        result is not None and result.status in {RESULT_APPROVED, RESULT_RELEASED}
+    )
+    if not already_approved:
+        biz.approve_result(order.order_code, doctor_note=doctor_note, actor=actor)
+    elif doctor_note and result is not None:
+        result.doctor_note = doctor_note
+
     payload = build_report_payload(order.id)
-    report_hash = generate_report_hash(payload)
-    html = render_html_report(payload, report_code=report.report_code, doctor_note=doctor_note)
     report.doctor_note = doctor_note
     report.report_status = "approved"
-    report.approved_by = actor
+    report.approved_by = actor or (result.approved_by if result else None)
     report.approved_at = _utcnow()
     report.generated_at = _utcnow()
-    report.report_hash = report_hash
-    report.qr_payload = generate_qr_payload(report.report_code)
-    report.html_content = html
     report.clinical_summary = doctor_note
     report.updated_at = _utcnow()
+
+    pdf_payload = _freeze_and_render_pdf(report, payload, actor=actor)
 
     sig_hash = generate_report_hash({"report": report.report_code, "signer": actor, "at": report.approved_at.isoformat()})
     db.session.add(
@@ -225,13 +311,13 @@ def approve_report(order_ref: str, *, doctor_note: str | None = None, actor: str
             signer_role="DOCTOR",
             signed_at=report.approved_at,
             signature_hash=sig_hash,
-            report_hash=report_hash,
+            report_hash=report.report_hash,
             signature_method="INTERNAL_APPROVAL",
         )
     )
     write_report_audit(action="report_approved", object_type="clinical_report", object_id=report.report_code, actor=actor)
     write_report_audit(action="report_signed", object_type="clinical_report", object_id=report.report_code, actor=actor)
-    return {**report.to_dict(), "pdf_payload": prepare_pdf_payload(payload, html)}
+    return {**report.to_dict(), "pdf_payload": pdf_payload}
 
 
 def reject_report(order_ref: str, *, reason: str | None = None, actor: str | None = None) -> dict:
@@ -263,6 +349,8 @@ def release_report(order_ref: str, *, actor: str | None = None) -> dict:
         raise ReportingEngineError("Report must be approved before release")
     if not report.report_hash or not report.approved_at:
         raise ReportingEngineError("Report missing hash or approval timestamp")
+    if not report.pdf_path:
+        raise ReportingEngineError("Approved report missing PDF artifact")
     unresolved_critical = CriticalResultAlert.query.filter_by(order_id=order.id, status="new").count()
     if unresolved_critical:
         raise ReportingEngineError("Unresolved critical results require acknowledgement")
@@ -273,6 +361,26 @@ def release_report(order_ref: str, *, actor: str | None = None) -> dict:
     report.released_at = _utcnow()
     report.is_visible_to_patient = True
     report.updated_at = _utcnow()
+
+    # Refresh HTML for print consistency; keep immutable approved PDF bytes.
+    try:
+        payload = build_report_payload(order.id)
+        report.html_content = render_html_report(
+            payload,
+            report_code=report.report_code,
+            doctor_note=report.doctor_note,
+            report_version=report.report_version,
+            report_status=report.report_status,
+            report_hash=report.report_hash,
+            approved_by=report.approved_by,
+            approved_at=report.approved_at.isoformat() if report.approved_at else None,
+            released_by=report.released_by,
+            released_at=report.released_at.isoformat() if report.released_at else None,
+            amendment_reason=report.amendment_reason,
+            verify_url=build_verify_url(report.report_code, report.report_hash),
+        )
+    except Exception:
+        pass
 
     db.session.add(
         ReportNotificationEvent(
@@ -288,6 +396,107 @@ def release_report(order_ref: str, *, actor: str | None = None) -> dict:
     write_report_audit(action="report_released", object_type="clinical_report", object_id=report.report_code, actor=actor)
     return report.to_dict()
 
+
+def _reprint_count(report_code: str) -> int:
+    return AuditLog.query.filter_by(action="report.report_reprinted", object_id=report_code).count()
+
+
+def get_report_pdf(
+    report_code: str,
+    *,
+    actor: str | None = None,
+    as_reprint: bool = False,
+    patient_code: str | None = None,
+) -> dict[str, Any]:
+    """Return PDF bytes for an approved/released report. Draft/pending denied."""
+    report = ClinicalReport.query.filter_by(report_code=report_code).first()
+    if not report:
+        raise ReportingEngineError("Report not found")
+    if report.report_status not in ("approved", "released", "amended"):
+        raise ReportingEngineError("PDF available only after report approval")
+    if patient_code is not None:
+        if report.patient_id != patient_code or not is_report_visible_to_patient(report):
+            raise ReportingEngineError("Report not visible to patient")
+    if not report.pdf_path:
+        # Amended originals may keep pdf; current version must have been approved with PDF
+        path = resolve_pdf_path(report.report_code, report.report_version)
+        if path.exists():
+            report.pdf_path = str(path)
+        else:
+            raise ReportingEngineError("PDF artifact missing for report")
+
+    try:
+        data = read_pdf_bytes(report.pdf_path)
+    except ReportPdfError as exc:
+        raise ReportingEngineError(str(exc)) from exc
+
+    reprint_number = 0
+    if as_reprint:
+        reprint_number = _reprint_count(report.report_code) + 1
+        write_report_audit(
+            action="report_reprinted",
+            object_type="clinical_report",
+            object_id=report.report_code,
+            actor=actor,
+        )
+
+    filename = f"DxCon_{report.report_code}_v{report.report_version}.pdf"
+    if reprint_number:
+        filename = f"DxCon_{report.report_code}_v{report.report_version}_reprint{reprint_number}.pdf"
+
+    return {
+        "report_code": report.report_code,
+        "report_version": report.report_version,
+        "report_hash": report.report_hash,
+        "report_status": report.report_status,
+        "pdf_path": report.pdf_path,
+        "filename": filename,
+        "content_type": "application/pdf",
+        "bytes": data,
+        "reprint_number": reprint_number,
+        "template_id": REPORT_PDF_TEMPLATE_ID,
+        "template_version": REPORT_PDF_TEMPLATE_VERSION,
+        "immutable": True,
+    }
+
+
+def verify_clinical_report(report_code: str, *, hash_prefix: str | None = None) -> dict[str, Any]:
+    """Public verification of report authenticity (no PHI beyond minimal certificate fields)."""
+    report = ClinicalReport.query.filter_by(report_code=report_code).first()
+    if not report:
+        return {"valid": False, "reason": "Report not found"}
+    if report.report_status not in ("approved", "released", "amended"):
+        return {"valid": False, "reason": "Report not finalized", "report_status": report.report_status}
+    if hash_prefix and report.report_hash and not report.report_hash.startswith(hash_prefix):
+        return {"valid": False, "reason": "Hash mismatch"}
+    return {
+        "valid": True,
+        "report_code": report.report_code,
+        "report_version": report.report_version,
+        "report_status": report.report_status,
+        "report_hash": report.report_hash,
+        "approved_at": report.approved_at.isoformat() if report.approved_at else None,
+        "released_at": report.released_at.isoformat() if report.released_at else None,
+        "order_code": report.order_code,
+        "template_id": REPORT_PDF_TEMPLATE_ID,
+        "template_version": REPORT_PDF_TEMPLATE_VERSION,
+        "pdf_available": bool(report.pdf_path),
+        "qr_payload": report.qr_payload,
+    }
+
+
+def production_report_pdf_report() -> dict[str, Any]:
+    approved_with_pdf = ClinicalReport.query.filter(
+        ClinicalReport.report_status.in_(("approved", "released")),
+        ClinicalReport.pdf_path.isnot(None),
+    ).count()
+    return {
+        "report": "PRODUCTION_REPORT_PDF",
+        "template_id": REPORT_PDF_TEMPLATE_ID,
+        "template_version": REPORT_PDF_TEMPLATE_VERSION,
+        "approved_or_released_with_pdf": approved_with_pdf,
+        "total_clinical_reports": ClinicalReport.query.count(),
+    }
 
 def create_report_amendment(report_code: str, *, reason: str, actor: str | None = None) -> dict:
     original = ClinicalReport.query.filter_by(report_code=report_code).first()

@@ -4,6 +4,7 @@ from app.services.collector_operations import (
     CollectorOperationsError,
     CollectorOperationsService,
 )
+from app.services.sample_collection_workflow import SampleCollectionWorkflowError
 
 
 collector_operations_bp = Blueprint(
@@ -238,8 +239,14 @@ def pickup_booking_sample(booking_id):
             note=data.get("note"),
             actor_email=_actor_email(),
             ip_address=_client_ip(),
+            specimen_type=data.get("specimen_type"),
+            scanned_barcode=data.get("scanned_barcode") or data.get("barcode"),
+            collection_location=data.get("collection_location") or data.get("location"),
+            require_barcode=bool(data.get("require_barcode", False)),
         )
     except CollectorOperationsError as exc:
+        return {"error": exc.message}, exc.status_code
+    except SampleCollectionWorkflowError as exc:
         return {"error": exc.message}, exc.status_code
     return {
         "message": "Sample picked up",

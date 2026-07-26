@@ -1,15 +1,18 @@
 import os
 
-from flask import Blueprint, current_app
+from flask import Blueprint, current_app, jsonify, make_response
 
 from app.core.api_response import api_envelope, success_response
+from app.core.authz import roles_required
 from app.core.build_info import build_info
 from app.core.database_startup import verify_database_connection, verify_migrations
 from app.core.deployment import deployment_readiness
 from app.core.metrics import metrics
 from app.core.monitoring import application_metrics
 from app.core.performance_metrics import performance_metrics
+from app.core.roles import SUPER_ADMIN
 from app.core.startup_checks import run_startup_checks
+from app.infrastructure.redis_diagnostic import ping_redis_diagnostic
 from app.notifications.providers.email import EmailProvider
 from app.extensions.db import db
 from app.models.invoice import Invoice
@@ -119,11 +122,12 @@ def liveness():
 
 def _ready_response():
     app = current_app._get_current_object()
-    migration = app.extensions.get("dxcon_deployment", {}).get("migration_status", {})
 
     try:
+        # Always re-verify under the current request app context.
+        # Cached startup migration_status can be stale/wrong if startup ran without context.
         verify_database_connection(app, retries=1, delay_seconds=0)
-        migration = migration or verify_migrations(app)
+        migration = verify_migrations(app)
         if migration.get("ready"):
             email = EmailProvider().health_check()
             email_dry_run = bool(os.environ.get("EMAIL_DRY_RUN", "").lower() in ("1", "true", "yes"))
@@ -266,3 +270,15 @@ def system_storage():
     if current_app.config.get("TESTING"):
         return payload
     return success_response(payload)[0]
+
+
+@system_bp.route("/diagnostics/redis", methods=["GET"])
+@roles_required(SUPER_ADMIN)
+def system_redis_diagnostic():
+    """SUPER_ADMIN-only Redis PING inside the service runtime (no secrets)."""
+    app = current_app._get_current_object()
+    payload = ping_redis_diagnostic(app)
+    status_code = 200 if payload.get("ping") else 503
+    response = make_response(jsonify(payload), status_code)
+    response.headers["Cache-Control"] = "no-store"
+    return response

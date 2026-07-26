@@ -1,4 +1,4 @@
-"""Laboratory workspace REST API — Sprint 007."""
+"""Laboratory workspace REST API — specimen receive through medical validation."""
 
 from __future__ import annotations
 
@@ -6,32 +6,46 @@ from flask import Blueprint, request, session
 
 from app.business_engine.service import BusinessEngineError
 from app.extensions.db import db
-from app.lab_workspace.auth import lab_api_admin, lab_api_read, lab_api_supervisor, lab_api_write
+from app.lab_workspace.auth import (
+    lab_api_admin,
+    lab_api_medical,
+    lab_api_read,
+    lab_api_supervisor,
+    lab_api_write,
+)
 from app.lab_workspace.lis_service import (
     LISImportError,
+    get_mappings,
     import_csv,
     import_json,
+    lis_adapter_stub,
     list_connectors,
     list_failed_imports,
     list_import_batches,
-    lis_adapter_stub,
     retry_failed_import,
     upsert_connector,
     upsert_mapping,
-    get_mappings,
 )
 from app.lab_workspace.service import (
     LabWorkspaceError,
+    assign_processing,
+    complete_processing,
     create_accession,
     enter_result_manual,
+    get_order_workspace,
+    ingest_analyzer_result,
     lab_security_report,
     lab_workspace_report,
     mark_qc_failed,
     mark_qc_passed,
+    medical_validate,
     receive_sample,
     reject_result,
+    start_processing,
+    status_contract,
     testing_queue,
     validate_result,
+    verify_identifiers,
     workspace_dashboard,
 )
 
@@ -42,10 +56,48 @@ def _actor() -> str | None:
     return session.get("email") or request.headers.get("X-Actor") or request.headers.get("X-User-Email")
 
 
+def _err(exc: Exception, code: int = 400):
+    db.session.rollback()
+    return {"success": False, "error": str(exc)}, code
+
+
 @lab_workspace_bp.route("/dashboard", methods=["GET"])
 @lab_api_read
 def dashboard():
     return {"success": True, "data": workspace_dashboard()}, 200
+
+
+@lab_workspace_bp.route("/status-contract", methods=["GET"])
+@lab_api_read
+def status_contract_route():
+    return {"success": True, "data": status_contract()}, 200
+
+
+@lab_workspace_bp.route("/orders/<order_code>", methods=["GET"])
+@lab_api_read
+def order_detail(order_code: str):
+    try:
+        return {"success": True, "data": get_order_workspace(order_code)}, 200
+    except LabWorkspaceError as exc:
+        return _err(exc, 404)
+
+
+@lab_workspace_bp.route("/verify", methods=["POST"])
+@lab_api_write
+def verify_route():
+    payload = request.get_json(silent=True) or {}
+    try:
+        data = verify_identifiers(
+            order_code=payload.get("order_code"),
+            sample_code=payload.get("sample_code"),
+            barcode_value=payload.get("barcode_value"),
+            patient_code=payload.get("patient_code"),
+            actor=_actor(),
+        )
+        db.session.commit()
+        return {"success": True, "data": data}, 200
+    except (LabWorkspaceError, BusinessEngineError) as exc:
+        return _err(exc)
 
 
 @lab_workspace_bp.route("/receive", methods=["POST"])
@@ -57,16 +109,38 @@ def sample_receive():
             sample_code=payload.get("sample_code"),
             order_code=payload.get("order_code"),
             patient_code=payload.get("patient_code"),
+            barcode_value=payload.get("barcode_value"),
             received_by=payload.get("received_by", _actor() or "LAB"),
             condition_status=payload.get("condition_status", "acceptable"),
+            rejection_reason=payload.get("rejection_reason"),
             note=payload.get("note"),
             actor=_actor(),
         )
         db.session.commit()
         return {"success": True, "data": data}, 200
     except (LabWorkspaceError, BusinessEngineError) as exc:
-        db.session.rollback()
-        return {"success": False, "error": str(exc)}, 400
+        return _err(exc)
+
+
+@lab_workspace_bp.route("/reject", methods=["POST"])
+@lab_api_write
+def sample_reject():
+    payload = request.get_json(silent=True) or {}
+    try:
+        data = receive_sample(
+            sample_code=payload.get("sample_code"),
+            order_code=payload.get("order_code"),
+            patient_code=payload.get("patient_code"),
+            received_by=payload.get("received_by", _actor() or "LAB"),
+            condition_status="rejected",
+            rejection_reason=payload.get("rejection_reason") or payload.get("reason") or "other",
+            note=payload.get("note") or payload.get("reason"),
+            actor=_actor(),
+        )
+        db.session.commit()
+        return {"success": True, "data": data}, 200
+    except (LabWorkspaceError, BusinessEngineError) as exc:
+        return _err(exc)
 
 
 @lab_workspace_bp.route("/accession", methods=["POST"])
@@ -84,8 +158,49 @@ def accession():
         db.session.commit()
         return {"success": True, "data": data}, 201
     except LabWorkspaceError as exc:
-        db.session.rollback()
-        return {"success": False, "error": str(exc)}, 400
+        return _err(exc)
+
+
+@lab_workspace_bp.route("/assign", methods=["POST"])
+@lab_api_write
+def assign_route():
+    payload = request.get_json(silent=True) or {}
+    try:
+        data = assign_processing(
+            order_code=payload.get("order_code", ""),
+            bench_id=payload.get("bench_id"),
+            instrument_id=payload.get("instrument_id") or payload.get("instrument"),
+            technician=payload.get("technician"),
+            actor=_actor(),
+        )
+        db.session.commit()
+        return {"success": True, "data": data}, 200
+    except LabWorkspaceError as exc:
+        return _err(exc)
+
+
+@lab_workspace_bp.route("/processing/start", methods=["POST"])
+@lab_api_write
+def processing_start():
+    payload = request.get_json(silent=True) or {}
+    try:
+        data = start_processing(order_code=payload.get("order_code", ""), actor=_actor())
+        db.session.commit()
+        return {"success": True, "data": data}, 200
+    except LabWorkspaceError as exc:
+        return _err(exc)
+
+
+@lab_workspace_bp.route("/processing/complete", methods=["POST"])
+@lab_api_write
+def processing_complete():
+    payload = request.get_json(silent=True) or {}
+    try:
+        data = complete_processing(order_code=payload.get("order_code", ""), actor=_actor())
+        db.session.commit()
+        return {"success": True, "data": data}, 200
+    except LabWorkspaceError as exc:
+        return _err(exc)
 
 
 @lab_workspace_bp.route("/testing-queue", methods=["GET"])
@@ -111,6 +226,8 @@ def results_enter():
             unit=payload.get("unit"),
             reference_range=payload.get("reference_range"),
             abnormal_flag=payload.get("abnormal_flag"),
+            critical_low=payload.get("critical_low"),
+            critical_high=payload.get("critical_high"),
             instrument=payload.get("instrument"),
             technician=payload.get("technician"),
             note=payload.get("note"),
@@ -120,8 +237,30 @@ def results_enter():
         db.session.commit()
         return {"success": True, "data": data}, 201
     except (LabWorkspaceError, BusinessEngineError) as exc:
-        db.session.rollback()
-        return {"success": False, "error": str(exc)}, 400
+        return _err(exc)
+
+
+@lab_workspace_bp.route("/results/ingest", methods=["POST"])
+@lab_api_write
+def results_ingest():
+    payload = request.get_json(silent=True) or {}
+    try:
+        data = ingest_analyzer_result(
+            payload.get("order_code", ""),
+            test_code=payload.get("test_code", ""),
+            result_value=payload.get("result_value", ""),
+            unit=payload.get("unit"),
+            reference_range=payload.get("reference_range"),
+            instrument=payload.get("instrument"),
+            technician=payload.get("technician"),
+            critical_low=payload.get("critical_low"),
+            critical_high=payload.get("critical_high"),
+            actor=_actor(),
+        )
+        db.session.commit()
+        return {"success": True, "data": data}, 201
+    except (LabWorkspaceError, BusinessEngineError) as exc:
+        return _err(exc)
 
 
 @lab_workspace_bp.route("/qc/pass", methods=["POST"])
@@ -133,8 +272,7 @@ def qc_pass():
         db.session.commit()
         return {"success": True, "data": data}, 200
     except (LabWorkspaceError, BusinessEngineError) as exc:
-        db.session.rollback()
-        return {"success": False, "error": str(exc)}, 400
+        return _err(exc)
 
 
 @lab_workspace_bp.route("/qc/fail", methods=["POST"])
@@ -146,8 +284,7 @@ def qc_fail():
         db.session.commit()
         return {"success": True, "data": data}, 200
     except LabWorkspaceError as exc:
-        db.session.rollback()
-        return {"success": False, "error": str(exc)}, 400
+        return _err(exc)
 
 
 @lab_workspace_bp.route("/validation/approve", methods=["POST"])
@@ -158,9 +295,8 @@ def validation_approve():
         data = validate_result(payload.get("order_code", ""), actor=_actor())
         db.session.commit()
         return {"success": True, "data": data}, 200
-    except LabWorkspaceError as exc:
-        db.session.rollback()
-        return {"success": False, "error": str(exc)}, 400
+    except (LabWorkspaceError, BusinessEngineError) as exc:
+        return _err(exc)
 
 
 @lab_workspace_bp.route("/validation/reject", methods=["POST"])
@@ -168,12 +304,31 @@ def validation_approve():
 def validation_reject():
     payload = request.get_json(silent=True) or {}
     try:
-        data = reject_result(payload.get("order_code", ""), reason=payload.get("reason"), actor=_actor())
+        data = reject_result(
+            payload.get("order_code", ""),
+            reason=payload.get("reason"),
+            actor=_actor(),
+        )
         db.session.commit()
         return {"success": True, "data": data}, 200
     except LabWorkspaceError as exc:
-        db.session.rollback()
-        return {"success": False, "error": str(exc)}, 400
+        return _err(exc)
+
+
+@lab_workspace_bp.route("/medical-validation/approve", methods=["POST"])
+@lab_api_medical
+def medical_validation_approve():
+    payload = request.get_json(silent=True) or {}
+    try:
+        data = medical_validate(
+            payload.get("order_code", ""),
+            doctor_note=payload.get("doctor_note") or payload.get("note"),
+            actor=_actor(),
+        )
+        db.session.commit()
+        return {"success": True, "data": data}, 200
+    except (LabWorkspaceError, BusinessEngineError) as exc:
+        return _err(exc)
 
 
 @lab_workspace_bp.route("/report", methods=["GET"])
@@ -204,8 +359,7 @@ def lis_connectors_create():
         db.session.commit()
         return {"success": True, "data": data}, 201
     except LISImportError as exc:
-        db.session.rollback()
-        return {"success": False, "error": str(exc)}, 400
+        return _err(exc)
 
 
 @lab_workspace_bp.route("/lis/connectors/<connector_id>/mappings", methods=["GET"])
@@ -222,8 +376,7 @@ def lis_mapping_upsert():
         db.session.commit()
         return {"success": True, "data": data}, 200
     except LISImportError as exc:
-        db.session.rollback()
-        return {"success": False, "error": str(exc)}, 400
+        return _err(exc)
 
 
 @lab_workspace_bp.route("/lis/import/csv", methods=["POST"])
@@ -238,8 +391,7 @@ def lis_import_csv():
         db.session.commit()
         return {"success": True, "data": data}, 201
     except LISImportError as exc:
-        db.session.rollback()
-        return {"success": False, "error": str(exc)}, 400
+        return _err(exc)
 
 
 @lab_workspace_bp.route("/lis/import/json", methods=["POST"])
@@ -254,8 +406,7 @@ def lis_import_json_route():
         db.session.commit()
         return {"success": True, "data": data}, 201
     except LISImportError as exc:
-        db.session.rollback()
-        return {"success": False, "error": str(exc)}, 400
+        return _err(exc)
 
 
 @lab_workspace_bp.route("/lis/import-history", methods=["GET"])
@@ -281,8 +432,7 @@ def lis_retry_failed(failed_id: str):
         db.session.commit()
         return {"success": True, "data": data}, 200
     except LISImportError as exc:
-        db.session.rollback()
-        return {"success": False, "error": str(exc)}, 400
+        return _err(exc)
 
 
 @lab_workspace_bp.route("/lis/adapters/<adapter_type>", methods=["GET"])

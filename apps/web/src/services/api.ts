@@ -10,6 +10,8 @@ export type RequestOptions = {
   headers?: Record<string, string>;
   correlationId?: string;
   timeoutMs?: number;
+  /** Optional caller abort (e.g. debounce cancel). Distinct from timeout. */
+  signal?: AbortSignal;
 };
 
 function generateCorrelationId(): string {
@@ -32,6 +34,7 @@ export async function apiRequest<T>(
     headers = {},
     correlationId = generateCorrelationId(),
     timeoutMs = API_TIMEOUT_MS,
+    signal,
   } = options;
 
   const requestHeaders: Record<string, string> = {
@@ -53,10 +56,20 @@ export async function apiRequest<T>(
   }
 
   const controller = new AbortController();
+  const onExternalAbort = () => {
+    controller.abort();
+  };
+  if (signal) {
+    if (signal.aborted) {
+      throw new ApiError("Request cancelled", 499, { code: "ABORTED" });
+    }
+    signal.addEventListener("abort", onExternalAbort, { once: true });
+  }
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   let response: Response;
   try {
+    console.debug("[apiRequest] fetch", { method, path });
     response = await fetch(`${API_BASE_URL}${path}`, {
       method,
       headers: requestHeaders,
@@ -64,8 +77,13 @@ export async function apiRequest<T>(
       cache: "no-store",
       signal: controller.signal,
     });
+    console.debug("[apiRequest] response", { status: response.status, path });
   } catch (error) {
+    console.debug("[apiRequest] fetch failed", { path, name: (error as Error)?.name });
     if (error instanceof Error && error.name === "AbortError") {
+      if (signal?.aborted) {
+        throw new ApiError("Request cancelled", 499, { code: "ABORTED" });
+      }
       throw new ApiError("Request timed out", 408, { code: "TIMEOUT" });
     }
     throw new ApiError("Network error — check your connection", 0, {
@@ -73,6 +91,7 @@ export async function apiRequest<T>(
     });
   } finally {
     clearTimeout(timer);
+    signal?.removeEventListener("abort", onExternalAbort);
   }
 
   const contentType = response.headers.get("content-type") ?? "";

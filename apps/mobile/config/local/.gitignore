@@ -1,0 +1,4 @@
+# Local overrides — copy from *.env.json and fill secrets locally.
+# Never commit real Sentry DSN, Firebase keys, or signing passwords.
+*
+!.gitkeep

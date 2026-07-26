@@ -1,8 +1,9 @@
-from flask import Blueprint
+from flask import Blueprint, current_app
 from datetime import datetime, timedelta
 import uuid
 
 from app.extensions.db import db
+from app.infrastructure.production_readiness import is_production
 
 from app.models.patient import Patient
 from app.models.company import Company
@@ -29,8 +30,19 @@ def sid():
     return str(uuid.uuid4())[:8].upper()
 
 
+def _seed_allowed():
+    """Block demo seed mutation in production unless DEMO_MODE is explicitly enabled."""
+    if is_production(current_app) and not current_app.config.get("DEMO_MODE"):
+        return False
+    if current_app.config.get("ALLOW_DEMO_SEED") is False:
+        return False
+    return True
+
+
 @seeds_bp.route("/demo-operations", methods=["POST"])
 def demo_operations():
+    if not _seed_allowed():
+        return {"error": "Demo seed is disabled in this environment"}, 403
 
     now = datetime.utcnow()
     batch = sid()

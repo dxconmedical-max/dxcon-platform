@@ -41,4 +41,9 @@ def prometheus_metrics_text(app=None):
 def prometheus_auth_required(app):
     if app.config.get("TESTING"):
         return False
-    return bool(app.config.get("PROMETHEUS_AUTH_REQUIRED", False))
+    if app.config.get("PROMETHEUS_AUTH_REQUIRED") is not None:
+        return bool(app.config.get("PROMETHEUS_AUTH_REQUIRED"))
+    # Default: require auth in staging/production.
+    from app.infrastructure.production_readiness import is_strict_env
+
+    return is_strict_env(app)

@@ -36,7 +36,17 @@ jobs:
         env:
           DATABASE_URL: sqlite:///:memory:
         run: |
-          python -m unittest discover -s tests -v -k "executive_platform or portal_workspace or reporting_engine" || python -m unittest tests.test_executive_platform tests.test_portal_workspace tests.test_reporting_engine -v
+          python -m unittest \
+            tests.test_rc_security_gate \
+            tests.test_cors_hardening \
+            tests.test_reception_workspace \
+            tests.test_laboratory_workflow \
+            tests.test_report_pdf \
+            tests.test_role_dashboards \
+            tests.test_executive_platform \
+            tests.test_portal_workspace \
+            tests.test_reporting_engine \
+            -v
 
       - name: Health check
         env:

@@ -1,9 +1,10 @@
-from flask import Blueprint
+from flask import Blueprint, request
 
 from app.models.test_result import TestResult
 from app.models.order_item import OrderItem
 from app.models.order import Order
 from app.models.patient import Patient
+from app.reporting_engine.service import verify_clinical_report
 
 
 result_verify_web_bp = Blueprint(
@@ -12,8 +13,45 @@ result_verify_web_bp = Blueprint(
 )
 
 
+@result_verify_web_bp.route("/results/verify/report/<report_code>")
+def verify_clinical_report_page(report_code):
+    """Public certificate page for Production Report PDF QR verification."""
+    data = verify_clinical_report(report_code, hash_prefix=request.args.get("hash"))
+    if not data.get("valid"):
+        reason = data.get("reason") or "invalid"
+        return f"""
+        <html><body style="font-family:Arial;padding:40px;background:#f8fafc;">
+          <div style="background:white;padding:30px;border-radius:12px;max-width:640px;">
+            <h1 style="color:#dc3545;">INVALID REPORT</h1>
+            <p>{reason}</p>
+            <p>Report code: <code>{report_code}</code></p>
+          </div>
+        </body></html>
+        """
+    return f"""
+    <html><head><title>DxCon Verified Clinical Report</title></head>
+    <body style="font-family:Arial;padding:40px;background:#f8fafc;">
+      <div style="background:white;padding:30px;border-radius:12px;max-width:720px;">
+        <h1 style="color:#198754;">VERIFIED CLINICAL REPORT</h1>
+        <p>Report <strong>{data.get('report_code')}</strong> · Version {data.get('report_version')}</p>
+        <p>Status: <strong>{data.get('report_status')}</strong></p>
+        <p>Order: {data.get('order_code')}</p>
+        <p>Approved at: {data.get('approved_at') or '—'}</p>
+        <p>Released at: {data.get('released_at') or '—'}</p>
+        <p>Hash: <code>{data.get('report_hash')}</code></p>
+        <p>Template: {data.get('template_id')} @ {data.get('template_version')}</p>
+        <p>PDF artifact: {'available' if data.get('pdf_available') else 'missing'}</p>
+        <p style="color:#64748b;font-size:13px;">Patient identifiers are omitted from public verification for privacy.</p>
+      </div>
+    </body></html>
+    """
+
+
 @result_verify_web_bp.route("/results/verify/<result_id>")
 def verify_result(result_id):
+    # Prefer clinical report codes (RPT-...) over legacy TestResult ids.
+    if str(result_id).startswith("RPT-"):
+        return verify_clinical_report_page(result_id)
 
     result = TestResult.query.get(result_id)
 

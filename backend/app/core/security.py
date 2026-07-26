@@ -5,6 +5,7 @@ SECURITY_HEADERS = {
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Content-Security-Policy": "default-src 'self'",
     "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
 }
 
 RATE_LIMIT_EXEMPT_PATHS = {
@@ -21,7 +22,13 @@ RATE_LIMIT_EXEMPT_PATHS = {
 PRODUCTION_CORS_ORIGINS = (
     "https://dxcon.com.vn,"
     "https://www.dxcon.com.vn,"
-    "https://app.dxcon.com.vn"
+    "https://app.dxcon.com.vn,"
+    "https://admin.dxcon.com.vn,"
+    "https://lab.dxcon.com.vn,"
+    "https://doctor.dxcon.com.vn,"
+    "https://patient.dxcon.com.vn,"
+    "https://collector.dxcon.com.vn,"
+    "https://clinic.dxcon.com.vn"
 )
 STAGING_CORS_ORIGINS = (
     "https://staging.dxcon.com.vn,"
@@ -103,6 +110,8 @@ def init_security(app):
             return response
 
         for header, value in SECURITY_HEADERS.items():
+            if header == "Strict-Transport-Security" and not is_strict_env(app):
+                continue
             response.headers.setdefault(header, value)
         return response
 

@@ -13,9 +13,11 @@ services:
       - key: STARTUP_VALIDATE_DB
         value: "true"
       - key: CORS_ORIGINS
-        value: https://dxcon.com.vn,https://www.dxcon.com.vn,https://app.dxcon.com.vn
+        value: https://dxcon.com.vn,https://www.dxcon.com.vn,https://app.dxcon.com.vn,https://admin.dxcon.com.vn,https://lab.dxcon.com.vn,https://doctor.dxcon.com.vn,https://patient.dxcon.com.vn,https://collector.dxcon.com.vn,https://clinic.dxcon.com.vn
       - key: DEMO_MODE
         value: "false"
+      - key: API_AUTH_GATE_ENABLED
+        value: "true"
       - key: SECRET_KEY
         generateValue: true
       - key: JWT_SECRET_KEY
@@ -24,8 +26,16 @@ services:
         fromDatabase:
           name: dxcon-postgres
           property: connectionString
+      - key: REDIS_URL
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
       - key: BUILD_VERSION
-        value: "2.5.0"
+        value: "2.0.0-rc1"
 
 databases:
   - name: dxcon-postgres

@@ -22,11 +22,20 @@ __MACOSX/
 # Editor / temp saves
 *.save
 
-# Environment
+# Environment / local secrets (never commit)
 .env
+.env.local
+.env.*.local
+.env.development.local
+.env.production.local
+.vercel/
+backend.zip
+*.zip
+!.github/**/*.yml
 
 # Upload scratch space
 uploads/tmp/
+backend/uploads/reports/
 
 # Flutter build
 build/

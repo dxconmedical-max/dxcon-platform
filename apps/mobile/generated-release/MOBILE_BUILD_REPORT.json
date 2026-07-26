@@ -1,9 +1,25 @@
 {
-  "generated_at": "2026-07-10T12:03:02.016337Z",
+  "generated_at": "2026-07-24T04:10:00.000Z",
+  "phase": 1,
   "status": "PASS_WITH_WARNINGS",
+  "tests": {
+    "flutter_test": "PASS",
+    "count": 36,
+    "verify_mobile_phase1": "PASS_WITH_WARNINGS"
+  },
+  "builds": {
+    "android_local": "SKIPPED_NO_SDK",
+    "android_ci": "configured_in_mobile-ci.yml_with_flavor_production",
+    "ios_local": "SKIPPED_INCOMPLETE_XCODE",
+    "ios_ci": "configured_macos_no_codesign"
+  },
+  "warnings": [
+    "android_sdk_not_configured_locally",
+    "xcode_incomplete_locally",
+    "cocoapods_not_installed_locally"
+  ],
   "android_application_id": "vn.com.dxcon.mobile",
   "ios_bundle_id": "vn.com.dxcon.mobile",
-  "android_debug_build": false,
-  "android_blocker": "ANDROID_HOME not configured in build environment",
-  "ios_readiness": "CONFIGURED"
+  "flavors": ["development", "staging", "production"],
+  "gate": "STOP_AFTER_PHASE_1_AWAIT_PRODUCTION_VERIFICATION"
 }

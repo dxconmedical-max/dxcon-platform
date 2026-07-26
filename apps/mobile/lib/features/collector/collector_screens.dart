@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:dxcon_mobile/core/auth/auth_provider.dart';
-import 'package:dxcon_mobile/core/api/api_client.dart';
 import 'package:dxcon_mobile/design_system/components.dart';
-import 'package:dxcon_mobile/features/patient/patient_home_screen.dart';
 import 'package:dxcon_mobile/services/collector_api_repository.dart';
 
 final collectorApiProvider = Provider<CollectorApiRepository>((ref) {
@@ -17,7 +15,8 @@ class CollectorHomeScreen extends ConsumerStatefulWidget {
   final String collectorId;
 
   @override
-  ConsumerState<CollectorHomeScreen> createState() => _CollectorHomeScreenState();
+  ConsumerState<CollectorHomeScreen> createState() =>
+      _CollectorHomeScreenState();
 }
 
 class _CollectorHomeScreenState extends ConsumerState<CollectorHomeScreen> {
@@ -32,7 +31,9 @@ class _CollectorHomeScreenState extends ConsumerState<CollectorHomeScreen> {
 
   Future<void> _load() async {
     try {
-      final data = await ref.read(collectorApiProvider).dashboard(widget.collectorId);
+      final data = await ref
+          .read(collectorApiProvider)
+          .dashboard(widget.collectorId);
       setState(() {
         _data = data;
         _error = null;
@@ -61,7 +62,9 @@ class _CollectorHomeScreenState extends ConsumerState<CollectorHomeScreen> {
             ),
           ),
           if (_data!['active_job'] != null)
-            Card(child: ListTile(title: const Text('Công việc đang hoạt động'))),
+            Card(
+              child: ListTile(title: const Text('Công việc đang hoạt động')),
+            ),
         ],
       ),
     );
@@ -73,7 +76,8 @@ class CollectorJobsScreen extends ConsumerStatefulWidget {
   final String collectorId;
 
   @override
-  ConsumerState<CollectorJobsScreen> createState() => _CollectorJobsScreenState();
+  ConsumerState<CollectorJobsScreen> createState() =>
+      _CollectorJobsScreenState();
 }
 
 class _CollectorJobsScreenState extends ConsumerState<CollectorJobsScreen> {
@@ -89,7 +93,9 @@ class _CollectorJobsScreenState extends ConsumerState<CollectorJobsScreen> {
 
   Future<void> _load() async {
     try {
-      final jobs = await ref.read(collectorApiProvider).jobs(widget.collectorId, status: _filter);
+      final jobs = await ref
+          .read(collectorApiProvider)
+          .jobs(widget.collectorId, status: _filter);
       setState(() {
         _jobs = jobs;
         _error = null;
@@ -108,12 +114,29 @@ class _CollectorJobsScreenState extends ConsumerState<CollectorJobsScreen> {
           padding: const EdgeInsets.all(8),
           child: Row(
             children: [
-              FilterChip(label: const Text('Tất cả'), selected: _filter == null, onSelected: (_) { setState(() => _filter = null); _load(); }),
-              FilterChip(label: const Text('Hôm nay'), selected: _filter == 'ASSIGNED', onSelected: (_) { setState(() => _filter = 'ASSIGNED'); _load(); }),
+              FilterChip(
+                label: const Text('Tất cả'),
+                selected: _filter == null,
+                onSelected: (_) {
+                  setState(() => _filter = null);
+                  _load();
+                },
+              ),
+              FilterChip(
+                label: const Text('Hôm nay'),
+                selected: _filter == 'ASSIGNED',
+                onSelected: (_) {
+                  setState(() => _filter = 'ASSIGNED');
+                  _load();
+                },
+              ),
             ],
           ),
         ),
-        if (_error != null) Expanded(child: DxErrorState(message: _error!, onRetry: _load)),
+        if (_error != null)
+          Expanded(
+            child: DxErrorState(message: _error!, onRetry: _load),
+          ),
         if (_error == null)
           Expanded(
             child: _jobs.isEmpty
@@ -122,12 +145,21 @@ class _CollectorJobsScreenState extends ConsumerState<CollectorJobsScreen> {
                     itemCount: _jobs.length,
                     itemBuilder: (context, i) {
                       final job = _jobs[i] as Map<String, dynamic>;
-                      final assignment = job['assignment'] as Map<String, dynamic>? ?? {};
-                      final booking = job['booking'] as Map<String, dynamic>? ?? {};
+                      final assignment =
+                          job['assignment'] as Map<String, dynamic>? ?? {};
+                      final booking =
+                          job['booking'] as Map<String, dynamic>? ?? {};
                       return ListTile(
-                        title: Text(booking['patient_name']?.toString() ?? booking['booking_code']?.toString() ?? 'Công việc'),
-                        subtitle: Text(assignment['assignment_status']?.toString() ?? ''),
-                        onTap: () => context.go('/collector/job/${assignment['id']}'),
+                        title: Text(
+                          booking['patient_name']?.toString() ??
+                              booking['booking_code']?.toString() ??
+                              'Công việc',
+                        ),
+                        subtitle: Text(
+                          assignment['assignment_status']?.toString() ?? '',
+                        ),
+                        onTap: () =>
+                            context.go('/collector/job/${assignment['id']}'),
                       );
                     },
                   ),
@@ -138,38 +170,61 @@ class _CollectorJobsScreenState extends ConsumerState<CollectorJobsScreen> {
 }
 
 class CollectorJobDetailScreen extends ConsumerWidget {
-  const CollectorJobDetailScreen({super.key, required this.collectorId, required this.assignmentId});
+  const CollectorJobDetailScreen({
+    super.key,
+    required this.collectorId,
+    required this.assignmentId,
+  });
   final String collectorId;
   final String assignmentId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return FutureBuilder<Map<String, dynamic>>(
-      future: ref.read(collectorApiProvider).jobDetail(collectorId, assignmentId),
+      future: ref
+          .read(collectorApiProvider)
+          .jobDetail(collectorId, assignmentId),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const DxLoadingState();
-        if (snapshot.hasError) return DxErrorState(message: snapshot.error.toString());
+        if (snapshot.hasError)
+          return DxErrorState(message: snapshot.error.toString());
         final job = snapshot.data!;
-        final assignment = job['assignment'] as Map<String, dynamic>? ?? {};
         final booking = job['booking'] as Map<String, dynamic>? ?? {};
         return ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text('Mã: ${booking['booking_code'] ?? booking['id']}', style: Theme.of(context).textTheme.titleLarge),
-            ListTile(title: const Text('Địa chỉ lấy mẫu'), subtitle: Text(booking['pickup_address']?.toString() ?? '—')),
+            Text(
+              'Mã: ${booking['booking_code'] ?? booking['id']}',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            ListTile(
+              title: const Text('Địa chỉ lấy mẫu'),
+              subtitle: Text(booking['pickup_address']?.toString() ?? '—'),
+            ),
             Row(
               children: [
                 ElevatedButton(
                   onPressed: () async {
-                    await ref.read(collectorApiProvider).acceptAssignment(assignmentId, collectorId);
-                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Đã chấp nhận')));
+                    await ref
+                        .read(collectorApiProvider)
+                        .acceptAssignment(assignmentId, collectorId);
+                    if (context.mounted)
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Đã chấp nhận')),
+                      );
                   },
                   child: const Text('Chấp nhận'),
                 ),
                 const SizedBox(width: 8),
                 OutlinedButton(
                   onPressed: () async {
-                    await ref.read(collectorApiProvider).rejectAssignment(collectorId, assignmentId, 'Không khả dụng');
+                    await ref
+                        .read(collectorApiProvider)
+                        .rejectAssignment(
+                          collectorId,
+                          assignmentId,
+                          'Không khả dụng',
+                        );
                     if (context.mounted) Navigator.of(context).pop();
                   },
                   child: const Text('Từ chối'),

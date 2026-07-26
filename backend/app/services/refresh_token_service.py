@@ -22,8 +22,9 @@ class RefreshTokenService:
             return True
 
         record = RefreshTokenRecord.query.filter_by(jti=jti).first()
+        # Unknown jti must be treated as revoked — prevents refresh with unregistered tokens.
         if not record:
-            return False
+            return True
 
         if record.revoked:
             return True

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from flask import Blueprint, Response, current_app, request
+from flask_jwt_extended import jwt_required
 
 from app.core.api_response import success_response
 from app.storage.attachment_service import AttachmentService
@@ -11,6 +12,7 @@ files_bp = Blueprint("files", __name__, url_prefix="/api/v1/files")
 
 
 @files_bp.route("", methods=["GET"])
+@jwt_required()
 def list_files():
     tenant_id = request.args.get("tenant_id")
     limit = int(request.args.get("limit", "100"))
@@ -21,6 +23,7 @@ def list_files():
 
 
 @files_bp.route("/upload", methods=["POST"])
+@jwt_required()
 def upload_file():
     upload = request.files.get("file")
     if not upload:
@@ -41,6 +44,7 @@ def upload_file():
 
 
 @files_bp.route("/<file_id>", methods=["GET"])
+@jwt_required()
 def get_file(file_id):
     payload = AttachmentService.get_file(file_id)
     if not payload:
@@ -52,11 +56,16 @@ def get_file(file_id):
 
 @files_bp.route("/<file_id>/download", methods=["GET"])
 def download_file(file_id):
+    """Download requires a valid signed URL (token+expires) — no anonymous open download."""
+    token = request.args.get("token")
+    expires = request.args.get("expires", type=int)
+    if not token or not expires:
+        return {"error": "signed token and expires are required"}, 401
     try:
         payload = AttachmentService.download_file(
             file_id,
-            token=request.args.get("token"),
-            expires=request.args.get("expires", type=int),
+            token=token,
+            expires=expires,
         )
     except PermissionError as exc:
         return {"error": str(exc)}, 403
@@ -73,6 +82,7 @@ def download_file(file_id):
 
 
 @files_bp.route("/<file_id>/signed-url", methods=["POST"])
+@jwt_required()
 def signed_url(file_id):
     payload = AttachmentService.create_signed_url(file_id)
     if not payload:

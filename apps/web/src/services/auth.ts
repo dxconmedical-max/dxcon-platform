@@ -1,4 +1,8 @@
 import { apiRequest } from "@/services/api";
+import {
+  parseCapabilitiesResponse,
+  parseMeResponse,
+} from "@/lib/auth/session";
 
 export type AuthUser = {
   id: string;
@@ -32,7 +36,7 @@ export type Organization = {
 };
 
 export type AuthCapabilities = {
-  user: AuthUser;
+  user?: AuthUser;
   organization: Organization | null;
   membership: {
     membership_id: string | null;
@@ -71,6 +75,8 @@ export async function login(
   email: string,
   password: string,
 ): Promise<LoginResponse> {
+  console.debug("[services/auth.login] POST /api/v1/auth/login");
+  // Raw payload — authStore parses/validates via parseLoginResponse.
   return apiRequest<LoginResponse>("/api/v1/auth/login", {
     method: "POST",
     body: { email, password },
@@ -98,10 +104,10 @@ export async function logout(refreshToken: string): Promise<void> {
 }
 
 export async function fetchMe(token: string): Promise<MeResponse> {
-  const response = await apiRequest<ApiEnvelope<MeResponse>>("/api/v1/auth/me", {
+  const response = await apiRequest<unknown>("/api/v1/auth/me", {
     token,
   });
-  return response.data;
+  return parseMeResponse(response) as MeResponse;
 }
 
 export async function fetchMemberships(token: string): Promise<Membership[]> {
@@ -116,7 +122,7 @@ export async function switchOrganization(
   token: string,
   organizationId: string,
 ): Promise<AuthCapabilities> {
-  const response = await apiRequest<ApiEnvelope<AuthCapabilities>>(
+  const response = await apiRequest<unknown>(
     "/api/v1/auth/switch-organization",
     {
       method: "POST",
@@ -124,7 +130,7 @@ export async function switchOrganization(
       body: { organization_id: organizationId },
     },
   );
-  return response.data;
+  return parseCapabilitiesResponse(response) as AuthCapabilities;
 }
 
 export async function fetchCapabilities(
@@ -134,11 +140,11 @@ export async function fetchCapabilities(
   const query = organizationId
     ? `?organization_id=${encodeURIComponent(organizationId)}`
     : "";
-  const response = await apiRequest<ApiEnvelope<AuthCapabilities>>(
+  const response = await apiRequest<unknown>(
     `/api/v1/auth/capabilities${query}`,
     { token, organizationId },
   );
-  return response.data;
+  return parseCapabilitiesResponse(response) as AuthCapabilities;
 }
 
 export async function forgotPassword(email: string): Promise<string> {

@@ -1,82 +1,233 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 
 import { can, canAny, canAll, hasFeature, isOrganizationType, isWorkspace } from "@/lib/permissions";
+import { logAuthBootstrap } from "@/lib/auth/bootstrapDebug";
 import { isWorkspacePath, workspacePathForRole } from "@/lib/roles";
-import { useAuthStore } from "@/stores/authStore";
+import {
+  isBootstrapPending,
+  useAuthStore,
+} from "@/stores/authStore";
 
+/**
+ * Prefer field selectors — never subscribe to the entire store object
+ * (that allocates a new snapshot every tick and invites effect loops).
+ */
 export function useAuth() {
-  const store = useAuthStore();
+  const status = useAuthStore((s) => s.status);
+  const bootstrapPhase = useAuthStore((s) => s.bootstrapPhase);
+  const user = useAuthStore((s) => s.user);
+  const role = useAuthStore((s) => s.role);
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const refreshToken = useAuthStore((s) => s.refreshToken);
+  const memberships = useAuthStore((s) => s.memberships);
+  const activeOrganizationId = useAuthStore((s) => s.activeOrganizationId);
+  const capabilities = useAuthStore((s) => s.capabilities);
+  const error = useAuthStore((s) => s.error);
+  const isHydrated = useAuthStore((s) => s.isHydrated);
+  const isInitializingSession = useAuthStore((s) => s.isInitializingSession);
+  const isSubmittingLogin = useAuthStore((s) => s.isSubmittingLogin);
+  const isRefreshingSession = useAuthStore((s) => s.isRefreshingSession);
+  const login = useAuthStore((s) => s.login);
+  const logout = useAuthStore((s) => s.logout);
+  const restoreSession = useAuthStore((s) => s.restoreSession);
+  const selectOrganization = useAuthStore((s) => s.selectOrganization);
+  const clearError = useAuthStore((s) => s.clearError);
+  const clearTransientFlags = useAuthStore((s) => s.clearTransientFlags);
+  const setHydrated = useAuthStore((s) => s.setHydrated);
+
+  const isBootstrapping = !isHydrated || isBootstrapPending(bootstrapPhase);
+
   return {
-    ...store,
-    isAuthenticated: store.status === "authenticated",
-    isLoading: store.status === "loading",
-    capabilities: store.capabilities,
-    can: (permission: string) => can(store.capabilities, permission),
-    canAny: (permissions: string[]) => canAny(store.capabilities, permissions),
-    canAll: (permissions: string[]) => canAll(store.capabilities, permissions),
-    hasFeature: (feature: string) => hasFeature(store.capabilities, feature),
-    isWorkspace: (workspace: string) => isWorkspace(store.capabilities, workspace),
+    status,
+    bootstrapPhase,
+    user,
+    role,
+    accessToken,
+    refreshToken,
+    memberships,
+    activeOrganizationId,
+    capabilities,
+    error,
+    isHydrated,
+    isBootstrapping,
+    isInitializingSession,
+    isSubmittingLogin,
+    isRefreshingSession,
+    isAuthenticated: status === "authenticated",
+    login,
+    logout,
+    restoreSession,
+    selectOrganization,
+    clearError,
+    clearTransientFlags,
+    setHydrated,
+    can: (permission: string) => can(capabilities, permission),
+    canAny: (permissions: string[]) => canAny(capabilities, permissions),
+    canAll: (permissions: string[]) => canAll(capabilities, permissions),
+    hasFeature: (feature: string) => hasFeature(capabilities, feature),
+    isWorkspace: (workspace: string) => isWorkspace(capabilities, workspace),
     isOrganizationType: (type: string) =>
-      isOrganizationType(store.capabilities, type),
+      isOrganizationType(capabilities, type),
     workspacePath:
-      store.capabilities?.workspace ??
-      workspacePathForRole(store.role ?? store.user?.role),
+      capabilities?.workspace ?? workspacePathForRole(role ?? user?.role),
   };
 }
 
+const ADMIN_ROLES = new Set([
+  "SUPER_ADMIN",
+  "DXCON_ADMIN",
+  "ADMIN",
+  "SYSTEM_ADMIN",
+]);
+
+function safeReplace(
+  router: { replace: (href: string) => void },
+  pathname: string,
+  target: string,
+) {
+  if (!target || target === pathname) return;
+  router.replace(target);
+}
+
+/**
+ * Route guard only — does NOT own restoreSession.
+ * AuthProvider is the sole bootstrap owner.
+ *
+ * CRITICAL: never redirect while bootstrap is idle/restoring.
+ * Redirect only after terminal phase === "anonymous" (or session_expired).
+ */
 export function useRequireAuth(workspacePath?: string) {
   const router = useRouter();
   const pathname = usePathname();
-  const auth = useAuth();
+  const routerRef = useRef(router);
+  routerRef.current = router;
+
+  const isHydrated = useAuthStore((s) => s.isHydrated);
+  const bootstrapPhase = useAuthStore((s) => s.bootstrapPhase);
+  const status = useAuthStore((s) => s.status);
+  const role = useAuthStore((s) => s.role);
+  const capabilities = useAuthStore((s) => s.capabilities);
 
   useEffect(() => {
-    if (!auth.isHydrated) return;
+    if (!isHydrated) return;
+    // Must wait for restoreSession to finish — do NOT treat default
+    // status:"unauthenticated" as anonymous while phase is still pending.
+    if (isBootstrapPending(bootstrapPhase)) {
+      logAuthBootstrap("useRequireAuth", {
+        status,
+        bootstrapPhase,
+        pathname,
+        sessionAuthenticated: status === "authenticated",
+        redirectReason: "waiting_bootstrap",
+        hasCapabilities: Boolean(capabilities),
+      });
+      return;
+    }
 
-    const guard = async () => {
-      const status = await auth.restoreSession();
-      if (status === "unauthenticated" || status === "session_expired") {
-        router.replace(
-          status === "session_expired"
-            ? "/login?reason=session-expired"
-            : "/login",
+    if (status === "session_expired") {
+      logAuthBootstrap("useRequireAuth", {
+        status,
+        bootstrapPhase,
+        pathname,
+        sessionAuthenticated: false,
+        redirectReason: "session_expired",
+      });
+      if (!pathname.startsWith("/login")) {
+        safeReplace(
+          routerRef.current,
+          pathname,
+          "/login?reason=session-expired",
         );
-        return;
       }
-      if (status === "organization_required") {
-        router.replace("/select-organization");
-        return;
+      return;
+    }
+
+    // Stale anonymous phase after login must NOT redirect authenticated users.
+    if (bootstrapPhase === "anonymous" && status !== "authenticated") {
+      logAuthBootstrap("useRequireAuth", {
+        status,
+        bootstrapPhase,
+        pathname,
+        sessionAuthenticated: false,
+        redirectReason: "terminal_anonymous",
+      });
+      if (!pathname.startsWith("/login")) {
+        safeReplace(routerRef.current, pathname, "/login");
       }
+      return;
+    }
+
+    if (bootstrapPhase === "anonymous" && status === "authenticated") {
+      logAuthBootstrap("useRequireAuth", {
+        status,
+        bootstrapPhase,
+        pathname,
+        sessionAuthenticated: true,
+        redirectReason: "skip_stale_anonymous_while_authenticated",
+        hasCapabilities: Boolean(capabilities),
+      });
+      return;
+    }
+
+    if (status === "organization_required") {
+      logAuthBootstrap("useRequireAuth", {
+        status,
+        bootstrapPhase,
+        pathname,
+        sessionAuthenticated: true,
+        redirectReason: "organization_required",
+      });
+      safeReplace(routerRef.current, pathname, "/select-organization");
+      return;
+    }
+
+    if (status === "forbidden" || bootstrapPhase === "failed") {
       if (status === "forbidden") {
-        router.replace("/forbidden");
-        return;
+        logAuthBootstrap("useRequireAuth", {
+          status,
+          bootstrapPhase,
+          pathname,
+          sessionAuthenticated: false,
+          redirectReason: "forbidden",
+        });
+        safeReplace(routerRef.current, pathname, "/forbidden");
       }
+      return;
+    }
 
-      if (workspacePath && auth.capabilities) {
-        const home = auth.capabilities.workspace;
-        const adminRoles = new Set([
-          "SUPER_ADMIN",
-          "DXCON_ADMIN",
-          "ADMIN",
-          "SYSTEM_ADMIN",
-        ]);
-        const role = (auth.role ?? "").toUpperCase();
-        const isAdmin = adminRoles.has(role);
-        if (
-          !isAdmin &&
-          workspacePath !== home &&
-          workspacePath !== "/app" &&
-          isWorkspacePath(workspacePath)
-        ) {
-          router.replace(home || "/app");
-        }
-      }
-    };
+    if (bootstrapPhase !== "authenticated") return;
+    if (!workspacePath || !capabilities) return;
+    const home = capabilities.workspace;
+    const roleCode = (role ?? "").toUpperCase();
+    const isAdmin = ADMIN_ROLES.has(roleCode);
+    if (
+      !isAdmin &&
+      workspacePath !== home &&
+      workspacePath !== "/app" &&
+      isWorkspacePath(workspacePath)
+    ) {
+      logAuthBootstrap("useRequireAuth", {
+        status,
+        bootstrapPhase,
+        pathname,
+        sessionAuthenticated: true,
+        redirectReason: `workspace_mismatch→${home || "/app"}`,
+        hasCapabilities: true,
+      });
+      safeReplace(routerRef.current, pathname, home || "/app");
+    }
+  }, [
+    isHydrated,
+    bootstrapPhase,
+    status,
+    pathname,
+    workspacePath,
+    capabilities,
+    role,
+  ]);
 
-    void guard();
-  }, [auth.isHydrated, workspacePath, pathname, auth, router]);
-
-  return auth;
+  return useAuth();
 }

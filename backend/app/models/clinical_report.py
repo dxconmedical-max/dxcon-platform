@@ -79,6 +79,7 @@ class ClinicalReport(db.Model):
             "doctor_note": self.doctor_note,
             "lab_note": self.lab_note,
             "clinical_summary": self.clinical_summary,
+            "pdf_path": self.pdf_path,
             "report_hash": self.report_hash,
             "qr_payload": self.qr_payload,
             "is_visible_to_patient": self.is_visible_to_patient,

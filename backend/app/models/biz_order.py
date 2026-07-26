@@ -120,6 +120,183 @@ class BizPayment(db.Model):
         }
 
 
+class BizReceipt(db.Model):
+    """Reception cash-desk receipt document (issued from a BizPayment)."""
+
+    __tablename__ = "biz_receipts"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    receipt_code = db.Column(db.String(50), unique=True, nullable=False)
+    payment_id = db.Column(db.String(36), db.ForeignKey("biz_payments.id"), nullable=False, unique=True)
+    order_id = db.Column(db.String(36), db.ForeignKey("biz_orders.id"), nullable=False)
+    invoice_id = db.Column(db.String(36), db.ForeignKey("biz_invoices.id"))
+    status = db.Column(db.String(30), nullable=False, default="issued")
+    print_count = db.Column(db.Integer, default=0)
+    preferred_format = db.Column(db.String(30), default="standard")  # standard | thermal
+    html_snapshot = db.Column(db.Text)
+    thermal_payload = db.Column(db.Text)
+    pdf_path = db.Column(db.String(500))
+    issued_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    issued_by = db.Column(db.String(255))
+    last_printed_at = db.Column(db.DateTime)
+    last_printed_by = db.Column(db.String(255))
+    cancelled_at = db.Column(db.DateTime)
+    cancelled_by = db.Column(db.String(255))
+    cancel_reason = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self, *, include_payloads: bool = False) -> dict:
+        payload = {
+            "id": self.id,
+            "receipt_code": self.receipt_code,
+            "payment_id": self.payment_id,
+            "order_id": self.order_id,
+            "invoice_id": self.invoice_id,
+            "status": self.status,
+            "print_count": int(self.print_count or 0),
+            "preferred_format": self.preferred_format or "standard",
+            "pdf_available": bool(self.pdf_path),
+            "issued_at": self.issued_at.isoformat() if self.issued_at else None,
+            "issued_by": self.issued_by,
+            "last_printed_at": self.last_printed_at.isoformat() if self.last_printed_at else None,
+            "last_printed_by": self.last_printed_by,
+            "cancelled_at": self.cancelled_at.isoformat() if self.cancelled_at else None,
+            "cancelled_by": self.cancelled_by,
+            "cancel_reason": self.cancel_reason,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+        if include_payloads:
+            payload["html_snapshot"] = self.html_snapshot
+            payload["thermal_payload"] = self.thermal_payload
+            payload["pdf_path"] = self.pdf_path
+        return payload
+
+
+class BizLabQueueItem(db.Model):
+    """Laboratory intake queue row (post handoff: waiting → verified)."""
+
+    __tablename__ = "biz_lab_queue_items"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    order_id = db.Column(db.String(36), db.ForeignKey("biz_orders.id"), nullable=False, unique=True)
+    order_code = db.Column(db.String(50), nullable=False, unique=True, index=True)
+    stage = db.Column(db.String(30), nullable=False, default="waiting", index=True)
+    priority = db.Column(db.String(20), nullable=False, default="routine", index=True)
+    queue_reference = db.Column(db.String(100))
+    laboratory_name = db.Column(db.String(255))
+    notes = db.Column(db.Text)
+    entered_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    started_at = db.Column(db.DateTime)
+    completed_at = db.Column(db.DateTime)
+    verified_at = db.Column(db.DateTime)
+    verified_by = db.Column(db.String(255))
+    updated_by = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "order_id": self.order_id,
+            "order_code": self.order_code,
+            "stage": self.stage,
+            "priority": self.priority,
+            "queue_reference": self.queue_reference,
+            "laboratory_name": self.laboratory_name,
+            "notes": self.notes,
+            "entered_at": self.entered_at.isoformat() if self.entered_at else None,
+            "started_at": self.started_at.isoformat() if self.started_at else None,
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "verified_at": self.verified_at.isoformat() if self.verified_at else None,
+            "verified_by": self.verified_by,
+            "updated_by": self.updated_by,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class BizSampleQueueItem(db.Model):
+    """Sample logistics queue: collected → transport → … → completed."""
+
+    __tablename__ = "biz_sample_queue_items"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    order_id = db.Column(db.String(36), db.ForeignKey("biz_orders.id"), nullable=False, unique=True)
+    order_code = db.Column(db.String(50), nullable=False, unique=True, index=True)
+    collection_id = db.Column(db.String(36), db.ForeignKey("biz_collections.id"))
+    sample_code = db.Column(db.String(50), index=True)
+    stage = db.Column(db.String(30), nullable=False, default="collected", index=True)
+    collector_name = db.Column(db.String(255))
+    location = db.Column(db.String(255))
+    notes = db.Column(db.Text)
+    collected_at = db.Column(db.DateTime)
+    transport_at = db.Column(db.DateTime)
+    received_at = db.Column(db.DateTime)
+    sorting_at = db.Column(db.DateTime)
+    laboratory_at = db.Column(db.DateTime)
+    completed_at = db.Column(db.DateTime)
+    updated_by = db.Column(db.String(255))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "order_id": self.order_id,
+            "order_code": self.order_code,
+            "collection_id": self.collection_id,
+            "sample_code": self.sample_code,
+            "stage": self.stage,
+            "collector_name": self.collector_name,
+            "location": self.location,
+            "notes": self.notes,
+            "collected_at": self.collected_at.isoformat() if self.collected_at else None,
+            "transport_at": self.transport_at.isoformat() if self.transport_at else None,
+            "received_at": self.received_at.isoformat() if self.received_at else None,
+            "sorting_at": self.sorting_at.isoformat() if self.sorting_at else None,
+            "laboratory_at": self.laboratory_at.isoformat() if self.laboratory_at else None,
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "updated_by": self.updated_by,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class BizSampleQueueEvent(db.Model):
+    """Immutable history row for sample queue tracking."""
+
+    __tablename__ = "biz_sample_queue_events"
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    queue_item_id = db.Column(
+        db.String(36), db.ForeignKey("biz_sample_queue_items.id"), nullable=False, index=True
+    )
+    order_code = db.Column(db.String(50), nullable=False, index=True)
+    event_type = db.Column(db.String(50), nullable=False)  # entered | advanced | note | location
+    from_stage = db.Column(db.String(30))
+    to_stage = db.Column(db.String(30))
+    actor = db.Column(db.String(255))
+    location = db.Column(db.String(255))
+    note = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "queue_item_id": self.queue_item_id,
+            "order_code": self.order_code,
+            "event_type": self.event_type,
+            "from_stage": self.from_stage,
+            "to_stage": self.to_stage,
+            "actor": self.actor,
+            "location": self.location,
+            "note": self.note,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
 class BizCollection(db.Model):
     __tablename__ = "biz_collections"
 
@@ -226,6 +403,10 @@ class BizResultItem(db.Model):
             "unit": self.unit,
             "reference_range": self.reference_range,
             "flag": self.flag,
+            "instrument": self.instrument,
+            "technician": self.technician,
+            "result_time": self.result_time.isoformat() if self.result_time else None,
+            "entry_note": self.entry_note,
         }
 
 
