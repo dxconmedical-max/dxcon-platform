@@ -86,7 +86,25 @@ SELECT to_regclass('public.biz_sample_queue_events');
 
 ---
 
-## 4. Post-deploy verification
+## 4. Redis verification (environment-aware)
+
+**Do not** resolve or `PING` Render internal `red-*` hostnames from Mac, CI, Vercel, or GitHub runners. Those hosts are private-network only.
+
+| Context | How to verify |
+|---------|----------------|
+| Outside Render | `python backend/scripts/verify_release_2_redis.py` → indirect `/health` + `/api/v1/system/health` only; local DNS = **NOT APPLICABLE** |
+| Inside Render | Same script with `RENDER=true` (or `DXCON_REDIS_DIRECT=1`) → DNS + client `PING`; never print `REDIS_URL` |
+
+Expect separately: **API Redis** / **Worker Redis** / **Scheduler Redis** = PASS | FAIL | NOT VERIFIED.
+
+- [ ] API Redis PASS via in-Render PING or startup check `redis=pass`
+- [ ] Worker Redis PASS or **NOT VERIFIED** (no dedicated worker yet)
+- [ ] Scheduler Redis PASS or **NOT VERIFIED** (in-process scheduler ≠ Redis broker)
+- [ ] Local DNS marked **NOT APPLICABLE** (not FAIL)
+
+---
+
+## 5. Post-deploy verification
 
 - [ ] Run go-live smoke (`RELEASE_2_GO_LIVE_CHECKLIST.md`)
 - [ ] Confirm no auth-freeze path diffs vs freeze policy
@@ -95,7 +113,7 @@ SELECT to_regclass('public.biz_sample_queue_events');
 
 ---
 
-## 5. Rollback
+## 6. Rollback
 
 | Layer | Action |
 |-------|--------|
@@ -105,9 +123,11 @@ SELECT to_regclass('public.biz_sample_queue_events');
 
 ---
 
-## 6. Do not
+## 7. Do not
 
 - Force-push `main` / `release/v1.0.0` / move `v1.0.0` tag
 - Modify auth freeze runtime files
 - Mix unfinished exclusive releases in one commit
 - Enable live VNPay without merchant secrets + RM sign-off
+- Treat local DNS failure of `red-*` as production Redis FAIL
+- Print `REDIS_URL` or Redis credentials in reports

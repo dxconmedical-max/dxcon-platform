@@ -67,13 +67,25 @@ def check_postgresql_config() -> dict:
 
 
 def check_redis_config() -> dict:
+    """Confirm REDIS_URL shape without returning the URL or credentials."""
     reports = {}
     for path in ENV_FILES:
         values = parse_env_file(path)
         redis_url = values.get("REDIS_URL", "")
+        ok = redis_url.startswith("redis://") or redis_url.startswith("rediss://")
+        host = ""
+        if ok:
+            try:
+                from urllib.parse import urlparse
+
+                host = urlparse(redis_url).hostname or ""
+            except Exception:
+                host = ""
+        redacted = "red-***" if host.startswith("red-") else ("set" if host else "missing")
         reports[str(path.relative_to(REPO))] = {
-            "ok": redis_url.startswith("redis://") or redis_url.startswith("rediss://"),
-            "redis_url": redis_url,
+            "ok": ok,
+            "redis_host_redacted": redacted,
+            "scheme_ok": ok,
         }
     return {"ok": all(item["ok"] for item in reports.values()), "files": reports}
 
