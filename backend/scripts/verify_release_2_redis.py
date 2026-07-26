@@ -75,8 +75,11 @@ def is_render_internal_host(host: str | None) -> bool:
     return bool(host) and host.lower().startswith("red-")
 
 
-def http_get(url: str, timeout: float = 40.0) -> tuple[int | None, Any]:
-    req = urllib.request.Request(url, headers={"User-Agent": "dxcon-verify-release-2-redis/1.0"})
+def http_get(url: str, timeout: float = 40.0, headers: dict | None = None) -> tuple[int | None, Any]:
+    hdrs = {"User-Agent": "dxcon-verify-release-2-redis/1.0"}
+    if headers:
+        hdrs.update(headers)
+    req = urllib.request.Request(url, headers=hdrs)
     try:
         with urllib.request.urlopen(req, timeout=timeout, context=ssl.create_default_context()) as resp:
             raw = resp.read().decode("utf-8", "replace")
@@ -92,6 +95,50 @@ def http_get(url: str, timeout: float = 40.0) -> tuple[int | None, Any]:
             return exc.code, {"_raw": sanitize(raw[:500])}
     except Exception as exc:  # noqa: BLE001 — verifier must never crash on probe errors
         return None, {"_error": sanitize(f"{type(exc).__name__}: {exc}")}
+
+
+def _admin_bearer() -> str | None:
+    for key in ("DXCON_SUPER_ADMIN_TOKEN", "DXCON_API_TOKEN", "DXCON_ADMIN_JWT"):
+        value = (os.environ.get(key) or "").strip()
+        if value:
+            return value
+    return None
+
+
+def verify_super_admin_diagnostic(api_base: str) -> dict | None:
+    """Call protected in-runtime Redis diagnostic when a SUPER_ADMIN JWT is available."""
+    token = _admin_bearer()
+    if not token:
+        return None
+    code, body = http_get(
+        f"{api_base.rstrip('/')}/api/v1/system/diagnostics/redis",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    if not isinstance(body, dict):
+        return {
+            "http": code,
+            "api_redis": "NOT VERIFIED",
+            "diagnostic": None,
+            "note": "diagnostic_non_json",
+        }
+    # Never retain unexpected secret-looking keys
+    safe = {
+        "service": body.get("service"),
+        "status": body.get("status"),
+        "ping": body.get("ping"),
+        "runtime": body.get("runtime"),
+        "error_type": body.get("error_type"),
+        "checked_at": body.get("checked_at"),
+    }
+    if code == 200 and body.get("ping") is True and body.get("status") == "ok":
+        api_redis = "PASS"
+    elif code in {401, 403}:
+        api_redis = "NOT VERIFIED"
+    elif body.get("ping") is False or code == 503:
+        api_redis = "FAIL"
+    else:
+        api_redis = "NOT VERIFIED"
+    return {"http": code, "api_redis": api_redis, "diagnostic": safe}
 
 
 def extract_redis_check(health: dict) -> dict:
@@ -125,6 +172,8 @@ def host_from_error_detail(detail: str) -> str | None:
 
 def verify_outside_render(api_base: str) -> dict:
     """Indirect verification only — never DNS/TCP/PING internal red-* hosts."""
+    diagnostic = verify_super_admin_diagnostic(api_base)
+
     health_code, health = http_get(f"{api_base.rstrip('/')}/api/v1/system/health")
     root_health_code, root_health = http_get(f"{api_base.rstrip('/')}/health")
     ready_code, ready = http_get(f"{api_base.rstrip('/')}/api/v1/system/ready")
@@ -138,22 +187,22 @@ def verify_outside_render(api_base: str) -> dict:
     cfg = ((health.get("data") or {}).get("startup") or {}).get("config") if isinstance(health, dict) else {}
     build = (health.get("data") or {}).get("build") if isinstance(health, dict) else {}
 
-    redis_status = redis_check.get("status")
-    if redis_status == "pass":
-        api_redis = "PASS"
-    elif redis_status == "fail":
-        api_redis = "FAIL"
-    elif redis_status in {"skipped", "warn"}:
-        api_redis = "NOT VERIFIED"
+    # Prefer SUPER_ADMIN in-runtime diagnostic when available.
+    if diagnostic and diagnostic.get("api_redis") in {"PASS", "FAIL"}:
+        api_redis = diagnostic["api_redis"]
     else:
-        api_redis = "NOT VERIFIED"
+        redis_status = redis_check.get("status")
+        if redis_status == "pass":
+            api_redis = "PASS"
+        elif redis_status == "fail":
+            api_redis = "FAIL"
+        else:
+            api_redis = "NOT VERIFIED"
 
     root_redis = None
     if isinstance(root_health, dict):
         root_redis = root_health.get("redis")
 
-    # Dedicated worker Redis evidence is not exposed unless workers endpoint succeeds
-    # with an explicit redis/broker field. In-process scheduler ≠ Redis broker.
     worker_redis = "NOT VERIFIED"
     if workers_code == 200 and isinstance(workers, dict):
         payload = workers.get("data") if isinstance(workers.get("data"), dict) else workers
@@ -165,9 +214,6 @@ def verify_outside_render(api_base: str) -> dict:
                 worker_redis = "FAIL"
 
     scheduler_redis = "NOT VERIFIED"
-    if scheduler_check.get("status") == "pass":
-        # In-process background workers — not evidence of Redis broker connectivity
-        scheduler_redis = "NOT VERIFIED"
 
     mon_ping = None
     if isinstance(mon, dict) and isinstance(mon.get("data"), dict):
@@ -180,7 +226,8 @@ def verify_outside_render(api_base: str) -> dict:
         "local_redis_ping": "NOT APPLICABLE",
         "note": (
             "Render internal red-* hostnames must not be resolved from Mac, CI, "
-            "Vercel, or other non-Render networks. Use HTTP readiness or in-Render PING."
+            "Vercel, or other non-Render networks. Prefer SUPER_ADMIN "
+            "/api/v1/system/diagnostics/redis (DXCON_SUPER_ADMIN_TOKEN)."
         ),
         "api_base": api_base,
         "sanitized_hostname": redact_host(err_host) if err_host else None,
@@ -188,6 +235,7 @@ def verify_outside_render(api_base: str) -> dict:
         "api_redis": api_redis,
         "worker_redis": worker_redis,
         "scheduler_redis": scheduler_redis,
+        "super_admin_diagnostic": diagnostic,
         "probes": {
             "system_health_http": health_code,
             "root_health_http": root_health_code,

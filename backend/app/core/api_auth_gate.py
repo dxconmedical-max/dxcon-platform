@@ -57,6 +57,7 @@ PROTECTED_PREFIXES = (
     "/api/v1/admin",
     "/api/v1/system/routes",
     "/api/v1/system/stats",
+    "/api/v1/system/diagnostics",
 )
 
 

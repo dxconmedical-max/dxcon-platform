@@ -49,12 +49,22 @@ def is_api_path(path=None):
     return path.startswith("/api/")
 
 
+# Paths that must return an exact diagnostic schema (no envelope wrap).
+RAW_JSON_PATHS = frozenset(
+    {
+        "/api/v1/system/diagnostics/redis",
+    }
+)
+
+
 def should_wrap_response(app, response):
     if app.config.get("TESTING"):
         return False
     if not app.config.get("API_RESPONSE_ENVELOPE", True):
         return False
     if not is_api_path():
+        return False
+    if request.path in RAW_JSON_PATHS:
         return False
     if response.status_code in {204, 304}:
         return False
