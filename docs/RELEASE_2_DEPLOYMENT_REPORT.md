@@ -52,21 +52,23 @@ Verify with `to_regclass(...)` per deployment checklist.
 
 ---
 
-## 4. Redis — methodology corrected; API still FAIL (runtime)
+## 4. Redis — SUPER_ADMIN diagnostic ready; production not cut over
 
-**Invalid check removed:** local DNS/TCP/PING of Render internal `red-*` from Mac/CI (those hosts are private-network only → **NOT APPLICABLE**, not FAIL).
+**Invalid check (retained):** local DNS/TCP/PING of `red-*` → **NOT APPLICABLE**.
 
-**Verifier:** `backend/scripts/verify_release_2_redis.py` (outside Render = HTTP only; inside Render = direct PING). Never prints `REDIS_URL` / credentials; hostname only as **`red-***`**.
+**New path:** `GET /api/v1/system/diagnostics/redis` (SUPER_ADMIN JWT, `Cache-Control: no-store`, sanitized errors only).
 
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Local DNS | **NOT APPLICABLE** | Corrected false-negative methodology |
-| **API Redis** | **FAIL** | Render-side startup check via `GET /api/v1/system/health`: `redis=fail`, sanitized `Error -2 connecting to red-***:6379`. Hostname class **`placeholder_x`**. `/health` HTTP **200** with `redis=DEGRADED` under `app_env=staging` is **not** Redis PASS. |
-| **Worker Redis** | **NOT VERIFIED** | No worker in `render.yaml`; `/api/v1/system/workers` → 500 |
-| **Scheduler Redis** | **NOT VERIFIED** | In-process scheduler pass ≠ Redis broker |
-| Workspace / region / shared URL | **NOT VERIFIED** | No Render API access; blueprint has only `dxcon-api` + `REDIS_URL` `sync: false` |
-
-**Ops action:** Confirm Internal Redis URL on `dxcon-api` in Render dashboard (do not change if already correct). Re-check **in Render** until startup `redis=pass`. Do not redeploy merely to test laptop DNS. Do not alter payment/queue/auth/migrations in this Redis correction.
+| Item | Status |
+|------|--------|
+| Implementation commit | `3544d62` pushed to `origin/release/v2.0.0` |
+| Render production deploy | **BLOCKED** (no API key / deploy hook; Free plan has no shell) |
+| Prod diagnostic HTTP | **404** |
+| Deployment ID | **NONE** |
+| API Redis | **NOT VERIFIED** (PASS only after `ping=true` from diagnostic) |
+| Worker Redis | **NOT VERIFIED** |
+| Scheduler Redis | **NOT VERIFIED** |
+| Local DNS | **NOT APPLICABLE** |
+| `REDIS_URL` changed | **No** |
 
 ---
 
@@ -76,8 +78,7 @@ Verify with `to_regclass(...)` per deployment checklist.
 |-----------|-------------|
 | In-process scheduler | `status=pass`, `workers=4` (startup check) |
 | Dedicated worker service in `render.yaml` | **Not present** |
-| `GET /api/v1/system/workers` | **500** `INTERNAL_SERVER_ERROR` |
-| Worker / scheduler Redis broker | **NOT VERIFIED** (do not collapse into whole-layer FAIL) |
+| Worker / scheduler Redis broker | **NOT VERIFIED** |
 
 ---
 
@@ -85,15 +86,14 @@ Verify with `to_regclass(...)` per deployment checklist.
 
 | Layer | Result |
 |-------|--------|
-| Commit + push | **PASS** |
-| Frontend production | **PASS** |
-| Backend production tip | **FAIL / pending ops** |
+| Commit + push (diagnostic) | **PASS** (`3544d62`) |
+| Frontend production | **PASS** (prior) |
+| Backend production tip | **FAIL / pending deploy** |
 | Migrations | **PENDING** |
 | Local Redis DNS | **NOT APPLICABLE** |
-| API Redis | **FAIL** |
+| API Redis | **NOT VERIFIED** |
 | Worker Redis | **NOT VERIFIED** |
 | Scheduler Redis | **NOT VERIFIED** |
-| Workers process | **PARTIAL** (in-process only) |
 | Go-Live | **NOT PASS** |
 
 ---

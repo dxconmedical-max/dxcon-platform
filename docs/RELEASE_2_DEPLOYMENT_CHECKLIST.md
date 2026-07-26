@@ -92,8 +92,8 @@ SELECT to_regclass('public.biz_sample_queue_events');
 
 | Context | How to verify |
 |---------|----------------|
-| Outside Render | `python backend/scripts/verify_release_2_redis.py` → indirect `/health` + `/api/v1/system/health` only; local DNS = **NOT APPLICABLE** |
-| Inside Render | Same script with `RENDER=true` (or `DXCON_REDIS_DIRECT=1`) → DNS + client `PING`; never print `REDIS_URL` |
+| Outside Render | Prefer `GET /api/v1/system/diagnostics/redis` with SUPER_ADMIN JWT (`DXCON_SUPER_ADMIN_TOKEN`); or `python backend/scripts/verify_release_2_redis.py`. Local DNS = **NOT APPLICABLE** |
+| Inside Render | Same diagnostic endpoint (preferred) or script with `RENDER=true` |
 
 Expect separately: **API Redis** / **Worker Redis** / **Scheduler Redis** = PASS | FAIL | NOT VERIFIED.
 

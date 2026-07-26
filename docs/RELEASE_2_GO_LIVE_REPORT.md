@@ -17,12 +17,12 @@ Reception M2 UI is **live on production** (`https://dxcon.com.vn`) from commit `
 
 | Component | Status |
 |-----------|--------|
-| API Redis | **FAIL** (Render process startup check via public health; sanitized host `red-***`, class `placeholder_x`) |
+| API Redis | **NOT VERIFIED** — `GET /api/v1/system/diagnostics/redis` implemented (`3544d62`) but **not deployed** (prod **404**); PASS only when runtime returns `ping=true` |
 | Worker Redis | **NOT VERIFIED** |
 | Scheduler Redis | **NOT VERIFIED** |
 | Local DNS | **NOT APPLICABLE** |
 
-Payment → Sample E2E remains **BLOCKED** (API tip + migrations; API Redis still FAIL).
+Payment → Sample E2E remains **BLOCKED**. Render deploy of the diagnostic commit is required before API Redis can be marked PASS (no Free-plan shell; provide `RENDER_API_KEY` or dashboard deploy).
 
 Do **not** declare full Reception M2 GA until backend deploy + Redis PASS (in-Render) + migrations complete and verification is re-run.
 
@@ -37,8 +37,9 @@ Do **not** declare full Reception M2 GA until backend deploy + Redis PASS (in-Re
 | Vercel production deploy | **PASS** — `dpl_7vLhsf3nASxgM34mVQLdrtS6Sh6d` → `dxcon.com.vn` |
 | Render API deploy | **NOT EXECUTED** (no Render API credentials; service not on R2 tip) |
 | Postgres migrations 017–019 | **NOT EXECUTED** |
-| Redis methodology | **CORRECTED** — env-aware verifier; local DNS N/A |
-| Redis API runtime | **Still FAIL** on public health startup check |
+| Redis methodology | **CORRECTED** — env-aware verifier + SUPER_ADMIN diagnostic |
+| Redis diagnostic deploy | **BLOCKED** — no Render API key; prod route **404** |
+| Redis API runtime | **NOT VERIFIED** |
 | Dedicated workers deploy | **N/A** — none in `render.yaml` |
 
 ---
@@ -50,7 +51,7 @@ Do **not** declare full Reception M2 GA until backend deploy + Redis PASS (in-Re
 | Frontend M2 routes | **PASS** (307 → login) |
 | Auth freeze redirect | **PASS** |
 | Payment / receipt / barcode / QR / queues (E2E) | **BLOCKED** — API tip missing R2 routes |
-| API Redis | **FAIL** |
+| API Redis | **NOT VERIFIED** |
 | Worker Redis | **NOT VERIFIED** |
 | Scheduler Redis | **NOT VERIFIED** |
 | Local Redis DNS | **NOT APPLICABLE** |
@@ -65,13 +66,14 @@ Verifier: `backend/scripts/verify_release_2_redis.py`
 
 ## Immediate ops checklist (to finish go-live)
 
-1. [ ] Render: deploy `dxcon-api` from `release/v2.0.0` / `15cc36f`
-2. [ ] Confirm `REDIS_URL` Internal URL on `dxcon-api` (verify **in Render** / startup `redis=pass` — **not** via laptop DNS)
-3. [ ] Run SQL migrations `017`, `018`, `019`
-4. [ ] Confirm `BUILD_VERSION=2.0.0-rc1` and prefer `APP_ENV=production`
-5. [ ] Re-probe M2 APIs → expect **401** unauth / **200** with reception token
-6. [ ] Execute smoke from `docs/RELEASE_2_GO_LIVE_CHECKLIST.md` (payment → sample queue)
-7. [ ] Update this report to **PASS** and tag `v2.0.0-rc1` if process requires
+1. [ ] Render: deploy `dxcon-api` from `release/v2.0.0` including `3544d62` (Redis diagnostic)
+2. [ ] Call `GET /api/v1/system/diagnostics/redis` as SUPER_ADMIN → expect `ping=true` (do **not** use laptop DNS)
+3. [ ] Confirm `REDIS_URL` Internal URL on `dxcon-api` if diagnostic fails (do not change if already correct)
+4. [ ] Run SQL migrations `017`, `018`, `019`
+5. [ ] Confirm `BUILD_VERSION=2.0.0-rc1` and prefer `APP_ENV=production`
+6. [ ] Re-probe M2 APIs → expect **401** unauth / **200** with reception token
+7. [ ] Execute smoke from `docs/RELEASE_2_GO_LIVE_CHECKLIST.md` (payment → sample queue)
+8. [ ] Update this report to **PASS** and tag `v2.0.0-rc1` if process requires
 
 ---
 
@@ -93,7 +95,7 @@ Verifier: `backend/scripts/verify_release_2_redis.py`
 | Full Reception M2 go-live? | **NO — blocked on API tip + API Redis + migrations** |
 | Safe to market as M2 live E2E? | **NO** until verification re-run PASS |
 | Local Redis DNS used as FAIL? | **NO — retracted (NOT APPLICABLE)** |
-| API Redis PASS? | **NO** |
+| API Redis PASS? | **NO — NOT VERIFIED** (diagnostic not on prod yet) |
 | Payment → Sample E2E unblocked? | **NO** |
 
 **STOP.** Go-Live remains **NOT PASS**.

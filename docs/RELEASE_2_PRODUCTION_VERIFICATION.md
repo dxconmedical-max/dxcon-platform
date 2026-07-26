@@ -8,48 +8,52 @@
 
 ---
 
-## Redis verification — corrected methodology
+## Redis verification — SUPER_ADMIN in-runtime diagnostic
 
-### Root cause of prior false negative
+### Architecture (existing)
 
-Earlier “Redis FAIL — hostname does not resolve” conclusions mixed **local DNS/TCP/PING** (Mac / Cursor sandbox) against a Render **internal** `red-*` hostname. Internal Key Value hosts are **not** expected to resolve outside the matching Render workspace/region. That local check is **invalid** as production Redis evidence.
+| Surface | Path | Auth |
+|---------|------|------|
+| Liveness/health | `/health`, `/api/v1/system/health` | Public |
+| Ready | `/ready`, `/api/v1/system/ready`, `/api/v1/system/readiness` | Public |
+| Monitoring redis | `/api/v1/monitoring-center/redis` | Unauthenticated (reports status; may include error text) |
+| **New diagnostic** | **`GET /api/v1/system/diagnostics/redis`** | **SUPER_ADMIN JWT only** (`roles_required`) |
 
-**Invalid check removed:** local `getaddrinfo` / `nc` / `redis.PING` against `red-*` from outside Render.  
-**Replacement:** `backend/scripts/verify_release_2_redis.py` (environment-aware).
+Redis client: `app.config["REDIS_URL"]` via `redis.from_url` (same pattern as `check_redis` / `check_redis_health`). No new secret source. Local DNS of `red-*` = **NOT APPLICABLE**.
 
-| Check | Status |
-|-------|--------|
-| Local DNS of `red-*` | **NOT APPLICABLE** |
-| Local TCP/TLS to `red-*` | **NOT APPLICABLE** |
-| Local Redis PING | **NOT APPLICABLE** |
+### Deploy / production call (2026-07-26)
 
-Credentials / full `REDIS_URL` are never printed. Hostname shown only as **`red-***`**.
+| Step | Result |
+|------|--------|
+| Code commit | `3544d62` on `release/v2.0.0` (pushed) |
+| Render deploy | **BLOCKED** — no `RENDER_API_KEY` / deploy hook in this environment; Free instance has no Dashboard Shell |
+| Production tip | Still `2.5.0-dev` / `staging` / `git_sha=local` |
+| Diagnostic route on prod | **404** (not deployed yet) |
+| Sanitized production diagnostic response | **N/A** — endpoint not live |
+| Deployment ID | **NONE** |
 
-### Runtime evidence (indirect, outside Render)
+### Component status
 
-Probe tool: `python backend/scripts/verify_release_2_redis.py` → `backend/generated_release/RELEASE_2_REDIS_VERIFY.json`
+| Component | Status |
+|-----------|--------|
+| **API Redis** | **NOT VERIFIED** — requires deployed diagnostic with `ping=true` |
+| **Worker Redis** | **NOT VERIFIED** |
+| **Scheduler Redis** | **NOT VERIFIED** |
+| **Local DNS** | **NOT APPLICABLE** |
 
-| Component | Status | Evidence |
-|-----------|--------|----------|
-| **API Redis** | **FAIL** | `GET /api/v1/system/health` startup check `redis=fail` (executed **inside** the Render API process). Detail (sanitized): `Error -2 connecting to red-***:6379. Name or service not known.` Hostname class from error: **`placeholder_x`** (`red-` + repeated `x`, len 17) — not a typical live Render KV id. |
-| **Worker Redis** | **NOT VERIFIED** | No dedicated worker service in `render.yaml`; `GET /api/v1/system/workers` → **500**. Do not mark whole Redis layer FAIL for this alone. |
-| **Scheduler Redis** | **NOT VERIFIED** | In-process `scheduler` startup check **pass** (`workers:4`) — not Redis-broker evidence. |
-| Local DNS | **NOT APPLICABLE** | Corrected; must not be recorded as FAIL. |
+**Go-Live:** **NOT PASS**
 
-| Endpoint | HTTP | Redis-related |
-|----------|------|----------------|
-| `GET /health` | **200** | `status=OK`, `redis=DEGRADED`, `app_env=staging` (Redis not required when non-production) |
-| `GET /api/v1/system/health` | **200** | overall **DEGRADED**; startup `redis=fail` |
-| `GET /api/v1/system/ready` | **503** | `NOT_READY` (migrations context error; not used alone as Redis PASS) |
-| `GET /api/v1/monitoring-center/redis` | **200** | ping **DEGRADED** / unavailable (same sanitized DNS error) |
+After Render deploy of `3544d62` (or later tip containing the diagnostic):
 
-**Operator claim:** Render logs show “Redis connection verified.” This session has **no Render log API access** to confirm. Codebase emits **`database connection verified`**, not a Redis equivalent — treat operator log claim as **unconfirmed** here. Public runtime health still shows API Redis **FAIL**.
-
-**Workspace / region / shared `REDIS_URL`:** `render.yaml` defines only `dxcon-api` + Postgres; `REDIS_URL` is `sync: false` (dashboard). No worker/scheduler services to compare. Same-workspace / same-region / shared source: **NOT VERIFIED** from this environment (no Render API key). Do not alter `REDIS_URL`.
-
-### Payment → Sample E2E
-
-**Still BLOCKED** (independent of Redis methodology): API tip not R2 (`2.5.0-dev` / `staging` / `git_sha=local`); M2 routes **404**; migrations `017`–`019` not applied. Redis API FAIL remains an additional blocker until startup `redis=pass`.
+```bash
+# SUPER_ADMIN access token only — never print token/REDIS_URL
+export DXCON_SUPER_ADMIN_TOKEN='…'
+curl -sS -H "Authorization: Bearer ${DXCON_SUPER_ADMIN_TOKEN}" \
+  -H "Cache-Control: no-store" \
+  https://api.dxcon.com.vn/api/v1/system/diagnostics/redis
+# PASS only if: {"service":"redis","status":"ok","ping":true,"runtime":"render",...}
+python backend/scripts/verify_release_2_redis.py
+```
 
 ---
 
@@ -62,7 +66,7 @@ Probe tool: `python backend/scripts/verify_release_2_redis.py` → `backend/gene
 | API health | **DEGRADED** | HTTP 200; startup DEGRADED |
 | API ready | **FAIL** | HTTP **503** |
 | API build identity | **NOT R2** | `version=2.5.0-dev`, `environment=staging`, `git_sha=local` |
-| API Redis | **FAIL** | Startup check fail (see above) — **not** a local-DNS FAIL |
+| API Redis | **NOT VERIFIED** | Diagnostic not deployed (prod 404); local DNS N/A |
 | Worker Redis | **NOT VERIFIED** | No dedicated worker |
 | Scheduler Redis | **NOT VERIFIED** | In-process only |
 | Local Redis DNS | **NOT APPLICABLE** | — |
