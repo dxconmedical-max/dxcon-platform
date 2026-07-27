@@ -106,17 +106,18 @@ export function SimpleTable<T>({
 }
 
 export function StatusPill({ status }: { status: string }) {
+  const label = typeof status === "string" && status.trim() ? status : "—";
   const tone =
-    status === "RECEIVED" || status === "delivered"
+    label === "RECEIVED" || label === "delivered"
       ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-      : status === "REJECTED" || status === "RECOLLECT_REQUIRED"
+      : label === "REJECTED" || label === "RECOLLECT_REQUIRED"
         ? "bg-rose-50 text-rose-800 border-rose-200"
-        : status === "IN_TRANSIT" || status === "in_transit" || status === "COLLECTED"
+        : label === "IN_TRANSIT" || label === "in_transit" || label === "COLLECTED"
           ? "bg-sky-50 text-sky-800 border-sky-200"
           : "bg-slate-50 text-slate-700 border-slate-200";
   return (
     <span className={cn("inline-flex rounded-md border px-2 py-0.5 text-xs font-medium", tone)}>
-      {status}
+      {label}
     </span>
   );
 }

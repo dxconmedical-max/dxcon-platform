@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "freeze_doc": "docs/AUTH_FREEZE.md",
+  "freeze_doc_present": true,
+  "freeze_doc_mentions_review": true,
+  "freeze_doc_has_persistence": true,
+  "freeze_doc_has_route_guards": true,
+  "freeze_doc_has_bootstrap_ownership": true,
+  "freeze_doc_has_redirect_behavior": true,
+  "freeze_doc_has_production_reverified": true,
+  "frozen_files": [
+    "src/stores/authStore.ts",
+    "src/lib/auth/session.ts",
+    "src/lib/auth/bootstrapDebug.ts",
+    "src/lib/cookies.ts",
+    "src/services/auth.ts",
+    "src/components/providers/AuthProvider.tsx",
+    "src/components/providers/AuthErrorBoundary.tsx",
+    "src/hooks/useAuth.ts",
+    "src/components/layout/AppShell.tsx",
+    "src/middleware.ts",
+    "src/app/login/page.tsx",
+    "src/app/layout.tsx"
+  ],
+  "missing_frozen_files": [],
+  "required_tests": [
+    "src/app/login/page.test.tsx",
+    "src/stores/authStore.login.test.ts",
+    "src/components/providers/AuthProvider.test.tsx",
+    "src/components/layout/AppShell.test.tsx",
+    "src/components/layout/AdminBootstrap.integration.test.tsx",
+    "src/hooks/useRequireAuth.bootstrap.test.tsx",
+    "src/hooks/gate1Auth.regression.test.tsx",
+    "src/lib/auth/session.test.ts",
+    "src/services/api.auth.test.ts",
+    "src/auth/e2e.login.hardening.test.ts"
+  ],
+  "missing_tests": [],
+  "generated_at": "2026-07-26T19:58:56.288Z"
+}

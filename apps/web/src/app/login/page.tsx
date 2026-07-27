@@ -168,10 +168,8 @@ function LoginForm() {
             </Button>
           </form>
           <p className="mt-6 text-center text-sm text-slate-500">
-            <Link href="/register" className="text-teal-700">
-              Create account
-            </Link>
-            {" · "}
+            {/* Public self-registration is not part of Release 2 — do not link
+                /register (missing route causes Next.js Link prefetch 404). */}
             <Link href="/" className="text-teal-700">
               Back to homepage
             </Link>

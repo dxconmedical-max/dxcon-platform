@@ -75,4 +75,25 @@ describe("apiRequest auth integration", () => {
       }),
     ).rejects.toMatchObject({ status: 401, message: "Invalid credentials" });
   });
+
+  it("maps envelope error objects to a readable ApiError message", async () => {
+    const fetchMock = globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          success: false,
+          error: { code: "FORBIDDEN", message: "Insufficient role permissions" },
+        }),
+        {
+          status: 403,
+          headers: { "content-type": "application/json" },
+        },
+      ),
+    );
+
+    await expect(apiRequest("/api/v1/sample-collections/queue")).rejects.toMatchObject({
+      status: 403,
+      message: "Insufficient role permissions",
+    });
+  });
 });

@@ -86,15 +86,17 @@ Verify with `to_regclass(...)` per deployment checklist.
 
 | Layer | Result |
 |-------|--------|
-| Commit + push (diagnostic) | **PASS** (`3544d62`) |
-| Frontend production | **PASS** (prior) |
-| Backend production tip | **FAIL / pending deploy** |
-| Migrations | **PENDING** |
+| Frontend login (production) | **PASS** (user-confirmed) |
+| Post-login `/app/admin` | **PASS** |
+| Auth bootstrap | **PASS** |
+| CORS | **PASS** |
+| `/register` nav prefetch | **FIXED** — public registration not in R2; Create account link removed |
 | Local Redis DNS | **NOT APPLICABLE** |
 | API Redis | **NOT VERIFIED** |
 | Worker Redis | **NOT VERIFIED** |
 | Scheduler Redis | **NOT VERIFIED** |
-| Go-Live | **NOT PASS** |
+| Go-Live | **PARTIAL** (auth/shell); full M2 GA **not** claimed |
+| Release 3 | **NOT STARTED** |
 
 ---
 

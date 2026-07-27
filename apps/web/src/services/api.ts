@@ -1,5 +1,5 @@
 import { API_BASE_URL, API_TIMEOUT_MS } from "@/lib/constants";
-import { ApiError } from "@/lib/errors";
+import { ApiError, extractApiErrorMessage } from "@/lib/errors";
 
 export type RequestOptions = {
   method?: string;
@@ -100,15 +100,29 @@ export async function apiRequest<T>(
     : await response.text();
 
   if (!response.ok) {
-    const code =
-      typeof payload === "object" && payload && "code" in payload
-        ? String((payload as { code: unknown }).code)
-        : undefined;
+    let code: string | undefined;
+    if (typeof payload === "object" && payload) {
+      if ("code" in payload) {
+        code = String((payload as { code: unknown }).code);
+      } else if (
+        "error" in payload &&
+        typeof (payload as { error: unknown }).error === "object" &&
+        (payload as { error: unknown }).error &&
+        "code" in ((payload as { error: object }).error as object)
+      ) {
+        code = String(((payload as { error: { code: unknown } }).error as { code: unknown }).code);
+      }
+    }
     const message =
-      typeof payload === "object" && payload && "error" in payload
-        ? String((payload as { error: unknown }).error)
-        : `Request failed (${response.status})`;
-    throw new ApiError(message, response.status, { ...((payload as object) || {}), code });
+      extractApiErrorMessage(
+        typeof payload === "object" && payload && "error" in payload
+          ? (payload as { error: unknown }).error
+          : payload,
+      ) || `Request failed (${response.status})`;
+    throw new ApiError(message, response.status, {
+      ...((typeof payload === "object" && payload ? payload : {}) as object),
+      code,
+    });
   }
 
   return payload as T;

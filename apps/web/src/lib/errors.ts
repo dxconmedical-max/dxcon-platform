@@ -20,6 +20,40 @@ export function isRequestAborted(error: unknown): boolean {
   );
 }
 
+/**
+ * Extract a human-readable message from API error payloads.
+ * Handles string errors and envelope objects `{ code, message }` —
+ * never returns "[object Object]".
+ */
+export function extractApiErrorMessage(value: unknown): string | null {
+  if (value == null) return null;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed && trimmed !== "[object Object]" ? trimmed : null;
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+  if (typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    for (const key of ["message", "detail", "title"] as const) {
+      const nested = record[key];
+      if (typeof nested === "string" && nested.trim()) {
+        return nested.trim();
+      }
+    }
+    // Nested envelope: { error: { message } } or { error: "text" }
+    if ("error" in record) {
+      const nested = extractApiErrorMessage(record.error);
+      if (nested) return nested;
+    }
+    if (typeof record.code === "string" && record.code.trim()) {
+      return record.code.trim();
+    }
+  }
+  return null;
+}
+
 export function normalizeApiError(error: unknown): string {
   if (error instanceof ApiError) {
     if (isRequestAborted(error)) {
@@ -36,20 +70,25 @@ export function normalizeApiError(error: unknown): string {
       return "Network error — check your connection.";
     }
     if (typeof error.body === "object" && error.body && "error" in error.body) {
-      return String((error.body as { error: unknown }).error);
+      const fromBody = extractApiErrorMessage(
+        (error.body as { error: unknown }).error,
+      );
+      if (fromBody) return fromBody;
     }
+    const fromMessage = extractApiErrorMessage(error.message);
+    if (fromMessage) return fromMessage;
     if (error.status === 403) {
-      return error.message || "You do not have permission for this action.";
+      return "You do not have permission for this action.";
     }
     if (error.status === 401) {
-      return error.message || "Authentication required.";
+      return "Authentication required.";
     }
-    return error.message || `Request failed (${error.status})`;
+    return `Request failed (${error.status})`;
   }
   if (error instanceof Error) {
-    return error.message;
+    return extractApiErrorMessage(error.message) || "An unexpected error occurred";
   }
-  return "An unexpected error occurred";
+  return extractApiErrorMessage(error) || "An unexpected error occurred";
 }
 
 export function loginErrorMessage(error: unknown): string {
@@ -60,10 +99,10 @@ export function loginErrorMessage(error: unknown): string {
     case 400:
       return (
         (typeof error.body === "object" &&
-        error.body &&
-        "error" in error.body &&
-        String((error.body as { error: unknown }).error)) ||
-        error.message ||
+          error.body &&
+          "error" in error.body &&
+          extractApiErrorMessage((error.body as { error: unknown }).error)) ||
+        extractApiErrorMessage(error.message) ||
         "Invalid login request."
       );
     case 401:
@@ -84,9 +123,11 @@ export function loginErrorMessage(error: unknown): string {
       ) {
         return "Unexpected login response from server. Please try again.";
       }
-      return error.message || "Service temporarily unavailable.";
+      return extractApiErrorMessage(error.message) || "Service temporarily unavailable.";
     default:
       // Preserve real backend messages for 500 and other statuses.
-      return error.message || `Request failed (${error.status})`;
+      return (
+        extractApiErrorMessage(error.message) || `Request failed (${error.status})`
+      );
   }
 }

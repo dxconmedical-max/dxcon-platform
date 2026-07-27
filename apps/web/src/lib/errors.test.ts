@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ApiError, normalizeApiError } from "@/lib/errors";
+import { ApiError, extractApiErrorMessage, normalizeApiError } from "@/lib/errors";
 
 describe("normalizeApiError", () => {
   it("maps 429 to rate limit message", () => {
@@ -17,7 +17,28 @@ describe("normalizeApiError", () => {
     ).toBe("Invalid credentials");
   });
 
+  it("extracts nested envelope error.message instead of [object Object]", () => {
+    const err = new ApiError("[object Object]", 403, {
+      success: false,
+      error: { code: "FORBIDDEN", message: "Insufficient role permissions" },
+    });
+    expect(normalizeApiError(err)).toBe("Insufficient role permissions");
+    expect(normalizeApiError(err)).not.toBe("[object Object]");
+  });
+
   it("does not label 4xx as network error", () => {
     expect(normalizeApiError(new ApiError("nope", 404))).toBe("nope");
+  });
+});
+
+describe("extractApiErrorMessage", () => {
+  it("returns null for object without message fields", () => {
+    expect(extractApiErrorMessage({ foo: 1 })).toBeNull();
+  });
+
+  it("unwraps nested error objects", () => {
+    expect(
+      extractApiErrorMessage({ error: { code: "X", message: "Readable failure" } }),
+    ).toBe("Readable failure");
   });
 });
