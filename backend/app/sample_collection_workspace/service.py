@@ -107,7 +107,12 @@ def list_production_queue(
             like = f"%{location}%"
             query = query.filter(BizCollection.pickup_address.ilike(like))
         for row in query.order_by(BizCollection.created_at.desc()).limit(200).all():
-            order = BizOrder.query.get(row.order_id)
+            order = None
+            try:
+                order = BizOrder.query.get(row.order_id) if row.order_id else None
+            except Exception:
+                db.session.rollback()
+                order = None
             desk_items.append(
                 {
                     "source": "desk",
