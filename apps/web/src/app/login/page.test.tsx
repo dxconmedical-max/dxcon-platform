@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "@/lib/errors";
 
@@ -65,11 +65,27 @@ describe("LoginPage submit loading state", () => {
     isSubmittingLogin = false;
   });
 
+  afterEach(() => {
+    cleanup();
+  });
+
   it("fresh anonymous visit renders Sign in, never Signing in...", () => {
     render(<LoginPage />);
     const button = submitButton();
     expect(button).toHaveTextContent("Sign in");
     expect(button).not.toHaveTextContent("Signing in...");
+  });
+
+  it("does not offer a Create account link to missing /register", () => {
+    render(<LoginPage />);
+    expect(screen.queryByRole("link", { name: /create account/i })).toBeNull();
+    expect(
+      document.querySelector('a[href="/register"]'),
+    ).toBeNull();
+    expect(screen.getByRole("link", { name: /back to homepage/i })).toHaveAttribute(
+      "href",
+      "/",
+    );
   });
 
   it("session initialization flags do not lock the submit label", () => {
