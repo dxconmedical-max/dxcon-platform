@@ -1,5 +1,5 @@
 import { apiRequest } from "@/services/api";
-import { ApiError } from "@/lib/errors";
+import { ApiError, extractApiErrorMessage } from "@/lib/errors";
 
 export type SampleCollectionAuth = {
   token?: string | null;
@@ -93,15 +93,48 @@ function opts(auth: SampleCollectionAuth, extra?: { timeoutMs?: number; signal?:
   };
 }
 
-async function unwrap<T>(promise: Promise<{ success?: boolean; data?: T; error?: string }>): Promise<T> {
+async function unwrap<T>(promise: Promise<{ success?: boolean; data?: T; error?: unknown }>): Promise<T> {
   const body = await promise;
   if (body && body.success === false) {
-    throw new ApiError(body.error || "Sample collection request failed", 400);
+    const message =
+      extractApiErrorMessage(body.error) || "Sample collection request failed";
+    throw new ApiError(message, 400, body);
   }
   if (body && "data" in body) {
     return body.data as T;
   }
   return body as unknown as T;
+}
+
+function normalizeQueuePayload(data: unknown): SampleCollectionQueue {
+  if (Array.isArray(data)) {
+    return {
+      count: data.length,
+      items: data as SampleCollectionItem[],
+      field_count: data.length,
+      desk_count: 0,
+    };
+  }
+  if (data && typeof data === "object") {
+    const record = data as Record<string, unknown>;
+    const rawItems = record.items ?? record.collections ?? record.queue;
+    const items = Array.isArray(rawItems) ? (rawItems as SampleCollectionItem[]) : [];
+    const fieldCount =
+      typeof record.field_count === "number"
+        ? record.field_count
+        : items.filter((item) => item.source !== "desk").length;
+    const deskCount =
+      typeof record.desk_count === "number"
+        ? record.desk_count
+        : items.filter((item) => item.source === "desk").length;
+    return {
+      count: typeof record.count === "number" ? record.count : items.length,
+      items,
+      field_count: fieldCount,
+      desk_count: deskCount,
+    };
+  }
+  return { count: 0, items: [], field_count: 0, desk_count: 0 };
 }
 
 export async function fetchCollectionDashboard(auth: SampleCollectionAuth) {
@@ -133,12 +166,13 @@ export async function fetchCollectionQueue(
   if (filters.date_to) params.set("date_to", filters.date_to);
   if (filters.include_desk === false) params.set("include_desk", "false");
   const qs = params.toString();
-  return unwrap(
-    apiRequest<{ success: boolean; data: SampleCollectionQueue }>(
+  const data = await unwrap(
+    apiRequest<{ success: boolean; data: SampleCollectionQueue | SampleCollectionItem[] }>(
       `/api/v1/sample-collections/queue${qs ? `?${qs}` : ""}`,
       { method: "GET", ...opts(auth, extra) },
     ),
   );
+  return normalizeQueuePayload(data);
 }
 
 export async function fetchCollection(auth: SampleCollectionAuth, collectionId: string) {
