@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from flask import Blueprint, request, session
 
+from app.core.errors import STATUS_CODES, build_error_response
 from app.extensions.db import db
 from app.sample_collection_workspace.auth import collection_api_read, collection_api_write
 from app.sample_collection_workspace.service import (
@@ -49,6 +50,13 @@ def _scoped_collector_id() -> str | None:
     )
 
 
+def _workflow_error_response(exc: SampleCollectionWorkflowError):
+    code = STATUS_CODES.get(exc.status_code, "WORKFLOW_ERROR")
+    if exc.status_code == 503:
+        code = "SERVICE_UNAVAILABLE"
+    return build_error_response(code, exc.message, exc.status_code)
+
+
 @sample_collections_bp.route("/dashboard", methods=["GET"])
 @collection_api_read
 def dashboard():
@@ -71,7 +79,7 @@ def queue():
             scoped_collector_id=_scoped_collector_id(),
         )
     except SampleCollectionWorkflowError as exc:
-        return {"success": False, "error": exc.message}, exc.status_code
+        return _workflow_error_response(exc)
     return {"success": True, "data": payload}, 200
 
 

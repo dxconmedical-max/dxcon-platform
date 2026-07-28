@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta
+import logging
 import uuid
 
 from sqlalchemy import or_
+from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from app.core.audit import write_audit
 from app.core.events import write_event
@@ -47,6 +49,14 @@ from app.models.sample_tracking import SampleTracking
 from app.services.booking_assignment import BookingAssignmentService
 from app.services.marketplace_booking import MarketplaceBookingService
 from app.services.order_lifecycle import OrderLifecycleError, OrderLifecycleService
+
+logger = logging.getLogger("dxcon.sample_collection")
+
+_SCHEMA_HINT = (
+    "Sample collection schema is out of date; apply "
+    "backend/migrations/020_sample_collections_production.sql and "
+    "backend/migrations/021_sample_collections_booking_link.sql"
+)
 
 
 class SampleCollectionWorkflowError(Exception):
@@ -169,16 +179,35 @@ class SampleCollectionWorkflowService:
 
     @staticmethod
     def _enrich_payload(collection):
+        """Serialize a collection; never fail the queue on missing related rows."""
         payload = collection.to_dict()
+
+        payload["sample_tracking"] = None
         if collection.sample_tracking_id:
-            sample = SampleTracking.query.get(collection.sample_tracking_id)
-            payload["sample_tracking"] = sample.to_dict() if sample else None
-        else:
-            payload["sample_tracking"] = None
+            try:
+                sample = SampleTracking.query.get(collection.sample_tracking_id)
+                payload["sample_tracking"] = sample.to_dict() if sample else None
+            except (OperationalError, ProgrammingError):
+                db.session.rollback()
+                logger.warning(
+                    "sample_tracking lookup failed for collection_id=%s",
+                    collection.id,
+                    exc_info=True,
+                )
 
         booking = None
         if collection.marketplace_booking_id:
-            booking = MarketplaceBooking.query.get(collection.marketplace_booking_id)
+            try:
+                booking = MarketplaceBooking.query.get(collection.marketplace_booking_id)
+            except (OperationalError, ProgrammingError):
+                db.session.rollback()
+                logger.warning(
+                    "marketplace_booking lookup failed for collection_id=%s",
+                    collection.id,
+                    exc_info=True,
+                )
+                booking = None
+
         if booking:
             payload["booking"] = {
                 "id": booking.id,
@@ -189,8 +218,19 @@ class SampleCollectionWorkflowService:
                 "city": booking.city,
                 "partner_id": booking.partner_id,
             }
-            order = OrderLifecycleService.get_order_for_booking(booking.id)
-            payload["order"] = order.to_dict() if order else None
+            try:
+                order = OrderLifecycleService.get_order_for_booking(booking.id)
+                payload["order"] = order.to_dict() if order else None
+            except OrderLifecycleError:
+                payload["order"] = None
+            except (OperationalError, ProgrammingError):
+                db.session.rollback()
+                payload["order"] = None
+                logger.warning(
+                    "order lookup failed for booking_id=%s",
+                    booking.id,
+                    exc_info=True,
+                )
         else:
             payload["booking"] = None
             payload["order"] = None
@@ -247,7 +287,13 @@ class SampleCollectionWorkflowService:
             except ValueError:
                 raise SampleCollectionWorkflowError("Invalid date_to (ISO8601 expected)")
 
-        collections = query.order_by(SampleCollection.created_at.desc()).all()
+        try:
+            collections = query.order_by(SampleCollection.created_at.desc()).all()
+        except (OperationalError, ProgrammingError) as exc:
+            db.session.rollback()
+            logger.exception("sample collection queue query failed (schema mismatch?)")
+            raise SampleCollectionWorkflowError(_SCHEMA_HINT, 503) from exc
+
         return [SampleCollectionWorkflowService._enrich_payload(item) for item in collections]
 
     @staticmethod
