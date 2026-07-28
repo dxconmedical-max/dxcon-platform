@@ -54,7 +54,8 @@ logger = logging.getLogger("dxcon.sample_collection")
 
 _SCHEMA_HINT = (
     "Sample collection schema is out of date; apply "
-    "backend/migrations/020_sample_collections_production.sql"
+    "backend/migrations/020_sample_collections_production.sql and "
+    "backend/migrations/021_sample_collections_booking_link.sql"
 )
 
 

@@ -132,11 +132,11 @@ describe("collector queue error message extraction", () => {
       error: {
         code: "SERVICE_UNAVAILABLE",
         message:
-          "Sample collection schema is out of date; apply backend/migrations/020_sample_collections_production.sql",
+          "Sample collection schema is out of date; apply backend/migrations/020_sample_collections_production.sql and backend/migrations/021_sample_collections_booking_link.sql",
       },
     });
     const text = normalizeApiError(err);
-    expect(text).toContain("020_sample_collections_production.sql");
+    expect(text).toContain("021_sample_collections_booking_link.sql");
     expect(text).not.toBe("[object Object]");
   });
 });

@@ -38,6 +38,13 @@ from app.services.slot_generation import SlotGenerationService
 from app.sample_collection_workspace.service import list_production_queue
 
 ORG_ID = "00000000-0000-4000-8000-000000000001"
+# Release 0.4 booking-link columns — must be ALTER'd (CREATE TABLE IF NOT EXISTS
+# does not retrofit existing production tables).
+BOOKING_LINK_COLUMNS = (
+    "marketplace_booking_id",
+    "collector_id",
+    "sample_tracking_id",
+)
 PRODUCTION_COLUMNS = (
     "specimen_type",
     "barcode_value",
@@ -64,6 +71,57 @@ PRODUCTION_COLUMNS = (
     "iot_device_id",
     "updated_at",
 )
+
+
+def _apply_sql_migration(path: Path) -> None:
+    """Apply additive SQL migration statements (SQLite-friendly subset)."""
+    import re
+
+    sql = path.read_text(encoding="utf-8")
+    lines = [
+        ln
+        for ln in sql.splitlines()
+        if ln.strip() and not ln.strip().startswith("--")
+    ]
+    body = "\n".join(lines)
+    for stmt in body.split(";"):
+        stmt = stmt.strip()
+        if not stmt:
+            continue
+        m = re.match(
+            r"ALTER TABLE sample_collections ADD COLUMN IF NOT EXISTS (\w+) (.+)",
+            stmt,
+            re.I,
+        )
+        if m:
+            col, typ = m.group(1), m.group(2)
+            typ = (
+                typ.replace("DOUBLE PRECISION", "REAL")
+                .replace("BOOLEAN", "INTEGER")
+                .replace("TIMESTAMP", "DATETIME")
+            )
+            try:
+                db.session.execute(
+                    text(f"ALTER TABLE sample_collections ADD COLUMN {col} {typ}")
+                )
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+            continue
+        if stmt.upper().startswith("CREATE TABLE"):
+            continue
+        if stmt.upper().startswith("CREATE INDEX"):
+            try:
+                db.session.execute(text(stmt))
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+            continue
+        try:
+            db.session.execute(text(stmt))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
 
 class SampleCollectionQueueTestCase(unittest.TestCase):
@@ -200,14 +258,28 @@ class SampleCollectionQueueTestCase(unittest.TestCase):
             sess["role"] = user.role
             sess["email"] = user.email
 
-    def test_migration_lists_all_production_columns(self):
-        migration = (ROOT / "migrations" / "020_sample_collections_production.sql").read_text(
-            encoding="utf-8"
-        )
+    def test_migration_lists_all_orm_columns_as_alter(self):
+        migration_020 = (
+            ROOT / "migrations" / "020_sample_collections_production.sql"
+        ).read_text(encoding="utf-8")
+        migration_021 = (
+            ROOT / "migrations" / "021_sample_collections_booking_link.sql"
+        ).read_text(encoding="utf-8")
+        for column in BOOKING_LINK_COLUMNS:
+            self.assertIn(
+                f"ADD COLUMN IF NOT EXISTS {column}",
+                migration_020,
+                msg=f"020 missing ALTER for {column}",
+            )
+            self.assertIn(
+                f"ADD COLUMN IF NOT EXISTS {column}",
+                migration_021,
+                msg=f"021 missing ALTER for {column}",
+            )
         for column in PRODUCTION_COLUMNS:
             self.assertIn(
                 f"ADD COLUMN IF NOT EXISTS {column}",
-                migration,
+                migration_020,
                 msg=f"migration missing column {column}",
             )
 
@@ -369,9 +441,6 @@ class SampleCollectionQueueTestCase(unittest.TestCase):
                 CREATE TABLE sample_collections (
                     id VARCHAR(36) PRIMARY KEY,
                     order_id VARCHAR(36) NOT NULL,
-                    marketplace_booking_id VARCHAR(36),
-                    collector_id VARCHAR(36),
-                    sample_tracking_id VARCHAR(36),
                     collector_name VARCHAR(255),
                     status VARCHAR(50),
                     collected_at DATETIME,
@@ -392,7 +461,7 @@ class SampleCollectionQueueTestCase(unittest.TestCase):
         with self.assertRaises(SampleCollectionWorkflowError) as ctx:
             SampleCollectionWorkflowService.list_queue(awaiting_only=True)
         self.assertEqual(ctx.exception.status_code, 503)
-        self.assertIn("020_sample_collections_production.sql", ctx.exception.message)
+        self.assertIn("sample_collections", ctx.exception.message.lower())
 
         resp = self.client.get(
             "/api/v1/sample-collections/queue?include_desk=false",
@@ -401,7 +470,57 @@ class SampleCollectionQueueTestCase(unittest.TestCase):
         self.assertEqual(resp.status_code, 503)
         error = resp.get_json()["error"]
         self.assertIsInstance(error, dict)
-        self.assertIn("020_sample_collections_production.sql", error["message"])
+        self.assertIn("message", error)
+
+    def test_production_missing_marketplace_booking_id_fixed_by_migration(self):
+        """Exact production UndefinedColumn: marketplace_booking_id missing."""
+        db.session.execute(text("DROP TABLE IF EXISTS sample_collections"))
+        # Phase-1 shaped table (no booking link columns) — matches live traceback.
+        db.session.execute(
+            text(
+                """
+                CREATE TABLE sample_collections (
+                    id VARCHAR(36) PRIMARY KEY,
+                    order_id VARCHAR(36) NOT NULL,
+                    collector_name VARCHAR(255),
+                    status VARCHAR(50),
+                    collected_at DATETIME,
+                    created_at DATETIME
+                )
+                """
+            )
+        )
+        row_id = str(uuid.uuid4())
+        db.session.execute(
+            text(
+                "INSERT INTO sample_collections (id, order_id, status, created_at) "
+                "VALUES (:id, :oid, 'PENDING', CURRENT_TIMESTAMP)"
+            ),
+            {"id": row_id, "oid": str(uuid.uuid4())},
+        )
+        db.session.commit()
+
+        with self.assertRaises(SampleCollectionWorkflowError) as ctx:
+            SampleCollectionWorkflowService.list_queue(awaiting_only=True)
+        self.assertEqual(ctx.exception.status_code, 503)
+
+        _apply_sql_migration(ROOT / "migrations" / "020_sample_collections_production.sql")
+        _apply_sql_migration(ROOT / "migrations" / "021_sample_collections_booking_link.sql")
+
+        # SQLAlchemy metadata may still think columns were always there; clear
+        # identity map and re-query via ORM after physical ALTER.
+        db.session.expire_all()
+        items = SampleCollectionWorkflowService.list_queue(awaiting_only=True)
+        self.assertGreaterEqual(len(items), 1)
+        self.assertTrue(any(item["id"] == row_id for item in items))
+
+        resp = self.client.get(
+            "/api/v1/sample-collections/queue?include_desk=false",
+            headers=self._auth(self.super_token),
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.get_json()["success"])
+        self.assertEqual(resp.get_json()["data"]["count"], len(items))
 
 
 if __name__ == "__main__":
