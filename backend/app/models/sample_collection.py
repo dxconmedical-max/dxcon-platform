@@ -23,6 +23,9 @@ class SampleCollection(db.Model):
         db.ForeignKey("marketplace_bookings.id"),
     )
 
+    # Authoritative routing: AT_RECEPTION | HOME_COLLECTION | CLINIC_COLLECTION
+    collection_mode = db.Column(db.String(50))
+
     collector_id = db.Column(
         db.String(36),
     )
@@ -76,6 +79,16 @@ class SampleCollection(db.Model):
     temperature_c = db.Column(db.Float)
     iot_device_id = db.Column(db.String(36))
 
+    # Field collection request metadata (HOME / CLINIC)
+    pickup_address = db.Column(db.String(500))
+    pickup_city = db.Column(db.String(100))
+    contact_phone = db.Column(db.String(50))
+    requested_date = db.Column(db.String(20))
+    requested_time_window = db.Column(db.String(100))
+    pickup_latitude = db.Column(db.String(50))
+    pickup_longitude = db.Column(db.String(50))
+    collection_request_note = db.Column(db.Text)
+
     updated_at = db.Column(
         db.DateTime,
         default=datetime.utcnow,
@@ -83,16 +96,24 @@ class SampleCollection(db.Model):
     )
 
     def to_dict(self):
+        def _iso(value):
+            if value is None:
+                return None
+            if hasattr(value, "isoformat"):
+                return value.isoformat()
+            return str(value)
+
         return {
             "id": self.id,
             "order_id": self.order_id,
             "marketplace_booking_id": self.marketplace_booking_id,
+            "collection_mode": self.collection_mode,
             "collector_id": self.collector_id,
             "sample_tracking_id": self.sample_tracking_id,
             "collector_name": self.collector_name,
             "status": self.status,
-            "collected_at": self.collected_at.isoformat() if self.collected_at else None,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "collected_at": _iso(self.collected_at),
+            "created_at": _iso(self.created_at),
             "specimen_type": self.specimen_type,
             "barcode_value": self.barcode_value,
             "expected_barcode": self.expected_barcode,
@@ -105,10 +126,10 @@ class SampleCollection(db.Model):
             "recollect_of_id": self.recollect_of_id,
             "patient_verified": bool(self.patient_verified),
             "order_verified": bool(self.order_verified),
-            "picked_up_at": self.picked_up_at.isoformat() if self.picked_up_at else None,
-            "dispatched_at": self.dispatched_at.isoformat() if self.dispatched_at else None,
-            "handoff_at": self.handoff_at.isoformat() if self.handoff_at else None,
-            "arrived_at_lab": self.arrived_at_lab.isoformat() if self.arrived_at_lab else None,
+            "picked_up_at": _iso(self.picked_up_at),
+            "dispatched_at": _iso(self.dispatched_at),
+            "handoff_at": _iso(self.handoff_at),
+            "arrived_at_lab": _iso(self.arrived_at_lab),
             "vehicle_id": self.vehicle_id,
             "driver_id": self.driver_id,
             "transport_box_id": self.transport_box_id,
@@ -116,5 +137,13 @@ class SampleCollection(db.Model):
             "eta_minutes": self.eta_minutes,
             "temperature_c": self.temperature_c,
             "iot_device_id": self.iot_device_id,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "pickup_address": self.pickup_address,
+            "pickup_city": self.pickup_city,
+            "contact_phone": self.contact_phone,
+            "requested_date": _iso(self.requested_date) if not isinstance(self.requested_date, str) else self.requested_date,
+            "requested_time_window": self.requested_time_window,
+            "pickup_latitude": self.pickup_latitude,
+            "pickup_longitude": self.pickup_longitude,
+            "collection_request_note": self.collection_request_note,
+            "updated_at": _iso(self.updated_at),
         }
