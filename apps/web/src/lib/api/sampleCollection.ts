@@ -51,6 +51,8 @@ export type SampleCollectionItem = {
   order?: Record<string, unknown> | null;
   sample_code?: string;
   pickup_address?: string;
+  actionable?: boolean;
+  status_raw?: string;
   [key: string]: unknown;
 };
 
@@ -73,6 +75,7 @@ export type SampleCollectionDashboard = {
     queue: string[];
     flow: string[];
     exceptions: string[];
+    aliases?: Record<string, string>;
   };
 };
 
@@ -253,7 +256,7 @@ export async function rejectSpecimen(
 
 export async function dispatchCollection(
   auth: SampleCollectionAuth,
-  bookingId: string,
+  bookingOrCollectionId: string,
   body: {
     transport_box_id?: string;
     vehicle_id?: string;
@@ -264,12 +267,18 @@ export async function dispatchCollection(
     iot_device_id?: string;
     note?: string;
   } = {},
+  options: { by?: "booking" | "collection" } = {},
 ) {
+  const by = options.by ?? "collection";
+  const path =
+    by === "booking"
+      ? `/api/v1/sample-collections/bookings/${encodeURIComponent(bookingOrCollectionId)}/dispatch`
+      : `/api/v1/sample-collections/${encodeURIComponent(bookingOrCollectionId)}/dispatch`;
   return unwrap(
     apiRequest<{
       success: boolean;
       data: { collection: SampleCollectionItem; sample_tracking: Record<string, unknown> };
-    }>(`/api/v1/sample-collections/bookings/${encodeURIComponent(bookingId)}/dispatch`, {
+    }>(path, {
       method: "POST",
       body,
       ...opts(auth),
@@ -292,9 +301,15 @@ export async function handoffCollection(
 
 export async function arriveAtLab(
   auth: SampleCollectionAuth,
-  bookingId: string,
+  bookingOrCollectionId: string,
   body: { note?: string; temperature_c?: number } = {},
+  options: { by?: "booking" | "collection" } = {},
 ) {
+  const by = options.by ?? "collection";
+  const path =
+    by === "booking"
+      ? `/api/v1/sample-collections/bookings/${encodeURIComponent(bookingOrCollectionId)}/lab-arrive`
+      : `/api/v1/sample-collections/${encodeURIComponent(bookingOrCollectionId)}/lab-arrive`;
   return unwrap(
     apiRequest<{
       success: boolean;
@@ -303,7 +318,7 @@ export async function arriveAtLab(
         sample_tracking: Record<string, unknown>;
         synthetic_specimen_id?: string;
       };
-    }>(`/api/v1/sample-collections/bookings/${encodeURIComponent(bookingId)}/lab-arrive`, {
+    }>(path, {
       method: "POST",
       body,
       ...opts(auth),

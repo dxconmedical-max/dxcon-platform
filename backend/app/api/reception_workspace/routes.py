@@ -94,6 +94,11 @@ def tests_search():
 def orders_create():
     payload = request.get_json(silent=True) or {}
     try:
+        organization_id = (
+            request.headers.get("X-Organization-ID")
+            or request.headers.get("X-Organization-Id")
+            or payload.get("organization_id")
+        )
         result = create_reception_order(
             patient_code=payload.get("patient_code", ""),
             test_catalog_ids=payload.get("test_catalog_ids") or payload.get("tests") or [],
@@ -101,6 +106,7 @@ def orders_create():
             note=payload.get("note"),
             queue_entry_id=payload.get("queue_entry_id"),
             actor=_actor(),
+            organization_id=organization_id,
         )
         db.session.commit()
         return {"success": True, "data": result}, 201

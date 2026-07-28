@@ -8,13 +8,15 @@ from app.business_engine import service as biz
 from app.business_engine.statuses import (
     COLLECTION_ACCEPTED as BIZ_ACCEPTED,
     COLLECTION_ASSIGNED as BIZ_ASSIGNED,
-    COLLECTION_COLLECTED as BIZ_COLLECTED,
-    COLLECTION_IN_TRANSIT as BIZ_IN_TRANSIT,
-    COLLECTION_DELIVERED as BIZ_DELIVERED,
 )
 from app.core.statuses import COLLECTION_QUEUE_STATUSES
 from app.extensions.db import db
-from app.models.biz_order import BizCollection, BizOrder
+from app.models.biz_order import BizCollection
+from app.sample_collection_workspace.desk_bridge import (
+    annotate_queue_item,
+    backfill_desk_sample_collections,
+    collection_source,
+)
 from app.services.sample_collection_workflow import (
     SampleCollectionWorkflowError,
     SampleCollectionWorkflowService,
@@ -51,11 +53,17 @@ def workspace_dashboard() -> dict[str, Any]:
             "queue": list(COLLECTION_QUEUE_STATUSES),
             "flow": [
                 "PENDING",
-                "CHECKED_IN",
+                "ASSIGNED",
+                "VERIFIED",
                 "COLLECTED",
                 "IN_TRANSIT",
-                "RECEIVED",
+                "ARRIVED_AT_LAB",
             ],
+            "aliases": {
+                "ASSIGNED": "PENDING",
+                "CHECKED_IN": "VERIFIED",
+                "RECEIVED": "ARRIVED_AT_LAB",
+            },
             "exceptions": ["REJECTED", "RECOLLECT_REQUIRED"],
         },
     }
@@ -72,11 +80,36 @@ def list_production_queue(
     include_desk: bool = True,
     role: str | None = None,
     scoped_collector_id: str | None = None,
+    organization_id: str | None = None,
 ) -> dict[str, Any]:
-    """Tenant/role isolation: collectors only see their jobs; supervisors see all."""
+    """Tenant/role isolation: collectors only see their jobs; supervisors see all.
+
+    Desk SampleCollections (null marketplace_booking_id) are first-class queue rows.
+    They are never excluded by include_desk — that flag only controls legacy BizCollection
+    backfill. Organization scope uses partner_id when provided (desk rows stamped at create).
+    """
     effective_collector = collector_id
     if role in {"COLLECTOR", "PARTNER_COLLECTOR", "DRIVER"} and scoped_collector_id:
         effective_collector = scoped_collector_id
+
+    # Partner filter: explicit partner_id wins. Organization header scopes only
+    # collector-class roles so SUPER_ADMIN can still see the full queue.
+    effective_partner = partner_id
+    if not effective_partner and organization_id and role in {
+        "COLLECTOR",
+        "PARTNER_COLLECTOR",
+        "DRIVER",
+    }:
+        effective_partner = organization_id
+
+    # Always attempt backfill for desk jobs so Reception → Collector routing stays intact
+    # even when clients omit include_desk.
+    if not effective_collector:
+        try:
+            backfill_desk_sample_collections()
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
 
     field_items = SampleCollectionWorkflowService.list_queue(
         status=status,
@@ -84,53 +117,28 @@ def list_production_queue(
         location=location,
         date_from=date_from,
         date_to=date_to,
-        partner_id=partner_id,
+        partner_id=effective_partner,
         awaiting_only=not bool(status),
     )
 
-    desk_items: list[dict[str, Any]] = []
-    if include_desk and not effective_collector:
-        query = BizCollection.query
-        if status:
-            # Map clinical uppercase to biz lowercase when filtering desk jobs
-            mapped = {
-                "PENDING": BIZ_ASSIGNED,
-                "CHECKED_IN": BIZ_ACCEPTED,
-                "COLLECTED": BIZ_COLLECTED,
-                "IN_TRANSIT": BIZ_IN_TRANSIT,
-                "RECEIVED": BIZ_DELIVERED,
-            }.get(status.upper(), status.lower())
-            query = query.filter(BizCollection.status == mapped)
-        else:
-            query = query.filter(BizCollection.status.in_((BIZ_ASSIGNED, BIZ_ACCEPTED)))
-        if location:
-            like = f"%{location}%"
-            query = query.filter(BizCollection.pickup_address.ilike(like))
-        for row in query.order_by(BizCollection.created_at.desc()).limit(200).all():
-            order = BizOrder.query.get(row.order_id)
-            desk_items.append(
-                {
-                    "source": "desk",
-                    "id": row.id,
-                    "status": row.status,
-                    "sample_code": row.sample_code,
-                    "barcode_value": row.barcode_value,
-                    "collector_name": row.collector_name,
-                    "pickup_address": row.pickup_address,
-                    "scheduled_at": row.scheduled_at.isoformat() if row.scheduled_at else None,
-                    "order": order.to_dict() if order else None,
-                    "collection": row.to_dict(),
-                }
-            )
-
+    items: list[dict[str, Any]] = []
     for item in field_items:
-        item["source"] = "field"
+        source = collection_source(item)
+        item["source"] = source
+        # Desk SampleCollections are always included. include_desk only gates
+        # whether we ran legacy BizCollection backfill above — never silently
+        # drops authoritative desk SampleCollection rows.
+        items.append(annotate_queue_item(item))
+
+    desk_count = sum(1 for item in items if item.get("source") == "desk")
+    field_count = len(items) - desk_count
 
     return {
-        "count": len(field_items) + len(desk_items),
-        "items": field_items + desk_items,
-        "field_count": len(field_items),
-        "desk_count": len(desk_items),
+        "count": len(items),
+        "items": items,
+        "field_count": field_count,
+        "desk_count": desk_count,
+        "include_desk": include_desk,
     }
 
 
@@ -141,13 +149,8 @@ def collect_from_queue(
     actor: str | None = None,
     ip_address: str = "",
 ) -> dict[str, Any]:
-    detail = SampleCollectionWorkflowService.get_collection(collection_id)
-    booking_id = detail.get("marketplace_booking_id")
-    if not booking_id:
-        raise SampleCollectionWorkflowError("Collection has no booking to collect", 409)
-
-    collection, sample = SampleCollectionWorkflowService.record_collection(
-        booking_id,
+    collection, sample = SampleCollectionWorkflowService.record_collection_by_id(
+        collection_id,
         collector_id=payload.get("collector_id"),
         note=payload.get("notes") or payload.get("note"),
         latitude=payload.get("latitude"),

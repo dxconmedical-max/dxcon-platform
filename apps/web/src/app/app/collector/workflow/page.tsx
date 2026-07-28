@@ -75,9 +75,15 @@ function CollectorWorkflowPanel() {
       if (row.sample_tracking?.sample_code) {
         setSpecimenId(row.sample_tracking.sample_code);
       }
-      if (row.status === "RECEIVED") setStep(3);
-      else if (row.status === "IN_TRANSIT" || row.status === "COLLECTED") setStep(2);
-      else if (row.patient_verified && row.order_verified) setStep(1);
+      const status = String(row.status || "").toUpperCase();
+      if (status === "RECEIVED" || status === "ARRIVED_AT_LAB") setStep(3);
+      else if (status === "IN_TRANSIT" || status === "COLLECTED") setStep(2);
+      else if (
+        status === "VERIFIED" ||
+        status === "CHECKED_IN" ||
+        (row.patient_verified && row.order_verified)
+      )
+        setStep(1);
       else setStep(0);
       return row;
     },
@@ -92,10 +98,12 @@ function CollectorWorkflowPanel() {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchCollectionQueue(auth, { include_desk: false });
-      const fieldItems = (data.items ?? []).filter((item) => item.source !== "desk");
-      setQueue(fieldItems);
-      const target = selectedId || idParam || fieldItems[0]?.id || null;
+      // Desk SampleCollections are first-class workflow records (include_desk only
+      // controls legacy BizCollection backfill on the API).
+      const data = await fetchCollectionQueue(auth, { include_desk: true });
+      const items = data.items ?? [];
+      setQueue(items);
+      const target = selectedId || idParam || items[0]?.id || null;
       setSelectedId(target);
       if (target) {
         await refreshDetail(target);
@@ -209,24 +217,36 @@ function CollectorWorkflowPanel() {
   }
 
   async function onDispatch() {
-    if (!detail?.marketplace_booking_id || !canWrite) return;
+    if (!selectedId || !canWrite) return;
     setBusy(true);
     setError(null);
     setMessage(null);
     try {
-      await dispatchCollection(auth, detail.marketplace_booking_id, {
-        temperature_c: temperature ? Number(temperature) : undefined,
-        eta_minutes: eta ? Number(eta) : undefined,
-        distance_km: distance ? Number(distance) : undefined,
-        driver_id: detail.collector_id || undefined,
-      });
-      if (selectedId) {
-        await handoffCollection(auth, selectedId, {
+      if (detail?.marketplace_booking_id) {
+        await dispatchCollection(
+          auth,
+          detail.marketplace_booking_id,
+          {
+            temperature_c: temperature ? Number(temperature) : undefined,
+            eta_minutes: eta ? Number(eta) : undefined,
+            distance_km: distance ? Number(distance) : undefined,
+            driver_id: detail.collector_id || undefined,
+          },
+          { by: "booking" },
+        );
+      } else {
+        await dispatchCollection(auth, selectedId, {
           temperature_c: temperature ? Number(temperature) : undefined,
-          note: "Collector handoff recorded",
+          eta_minutes: eta ? Number(eta) : undefined,
+          distance_km: distance ? Number(distance) : undefined,
+          driver_id: detail?.collector_id || undefined,
         });
-        await refreshDetail(selectedId);
       }
+      await handoffCollection(auth, selectedId, {
+        temperature_c: temperature ? Number(temperature) : undefined,
+        note: "Collector handoff recorded",
+      });
+      await refreshDetail(selectedId);
       setMessage("Dispatched and handoff recorded.");
       setStep(3);
     } catch (err) {
@@ -237,19 +257,29 @@ function CollectorWorkflowPanel() {
   }
 
   async function onLabArrive() {
-    if (!detail?.marketplace_booking_id || !canWrite) return;
+    if (!selectedId || !canWrite) return;
     setBusy(true);
     setError(null);
     setMessage(null);
     try {
-      const result = await arriveAtLab(auth, detail.marketplace_booking_id, {
-        temperature_c: temperature ? Number(temperature) : undefined,
-        note: "Arrived at laboratory",
-      });
+      const result = detail?.marketplace_booking_id
+        ? await arriveAtLab(
+            auth,
+            detail.marketplace_booking_id,
+            {
+              temperature_c: temperature ? Number(temperature) : undefined,
+              note: "Arrived at laboratory",
+            },
+            { by: "booking" },
+          )
+        : await arriveAtLab(auth, selectedId, {
+            temperature_c: temperature ? Number(temperature) : undefined,
+            note: "Arrived at laboratory",
+          });
       const sid = result.synthetic_specimen_id || String(result.sample_tracking?.sample_code ?? "");
       if (sid) setSpecimenId(sid);
       setMessage(`Arrived at laboratory${sid ? ` — specimen ${sid}` : ""}.`);
-      if (selectedId) await refreshDetail(selectedId);
+      await refreshDetail(selectedId);
     } catch (err) {
       setError(normalizeApiError(err));
     } finally {

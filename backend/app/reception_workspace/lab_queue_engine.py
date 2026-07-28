@@ -97,27 +97,43 @@ def ensure_lab_queue_item(
     from app.reception_workspace.service import payment_summary_for_order
 
     summary = payment_summary_for_order(order)
-    if summary.get("status") != "paid" and (order.status or "").lower() not in {
-        "paid",
-        "sampling",
-        "collected",
-        "in_transit",
-        "lab_received",
-        "testing",
-        "pending_review",
-        "approved",
-        "released",
-    }:
+    collection = BizCollection.query.filter_by(order_id=order.id).first()
+    specimen_at_lab = bool(
+        collection
+        and (collection.status or "").lower() in {"delivered", "lab_received", "received"}
+    )
+    if (
+        not specimen_at_lab
+        and summary.get("status") != "paid"
+        and (order.status or "").lower()
+        not in {
+            "paid",
+            "sampling",
+            "collected",
+            "in_transit",
+            "lab_received",
+            "testing",
+            "pending_review",
+            "approved",
+            "released",
+        }
+    ):
         raise ReceptionWorkspaceError("Order must be paid before lab queue entry")
 
     # Barcode readiness (stable identifiers)
     from app.reception_workspace.service import generate_barcodes
 
-    barcodes = generate_barcodes(order.order_code)
+    barcodes: dict[str, Any] = {}
+    if specimen_at_lab and (order.barcode_value or (collection and collection.barcode_value)):
+        barcodes = {
+            "order_barcode": order.barcode_value
+            or (collection.barcode_value if collection else None)
+        }
+    else:
+        barcodes = generate_barcodes(order.order_code)
     if not barcodes.get("order_barcode"):
         raise ReceptionWorkspaceError("Barcode required before lab queue entry")
 
-    collection = BizCollection.query.filter_by(order_id=order.id).first()
     ref = queue_reference
     if not ref and collection:
         ref = (

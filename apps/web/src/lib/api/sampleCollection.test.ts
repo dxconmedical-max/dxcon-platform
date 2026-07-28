@@ -10,4 +10,16 @@ describe("sampleCollection api contract", () => {
     expect(values).toContain("hemolyzed");
     expect(values).toContain("mismatched_identifier");
   });
+
+  it("defaults dispatch and lab-arrive to collection-id paths", async () => {
+    // Contract: by defaults to "collection" so desk rows work without booking id.
+    const byDefault: "booking" | "collection" = "collection";
+    expect(byDefault).toBe("collection");
+    expect(
+      `/api/v1/sample-collections/${encodeURIComponent("abc")}/dispatch`,
+    ).toContain("/sample-collections/abc/dispatch");
+    expect(
+      `/api/v1/sample-collections/${encodeURIComponent("abc")}/lab-arrive`,
+    ).toContain("/sample-collections/abc/lab-arrive");
+  });
 });

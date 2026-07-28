@@ -179,17 +179,24 @@ export default function CollectorQueuePage() {
                 {
                   key: "action",
                   label: "",
-                  render: (row) =>
-                    row.source === "desk" ? (
-                      <span className="text-xs text-slate-400">Desk / reception</span>
-                    ) : (
+                  render: (row) => {
+                    const terminal =
+                      row.actionable === false ||
+                      ["ARRIVED_AT_LAB", "RECEIVED", "REJECTED", "CANCELLED", "COMPLETED"].includes(
+                        String(row.status || "").toUpperCase(),
+                      );
+                    if (terminal) {
+                      return <span className="text-xs text-slate-400">Closed</span>;
+                    }
+                    return (
                       <Link
                         href={`/app/collector/workflow?id=${encodeURIComponent(row.id)}`}
                         className="text-sm font-medium text-sky-700 hover:underline"
                       >
                         Open
                       </Link>
-                    ),
+                    );
+                  },
                 },
               ]}
             />
