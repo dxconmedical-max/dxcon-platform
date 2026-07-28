@@ -83,7 +83,11 @@ def queue():
 @collection_api_read
 def get_collection(collection_id):
     try:
-        payload = SampleCollectionWorkflowService.get_collection(collection_id)
+        from app.sample_collection_workspace.desk_bridge import annotate_queue_item
+
+        payload = annotate_queue_item(
+            SampleCollectionWorkflowService.get_collection(collection_id)
+        )
     except SampleCollectionWorkflowError as exc:
         return {"success": False, "error": exc.message}, exc.status_code
     return {"success": True, "data": payload}, 200
@@ -227,6 +231,37 @@ def dispatch(booking_id):
     }, 200
 
 
+@sample_collections_bp.route("/<collection_id>/dispatch", methods=["POST"])
+@collection_api_write
+def dispatch_by_collection(collection_id):
+    """Dispatch / transport by collection id (desk + field)."""
+    data = request.get_json(silent=True) or {}
+    try:
+        collection, sample = SampleCollectionWorkflowService.dispatch_by_collection_id(
+            collection_id,
+            transport_box_id=data.get("transport_box_id"),
+            note=data.get("note"),
+            actor_email=_actor(),
+            ip_address=_client_ip(),
+            vehicle_id=data.get("vehicle_id"),
+            driver_id=data.get("driver_id"),
+            distance_km=data.get("distance_km"),
+            eta_minutes=data.get("eta_minutes"),
+            temperature_c=data.get("temperature_c"),
+            iot_device_id=data.get("iot_device_id"),
+        )
+    except SampleCollectionWorkflowError as exc:
+        db.session.rollback()
+        return {"success": False, "error": exc.message}, exc.status_code
+    return {
+        "success": True,
+        "data": {
+            "collection": SampleCollectionWorkflowService._enrich_payload(collection),
+            "sample_tracking": sample.to_dict(),
+        },
+    }, 200
+
+
 @sample_collections_bp.route("/<collection_id>/handoff", methods=["POST"])
 @collection_api_write
 def handoff(collection_id):
@@ -239,6 +274,16 @@ def handoff(collection_id):
             actor_email=_actor(),
             ip_address=_client_ip(),
         )
+        # Desk bridge: after handoff → IN_TRANSIT, sync sample queue
+        if not collection.marketplace_booking_id:
+            from app.sample_collection_workspace.desk_bridge import (
+                enqueue_sample_and_lab_after_transition,
+                sync_biz_collection_from_sample,
+            )
+
+            sync_biz_collection_from_sample(collection, actor=_actor())
+            enqueue_sample_and_lab_after_transition(collection, actor=_actor())
+            db.session.commit()
     except SampleCollectionWorkflowError as exc:
         db.session.rollback()
         return {"success": False, "error": exc.message}, exc.status_code
@@ -255,6 +300,32 @@ def lab_arrive(booking_id):
     try:
         collection, sample = SampleCollectionWorkflowService.receive_at_lab(
             booking_id,
+            note=data.get("note"),
+            actor_email=_actor(),
+            ip_address=_client_ip(),
+            temperature_c=data.get("temperature_c"),
+        )
+    except SampleCollectionWorkflowError as exc:
+        db.session.rollback()
+        return {"success": False, "error": exc.message}, exc.status_code
+    return {
+        "success": True,
+        "data": {
+            "collection": SampleCollectionWorkflowService._enrich_payload(collection),
+            "sample_tracking": sample.to_dict(),
+            "synthetic_specimen_id": sample.sample_code,
+        },
+    }, 200
+
+
+@sample_collections_bp.route("/<collection_id>/lab-arrive", methods=["POST"])
+@collection_api_write
+def lab_arrive_by_collection(collection_id):
+    """Lab arrival by collection id (desk + field)."""
+    data = request.get_json(silent=True) or {}
+    try:
+        collection, sample = SampleCollectionWorkflowService.receive_by_collection_id(
+            collection_id,
             note=data.get("note"),
             actor_email=_actor(),
             ip_address=_client_ip(),

@@ -236,12 +236,26 @@ def create_reception_order(
             entry.order_id = order.id
             entry.invoice_id = invoice.id
             entry.workflow_status = WORKFLOW_PAYMENT_PENDING
+    # Bridge: create SampleCollection so Collector Queue sees reception specimens immediately
+    sample_collection = None
+    try:
+        from app.sample_collection_workspace.desk_bridge import ensure_desk_sample_collection
+
+        if not order.barcode_value:
+            order.barcode_value = f"BC-{order.order_code}"
+        sample_collection = ensure_desk_sample_collection(order, actor=actor)
+    except Exception:
+        sample_collection = None
+
     write_reception_audit(action="order_created", object_type="order", object_id=order.order_code, actor=actor)
-    return {
+    result = {
         "order": biz.order_to_detail(order.order_code),
         "invoice": invoice.to_dict(),
         "pricing": {"subtotal": order.subtotal, "discount": order.discount, "total": order.total_amount},
     }
+    if sample_collection:
+        result["sample_collection_id"] = sample_collection.id
+    return result
 
 
 def payment_summary_for_order(order: BizOrder) -> dict[str, Any]:

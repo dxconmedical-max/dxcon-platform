@@ -293,9 +293,34 @@ class SampleCollectionWorkflowService:
                 payload["order"] = order.to_dict() if order else None
             except Exception:
                 payload["order"] = None
+            payload["source"] = "field"
         else:
-            payload["booking"] = None
-            payload["order"] = None
+            # Desk / Reception SampleCollection (order_id → BizOrder)
+            payload["source"] = "desk"
+            biz_order = None
+            order_id = payload.get("order_id")
+            if order_id:
+                try:
+                    from app.models.biz_order import BizOrder
+
+                    biz_order = BizOrder.query.get(order_id)
+                except (OperationalError, ProgrammingError):
+                    db.session.rollback()
+                    biz_order = None
+            if biz_order:
+                payload["order"] = biz_order.to_dict()
+                payload["booking"] = {
+                    "id": biz_order.id,
+                    "booking_code": biz_order.order_code,
+                    "patient_name": biz_order.patient_name,
+                    "patient_phone": None,
+                    "patient_address": payload.get("collection_location") or "Reception Desk",
+                    "city": payload.get("location_city"),
+                    "partner_id": None,
+                }
+            else:
+                payload["booking"] = None
+                payload["order"] = None
         return payload
 
     @staticmethod
@@ -323,7 +348,11 @@ class SampleCollectionWorkflowService:
         if awaiting_only and not status:
             query = query.filter(SampleCollection.status.in_(COLLECTION_QUEUE_STATUSES))
         elif status:
-            statuses = [s.strip() for s in str(status).split(",") if s.strip()]
+            from app.sample_collection_workspace.desk_bridge import resolve_filter_statuses
+
+            statuses = resolve_filter_statuses(status) or [
+                s.strip() for s in str(status).split(",") if s.strip()
+            ]
             if len(statuses) == 1:
                 query = query.filter(SampleCollection.status == statuses[0])
             else:
@@ -466,6 +495,68 @@ class SampleCollectionWorkflowService:
         ip_address="",
     ):
         collection = SampleCollectionWorkflowService._get_collection_or_raise(collection_id)
+
+        # Desk / Reception path — no marketplace booking
+        if not collection.marketplace_booking_id:
+            from app.models.biz_order import BizOrder
+
+            biz_order = BizOrder.query.get(collection.order_id)
+            if not biz_order:
+                raise SampleCollectionWorkflowError("Desk order not found for collection", 404)
+
+            mismatches = []
+            if patient_name and patient_name.strip().lower() != (biz_order.patient_name or "").strip().lower():
+                mismatches.append("patient_name")
+            if booking_code and booking_code.strip().upper() != biz_order.order_code.upper():
+                mismatches.append("booking_code")
+            if order_id and order_id not in (biz_order.id, biz_order.order_code):
+                mismatches.append("order_id")
+
+            expected = (
+                collection.expected_barcode
+                or biz_order.barcode_value
+                or f"BC-{biz_order.order_code}"
+            )
+            collection.expected_barcode = expected
+            if scanned_barcode:
+                scanned = SampleCollectionWorkflowService._normalize_barcode(scanned_barcode)
+                accepted = {
+                    SampleCollectionWorkflowService._normalize_barcode(expected),
+                    SampleCollectionWorkflowService._normalize_barcode(biz_order.order_code),
+                    SampleCollectionWorkflowService._normalize_barcode(f"BC-{biz_order.order_code}"),
+                    SampleCollectionWorkflowService._normalize_barcode(biz_order.barcode_value),
+                }
+                if scanned not in accepted:
+                    mismatches.append("barcode")
+
+            if mismatches:
+                write_audit(
+                    action="SAMPLE_COLLECTION_VERIFY_FAILED",
+                    object_type="SampleCollection",
+                    object_id=collection.id,
+                    user_email=actor_email,
+                    ip_address=ip_address,
+                )
+                raise SampleCollectionWorkflowError(
+                    f"Identifier mismatch: {', '.join(mismatches)}",
+                    409,
+                )
+
+            collection.patient_verified = True
+            collection.order_verified = True
+            if collection.status == COLLECTION_PENDING:
+                collection.status = COLLECTION_CHECKED_IN
+            collection.updated_at = datetime.utcnow()
+            write_audit(
+                action="SAMPLE_COLLECTION_VERIFIED",
+                object_type="SampleCollection",
+                object_id=collection.id,
+                user_email=actor_email,
+                ip_address=ip_address,
+            )
+            db.session.commit()
+            return collection
+
         booking = SampleCollectionWorkflowService._get_booking_or_raise(
             collection.marketplace_booking_id
         )
@@ -996,6 +1087,291 @@ class SampleCollectionWorkflowService:
             ip_address=ip_address,
         )
 
+        db.session.commit()
+        return collection, sample
+
+    @staticmethod
+    def record_collection_by_id(
+        collection_id,
+        collector_id=None,
+        note=None,
+        latitude=None,
+        longitude=None,
+        actor_email="SYSTEM",
+        ip_address="",
+        *,
+        specimen_type=None,
+        scanned_barcode=None,
+        collection_location=None,
+        require_barcode=False,
+        patient_verified=None,
+        order_verified=None,
+        allow_notes=True,
+    ):
+        """Collect by SampleCollection id — supports desk (no marketplace booking)."""
+        collection = SampleCollectionWorkflowService._get_collection_or_raise(collection_id)
+        if collection.marketplace_booking_id:
+            return SampleCollectionWorkflowService.record_collection(
+                collection.marketplace_booking_id,
+                collector_id=collector_id,
+                note=note,
+                latitude=latitude,
+                longitude=longitude,
+                actor_email=actor_email,
+                ip_address=ip_address,
+                specimen_type=specimen_type,
+                scanned_barcode=scanned_barcode,
+                collection_location=collection_location,
+                require_barcode=require_barcode,
+                patient_verified=patient_verified,
+                order_verified=order_verified,
+                allow_notes=allow_notes,
+            )
+
+        from app.models.biz_order import BizOrder
+        from app.sample_collection_workspace.desk_bridge import (
+            ensure_desk_tracking,
+            enqueue_sample_and_lab_after_transition,
+            sync_biz_collection_from_sample,
+        )
+
+        biz_order = BizOrder.query.get(collection.order_id)
+        if not biz_order:
+            raise SampleCollectionWorkflowError("Desk order not found for collection", 404)
+
+        if collection.status not in (
+            COLLECTION_PENDING,
+            COLLECTION_CHECKED_IN,
+            COLLECTION_RECOLLECT_REQUIRED,
+        ):
+            raise SampleCollectionWorkflowError(
+                f"Sample cannot be collected from status {collection.status}",
+                409,
+            )
+
+        expected = (
+            collection.expected_barcode
+            or biz_order.barcode_value
+            or f"BC-{biz_order.order_code}"
+        )
+        collection.expected_barcode = expected
+
+        if require_barcode and not scanned_barcode:
+            raise SampleCollectionWorkflowError("scanned_barcode is required", 400)
+
+        if scanned_barcode:
+            scanned = SampleCollectionWorkflowService._normalize_barcode(scanned_barcode)
+            accepted = {
+                SampleCollectionWorkflowService._normalize_barcode(expected),
+                SampleCollectionWorkflowService._normalize_barcode(biz_order.order_code),
+                SampleCollectionWorkflowService._normalize_barcode(f"BC-{biz_order.order_code}"),
+                SampleCollectionWorkflowService._normalize_barcode(biz_order.barcode_value),
+            }
+            if scanned not in accepted:
+                collection.quality_status = SAMPLE_QUALITY_MISMATCHED_ID
+                write_audit(
+                    action="SAMPLE_COLLECTION_BARCODE_MISMATCH",
+                    object_type="SampleCollection",
+                    object_id=collection.id,
+                    user_email=actor_email,
+                    ip_address=ip_address,
+                )
+                db.session.commit()
+                raise SampleCollectionWorkflowError(
+                    "Barcode mismatch: scanned identifier does not match expected specimen/order barcode",
+                    409,
+                )
+            collection.barcode_value = scanned_barcode.strip()
+
+        if collector_id:
+            collection.collector_id = collector_id
+            collector = Driver.query.get(collector_id)
+            if collector:
+                collection.collector_name = collector.full_name
+
+        now = datetime.utcnow()
+        sample = ensure_desk_tracking(collection)
+        sample.collector_id = collection.collector_id or sample.collector_id
+        sample.latitude = latitude or sample.latitude
+        sample.longitude = longitude or sample.longitude
+        sample.status = SAMPLE_IN_TRANSIT
+        sample.updated_at = now
+
+        collection.status = COLLECTION_COLLECTED
+        collection.collected_at = now
+        collection.picked_up_at = collection.picked_up_at or now
+        collection.specimen_type = specimen_type or collection.specimen_type or "BLOOD"
+        collection.collection_location = (
+            collection_location or collection.collection_location or "Reception Desk"
+        )
+        collection.quality_status = SAMPLE_QUALITY_ACCEPTABLE
+        collection.updated_at = now
+        if patient_verified is not None:
+            collection.patient_verified = bool(patient_verified)
+        if order_verified is not None:
+            collection.order_verified = bool(order_verified)
+        if allow_notes and note:
+            notes = collection.notes or ""
+            if "source:desk" not in notes:
+                notes = (notes + "\nsource:desk").strip()
+            collection.notes = (notes + f"\n{note}").strip() if note else notes
+
+        SampleCollectionWorkflowService._write_sample_event(
+            sample.id,
+            SAMPLE_EVENT_COLLECTED,
+            note=note or f"Desk sample collected for {biz_order.order_code}",
+        )
+        write_audit(
+            action="SAMPLE_COLLECTION_COLLECTED",
+            object_type="SampleCollection",
+            object_id=collection.id,
+            user_email=actor_email,
+            ip_address=ip_address,
+        )
+
+        sync_biz_collection_from_sample(collection, actor=actor_email)
+        enqueue_sample_and_lab_after_transition(collection, actor=actor_email)
+        db.session.commit()
+        return collection, sample
+
+    @staticmethod
+    def dispatch_by_collection_id(
+        collection_id,
+        transport_box_id=None,
+        note=None,
+        actor_email="SYSTEM",
+        ip_address="",
+        *,
+        vehicle_id=None,
+        driver_id=None,
+        distance_km=None,
+        eta_minutes=None,
+        temperature_c=None,
+        iot_device_id=None,
+    ):
+        collection = SampleCollectionWorkflowService._get_collection_or_raise(collection_id)
+        if collection.marketplace_booking_id:
+            return SampleCollectionWorkflowService.dispatch_sample(
+                collection.marketplace_booking_id,
+                transport_box_id=transport_box_id,
+                note=note,
+                actor_email=actor_email,
+                ip_address=ip_address,
+                vehicle_id=vehicle_id,
+                driver_id=driver_id,
+                distance_km=distance_km,
+                eta_minutes=eta_minutes,
+                temperature_c=temperature_c,
+                iot_device_id=iot_device_id,
+            )
+
+        from app.sample_collection_workspace.desk_bridge import (
+            ensure_desk_tracking,
+            enqueue_sample_and_lab_after_transition,
+            sync_biz_collection_from_sample,
+        )
+
+        if collection.status != COLLECTION_COLLECTED:
+            raise SampleCollectionWorkflowError(
+                "Sample must be collected before dispatch",
+                409,
+            )
+
+        sample = ensure_desk_tracking(collection)
+        now = datetime.utcnow()
+        if transport_box_id:
+            sample.transport_box_id = transport_box_id
+            collection.transport_box_id = transport_box_id
+        sample.status = SAMPLE_IN_TRANSIT
+        sample.updated_at = now
+        collection.status = COLLECTION_IN_TRANSIT
+        collection.dispatched_at = now
+        collection.updated_at = now
+        if vehicle_id:
+            collection.vehicle_id = vehicle_id
+        if driver_id:
+            collection.driver_id = driver_id
+        if distance_km is not None:
+            collection.distance_km = float(distance_km)
+        if eta_minutes is not None:
+            collection.eta_minutes = int(eta_minutes)
+        if temperature_c is not None:
+            collection.temperature_c = float(temperature_c)
+        if iot_device_id:
+            collection.iot_device_id = iot_device_id
+
+        SampleCollectionWorkflowService._write_sample_event(
+            sample.id,
+            SAMPLE_EVENT_DISPATCH,
+            note=note or f"Desk dispatch at {now.isoformat()}",
+        )
+        write_audit(
+            action="SAMPLE_COLLECTION_DISPATCHED",
+            object_type="SampleCollection",
+            object_id=collection.id,
+            user_email=actor_email,
+            ip_address=ip_address,
+        )
+        sync_biz_collection_from_sample(collection, actor=actor_email)
+        enqueue_sample_and_lab_after_transition(collection, actor=actor_email)
+        db.session.commit()
+        return collection, sample
+
+    @staticmethod
+    def receive_by_collection_id(
+        collection_id,
+        note=None,
+        actor_email="SYSTEM",
+        ip_address="",
+        *,
+        temperature_c=None,
+    ):
+        collection = SampleCollectionWorkflowService._get_collection_or_raise(collection_id)
+        if collection.marketplace_booking_id:
+            return SampleCollectionWorkflowService.receive_at_lab(
+                collection.marketplace_booking_id,
+                note=note,
+                actor_email=actor_email,
+                ip_address=ip_address,
+                temperature_c=temperature_c,
+            )
+
+        from app.sample_collection_workspace.desk_bridge import (
+            ensure_desk_tracking,
+            enqueue_sample_and_lab_after_transition,
+            sync_biz_collection_from_sample,
+        )
+
+        if collection.status not in (COLLECTION_COLLECTED, COLLECTION_IN_TRANSIT):
+            raise SampleCollectionWorkflowError(
+                "Sample must be collected or in transit before lab receive",
+                409,
+            )
+
+        sample = ensure_desk_tracking(collection)
+        now = datetime.utcnow()
+        sample.status = SAMPLE_RECEIVED
+        sample.updated_at = now
+        collection.status = COLLECTION_RECEIVED
+        collection.arrived_at_lab = now
+        collection.updated_at = now
+        if temperature_c is not None:
+            collection.temperature_c = float(temperature_c)
+
+        SampleCollectionWorkflowService._write_sample_event(
+            sample.id,
+            SAMPLE_EVENT_LAB_RECEIVED,
+            note=note or f"Desk sample received at lab at {now.isoformat()}",
+        )
+        write_audit(
+            action="SAMPLE_COLLECTION_LAB_RECEIVED",
+            object_type="SampleCollection",
+            object_id=collection.id,
+            user_email=actor_email,
+            ip_address=ip_address,
+        )
+        sync_biz_collection_from_sample(collection, actor=actor_email)
+        enqueue_sample_and_lab_after_transition(collection, actor=actor_email)
         db.session.commit()
         return collection, sample
 
