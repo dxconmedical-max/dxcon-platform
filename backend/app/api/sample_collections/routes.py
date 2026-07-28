@@ -71,7 +71,11 @@ def queue():
             scoped_collector_id=_scoped_collector_id(),
         )
     except SampleCollectionWorkflowError as exc:
-        return {"success": False, "error": exc.message}, exc.status_code
+        code = "SERVICE_UNAVAILABLE" if exc.status_code == 503 else "WORKFLOW_ERROR"
+        return {
+            "success": False,
+            "error": {"code": code, "message": exc.message},
+        }, exc.status_code
     return {"success": True, "data": payload}, 200
 
 
