@@ -12,10 +12,11 @@ from app.business_engine.statuses import (
 from app.core.statuses import COLLECTION_QUEUE_STATUSES
 from app.extensions.db import db
 from app.models.biz_order import BizCollection
-from app.sample_collection_workspace.desk_bridge import (
-    annotate_queue_item,
-    backfill_desk_sample_collections,
-    collection_source,
+from app.sample_collection_workspace.collection_domain import (
+    CANONICAL_STATUSES,
+    MODE_AT_RECEPTION,
+    MODE_CLINIC_COLLECTION,
+    MODE_HOME_COLLECTION,
 )
 from app.services.sample_collection_workflow import (
     SampleCollectionWorkflowError,
@@ -24,15 +25,26 @@ from app.services.sample_collection_workflow import (
 
 
 def workspace_dashboard() -> dict[str, Any]:
-    awaiting = SampleCollectionWorkflowService.list_queue(awaiting_only=True)
+    from app.sample_collection_workspace.collection_routing import (
+        list_field_collector_queue,
+        list_reception_desk_queue,
+    )
+
+    field = list_field_collector_queue()
+    desk = list_reception_desk_queue()
     in_transit = SampleCollectionWorkflowService.list_queue(
         status="IN_TRANSIT",
         awaiting_only=False,
     )
-    received = SampleCollectionWorkflowService.list_queue(
-        status="RECEIVED",
+    arrived = SampleCollectionWorkflowService.list_queue(
+        status="ARRIVED_AT_LAB",
         awaiting_only=False,
     )
+    if not arrived:
+        arrived = SampleCollectionWorkflowService.list_queue(
+            status="RECEIVED",
+            awaiting_only=False,
+        )
     rejected = SampleCollectionWorkflowService.list_queue(
         status="REJECTED",
         awaiting_only=False,
@@ -43,28 +55,30 @@ def workspace_dashboard() -> dict[str, Any]:
     )
     return {
         "kpis": {
-            "awaiting_collection": len(awaiting),
+            "awaiting_collection": field["count"],
+            "desk_collections_awaiting": desk["count"],
             "in_transit": len(in_transit),
-            "arrived_at_lab": len(received),
+            "arrived_at_lab": len(arrived),
             "rejected": len(rejected),
             "desk_jobs_awaiting": biz_awaiting,
         },
         "status_contract": {
-            "queue": list(COLLECTION_QUEUE_STATUSES),
+            "canonical": list(CANONICAL_STATUSES),
             "flow": [
-                "PENDING",
+                "REQUESTED",
                 "ASSIGNED",
                 "VERIFIED",
                 "COLLECTED",
                 "IN_TRANSIT",
                 "ARRIVED_AT_LAB",
+                "RECEIVED",
             ],
-            "aliases": {
-                "ASSIGNED": "PENDING",
-                "CHECKED_IN": "VERIFIED",
-                "RECEIVED": "ARRIVED_AT_LAB",
+            "modes": [MODE_AT_RECEPTION, MODE_HOME_COLLECTION, MODE_CLINIC_COLLECTION],
+            "queues": {
+                "reception_desk": [MODE_AT_RECEPTION],
+                "field_collector": [MODE_HOME_COLLECTION, MODE_CLINIC_COLLECTION],
             },
-            "exceptions": ["REJECTED", "RECOLLECT_REQUIRED"],
+            "legacy_queue": list(COLLECTION_QUEUE_STATUSES),
         },
     }
 
@@ -77,23 +91,26 @@ def list_production_queue(
     date_from: str | None = None,
     date_to: str | None = None,
     partner_id: str | None = None,
-    include_desk: bool = True,
+    include_desk: bool = False,
     role: str | None = None,
     scoped_collector_id: str | None = None,
     organization_id: str | None = None,
+    queue: str | None = None,
 ) -> dict[str, Any]:
-    """Tenant/role isolation: collectors only see their jobs; supervisors see all.
+    """Collector field queue by default (HOME/CLINIC only).
 
-    Desk SampleCollections (null marketplace_booking_id) are first-class queue rows.
-    They are never excluded by include_desk — that flag only controls legacy BizCollection
-    backfill. Organization scope uses partner_id when provided (desk rows stamped at create).
+    include_desk is deprecated for merging desks into the field queue.
+    Use queue=desk or GET /reception/.../desk-collections for AT_RECEPTION.
     """
+    from app.sample_collection_workspace.collection_routing import (
+        list_field_collector_queue,
+        list_reception_desk_queue,
+    )
+
     effective_collector = collector_id
     if role in {"COLLECTOR", "PARTNER_COLLECTOR", "DRIVER"} and scoped_collector_id:
         effective_collector = scoped_collector_id
 
-    # Partner filter: explicit partner_id wins. Organization header scopes only
-    # collector-class roles so SUPER_ADMIN can still see the full queue.
     effective_partner = partner_id
     if not effective_partner and organization_id and role in {
         "COLLECTOR",
@@ -102,44 +119,63 @@ def list_production_queue(
     }:
         effective_partner = organization_id
 
-    # Always attempt backfill for desk jobs so Reception → Collector routing stays intact
-    # even when clients omit include_desk.
-    if not effective_collector:
-        try:
-            backfill_desk_sample_collections()
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
+    queue_kind = (queue or "").strip().lower()
+    if queue_kind in {"desk", "reception", "at_reception"} or include_desk is True and queue_kind == "all":
+        if queue_kind in {"desk", "reception", "at_reception"}:
+            return list_reception_desk_queue(
+                status=status,
+                location=location,
+                date_from=date_from,
+                date_to=date_to,
+                partner_id=effective_partner,
+                role=role,
+                organization_id=organization_id,
+            )
 
-    field_items = SampleCollectionWorkflowService.list_queue(
+    if queue_kind == "all":
+        # Explicit all — still annotate by mode; used by admin diagnostics only
+        field = list_field_collector_queue(
+            status=status,
+            collector_id=effective_collector,
+            location=location,
+            date_from=date_from,
+            date_to=date_to,
+            partner_id=effective_partner,
+            role=role,
+            organization_id=organization_id,
+        )
+        desk = list_reception_desk_queue(
+            status=status,
+            location=location,
+            date_from=date_from,
+            date_to=date_to,
+            partner_id=effective_partner,
+            role=role,
+            organization_id=organization_id,
+        )
+        items = field["items"] + desk["items"]
+        return {
+            "count": len(items),
+            "items": items,
+            "field_count": field["count"],
+            "desk_count": desk["count"],
+            "queue": "all",
+        }
+
+    # Default: field collector queue only (never merge AT_RECEPTION)
+    payload = list_field_collector_queue(
         status=status,
         collector_id=effective_collector,
         location=location,
         date_from=date_from,
         date_to=date_to,
         partner_id=effective_partner,
-        awaiting_only=not bool(status),
+        role=role,
+        organization_id=organization_id,
     )
-
-    items: list[dict[str, Any]] = []
-    for item in field_items:
-        source = collection_source(item)
-        item["source"] = source
-        # Desk SampleCollections are always included. include_desk only gates
-        # whether we ran legacy BizCollection backfill above — never silently
-        # drops authoritative desk SampleCollection rows.
-        items.append(annotate_queue_item(item))
-
-    desk_count = sum(1 for item in items if item.get("source") == "desk")
-    field_count = len(items) - desk_count
-
-    return {
-        "count": len(items),
-        "items": items,
-        "field_count": field_count,
-        "desk_count": desk_count,
-        "include_desk": include_desk,
-    }
+    payload["field_count"] = payload["count"]
+    payload["desk_count"] = 0
+    return payload
 
 
 def collect_from_queue(

@@ -58,6 +58,8 @@ export type ReceptionOrderCreate = {
   order: Record<string, unknown>;
   invoice: Record<string, unknown>;
   pricing: ReceptionOrderPricing;
+  sample_collection_id?: string;
+  collection?: Record<string, unknown>;
 };
 
 export type ReceptionOrderDetail = {
@@ -368,6 +370,15 @@ export async function createReceptionOrder(
     discount?: number;
     note?: string;
     queue_entry_id?: string;
+    collection_mode?: "AT_RECEPTION" | "HOME_COLLECTION" | "CLINIC_COLLECTION" | string;
+    pickup_address?: string;
+    pickup_city?: string;
+    contact_phone?: string;
+    requested_date?: string;
+    requested_time_window?: string;
+    collection_note?: string;
+    latitude?: string;
+    longitude?: string;
   },
 ): Promise<ReceptionOrderCreate> {
   const uniqueTestIds = Array.from(new Set(payload.test_catalog_ids.filter(Boolean)));
@@ -382,6 +393,15 @@ export async function createReceptionOrder(
           discount: payload.discount ?? 0,
           note: payload.note,
           queue_entry_id: payload.queue_entry_id,
+          collection_mode: payload.collection_mode,
+          pickup_address: payload.pickup_address,
+          pickup_city: payload.pickup_city,
+          contact_phone: payload.contact_phone,
+          requested_date: payload.requested_date,
+          requested_time_window: payload.requested_time_window,
+          collection_note: payload.collection_note,
+          latitude: payload.latitude,
+          longitude: payload.longitude,
         },
       }),
     },
@@ -391,6 +411,8 @@ export async function createReceptionOrder(
     order: data.order,
     invoice: data.invoice,
     pricing: mapPricing(data.pricing as unknown as Record<string, unknown>),
+    collection: (data as { collection?: Record<string, unknown> }).collection,
+    sample_collection_id: (data as { sample_collection_id?: string }).sample_collection_id,
   };
 }
 

@@ -38,6 +38,7 @@ export default function CollectorQueuePage() {
     setLoading(true);
     setError(null);
     try {
+      // Field queue only — AT_RECEPTION is owned by Reception desk collections.
       const data = await fetchCollectionQueue(
         { token: accessToken, organizationId: activeOrganizationId },
         {
@@ -45,7 +46,7 @@ export default function CollectorQueuePage() {
           location: location || undefined,
           date: date || undefined,
           collector: collector || undefined,
-          include_desk: true,
+          include_desk: false,
         },
       );
       setItems(data.items ?? []);
@@ -64,8 +65,8 @@ export default function CollectorQueuePage() {
     <AppShell title="Collection queue" workspacePath="/app/collector">
       <div className="space-y-6">
         <SectionHeader
-          title="Specimens awaiting collection"
-          description="Filter by location, date, status, and collector. Field and desk jobs are tenant-scoped."
+          title="Field collection jobs"
+          description="HOME_COLLECTION and CLINIC_COLLECTION only. Desk AT_RECEPTION work is on Reception → Desk collections."
           actions={
             <Button size="sm" variant="outline" onClick={() => void load()}>
               Refresh
@@ -82,13 +83,14 @@ export default function CollectorQueuePage() {
               onChange={(e) => setStatus(e.target.value)}
             >
               <option value="">Awaiting (default)</option>
-              <option value="PENDING">PENDING</option>
-              <option value="CHECKED_IN">CHECKED_IN</option>
-              <option value="RECOLLECT_REQUIRED">RECOLLECT_REQUIRED</option>
+              <option value="REQUESTED">REQUESTED</option>
+              <option value="ASSIGNED">ASSIGNED</option>
+              <option value="VERIFIED">VERIFIED</option>
               <option value="COLLECTED">COLLECTED</option>
               <option value="IN_TRANSIT">IN_TRANSIT</option>
-              <option value="RECEIVED">RECEIVED</option>
+              <option value="ARRIVED_AT_LAB">ARRIVED_AT_LAB</option>
               <option value="REJECTED">REJECTED</option>
+              <option value="RECOLLECT_REQUIRED">RECOLLECT_REQUIRED</option>
             </select>
           </label>
           <label className="block text-sm">
@@ -129,7 +131,7 @@ export default function CollectorQueuePage() {
             loading={loading}
             error={error}
             empty={!loading && items.length === 0}
-            emptyLabel="No specimens match these filters."
+            emptyLabel="No field specimens match these filters."
             onRetry={() => void load()}
           >
             <SimpleTable
@@ -152,19 +154,30 @@ export default function CollectorQueuePage() {
                   ),
                 },
                 {
+                  key: "mode",
+                  label: "Mode",
+                  render: (row) => String(row.collection_mode || "—"),
+                },
+                {
                   key: "location",
-                  label: "Location",
+                  label: "Pickup",
                   render: (row) =>
-                    row.location_city ||
-                    row.collection_location ||
                     row.pickup_address ||
-                    row.booking?.city ||
+                    row.collection_location ||
+                    row.location_city ||
+                    row.booking?.patient_address ||
                     "—",
                 },
                 {
+                  key: "schedule",
+                  label: "Schedule",
+                  render: (row) =>
+                    [row.requested_date, row.requested_time_window].filter(Boolean).join(" ") || "—",
+                },
+                {
                   key: "collector",
-                  label: "Collector",
-                  render: (row) => row.collector_name || row.collector_id || "—",
+                  label: "Assignment",
+                  render: (row) => row.collector_name || row.collector_id || "Unassigned",
                 },
                 {
                   key: "status",
@@ -172,17 +185,12 @@ export default function CollectorQueuePage() {
                   render: (row) => <StatusPill status={row.status} />,
                 },
                 {
-                  key: "source",
-                  label: "Source",
-                  render: (row) => row.source || "field",
-                },
-                {
                   key: "action",
                   label: "",
                   render: (row) => {
                     const terminal =
                       row.actionable === false ||
-                      ["ARRIVED_AT_LAB", "RECEIVED", "REJECTED", "CANCELLED", "COMPLETED"].includes(
+                      ["ARRIVED_AT_LAB", "RECEIVED", "REJECTED", "CANCELLED", "COMPLETED", "RELEASED"].includes(
                         String(row.status || "").toUpperCase(),
                       );
                     if (terminal) {

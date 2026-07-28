@@ -438,6 +438,14 @@ export function TestsStep({
   const [selectedTestIds, setSelectedTestIds] = useState<string[]>([]);
   const [discount, setDiscount] = useState("0");
   const [note, setNote] = useState("");
+  const [collectionMode, setCollectionMode] = useState<
+    "AT_RECEPTION" | "HOME_COLLECTION" | "CLINIC_COLLECTION"
+  >("AT_RECEPTION");
+  const [pickupAddress, setPickupAddress] = useState("");
+  const [pickupCity, setPickupCity] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [requestedDate, setRequestedDate] = useState("");
+  const [timeWindow, setTimeWindow] = useState("");
   const catalogAbortRef = useRef<AbortController | null>(null);
   const createInFlight = useRef(false);
 
@@ -522,6 +530,12 @@ export function TestsStep({
       setError("Select at least one test.");
       return;
     }
+    if (collectionMode !== "AT_RECEPTION") {
+      if (!pickupAddress.trim() || !pickupCity.trim() || !contactPhone.trim() || !requestedDate || !timeWindow.trim()) {
+        setError("Field collection requires address, city, phone, date, and time window.");
+        return;
+      }
+    }
     createInFlight.current = true;
     setCreating(true);
     setError(null);
@@ -533,6 +547,12 @@ export function TestsStep({
           test_catalog_ids: uniqueIds(selectedTestIds),
           discount: asFloat(discount),
           note: note.trim() || undefined,
+          collection_mode: collectionMode,
+          pickup_address: collectionMode === "AT_RECEPTION" ? undefined : pickupAddress.trim(),
+          pickup_city: collectionMode === "AT_RECEPTION" ? undefined : pickupCity.trim(),
+          contact_phone: collectionMode === "AT_RECEPTION" ? undefined : contactPhone.trim(),
+          requested_date: collectionMode === "AT_RECEPTION" ? undefined : requestedDate,
+          requested_time_window: collectionMode === "AT_RECEPTION" ? undefined : timeWindow.trim(),
         },
       );
       const orderRef = getOrderCode(response.order);
@@ -620,6 +640,72 @@ export function TestsStep({
                 <Label htmlFor="note">Note</Label>
                 <Input id="note" value={note} onChange={(event) => setNote(event.target.value)} />
               </div>
+            </div>
+
+            <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-sm font-medium text-slate-900">Collection method</p>
+              <select
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                value={collectionMode}
+                onChange={(e) =>
+                  setCollectionMode(
+                    e.target.value as "AT_RECEPTION" | "HOME_COLLECTION" | "CLINIC_COLLECTION",
+                  )
+                }
+                aria-label="Collection method"
+              >
+                <option value="AT_RECEPTION">At reception (desk)</option>
+                <option value="HOME_COLLECTION">Home collection</option>
+                <option value="CLINIC_COLLECTION">Clinic collection</option>
+              </select>
+              <p className="text-xs text-slate-500">
+                Route:{" "}
+                {collectionMode === "AT_RECEPTION"
+                  ? "Reception desk worklist → lab handover"
+                  : "Field collector queue → transport → lab arrival"}
+              </p>
+              {collectionMode !== "AT_RECEPTION" ? (
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="md:col-span-2">
+                    <Label htmlFor="pickup-address">Pickup address</Label>
+                    <Input
+                      id="pickup-address"
+                      value={pickupAddress}
+                      onChange={(e) => setPickupAddress(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="pickup-city">City / province</Label>
+                    <Input id="pickup-city" value={pickupCity} onChange={(e) => setPickupCity(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label htmlFor="contact-phone">Contact phone</Label>
+                    <Input
+                      id="contact-phone"
+                      value={contactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="req-date">Requested date</Label>
+                    <Input
+                      id="req-date"
+                      type="date"
+                      value={requestedDate}
+                      onChange={(e) => setRequestedDate(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="time-window">Time window</Label>
+                    <Input
+                      id="time-window"
+                      placeholder="e.g. 08:00–10:00"
+                      value={timeWindow}
+                      onChange={(e) => setTimeWindow(e.target.value)}
+                    />
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             <SimpleTable<ReceptionTest>

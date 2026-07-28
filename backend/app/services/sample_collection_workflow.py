@@ -154,6 +154,10 @@ class SampleCollectionWorkflowService:
             location_city=booking.city,
             collection_location=booking.patient_address,
             expected_barcode=f"BC-{booking.booking_code}",
+            collection_mode="HOME_COLLECTION",
+            pickup_address=booking.patient_address,
+            pickup_city=booking.city,
+            contact_phone=getattr(booking, "patient_phone", None),
         )
         db.session.add(collection)
         db.session.flush()
@@ -346,9 +350,24 @@ class SampleCollectionWorkflowService:
                 return []
 
         if awaiting_only and not status:
-            from app.sample_collection_workspace.desk_bridge import AWAITING_QUEUE_DB_STATUSES
+            from app.sample_collection_workspace.collection_domain import (
+                ST_ASSIGNED,
+                ST_RECOLLECT_REQUIRED,
+                ST_REQUESTED,
+                ST_VERIFIED,
+            )
 
-            query = query.filter(SampleCollection.status.in_(AWAITING_QUEUE_DB_STATUSES))
+            awaiting_statuses = (
+                ST_REQUESTED,
+                ST_ASSIGNED,
+                ST_VERIFIED,
+                ST_RECOLLECT_REQUIRED,
+                "PENDING",
+                "CHECKED_IN",
+                "assigned",
+                "AWAITING_COLLECTION",
+            )
+            query = query.filter(SampleCollection.status.in_(awaiting_statuses))
         elif status:
             from app.sample_collection_workspace.desk_bridge import resolve_filter_statuses
 
@@ -430,6 +449,8 @@ class SampleCollectionWorkflowService:
         booking = SampleCollectionWorkflowService._get_booking_or_raise(booking_id)
         order = SampleCollectionWorkflowService._get_order_for_booking(booking_id)
         collection = SampleCollectionWorkflowService._get_or_create_collection(booking, order)
+        if not getattr(collection, "collection_mode", None):
+            collection.collection_mode = "HOME_COLLECTION"
         collection.expected_barcode = SampleCollectionWorkflowService._expected_barcode_for(
             booking, order, collection
         )
@@ -546,8 +567,15 @@ class SampleCollectionWorkflowService:
 
             collection.patient_verified = True
             collection.order_verified = True
-            if collection.status == COLLECTION_PENDING:
-                collection.status = COLLECTION_CHECKED_IN
+            from app.sample_collection_workspace.collection_domain import (
+                ST_ASSIGNED,
+                ST_REQUESTED,
+                ST_VERIFIED,
+                normalize_status,
+            )
+
+            if normalize_status(collection.status) in {ST_REQUESTED, ST_ASSIGNED, "PENDING", "CHECKED_IN"}:
+                collection.status = ST_VERIFIED
             collection.updated_at = datetime.utcnow()
             write_audit(
                 action="SAMPLE_COLLECTION_VERIFIED",
@@ -633,6 +661,10 @@ class SampleCollectionWorkflowService:
             COLLECTION_PENDING,
             COLLECTION_CHECKED_IN,
             COLLECTION_RECOLLECT_REQUIRED,
+            "REQUESTED",
+            "ASSIGNED",
+            "VERIFIED",
+            "assigned",
         ):
             raise SampleCollectionWorkflowError(
                 f"Sample cannot be collected from status {collection.status}",
@@ -1145,6 +1177,10 @@ class SampleCollectionWorkflowService:
             COLLECTION_PENDING,
             COLLECTION_CHECKED_IN,
             COLLECTION_RECOLLECT_REQUIRED,
+            "REQUESTED",
+            "ASSIGNED",
+            "VERIFIED",
+            "assigned",
         ):
             raise SampleCollectionWorkflowError(
                 f"Sample cannot be collected from status {collection.status}",
@@ -1273,7 +1309,7 @@ class SampleCollectionWorkflowService:
             sync_biz_collection_from_sample,
         )
 
-        if collection.status != COLLECTION_COLLECTED:
+        if collection.status != COLLECTION_COLLECTED and collection.status != "COLLECTED":
             raise SampleCollectionWorkflowError(
                 "Sample must be collected before dispatch",
                 409,
@@ -1354,7 +1390,7 @@ class SampleCollectionWorkflowService:
         now = datetime.utcnow()
         sample.status = SAMPLE_RECEIVED
         sample.updated_at = now
-        collection.status = COLLECTION_RECEIVED
+        collection.status = "ARRIVED_AT_LAB"
         collection.arrived_at_lab = now
         collection.updated_at = now
         if temperature_c is not None:
@@ -1363,7 +1399,7 @@ class SampleCollectionWorkflowService:
         SampleCollectionWorkflowService._write_sample_event(
             sample.id,
             SAMPLE_EVENT_LAB_RECEIVED,
-            note=note or f"Desk sample received at lab at {now.isoformat()}",
+            note=note or f"Sample arrived at lab at {now.isoformat()}",
         )
         write_audit(
             action="SAMPLE_COLLECTION_LAB_RECEIVED",
