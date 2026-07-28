@@ -23,32 +23,40 @@ def log_production_startup(app):
 
 
 def validate_startup(app):
-    validate_config(app)
+    from flask import has_app_context
 
-    migration_status = {"ready": True, "skipped": True}
-    if app.config.get("STARTUP_VALIDATE_DB", True):
-        try:
-            from app.core.database_startup import startup_database_check
+    def _run():
+        validate_config(app)
 
-            migration_status = startup_database_check(app)
-        except Exception as exc:
-            migration_status = {"ready": False, "error": str(exc)}
-            if app.config.get("APP_ENV") == "production":
-                raise
+        migration_status = {"ready": True, "skipped": True}
+        if app.config.get("STARTUP_VALIDATE_DB", True):
+            try:
+                from app.core.database_startup import startup_database_check
 
-    from app.core.startup_checks import run_startup_checks
+                migration_status = startup_database_check(app)
+            except Exception as exc:
+                migration_status = {"ready": False, "error": str(exc)}
+                if app.config.get("APP_ENV") == "production":
+                    raise
 
-    startup_status = run_startup_checks(app)
+        from app.core.startup_checks import run_startup_checks
 
-    app.extensions.setdefault("dxcon_deployment", {})
-    app.extensions["dxcon_deployment"]["migration_status"] = migration_status
-    app.extensions["dxcon_deployment"]["startup_checks"] = startup_status
-    app.extensions["dxcon_deployment"]["startup_complete"] = True
+        startup_status = run_startup_checks(app)
 
-    if app.config.get("APP_ENV") == "production":
-        log_production_startup(app)
+        app.extensions.setdefault("dxcon_deployment", {})
+        app.extensions["dxcon_deployment"]["migration_status"] = migration_status
+        app.extensions["dxcon_deployment"]["startup_checks"] = startup_status
+        app.extensions["dxcon_deployment"]["startup_complete"] = True
 
-    return migration_status
+        if app.config.get("APP_ENV") == "production":
+            log_production_startup(app)
+
+        return migration_status
+
+    if has_app_context():
+        return _run()
+    with app.app_context():
+        return _run()
 
 
 def init_deployment(app):
@@ -58,7 +66,12 @@ def init_deployment(app):
         app.extensions["dxcon_deployment"]["startup_complete"] = True
         return {"ready": True, "testing": True}
 
-    return validate_startup(app)
+    from flask import has_app_context
+
+    if has_app_context():
+        return validate_startup(app)
+    with app.app_context():
+        return validate_startup(app)
 
 
 def deployment_readiness(app):

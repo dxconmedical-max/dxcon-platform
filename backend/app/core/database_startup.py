@@ -59,6 +59,13 @@ def verify_migrations(app):
 
 
 def startup_database_check(app):
-    verify_database_connection(app)
-    migration_status = verify_migrations(app)
-    return migration_status
+    from flask import has_app_context
+
+    def _run():
+        verify_database_connection(app)
+        return verify_migrations(app)
+
+    if has_app_context():
+        return _run()
+    with app.app_context():
+        return _run()

@@ -116,58 +116,89 @@ def validate_redis(app):
     return True
 
 
+def email_dry_run_enabled(app) -> bool:
+    """Pilot-safe dry-run: SMTP checks still run, but missing SMTP does not hard-fail boot."""
+    cfg = app.config.get("EMAIL_DRY_RUN")
+    if cfg is not None:
+        if isinstance(cfg, bool):
+            return cfg
+        return str(cfg).strip().lower() in {"1", "true", "yes", "on"}
+    import os
+
+    return os.environ.get("EMAIL_DRY_RUN", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
 def check_smtp_readiness(app):
+    dry_run = email_dry_run_enabled(app)
     host = (app.config.get("SMTP_HOST") or "").strip()
     if not host:
-        blocker = is_production(app)
+        # Production still records the go-live gap unless EMAIL_DRY_RUN allows boot.
+        blocker = is_production(app) and not dry_run
         return {
-            "status": "WARNING" if blocker else "DEGRADED",
+            "status": "DEGRADED" if dry_run or not is_production(app) else "WARNING",
             "blocker": blocker,
-            "mode": "not_configured",
+            "mode": "dry_run" if dry_run else "not_configured",
             "ok": not blocker,
+            "dry_run": dry_run,
         }
 
     missing = [
         key
         for key in ("SMTP_HOST", "SMTP_PORT", "SMTP_FROM")
-        if not app.config.get(key)
+        if app.config.get(key) in (None, "")
     ]
     if missing:
-        blocker = is_production(app)
+        blocker = is_production(app) and not dry_run
         return {
-            "status": "WARNING" if blocker else "DEGRADED",
+            "status": "DEGRADED" if dry_run or not is_production(app) else "WARNING",
             "blocker": blocker,
             "missing": missing,
             "ok": not blocker,
+            "dry_run": dry_run,
         }
 
-    return {"status": "OK", "host": host, "blocker": False, "ok": True}
+    return {
+        "status": "OK",
+        "host": host,
+        "blocker": False,
+        "ok": True,
+        "dry_run": dry_run,
+    }
 
 
 def check_notification_provider_readiness(app):
-    try:
-        from app.models.notification_center import NCNotificationProvider
+    from flask import has_app_context
 
-        count = NCNotificationProvider.query.count()
-        smtp = check_smtp_readiness(app)
-        return {
-            "status": "OK" if smtp.get("ok") or not is_production(app) else "WARNING",
-            "providers": count,
-            "smtp": smtp,
-            "ok": smtp.get("ok") or not is_production(app),
-        }
-    except Exception as exc:
-        smtp = check_smtp_readiness(app)
-        return {
-            "status": "DEGRADED",
-            "error": str(exc),
-            "smtp": smtp,
-            "ok": smtp.get("ok") or not is_production(app),
-        }
+    def _run():
+        try:
+            from app.models.notification_center import NCNotificationProvider
+
+            count = NCNotificationProvider.query.count()
+            smtp = check_smtp_readiness(app)
+            return {
+                "status": "OK" if smtp.get("ok") or not is_production(app) else "WARNING",
+                "providers": count,
+                "smtp": smtp,
+                "ok": smtp.get("ok") or not is_production(app),
+            }
+        except Exception as exc:
+            smtp = check_smtp_readiness(app)
+            return {
+                "status": "DEGRADED",
+                "error": str(exc),
+                "smtp": smtp,
+                "ok": smtp.get("ok") or not is_production(app),
+            }
+
+    if has_app_context():
+        return _run()
+    with app.app_context():
+        return _run()
 
 
 def validate_smtp(app):
     status = check_smtp_readiness(app)
+    # Keep production check: hard-fail when SMTP is required (not dry-run) and incomplete.
     if is_production(app) and status.get("blocker"):
         raise RuntimeError("SMTP_HOST, SMTP_PORT, and SMTP_FROM are required in production")
     return True

@@ -119,6 +119,8 @@ class Config:
     SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
     SMTP_FROM = os.getenv("SMTP_FROM", "")
     SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "true").lower() in {"1", "true", "yes", "on"}
+    # Explicit opt-in (see render.yaml). When true, missing SMTP does not hard-fail create_app.
+    EMAIL_DRY_RUN = os.getenv("EMAIL_DRY_RUN", "false").lower() in {"1", "true", "yes", "on"}
 
     STORAGE_PATH = os.getenv("STORAGE_PATH", "uploads")
     STORAGE_BACKEND = os.getenv("STORAGE_BACKEND", "local")
