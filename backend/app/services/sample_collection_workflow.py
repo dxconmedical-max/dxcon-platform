@@ -1,7 +1,11 @@
 from datetime import datetime, timedelta
+import logging
 import uuid
+from typing import Optional, Set
 
 from sqlalchemy import or_
+from sqlalchemy.exc import OperationalError, ProgrammingError
+from sqlalchemy.orm import load_only
 
 from app.core.audit import write_audit
 from app.core.events import write_event
@@ -47,6 +51,8 @@ from app.models.sample_tracking import SampleTracking
 from app.services.booking_assignment import BookingAssignmentService
 from app.services.marketplace_booking import MarketplaceBookingService
 from app.services.order_lifecycle import OrderLifecycleError, OrderLifecycleService
+
+logger = logging.getLogger("dxcon.sample_collection")
 
 
 class SampleCollectionWorkflowError(Exception):
@@ -168,17 +174,110 @@ class SampleCollectionWorkflowService:
         return event
 
     @staticmethod
-    def _enrich_payload(collection):
-        payload = collection.to_dict()
-        if collection.sample_tracking_id:
-            sample = SampleTracking.query.get(collection.sample_tracking_id)
-            payload["sample_tracking"] = sample.to_dict() if sample else None
+    def _sample_collection_db_columns() -> Set[str]:
+        """Live DB columns for sample_collections (empty set if table missing)."""
+        try:
+            from app.infrastructure.schema_introspection import get_table_columns
+
+            return get_table_columns("sample_collections")
+        except Exception:
+            return set()
+
+    @staticmethod
+    def _load_only_existing_columns(columns: Set[str]):
+        """Restrict SELECT to physical columns so missing ORM fields do not 500."""
+        attrs = [
+            getattr(SampleCollection, column.name)
+            for column in SampleCollection.__table__.columns
+            if column.name in columns
+        ]
+        if not attrs:
+            return None
+        return load_only(*attrs)
+
+    @staticmethod
+    def _collection_to_dict_compatible(collection, columns: Optional[Set[str]] = None) -> dict:
+        """Serialize without touching columns absent from the live schema."""
+        columns = columns if columns is not None else SampleCollectionWorkflowService._sample_collection_db_columns()
+        if not columns:
+            # Fall back to model to_dict when introspection unavailable (e.g. tests with create_all).
+            return collection.to_dict()
+
+        def _get(name, default=None):
+            if name not in columns:
+                return default
+            return getattr(collection, name, default)
+
+        def _iso(value):
+            return value.isoformat() if value else None
+
+        return {
+            "id": _get("id"),
+            "order_id": _get("order_id"),
+            "marketplace_booking_id": _get("marketplace_booking_id"),
+            "collector_id": _get("collector_id"),
+            "sample_tracking_id": _get("sample_tracking_id"),
+            "collector_name": _get("collector_name"),
+            "status": _get("status"),
+            "collected_at": _iso(_get("collected_at")),
+            "created_at": _iso(_get("created_at")),
+            "specimen_type": _get("specimen_type"),
+            "barcode_value": _get("barcode_value"),
+            "expected_barcode": _get("expected_barcode"),
+            "collection_location": _get("collection_location"),
+            "location_city": _get("location_city"),
+            "notes": _get("notes"),
+            "quality_status": _get("quality_status"),
+            "rejection_reason": _get("rejection_reason"),
+            "partner_id": _get("partner_id"),
+            "recollect_of_id": _get("recollect_of_id"),
+            "patient_verified": bool(_get("patient_verified") or False),
+            "order_verified": bool(_get("order_verified") or False),
+            "picked_up_at": _iso(_get("picked_up_at")),
+            "dispatched_at": _iso(_get("dispatched_at")),
+            "handoff_at": _iso(_get("handoff_at")),
+            "arrived_at_lab": _iso(_get("arrived_at_lab")),
+            "vehicle_id": _get("vehicle_id"),
+            "driver_id": _get("driver_id"),
+            "transport_box_id": _get("transport_box_id"),
+            "distance_km": _get("distance_km"),
+            "eta_minutes": _get("eta_minutes"),
+            "temperature_c": _get("temperature_c"),
+            "iot_device_id": _get("iot_device_id"),
+            "updated_at": _iso(_get("updated_at")),
+        }
+
+    @staticmethod
+    def _enrich_payload(collection, columns: Optional[Set[str]] = None):
+        columns = columns if columns is not None else SampleCollectionWorkflowService._sample_collection_db_columns()
+        # Empty columns → full schema assumed (unit tests / create_all)
+        if columns and (
+            "marketplace_booking_id" not in columns
+            or len(columns) < len(SampleCollection.__table__.columns)
+        ):
+            payload = SampleCollectionWorkflowService._collection_to_dict_compatible(collection, columns)
+        else:
+            payload = collection.to_dict()
+
+        tracking_id = payload.get("sample_tracking_id")
+        if tracking_id:
+            try:
+                sample = SampleTracking.query.get(tracking_id)
+                payload["sample_tracking"] = sample.to_dict() if sample else None
+            except (OperationalError, ProgrammingError):
+                db.session.rollback()
+                payload["sample_tracking"] = None
         else:
             payload["sample_tracking"] = None
 
         booking = None
-        if collection.marketplace_booking_id:
-            booking = MarketplaceBooking.query.get(collection.marketplace_booking_id)
+        booking_id = payload.get("marketplace_booking_id")
+        if booking_id:
+            try:
+                booking = MarketplaceBooking.query.get(booking_id)
+            except (OperationalError, ProgrammingError):
+                db.session.rollback()
+                booking = None
         if booking:
             payload["booking"] = {
                 "id": booking.id,
@@ -189,8 +288,11 @@ class SampleCollectionWorkflowService:
                 "city": booking.city,
                 "partner_id": booking.partner_id,
             }
-            order = OrderLifecycleService.get_order_for_booking(booking.id)
-            payload["order"] = order.to_dict() if order else None
+            try:
+                order = OrderLifecycleService.get_order_for_booking(booking.id)
+                payload["order"] = order.to_dict() if order else None
+            except Exception:
+                payload["order"] = None
         else:
             payload["booking"] = None
             payload["order"] = None
@@ -207,7 +309,16 @@ class SampleCollectionWorkflowService:
         partner_id=None,
         awaiting_only=True,
     ):
+        columns = SampleCollectionWorkflowService._sample_collection_db_columns()
         query = SampleCollection.query
+        load_opt = None
+        if columns:
+            load_opt = SampleCollectionWorkflowService._load_only_existing_columns(columns)
+            if load_opt is not None:
+                query = query.options(load_opt)
+            elif "id" not in columns:
+                logger.warning("sample_collections has no selectable columns; returning empty queue")
+                return []
 
         if awaiting_only and not status:
             query = query.filter(SampleCollection.status.in_(COLLECTION_QUEUE_STATUSES))
@@ -218,37 +329,55 @@ class SampleCollectionWorkflowService:
             else:
                 query = query.filter(SampleCollection.status.in_(statuses))
 
-        if collector_id:
+        # Optional filters — skip when column absent on legacy production schema
+        if collector_id and (not columns or "collector_id" in columns):
             query = query.filter(SampleCollection.collector_id == collector_id)
-        if partner_id:
+        if partner_id and (not columns or "partner_id" in columns):
             query = query.filter(SampleCollection.partner_id == partner_id)
         if location:
             like = f"%{location}%"
-            query = query.filter(
-                or_(
-                    SampleCollection.location_city.ilike(like),
-                    SampleCollection.collection_location.ilike(like),
-                )
-            )
+            loc_clauses = []
+            if not columns or "location_city" in columns:
+                loc_clauses.append(SampleCollection.location_city.ilike(like))
+            if not columns or "collection_location" in columns:
+                loc_clauses.append(SampleCollection.collection_location.ilike(like))
+            if loc_clauses:
+                query = query.filter(or_(*loc_clauses))
 
-        if date_from:
+        if date_from and (not columns or "created_at" in columns):
             try:
                 start = datetime.fromisoformat(str(date_from).replace("Z", ""))
                 query = query.filter(SampleCollection.created_at >= start)
             except ValueError:
                 raise SampleCollectionWorkflowError("Invalid date_from (ISO8601 expected)")
-        if date_to:
+        if date_to and (not columns or "created_at" in columns):
             try:
                 end = datetime.fromisoformat(str(date_to).replace("Z", ""))
-                # Inclusive end-of-day when date-only
                 if len(str(date_to)) <= 10:
                     end = end + timedelta(days=1)
                 query = query.filter(SampleCollection.created_at < end)
             except ValueError:
                 raise SampleCollectionWorkflowError("Invalid date_to (ISO8601 expected)")
 
-        collections = query.order_by(SampleCollection.created_at.desc()).all()
-        return [SampleCollectionWorkflowService._enrich_payload(item) for item in collections]
+        try:
+            collections = query.order_by(SampleCollection.created_at.desc()).all()
+        except (OperationalError, ProgrammingError) as exc:
+            db.session.rollback()
+            logger.exception(
+                "sample collection queue query failed; apply "
+                "backend/migrations/020_sample_collections_marketplace_booking_id.sql"
+            )
+            # Backward compatible: empty queue rather than HTTP 500 for schema drift
+            raise SampleCollectionWorkflowError(
+                "Sample collection schema is out of date; apply "
+                "backend/migrations/020_sample_collections_marketplace_booking_id.sql",
+                503,
+            ) from exc
+
+        return [
+            SampleCollectionWorkflowService._enrich_payload(item, columns)
+            for item in collections
+        ]
 
     @staticmethod
     def get_collection(collection_id):
