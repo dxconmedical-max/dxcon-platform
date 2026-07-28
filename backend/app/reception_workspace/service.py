@@ -211,6 +211,7 @@ def create_reception_order(
     note: str | None = None,
     queue_entry_id: str | None = None,
     actor: str | None = None,
+    organization_id: str | None = None,
 ) -> dict[str, Any]:
     if not test_catalog_ids:
         raise ReceptionWorkspaceError("At least one test is required")
@@ -236,12 +237,48 @@ def create_reception_order(
             entry.order_id = order.id
             entry.invoice_id = invoice.id
             entry.workflow_status = WORKFLOW_PAYMENT_PENDING
+
+    # Authoritative routing: specimen-requiring orders enter Collector Queue via SampleCollection
+    sample_collection = None
+    from app.sample_collection_workspace.desk_bridge import (
+        ensure_desk_sample_collection,
+        order_requires_specimen_collection,
+    )
+
+    if order_requires_specimen_collection(order):
+        if not order.barcode_value:
+            order.barcode_value = f"BC-{order.order_code}"
+        try:
+            sample_collection = ensure_desk_sample_collection(
+                order,
+                actor=actor,
+                organization_id=organization_id,
+            )
+        except Exception as exc:
+            raise ReceptionWorkspaceError(
+                f"Failed to create collector queue record for order {order.order_code}: {exc}"
+            ) from exc
+        if sample_collection is None:
+            raise ReceptionWorkspaceError(
+                f"Collector queue record missing after create for order {order.order_code}"
+            )
+
     write_reception_audit(action="order_created", object_type="order", object_id=order.order_code, actor=actor)
-    return {
+    result = {
         "order": biz.order_to_detail(order.order_code),
         "invoice": invoice.to_dict(),
         "pricing": {"subtotal": order.subtotal, "discount": order.discount, "total": order.total_amount},
     }
+    if sample_collection:
+        result["sample_collection_id"] = sample_collection.id
+        result["collector_queue"] = {
+            "id": sample_collection.id,
+            "source": "desk",
+            "status": sample_collection.status,
+            "collector_name": sample_collection.collector_name,
+            "collection_location": sample_collection.collection_location,
+        }
+    return result
 
 
 def payment_summary_for_order(order: BizOrder) -> dict[str, Any]:
