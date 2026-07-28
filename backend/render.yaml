@@ -28,7 +28,13 @@ services:
           property: connectionString
       - key: REDIS_URL
         sync: false
+      - key: EMAIL_DRY_RUN
+        value: "true"
       - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_FROM
         sync: false
       - key: SMTP_USER
         sync: false

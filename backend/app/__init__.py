@@ -23,5 +23,8 @@ def create_app():
     register_errors(app)
 
     finalize_observability(app)
-    init_deployment(app)
+    # Gunicorn loads `run:app` at import time — DB/startup checks need an
+    # application context or SQLAlchemy raises "Working outside of application context".
+    with app.app_context():
+        init_deployment(app)
     return app
