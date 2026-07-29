@@ -29,6 +29,8 @@ VALID_COLLECTION_MODES = frozenset(
     {MODE_AT_RECEPTION, MODE_HOME_COLLECTION, MODE_CLINIC_COLLECTION}
 )
 FIELD_COLLECTION_MODES = frozenset({MODE_HOME_COLLECTION, MODE_CLINIC_COLLECTION})
+# Default Collector Queue (home field jobs only — CLINIC uses clinic/field-request board)
+HOME_COLLECTOR_QUEUE_MODES = frozenset({MODE_HOME_COLLECTION})
 DESK_COLLECTION_MODES = frozenset({MODE_AT_RECEPTION})
 
 # --- Canonical statuses ---

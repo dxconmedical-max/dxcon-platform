@@ -210,7 +210,11 @@ class CollectionModeRoutingTests(unittest.TestCase):
         db.session.commit()
         sc = SampleCollection.query.get(result["sample_collection_id"])
         self.assertEqual(sc.collection_mode, MODE_CLINIC_COLLECTION)
-        self.assertIn(sc.id, {i["id"] for i in list_field_collector_queue()["items"]})
+        # Clinic request exists on field-request board, not home collector queue
+        self.assertIn(sc.id, {i["id"] for i in list_home_field_requests()["items"]})
+        self.assertNotIn(sc.id, {i["id"] for i in list_field_collector_queue()["items"]})
+        self.assertNotIn(sc.id, {i["id"] for i in list_production_queue()["items"]})
+        self.assertNotIn(sc.id, {i["id"] for i in list_reception_desk_queue()["items"]})
 
     def test_e_non_specimen_no_collection(self):
         patient = self._patient()

@@ -14,6 +14,7 @@ from app.models.test_catalog import TestCatalog
 from app.sample_collection_workspace.collection_domain import (
     FIELD_COLLECTION_MODES,
     FIELD_QUEUE_STATUSES,
+    HOME_COLLECTOR_QUEUE_MODES,
     MODE_AT_RECEPTION,
     MODE_CLINIC_COLLECTION,
     MODE_HOME_COLLECTION,
@@ -280,7 +281,11 @@ def annotate_collection_payload(item: dict[str, Any]) -> dict[str, Any]:
 
 
 def list_field_collector_queue(**filters) -> dict[str, Any]:
-    """HOME_COLLECTION + CLINIC_COLLECTION only (default Collector Queue)."""
+    """Default Collector Queue = HOME_COLLECTION only (home field jobs).
+
+    CLINIC jobs are clinic pickup requests (field-collection-requests board),
+    not home collector queue rows. Pass modes=FIELD_COLLECTION_MODES to include both.
+    """
     items = SampleCollectionWorkflowService.list_queue(
         status=filters.get("status"),
         collector_id=filters.get("collector_id"),
@@ -290,7 +295,7 @@ def list_field_collector_queue(**filters) -> dict[str, Any]:
         partner_id=filters.get("partner_id"),
         awaiting_only=not bool(filters.get("status")),
     )
-    mode_filter = filters.get("modes") or FIELD_COLLECTION_MODES
+    mode_filter = filters.get("modes") or HOME_COLLECTOR_QUEUE_MODES
     field_items = []
     for item in items:
         mode = (item.get("collection_mode") or "").strip().upper()

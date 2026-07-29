@@ -57,7 +57,7 @@ export default function FieldCollectionRequestsPage() {
       <div className="space-y-6">
         <SectionHeader
           title="Field collection requests"
-          description="HOME and CLINIC requests created from Reception. Desk AT_RECEPTION work is on Desk collections."
+          description="HOME and CLINIC requests from Reception. Home jobs also appear on the Collector Queue; CLINIC stays on this board only."
           actions={
             <div className="flex gap-2">
               <Link
