@@ -9,7 +9,9 @@ from app.extensions.db import db
 from app.lab_workspace.auth import (
     lab_api_admin,
     lab_api_medical,
+    lab_api_patient_report,
     lab_api_read,
+    lab_api_release,
     lab_api_supervisor,
     lab_api_write,
 )
@@ -376,7 +378,7 @@ def medical_validation_queue():
 
 
 @lab_workspace_bp.route("/release", methods=["POST"])
-@lab_api_medical
+@lab_api_release
 def release_result_route():
     payload = request.get_json(silent=True) or {}
     try:
@@ -394,7 +396,7 @@ def release_queue_route():
 
 
 @lab_workspace_bp.route("/release/<order_code>/html", methods=["GET"])
-@lab_api_read
+@lab_api_patient_report
 def release_html_route(order_code: str):
     try:
         return {"success": True, "data": get_released_report_html(order_code)}, 200

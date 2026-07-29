@@ -10,6 +10,21 @@ LAB_SUPERVISOR_ROLES = frozenset({"SUPER_ADMIN", "SYSTEM_ADMIN", "ADMIN", "LAB"}
 LAB_MEDICAL_ROLES = frozenset(
     {"SUPER_ADMIN", "SYSTEM_ADMIN", "ADMIN", "DOCTOR"}
 )
+# Lab + doctor may release approved results; patients read via patient portal / release html.
+LAB_RELEASE_ROLES = frozenset(
+    {"SUPER_ADMIN", "SYSTEM_ADMIN", "ADMIN", "LAB", "DOCTOR"}
+)
+LAB_PATIENT_REPORT_ROLES = frozenset(
+    {
+        "SUPER_ADMIN",
+        "SYSTEM_ADMIN",
+        "ADMIN",
+        "LAB",
+        "LAB_TECHNICIAN",
+        "DOCTOR",
+        "PATIENT",
+    }
+)
 LAB_ADMIN_ROLES = frozenset({"SUPER_ADMIN", "SYSTEM_ADMIN"})
 
 LAB_FORBIDDEN_TECH = frozenset({"report.release", "doctor.approve", "connector.secrets"})
