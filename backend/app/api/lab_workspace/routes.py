@@ -33,14 +33,20 @@ from app.lab_workspace.service import (
     create_accession,
     enter_result_manual,
     get_order_workspace,
+    get_released_report_html,
     ingest_analyzer_result,
     lab_security_report,
     lab_workspace_report,
+    list_pending_medical_review,
+    list_releasable_results,
     mark_qc_failed,
     mark_qc_passed,
+    medical_reject,
+    medical_reopen,
     medical_validate,
     receive_sample,
     reject_result,
+    release_result,
     start_processing,
     status_contract,
     testing_queue,
@@ -328,6 +334,71 @@ def medical_validation_approve():
         db.session.commit()
         return {"success": True, "data": data}, 200
     except (LabWorkspaceError, BusinessEngineError) as exc:
+        return _err(exc)
+
+
+@lab_workspace_bp.route("/medical-validation/reject", methods=["POST"])
+@lab_api_medical
+def medical_validation_reject():
+    payload = request.get_json(silent=True) or {}
+    try:
+        data = medical_reject(
+            payload.get("order_code", ""),
+            reason=payload.get("reason") or payload.get("note"),
+            actor=_actor(),
+        )
+        db.session.commit()
+        return {"success": True, "data": data}, 200
+    except (LabWorkspaceError, BusinessEngineError) as exc:
+        return _err(exc)
+
+
+@lab_workspace_bp.route("/medical-validation/reopen", methods=["POST"])
+@lab_api_medical
+def medical_validation_reopen():
+    payload = request.get_json(silent=True) or {}
+    try:
+        data = medical_reopen(
+            payload.get("order_code", ""),
+            reason=payload.get("reason") or payload.get("note"),
+            actor=_actor(),
+        )
+        db.session.commit()
+        return {"success": True, "data": data}, 200
+    except (LabWorkspaceError, BusinessEngineError) as exc:
+        return _err(exc)
+
+
+@lab_workspace_bp.route("/medical-validation/queue", methods=["GET"])
+@lab_api_medical
+def medical_validation_queue():
+    return {"success": True, "data": {"items": list_pending_medical_review()}}, 200
+
+
+@lab_workspace_bp.route("/release", methods=["POST"])
+@lab_api_medical
+def release_result_route():
+    payload = request.get_json(silent=True) or {}
+    try:
+        data = release_result(payload.get("order_code", ""), actor=_actor())
+        db.session.commit()
+        return {"success": True, "data": data}, 200
+    except (LabWorkspaceError, BusinessEngineError) as exc:
+        return _err(exc)
+
+
+@lab_workspace_bp.route("/release/queue", methods=["GET"])
+@lab_api_read
+def release_queue_route():
+    return {"success": True, "data": {"items": list_releasable_results()}}, 200
+
+
+@lab_workspace_bp.route("/release/<order_code>/html", methods=["GET"])
+@lab_api_read
+def release_html_route(order_code: str):
+    try:
+        return {"success": True, "data": get_released_report_html(order_code)}, 200
+    except LabWorkspaceError as exc:
         return _err(exc)
 
 

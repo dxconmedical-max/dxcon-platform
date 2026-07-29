@@ -8,8 +8,13 @@ import { RoleDashboardHome } from "@/components/layout/RoleDashboardHome";
 const ACTIONS = [
   {
     label: "Result inbox",
-    href: "/app/doctor",
-    description: "Pending medical validation and critical flags (aggregate metrics live).",
+    href: "/app/doctor/review",
+    description: "Medical validation: approve, reject, or reopen.",
+  },
+  {
+    label: "Release board",
+    href: "/app/lab/release",
+    description: "Release approved results for patient download.",
   },
 ];
 
