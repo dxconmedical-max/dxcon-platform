@@ -76,7 +76,8 @@ def workspace_dashboard() -> dict[str, Any]:
             "modes": [MODE_AT_RECEPTION, MODE_HOME_COLLECTION, MODE_CLINIC_COLLECTION],
             "queues": {
                 "reception_desk": [MODE_AT_RECEPTION],
-                "field_collector": [MODE_HOME_COLLECTION, MODE_CLINIC_COLLECTION],
+                "field_collector": [MODE_HOME_COLLECTION],
+                "field_collection_requests": [MODE_HOME_COLLECTION, MODE_CLINIC_COLLECTION],
             },
             "legacy_queue": list(COLLECTION_QUEUE_STATUSES),
         },

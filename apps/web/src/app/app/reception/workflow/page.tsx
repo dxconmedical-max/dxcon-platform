@@ -18,14 +18,22 @@ import { normalizeApiError } from "@/lib/errors";
 import { SectionHeader } from "../_components/ui";
 import {
   CatalogSelectStep,
+  CollectionRequestStep,
   OrderConfirmationStep,
   PatientStep,
   ReviewPricingStep,
   type CatalogSelection,
+  type CollectionRequestDraft,
   type SelectedPatient,
 } from "./Milestone1Steps";
 
-const STEPS = ["Patient", "Tests", "Review and pricing", "Create order", "Confirmation"] as const;
+const STEPS = [
+  "Patient",
+  "Tests",
+  "Collection request",
+  "Review and pricing",
+  "Confirmation",
+] as const;
 
 function ReceptionMilestone1Panel() {
   const { accessToken, activeOrganizationId, can, role } = useAuth();
@@ -33,11 +41,12 @@ function ReceptionMilestone1Panel() {
   const patientParam = searchParams.get("patient") ?? undefined;
   const orderParam = searchParams.get("order") ?? undefined;
 
-  /** UI steps: 0 Patient, 1 Tests, 2 Review (create), 3 Confirmation. Create is embedded in Review. */
+  /** UI steps: 0 Patient, 1 Tests, 2 Collection request, 3 Review (create), 4 Confirmation. */
   const [step, setStep] = useState(0);
   const [patient, setPatient] = useState<SelectedPatient | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selection, setSelection] = useState<CatalogSelection | null>(null);
+  const [collectionRequest, setCollectionRequest] = useState<CollectionRequestDraft | null>(null);
   const [orderRef, setOrderRef] = useState<string | null>(null);
   const [pricing, setPricing] = useState<ReceptionOrderPricing | null>(null);
   const [order, setOrder] = useState<ReceptionOrderCreate["order"] | null>(null);
@@ -54,8 +63,7 @@ function ReceptionMilestone1Panel() {
       role ?? "",
     );
 
-  /** Map internal step index to badge highlight (Create order lights when reviewing/submitting). */
-  const badgeIndex = step === 0 ? 0 : step === 1 ? 1 : step === 2 ? 2 : 4;
+  const badgeIndex = step;
 
   useEffect(() => {
     if (!orderParam || !accessToken) {
@@ -80,7 +88,7 @@ function ReceptionMilestone1Panel() {
           setOrderRef(String(row.order_code ?? orderParam));
           setPricing(result.pricing);
           setOrder(result.order);
-          setStep(3);
+          setStep(4);
         })
         .catch((err) => {
           if (!cancelled) setReopenError(normalizeApiError(err));
@@ -99,6 +107,7 @@ function ReceptionMilestone1Panel() {
     setStep(0);
     setPatient(null);
     setSelection(null);
+    setCollectionRequest(null);
     setOrderRef(null);
     setPricing(null);
     setOrder(null);
@@ -120,8 +129,8 @@ function ReceptionMilestone1Panel() {
   return (
     <div className="space-y-5">
       <SectionHeader
-        title="Reception Milestone 1 — Patient, catalog, pricing & order"
-        description="Create a laboratory order with backend-authoritative pricing. Payment and documents are deferred to later milestones."
+        title="Reception — Patient, tests, collection request & order"
+        description="Record the specimen collection request before pricing and order creation."
         actions={
           step > 0 ? (
             <Button size="sm" variant="outline" onClick={reset}>
@@ -137,12 +146,10 @@ function ReceptionMilestone1Panel() {
         }
       />
 
-      <div className="flex flex-wrap gap-2" aria-label="Milestone 1 steps">
+      <div className="flex flex-wrap gap-2" aria-label="Reception order steps">
         {STEPS.map((label, index) => {
-          const active =
-            index === badgeIndex ||
-            (step === 2 && (index === 2 || index === 3));
-          const done = index < badgeIndex || (step === 3 && index < 4);
+          const active = index === badgeIndex;
+          const done = index < badgeIndex;
           return (
             <Badge key={label} tone={active ? "info" : done ? "success" : "default"}>
               {index + 1}. {label}
@@ -187,22 +194,36 @@ function ReceptionMilestone1Panel() {
       ) : null}
 
       {!reopening && step === 2 && patient && selection ? (
-        <ReviewPricingStep
-          accessToken={accessToken}
-          organizationId={activeOrganizationId}
+        <CollectionRequestStep
           patient={patient}
           selection={selection}
+          initial={collectionRequest}
           onBack={() => setStep(1)}
-          onCreated={({ orderRef: ref, pricing: nextPricing, order: nextOrder }) => {
-            setOrderRef(ref);
-            setPricing(nextPricing);
-            setOrder(nextOrder);
+          onContinue={(draft) => {
+            setCollectionRequest(draft);
             setStep(3);
           }}
         />
       ) : null}
 
-      {!reopening && step === 3 && patient && orderRef && pricing && order ? (
+      {!reopening && step === 3 && patient && selection && collectionRequest ? (
+        <ReviewPricingStep
+          accessToken={accessToken}
+          organizationId={activeOrganizationId}
+          patient={patient}
+          selection={selection}
+          collectionRequest={collectionRequest}
+          onBack={() => setStep(2)}
+          onCreated={({ orderRef: ref, pricing: nextPricing, order: nextOrder }) => {
+            setOrderRef(ref);
+            setPricing(nextPricing);
+            setOrder(nextOrder);
+            setStep(4);
+          }}
+        />
+      ) : null}
+
+      {!reopening && step === 4 && patient && orderRef && pricing && order ? (
         <OrderConfirmationStep
           accessToken={accessToken}
           organizationId={activeOrganizationId}

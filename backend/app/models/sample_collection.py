@@ -82,12 +82,18 @@ class SampleCollection(db.Model):
     # Field collection request metadata (HOME / CLINIC)
     pickup_address = db.Column(db.String(500))
     pickup_city = db.Column(db.String(100))
+    pickup_province = db.Column(db.String(100))
+    pickup_district = db.Column(db.String(100))
+    pickup_ward = db.Column(db.String(100))
+    contact_person = db.Column(db.String(255))
     contact_phone = db.Column(db.String(50))
     requested_date = db.Column(db.String(20))
     requested_time_window = db.Column(db.String(100))
     pickup_latitude = db.Column(db.String(50))
     pickup_longitude = db.Column(db.String(50))
     collection_request_note = db.Column(db.Text)
+    clinic_name = db.Column(db.String(255))
+    priority = db.Column(db.String(50))
 
     updated_at = db.Column(
         db.DateTime,
@@ -139,11 +145,17 @@ class SampleCollection(db.Model):
             "iot_device_id": self.iot_device_id,
             "pickup_address": self.pickup_address,
             "pickup_city": self.pickup_city,
+            "pickup_province": self.pickup_province,
+            "pickup_district": self.pickup_district,
+            "pickup_ward": self.pickup_ward,
+            "contact_person": self.contact_person,
             "contact_phone": self.contact_phone,
             "requested_date": _iso(self.requested_date) if not isinstance(self.requested_date, str) else self.requested_date,
             "requested_time_window": self.requested_time_window,
             "pickup_latitude": self.pickup_latitude,
             "pickup_longitude": self.pickup_longitude,
             "collection_request_note": self.collection_request_note,
+            "clinic_name": self.clinic_name,
+            "priority": self.priority,
             "updated_at": _iso(self.updated_at),
         }

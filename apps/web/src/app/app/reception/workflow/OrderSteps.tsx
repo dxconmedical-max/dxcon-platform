@@ -442,10 +442,15 @@ export function TestsStep({
     "AT_RECEPTION" | "HOME_COLLECTION" | "CLINIC_COLLECTION"
   >("AT_RECEPTION");
   const [pickupAddress, setPickupAddress] = useState("");
-  const [pickupCity, setPickupCity] = useState("");
+  const [pickupProvince, setPickupProvince] = useState("");
+  const [pickupDistrict, setPickupDistrict] = useState("");
+  const [pickupWard, setPickupWard] = useState("");
+  const [contactPerson, setContactPerson] = useState(patient.patientName);
   const [contactPhone, setContactPhone] = useState("");
   const [requestedDate, setRequestedDate] = useState("");
   const [timeWindow, setTimeWindow] = useState("");
+  const [clinicName, setClinicName] = useState("");
+  const [specimenType, setSpecimenType] = useState("BLOOD");
   const catalogAbortRef = useRef<AbortController | null>(null);
   const createInFlight = useRef(false);
 
@@ -530,9 +535,23 @@ export function TestsStep({
       setError("Select at least one test.");
       return;
     }
-    if (collectionMode !== "AT_RECEPTION") {
-      if (!pickupAddress.trim() || !pickupCity.trim() || !contactPhone.trim() || !requestedDate || !timeWindow.trim()) {
-        setError("Field collection requires address, city, phone, date, and time window.");
+    if (collectionMode === "HOME_COLLECTION") {
+      if (
+        !pickupAddress.trim() ||
+        !pickupProvince.trim() ||
+        !pickupDistrict.trim() ||
+        !contactPerson.trim() ||
+        !contactPhone.trim() ||
+        !requestedDate ||
+        !timeWindow.trim()
+      ) {
+        setError("HOME collection requires address, province, district, contact, phone, date, and time window.");
+        return;
+      }
+    }
+    if (collectionMode === "CLINIC_COLLECTION") {
+      if (!clinicName.trim() || !requestedDate || !timeWindow.trim()) {
+        setError("CLINIC collection requires clinic, preferred date, and preferred time.");
         return;
       }
     }
@@ -548,11 +567,17 @@ export function TestsStep({
           discount: asFloat(discount),
           note: note.trim() || undefined,
           collection_mode: collectionMode,
-          pickup_address: collectionMode === "AT_RECEPTION" ? undefined : pickupAddress.trim(),
-          pickup_city: collectionMode === "AT_RECEPTION" ? undefined : pickupCity.trim(),
-          contact_phone: collectionMode === "AT_RECEPTION" ? undefined : contactPhone.trim(),
+          specimen_type: specimenType.trim() || "BLOOD",
+          pickup_address: collectionMode === "HOME_COLLECTION" ? pickupAddress.trim() : undefined,
+          pickup_province: collectionMode === "HOME_COLLECTION" ? pickupProvince.trim() : undefined,
+          pickup_district: collectionMode === "HOME_COLLECTION" ? pickupDistrict.trim() : undefined,
+          pickup_ward: collectionMode === "HOME_COLLECTION" ? pickupWard.trim() || undefined : undefined,
+          contact_person:
+            collectionMode === "HOME_COLLECTION" ? contactPerson.trim() : undefined,
+          contact_phone: collectionMode === "HOME_COLLECTION" ? contactPhone.trim() : undefined,
           requested_date: collectionMode === "AT_RECEPTION" ? undefined : requestedDate,
           requested_time_window: collectionMode === "AT_RECEPTION" ? undefined : timeWindow.trim(),
+          clinic_name: collectionMode === "CLINIC_COLLECTION" ? clinicName.trim() : undefined,
         },
       );
       const orderRef = getOrderCode(response.order);
@@ -654,55 +679,67 @@ export function TestsStep({
                 }
                 aria-label="Collection method"
               >
-                <option value="AT_RECEPTION">At reception (desk)</option>
-                <option value="HOME_COLLECTION">Home collection</option>
-                <option value="CLINIC_COLLECTION">Clinic collection</option>
+                <option value="AT_RECEPTION">DESK (at reception)</option>
+                <option value="HOME_COLLECTION">HOME</option>
+                <option value="CLINIC_COLLECTION">CLINIC</option>
               </select>
-              <p className="text-xs text-slate-500">
-                Route:{" "}
-                {collectionMode === "AT_RECEPTION"
-                  ? "Reception desk worklist → lab handover"
-                  : "Field collector queue → transport → lab arrival"}
-              </p>
-              {collectionMode !== "AT_RECEPTION" ? (
+              <div>
+                <Label htmlFor="specimen-type-legacy">Specimen type</Label>
+                <Input
+                  id="specimen-type-legacy"
+                  value={specimenType}
+                  onChange={(e) => setSpecimenType(e.target.value)}
+                />
+              </div>
+              {collectionMode === "HOME_COLLECTION" ? (
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="md:col-span-2">
-                    <Label htmlFor="pickup-address">Pickup address</Label>
-                    <Input
-                      id="pickup-address"
-                      value={pickupAddress}
-                      onChange={(e) => setPickupAddress(e.target.value)}
-                    />
+                    <Label htmlFor="pickup-address">Pickup address *</Label>
+                    <Input id="pickup-address" value={pickupAddress} onChange={(e) => setPickupAddress(e.target.value)} />
                   </div>
                   <div>
-                    <Label htmlFor="pickup-city">City / province</Label>
-                    <Input id="pickup-city" value={pickupCity} onChange={(e) => setPickupCity(e.target.value)} />
+                    <Label htmlFor="pickup-province">Province *</Label>
+                    <Input id="pickup-province" value={pickupProvince} onChange={(e) => setPickupProvince(e.target.value)} />
                   </div>
                   <div>
-                    <Label htmlFor="contact-phone">Contact phone</Label>
-                    <Input
-                      id="contact-phone"
-                      value={contactPhone}
-                      onChange={(e) => setContactPhone(e.target.value)}
-                    />
+                    <Label htmlFor="pickup-district">District *</Label>
+                    <Input id="pickup-district" value={pickupDistrict} onChange={(e) => setPickupDistrict(e.target.value)} />
                   </div>
                   <div>
-                    <Label htmlFor="req-date">Requested date</Label>
-                    <Input
-                      id="req-date"
-                      type="date"
-                      value={requestedDate}
-                      onChange={(e) => setRequestedDate(e.target.value)}
-                    />
+                    <Label htmlFor="pickup-ward">Ward</Label>
+                    <Input id="pickup-ward" value={pickupWard} onChange={(e) => setPickupWard(e.target.value)} />
                   </div>
                   <div>
-                    <Label htmlFor="time-window">Time window</Label>
-                    <Input
-                      id="time-window"
-                      placeholder="e.g. 08:00–10:00"
-                      value={timeWindow}
-                      onChange={(e) => setTimeWindow(e.target.value)}
-                    />
+                    <Label htmlFor="contact-person">Contact person *</Label>
+                    <Input id="contact-person" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label htmlFor="contact-phone">Phone *</Label>
+                    <Input id="contact-phone" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label htmlFor="req-date">Preferred date *</Label>
+                    <Input id="req-date" type="date" value={requestedDate} onChange={(e) => setRequestedDate(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label htmlFor="time-window">Preferred time window *</Label>
+                    <Input id="time-window" value={timeWindow} onChange={(e) => setTimeWindow(e.target.value)} />
+                  </div>
+                </div>
+              ) : null}
+              {collectionMode === "CLINIC_COLLECTION" ? (
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="md:col-span-2">
+                    <Label htmlFor="clinic-name">Clinic *</Label>
+                    <Input id="clinic-name" value={clinicName} onChange={(e) => setClinicName(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label htmlFor="clinic-date">Preferred date *</Label>
+                    <Input id="clinic-date" type="date" value={requestedDate} onChange={(e) => setRequestedDate(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label htmlFor="clinic-time">Preferred time *</Label>
+                    <Input id="clinic-time" value={timeWindow} onChange={(e) => setTimeWindow(e.target.value)} />
                   </div>
                 </div>
               ) : null}

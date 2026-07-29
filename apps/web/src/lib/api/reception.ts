@@ -370,12 +370,19 @@ export async function createReceptionOrder(
     discount?: number;
     note?: string;
     queue_entry_id?: string;
-    collection_mode?: "AT_RECEPTION" | "HOME_COLLECTION" | "CLINIC_COLLECTION" | string;
+    collection_mode?: "AT_RECEPTION" | "HOME_COLLECTION" | "CLINIC_COLLECTION" | "DESK" | "HOME" | "CLINIC" | string;
+    specimen_type?: string;
     pickup_address?: string;
     pickup_city?: string;
+    pickup_province?: string;
+    pickup_district?: string;
+    pickup_ward?: string;
+    contact_person?: string;
     contact_phone?: string;
     requested_date?: string;
     requested_time_window?: string;
+    clinic_name?: string;
+    priority?: string;
     collection_note?: string;
     latitude?: string;
     longitude?: string;
@@ -394,11 +401,18 @@ export async function createReceptionOrder(
           note: payload.note,
           queue_entry_id: payload.queue_entry_id,
           collection_mode: payload.collection_mode,
+          specimen_type: payload.specimen_type,
           pickup_address: payload.pickup_address,
           pickup_city: payload.pickup_city,
+          pickup_province: payload.pickup_province,
+          pickup_district: payload.pickup_district,
+          pickup_ward: payload.pickup_ward,
+          contact_person: payload.contact_person,
           contact_phone: payload.contact_phone,
           requested_date: payload.requested_date,
           requested_time_window: payload.requested_time_window,
+          clinic_name: payload.clinic_name,
+          priority: payload.priority,
           collection_note: payload.collection_note,
           latitude: payload.latitude,
           longitude: payload.longitude,

@@ -10,7 +10,9 @@ from app.core.authz import roles_required
 from app.lab_workspace.security import (
     LAB_ADMIN_ROLES,
     LAB_MEDICAL_ROLES,
+    LAB_PATIENT_REPORT_ROLES,
     LAB_READ_ROLES,
+    LAB_RELEASE_ROLES,
     LAB_SUPERVISOR_ROLES,
     LAB_WRITE_ROLES,
 )
@@ -50,3 +52,11 @@ def lab_api_admin(fn):
 
 def lab_api_medical(fn):
     return _dual_auth(LAB_MEDICAL_ROLES, fn)
+
+
+def lab_api_release(fn):
+    return _dual_auth(LAB_RELEASE_ROLES, fn)
+
+
+def lab_api_patient_report(fn):
+    return _dual_auth(LAB_PATIENT_REPORT_ROLES, fn)

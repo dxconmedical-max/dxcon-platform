@@ -8,8 +8,8 @@ import { RoleDashboardHome } from "@/components/layout/RoleDashboardHome";
 const ACTIONS = [
   {
     label: "My results",
-    href: "/app/patient",
-    description: "Released reports when linked to your patient record.",
+    href: "/app/patient/results",
+    description: "Download released laboratory reports.",
   },
 ];
 

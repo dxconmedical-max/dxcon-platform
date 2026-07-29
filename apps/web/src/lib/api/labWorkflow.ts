@@ -314,3 +314,55 @@ export async function medicalValidate(auth: LabAuth, order_code: string, doctor_
     ),
   );
 }
+
+export async function medicalReject(auth: LabAuth, order_code: string, reason?: string) {
+  return unwrap(
+    apiRequest<{ success?: boolean; data?: Record<string, unknown>; error?: string }>(
+      "/api/v1/lab/workspace/medical-validation/reject",
+      { ...opts(auth), method: "POST", body: { order_code, reason } },
+    ),
+  );
+}
+
+export async function medicalReopen(auth: LabAuth, order_code: string, reason?: string) {
+  return unwrap(
+    apiRequest<{ success?: boolean; data?: Record<string, unknown>; error?: string }>(
+      "/api/v1/lab/workspace/medical-validation/reopen",
+      { ...opts(auth), method: "POST", body: { order_code, reason } },
+    ),
+  );
+}
+
+export async function fetchMedicalQueue(auth: LabAuth) {
+  const body = await apiRequest<{ success?: boolean; data?: { items?: LabQueueRow[] }; error?: string }>(
+    "/api/v1/lab/workspace/medical-validation/queue",
+    opts(auth),
+  );
+  return body.data?.items ?? [];
+}
+
+export async function releaseLabResult(auth: LabAuth, order_code: string) {
+  return unwrap(
+    apiRequest<{ success?: boolean; data?: Record<string, unknown>; error?: string }>(
+      "/api/v1/lab/workspace/release",
+      { ...opts(auth), method: "POST", body: { order_code } },
+    ),
+  );
+}
+
+export async function fetchReleaseQueue(auth: LabAuth) {
+  const body = await apiRequest<{ success?: boolean; data?: { items?: LabQueueRow[] }; error?: string }>(
+    "/api/v1/lab/workspace/release/queue",
+    opts(auth),
+  );
+  return body.data?.items ?? [];
+}
+
+export async function fetchReleasedReportHtml(auth: LabAuth, order_code: string) {
+  return unwrap(
+    apiRequest<{ success?: boolean; data?: Record<string, unknown>; error?: string }>(
+      `/api/v1/lab/workspace/release/${encodeURIComponent(order_code)}/html`,
+      opts(auth),
+    ),
+  );
+}

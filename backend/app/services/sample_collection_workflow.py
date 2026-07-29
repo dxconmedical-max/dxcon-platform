@@ -352,6 +352,7 @@ class SampleCollectionWorkflowService:
         if awaiting_only and not status:
             from app.sample_collection_workspace.collection_domain import (
                 ST_ASSIGNED,
+                ST_PENDING_ASSIGNMENT,
                 ST_RECOLLECT_REQUIRED,
                 ST_REQUESTED,
                 ST_VERIFIED,
@@ -359,6 +360,7 @@ class SampleCollectionWorkflowService:
 
             awaiting_statuses = (
                 ST_REQUESTED,
+                ST_PENDING_ASSIGNMENT,
                 ST_ASSIGNED,
                 ST_VERIFIED,
                 ST_RECOLLECT_REQUIRED,
@@ -1390,6 +1392,7 @@ class SampleCollectionWorkflowService:
         now = datetime.utcnow()
         sample.status = SAMPLE_RECEIVED
         sample.updated_at = now
+        # Canonical collection status; desk_bridge treats ARRIVED_AT_LAB as lab arrival
         collection.status = "ARRIVED_AT_LAB"
         collection.arrived_at_lab = now
         collection.updated_at = now

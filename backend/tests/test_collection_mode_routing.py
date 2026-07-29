@@ -23,6 +23,7 @@ from app.sample_collection_workspace.collection_domain import (
     MODE_CLINIC_COLLECTION,
     MODE_HOME_COLLECTION,
     ST_COLLECTED,
+    ST_PENDING_ASSIGNMENT,
     ST_REQUESTED,
     ST_VERIFIED,
     CollectionDomainError,
@@ -31,6 +32,7 @@ from app.sample_collection_workspace.collection_domain import (
 from app.sample_collection_workspace.collection_routing import (
     ensure_collection_for_order,
     list_field_collector_queue,
+    list_home_field_requests,
     list_reception_desk_queue,
 )
 from app.sample_collection_workspace.service import list_production_queue
@@ -139,10 +141,15 @@ class CollectionModeRoutingTests(unittest.TestCase):
         patient = self._patient()
         pickup = {
             "pickup_address": "12 Nguyen Trai",
-            "pickup_city": "Ha Noi",
+            "pickup_province": "Ha Noi",
+            "pickup_district": "Thanh Xuan",
+            "pickup_ward": "Nhan Chinh",
+            "contact_person": "CMR PATIENT",
             "contact_phone": "0901234567",
             "requested_date": "2026-08-01",
             "requested_time_window": "08:00-10:00",
+            "specimen_type": "BLOOD",
+            "priority": "ROUTINE",
         }
         result = create_reception_order(
             patient_code=patient.patient_code,
@@ -156,10 +163,21 @@ class CollectionModeRoutingTests(unittest.TestCase):
         sc_id = result["sample_collection_id"]
         sc = SampleCollection.query.get(sc_id)
         self.assertEqual(sc.collection_mode, MODE_HOME_COLLECTION)
+        self.assertEqual(sc.status, ST_PENDING_ASSIGNMENT)
         self.assertEqual(sc.pickup_address, "12 Nguyen Trai")
+        self.assertIsNotNone(sc.sample_tracking_id)
+        self.assertIsNone(sc.collector_id)
+        home_board = list_home_field_requests()
+        self.assertIn(sc_id, {i["id"] for i in home_board["items"]})
 
         self.assertIn(sc_id, {i["id"] for i in list_field_collector_queue()["items"]})
         self.assertNotIn(sc_id, {i["id"] for i in list_reception_desk_queue()["items"]})
+
+        # Dispatcher assignment before collector workflow
+        sc.collector_name = "Field Collector"
+        sc.collector_id = "collector-1"
+        sc.status = "ASSIGNED"
+        db.session.commit()
 
         barcode = result["order"].get("barcode_value") or f"BC-{result['order']['order_code']}"
         SampleCollectionWorkflowService.verify_identifiers(
@@ -182,18 +200,21 @@ class CollectionModeRoutingTests(unittest.TestCase):
             test_catalog_ids=[self.blood.id],
             collection_mode=MODE_CLINIC_COLLECTION,
             pickup={
-                "pickup_address": "Clinic A",
-                "pickup_city": "Da Nang",
-                "contact_phone": "0909999999",
+                "clinic_name": "Clinic A",
                 "requested_date": "2026-08-02",
                 "requested_time_window": "14:00-16:00",
+                "specimen_type": "BLOOD",
             },
             actor=self.admin.email,
         )
         db.session.commit()
         sc = SampleCollection.query.get(result["sample_collection_id"])
         self.assertEqual(sc.collection_mode, MODE_CLINIC_COLLECTION)
-        self.assertIn(sc.id, {i["id"] for i in list_field_collector_queue()["items"]})
+        # Clinic request exists on field-request board, not home collector queue
+        self.assertIn(sc.id, {i["id"] for i in list_home_field_requests()["items"]})
+        self.assertNotIn(sc.id, {i["id"] for i in list_field_collector_queue()["items"]})
+        self.assertNotIn(sc.id, {i["id"] for i in list_production_queue()["items"]})
+        self.assertNotIn(sc.id, {i["id"] for i in list_reception_desk_queue()["items"]})
 
     def test_e_non_specimen_no_collection(self):
         patient = self._patient()
@@ -237,7 +258,9 @@ class CollectionModeRoutingTests(unittest.TestCase):
             collection_mode=MODE_HOME_COLLECTION,
             pickup={
                 "pickup_address": "A",
-                "pickup_city": "HN",
+                "pickup_province": "HN",
+                "pickup_district": "D1",
+                "contact_person": "A",
                 "contact_phone": "1",
                 "requested_date": "2026-08-01",
                 "requested_time_window": "am",
@@ -251,7 +274,9 @@ class CollectionModeRoutingTests(unittest.TestCase):
             collection_mode=MODE_HOME_COLLECTION,
             pickup={
                 "pickup_address": "B",
-                "pickup_city": "HCM",
+                "pickup_province": "HCM",
+                "pickup_district": "D2",
+                "contact_person": "B",
                 "contact_phone": "2",
                 "requested_date": "2026-08-01",
                 "requested_time_window": "pm",
@@ -290,7 +315,9 @@ class CollectionModeRoutingTests(unittest.TestCase):
             collection_mode=MODE_HOME_COLLECTION,
             pickup={
                 "pickup_address": "Addr",
-                "pickup_city": "City",
+                "pickup_province": "City",
+                "pickup_district": "D",
+                "contact_person": "Contact",
                 "contact_phone": "090",
                 "requested_date": "2026-08-01",
                 "requested_time_window": "am",

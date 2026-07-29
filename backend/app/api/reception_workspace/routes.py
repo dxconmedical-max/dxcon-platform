@@ -109,13 +109,23 @@ def orders_create():
             organization_id=organization_id,
             collection_mode=payload.get("collection_mode"),
             pickup={
+                "specimen_type": payload.get("specimen_type"),
                 "pickup_address": payload.get("pickup_address"),
                 "pickup_city": payload.get("pickup_city") or payload.get("city"),
+                "pickup_province": payload.get("pickup_province") or payload.get("province"),
+                "pickup_district": payload.get("pickup_district") or payload.get("district"),
+                "pickup_ward": payload.get("pickup_ward") or payload.get("ward"),
+                "contact_person": payload.get("contact_person"),
                 "contact_phone": payload.get("contact_phone") or payload.get("phone"),
                 "requested_date": payload.get("requested_date"),
                 "requested_time_window": payload.get("requested_time_window")
+                or payload.get("preferred_time")
                 or payload.get("time_window"),
-                "note": payload.get("collection_note") or payload.get("pickup_note"),
+                "clinic_name": payload.get("clinic_name") or payload.get("clinic"),
+                "priority": payload.get("priority"),
+                "note": payload.get("collection_note")
+                or payload.get("pickup_note")
+                or payload.get("notes"),
                 "latitude": payload.get("latitude") or payload.get("pickup_latitude"),
                 "longitude": payload.get("longitude") or payload.get("pickup_longitude"),
             },
@@ -707,18 +717,16 @@ def desk_collections_queue():
 @reception_workspace_bp.route("/field-collection-requests", methods=["GET"])
 @reception_api_read
 def field_collection_requests():
-    """HOME/CLINIC requests visible to reception (read-only board)."""
-    from app.sample_collection_workspace.collection_routing import list_field_collector_queue
+    """HOME/CLINIC collection requests for Reception field board."""
+    from app.sample_collection_workspace.collection_routing import list_home_field_requests
 
     try:
-        payload = list_field_collector_queue(
+        payload = list_home_field_requests(
             status=request.args.get("status"),
-            location=request.args.get("location"),
-            date_from=request.args.get("date") or request.args.get("date_from"),
-            date_to=request.args.get("date_to"),
             role=session.get("role") or request.headers.get("X-User-Role"),
             organization_id=request.headers.get("X-Organization-ID")
             or request.headers.get("X-Organization-Id"),
+            limit=int(request.args.get("limit") or 200),
         )
         return {"success": True, "data": payload}, 200
     except Exception as exc:

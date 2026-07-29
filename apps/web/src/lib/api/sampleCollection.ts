@@ -24,9 +24,17 @@ export type SampleCollectionItem = {
   location_city?: string | null;
   pickup_address?: string | null;
   pickup_city?: string | null;
+  pickup_province?: string | null;
+  pickup_district?: string | null;
+  pickup_ward?: string | null;
+  contact_person?: string | null;
   contact_phone?: string | null;
   requested_date?: string | null;
   requested_time_window?: string | null;
+  clinic_name?: string | null;
+  priority?: string | null;
+  dispatcher_actionable?: boolean;
+  actionable?: boolean;
   workflow_path?: string | null;
   quality_status?: string | null;
   rejection_reason?: string | null;
@@ -57,7 +65,6 @@ export type SampleCollectionItem = {
   } | null;
   order?: Record<string, unknown> | null;
   sample_code?: string;
-  actionable?: boolean;
   status_raw?: string;
   [key: string]: unknown;
 };
@@ -329,6 +336,43 @@ export async function arriveAtLab(
       body,
       ...opts(auth),
     }),
+  );
+}
+
+export type AssignableCollector = {
+  id: string;
+  email: string;
+  role?: string;
+  full_name?: string;
+};
+
+export async function fetchAssignableCollectors(auth: SampleCollectionAuth) {
+  const body = await apiRequest<{ success: boolean; data: { items: AssignableCollector[] } }>(
+    "/api/v1/sample-collections/collectors",
+    opts(auth),
+  );
+  return body.data?.items ?? [];
+}
+
+export async function assignCollector(
+  auth: SampleCollectionAuth,
+  collectionId: string,
+  body: { collector_id: string; collector_name?: string },
+) {
+  return unwrap(
+    apiRequest<{ success: boolean; data: SampleCollectionItem }>(
+      `/api/v1/sample-collections/${encodeURIComponent(collectionId)}/assign`,
+      { method: "POST", body, ...opts(auth) },
+    ),
+  );
+}
+
+export async function unassignCollector(auth: SampleCollectionAuth, collectionId: string) {
+  return unwrap(
+    apiRequest<{ success: boolean; data: SampleCollectionItem }>(
+      `/api/v1/sample-collections/${encodeURIComponent(collectionId)}/unassign`,
+      { method: "POST", body: {}, ...opts(auth) },
+    ),
   );
 }
 

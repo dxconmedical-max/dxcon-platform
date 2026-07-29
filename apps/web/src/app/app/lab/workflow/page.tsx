@@ -16,9 +16,12 @@ import {
   fetchLabOrder,
   fetchTestingQueue,
   medicalValidate,
+  medicalReject,
+  medicalReopen,
   passQc,
   receiveSpecimen,
   rejectSpecimen,
+  releaseLabResult,
   startProcessing,
   technicalValidate,
   verifyLabIdentifiers,
@@ -471,6 +474,49 @@ function LabWorkflowPanel() {
                 >
                   Medical validate
                 </Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={!canMedical || busy || !selectedOrder}
+                    onClick={() =>
+                      void run(
+                        () => medicalReject(auth, selectedOrder!, doctorNote || undefined),
+                        "Medical rejection recorded.",
+                      )
+                    }
+                  >
+                    Medical reject
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={!canMedical || busy || !selectedOrder}
+                    onClick={() =>
+                      void run(
+                        () => medicalReopen(auth, selectedOrder!, doctorNote || undefined),
+                        "Medical validation reopened.",
+                      )
+                    }
+                  >
+                    Reopen
+                  </Button>
+                  <Button
+                    size="sm"
+                    disabled={!canMedical || busy || !selectedOrder}
+                    onClick={() =>
+                      void run(() => releaseLabResult(auth, selectedOrder!), "Result released.")
+                    }
+                  >
+                    Release result
+                  </Button>
+                  <Link
+                    href="/app/lab/release"
+                    className="self-center text-sm text-sky-700 hover:underline"
+                  >
+                    Release board
+                  </Link>
+                </div>
               </div>
             ) : null}
 

@@ -47,6 +47,17 @@ STATUS_COLLECTED = "COLLECTED"
 STATUS_IN_TRANSIT = "IN_TRANSIT"
 STATUS_ARRIVED_AT_LAB = "ARRIVED_AT_LAB"
 
+# Statuses that mean the specimen has arrived at the laboratory (sync + queue)
+LAB_ARRIVAL_DB_STATUSES = frozenset(
+    {
+        COLLECTION_RECEIVED,
+        STATUS_ARRIVED_AT_LAB,
+        "ARRIVED_AT_LAB",
+        "RECEIVED",
+        "delivered",
+    }
+)
+
 # Sample types that do not require physical specimen collection
 NON_SPECIMEN_SAMPLE_TYPES = frozenset(
     {
@@ -289,9 +300,11 @@ def sync_biz_collection_from_sample(
     elif status == COLLECTION_IN_TRANSIT:
         biz_row.status = BIZ_IN_TRANSIT
         order.status = "in_transit"
-    elif status == COLLECTION_RECEIVED:
+    elif status in LAB_ARRIVAL_DB_STATUSES:
         biz_row.status = BIZ_DELIVERED
         order.status = "lab_received"
+        if not collection.arrived_at_lab:
+            collection.arrived_at_lab = datetime.utcnow()
     biz_row.updated_at = datetime.utcnow()
     order.updated_at = datetime.utcnow()
     if collection.barcode_value:
@@ -307,9 +320,10 @@ def enqueue_sample_and_lab_after_transition(
     *,
     actor: str | None = None,
 ) -> dict[str, Any]:
-    """After COLLECTED/IN_TRANSIT/RECEIVED, sync reception sample queue + lab queue."""
+    """After COLLECTED/IN_TRANSIT/lab-arrival, sync reception sample queue + lab queue."""
     result: dict[str, Any] = {}
-    if collection.marketplace_booking_id and collection.status != COLLECTION_RECEIVED:
+    arrived = collection.status in LAB_ARRIVAL_DB_STATUSES
+    if collection.marketplace_booking_id and not arrived:
         return result
 
     order = BizOrder.query.get(collection.order_id)
@@ -318,7 +332,7 @@ def enqueue_sample_and_lab_after_transition(
 
     sync_biz_collection_from_sample(collection, actor=actor)
 
-    if collection.status in {COLLECTION_COLLECTED, COLLECTION_IN_TRANSIT, COLLECTION_RECEIVED}:
+    if collection.status in {COLLECTION_COLLECTED, COLLECTION_IN_TRANSIT} or arrived:
         try:
             from app.reception_workspace.sample_queue_engine import (
                 STAGE_COLLECTED,
@@ -339,7 +353,7 @@ def enqueue_sample_and_lab_after_transition(
                         actor=actor,
                         sync_collection=False,
                     )
-                elif collection.status == COLLECTION_RECEIVED and item.stage in {
+                elif arrived and item.stage in {
                     STAGE_COLLECTED,
                     STAGE_TRANSPORT,
                 }:
@@ -362,12 +376,13 @@ def enqueue_sample_and_lab_after_transition(
         except Exception as exc:
             result["sample_queue_error"] = str(exc)
 
-    if collection.status == COLLECTION_RECEIVED:
+    if arrived:
         try:
             from app.reception_workspace.lab_queue_engine import ensure_lab_queue_item
 
             ensure_lab_queue_item(order.order_code, actor=actor)
             result["lab_queue"] = True
+            result["order_status"] = order.status
         except Exception as exc:
             result["lab_queue_error"] = str(exc)
 
