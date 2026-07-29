@@ -339,6 +339,43 @@ export async function arriveAtLab(
   );
 }
 
+export type AssignableCollector = {
+  id: string;
+  email: string;
+  role?: string;
+  full_name?: string;
+};
+
+export async function fetchAssignableCollectors(auth: SampleCollectionAuth) {
+  const body = await apiRequest<{ success: boolean; data: { items: AssignableCollector[] } }>(
+    "/api/v1/sample-collections/collectors",
+    opts(auth),
+  );
+  return body.data?.items ?? [];
+}
+
+export async function assignCollector(
+  auth: SampleCollectionAuth,
+  collectionId: string,
+  body: { collector_id: string; collector_name?: string },
+) {
+  return unwrap(
+    apiRequest<{ success: boolean; data: SampleCollectionItem }>(
+      `/api/v1/sample-collections/${encodeURIComponent(collectionId)}/assign`,
+      { method: "POST", body, ...opts(auth) },
+    ),
+  );
+}
+
+export async function unassignCollector(auth: SampleCollectionAuth, collectionId: string) {
+  return unwrap(
+    apiRequest<{ success: boolean; data: SampleCollectionItem }>(
+      `/api/v1/sample-collections/${encodeURIComponent(collectionId)}/unassign`,
+      { method: "POST", body: {}, ...opts(auth) },
+    ),
+  );
+}
+
 export async function fetchTransportStatus(auth: SampleCollectionAuth, collectionId: string) {
   return unwrap(
     apiRequest<{ success: boolean; data: Record<string, unknown> }>(

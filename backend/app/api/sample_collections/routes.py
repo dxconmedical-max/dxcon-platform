@@ -348,6 +348,62 @@ def lab_arrive_by_collection(collection_id):
     }, 200
 
 
+@sample_collections_bp.route("/collectors", methods=["GET"])
+@collection_api_read
+def list_collectors():
+    from app.sample_collection_workspace.collection_routing import list_assignable_collectors
+
+    org = request.headers.get("X-Organization-ID") or request.headers.get("X-Organization-Id")
+    return {
+        "success": True,
+        "data": {"items": list_assignable_collectors(organization_id=org)},
+    }, 200
+
+
+@sample_collections_bp.route("/<collection_id>/assign", methods=["POST"])
+@collection_api_write
+def assign_collection_collector(collection_id):
+    """Assign or reassign a field collector (HOME/CLINIC)."""
+    from app.sample_collection_workspace.collection_domain import CollectionDomainError
+    from app.sample_collection_workspace.collection_routing import assign_collector
+
+    data = request.get_json(silent=True) or {}
+    try:
+        collection = assign_collector(
+            collection_id,
+            collector_id=data.get("collector_id") or "",
+            collector_name=data.get("collector_name"),
+            actor=_actor(),
+        )
+        db.session.commit()
+    except CollectionDomainError as exc:
+        db.session.rollback()
+        return {"success": False, "error": exc.message}, exc.status_code
+    return {
+        "success": True,
+        "data": SampleCollectionWorkflowService._enrich_payload(collection),
+    }, 200
+
+
+@sample_collections_bp.route("/<collection_id>/unassign", methods=["POST"])
+@collection_api_write
+def unassign_collection_collector(collection_id):
+    """Release collector assignment → PENDING_ASSIGNMENT."""
+    from app.sample_collection_workspace.collection_domain import CollectionDomainError
+    from app.sample_collection_workspace.collection_routing import release_collector_assignment
+
+    try:
+        collection = release_collector_assignment(collection_id, actor=_actor())
+        db.session.commit()
+    except CollectionDomainError as exc:
+        db.session.rollback()
+        return {"success": False, "error": exc.message}, exc.status_code
+    return {
+        "success": True,
+        "data": SampleCollectionWorkflowService._enrich_payload(collection),
+    }, 200
+
+
 @sample_collections_bp.route("/<collection_id>/transport", methods=["GET"])
 @collection_api_read
 def transport(collection_id):

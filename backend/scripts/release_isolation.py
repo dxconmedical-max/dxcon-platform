@@ -18,6 +18,7 @@ BACKEND = ROOT / "backend"
 SHARED_WIRING = {
     "backend/app/__init__.py",
     "backend/app/core/statuses.py",
+    "backend/app/business_engine/statuses.py",
     "backend/app/models/__init__.py",
     "backend/app/bootstrap/blueprints.py",
     "backend/scripts/production_staging_lib.py",
@@ -571,7 +572,10 @@ RELEASES: tuple[ReleaseSpec, ...] = (
         "backend/scripts/verify_laboratory_workflow.py",
         "backend/tests/test_laboratory_workflow.py",
         "backend/tests/test_lab_workspace.py",
+        "backend/tests/test_laboratory_lifecycle_e2e.py",
         "apps/web/src/app/app/lab/",
+        "apps/web/src/app/app/doctor/review/",
+        "apps/web/src/app/app/patient/results/",
         "apps/web/src/lib/api/labWorkflow.ts",
     )),
     ReleaseSpec("3.2", "Laboratory Operations Platform", (
@@ -631,6 +635,7 @@ RELEASES: tuple[ReleaseSpec, ...] = (
         "backend/tests/test_sample_collection_production.py",
         "apps/web/src/lib/api/sampleCollection.ts",
         "apps/web/src/app/app/collector/",
+        "apps/web/src/app/app/reception/m2/field-requests/",
     )),
 )
 

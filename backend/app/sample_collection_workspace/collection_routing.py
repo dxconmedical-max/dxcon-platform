@@ -29,6 +29,7 @@ from app.sample_collection_workspace.collection_domain import (
     assert_transition,
     infer_legacy_mode,
     initial_status_for_mode,
+    is_field_mode,
     normalize_status,
     validate_collection_request,
     validate_mode,
@@ -403,6 +404,114 @@ def apply_status_transition(collection_id: str, target: str, *, actor: str | Non
         collection.order_verified = True
     db.session.flush()
     return collection
+
+
+def assign_collector(
+    collection_id: str,
+    *,
+    collector_id: str,
+    collector_name: str | None = None,
+    actor: str | None = None,
+) -> SampleCollection:
+    """Assign or reassign a field collector. Updates queue immediately on flush."""
+    from app.models.user import User
+    from app.core.audit import write_audit
+
+    collection = SampleCollection.query.get(collection_id)
+    if not collection:
+        raise CollectionDomainError("Sample collection not found", 404)
+    if not is_field_mode(collection.collection_mode):
+        raise CollectionDomainError("Only HOME/CLINIC collections can be assigned to field collectors", 400)
+    cid = (collector_id or "").strip()
+    if not cid:
+        raise CollectionDomainError("collector_id is required", 400)
+
+    user = User.query.get(cid)
+    name = (collector_name or "").strip() or None
+    if user:
+        name = name or getattr(user, "full_name", None) or user.email or cid
+    if not name:
+        name = cid
+
+    current = normalize_status(collection.status)
+    previous_collector = collection.collector_id
+    if current == ST_PENDING_ASSIGNMENT:
+        assert_transition(collection.status, ST_ASSIGNED)
+        collection.status = ST_ASSIGNED
+        action = "COLLECTION_ASSIGNED"
+    elif current == ST_ASSIGNED:
+        action = "COLLECTION_REASSIGNED"
+    elif current in {ST_REQUESTED, "PENDING"}:
+        collection.status = ST_ASSIGNED
+        action = "COLLECTION_ASSIGNED"
+    else:
+        raise CollectionDomainError(
+            f"Cannot assign collector from status {collection.status}",
+            409,
+        )
+
+    collection.collector_id = cid
+    collection.collector_name = name
+    collection.updated_at = datetime.utcnow()
+    db.session.flush()
+    write_audit(
+        action=action,
+        object_type="SampleCollection",
+        object_id=collection.id,
+        user_email=actor,
+    )
+    return collection
+
+
+def release_collector_assignment(
+    collection_id: str,
+    *,
+    actor: str | None = None,
+) -> SampleCollection:
+    """Release assignment → PENDING_ASSIGNMENT; clears collector."""
+    from app.core.audit import write_audit
+
+    collection = SampleCollection.query.get(collection_id)
+    if not collection:
+        raise CollectionDomainError("Sample collection not found", 404)
+    if not is_field_mode(collection.collection_mode):
+        raise CollectionDomainError("Only HOME/CLINIC collections support assignment release", 400)
+    current = normalize_status(collection.status)
+    if current not in {ST_ASSIGNED, ST_PENDING_ASSIGNMENT}:
+        raise CollectionDomainError(
+            f"Cannot release assignment from status {collection.status}",
+            409,
+        )
+    collection.collector_id = None
+    collection.collector_name = None
+    collection.status = ST_PENDING_ASSIGNMENT
+    collection.updated_at = datetime.utcnow()
+    db.session.flush()
+    write_audit(
+        action="COLLECTION_ASSIGNMENT_RELEASED",
+        object_type="SampleCollection",
+        object_id=collection.id,
+        user_email=actor,
+    )
+    return collection
+
+
+def list_assignable_collectors(*, organization_id: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
+    from app.models.user import User
+
+    del organization_id
+    roles = ("COLLECTOR", "PARTNER_COLLECTOR", "DRIVER", "ADMIN", "SUPER_ADMIN")
+    q = User.query.filter(User.is_active.is_(True), User.role.in_(roles))
+    rows = q.order_by(User.email).limit(limit).all()
+    return [
+        {
+            "id": u.id,
+            "email": u.email,
+            "role": u.role,
+            "full_name": getattr(u, "full_name", None) or u.email,
+        }
+        for u in rows
+    ]
 
 
 def report_ambiguous_modes(limit: int = 200) -> dict[str, Any]:

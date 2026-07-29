@@ -1392,6 +1392,7 @@ class SampleCollectionWorkflowService:
         now = datetime.utcnow()
         sample.status = SAMPLE_RECEIVED
         sample.updated_at = now
+        # Canonical collection status; desk_bridge treats ARRIVED_AT_LAB as lab arrival
         collection.status = "ARRIVED_AT_LAB"
         collection.arrived_at_lab = now
         collection.updated_at = now
