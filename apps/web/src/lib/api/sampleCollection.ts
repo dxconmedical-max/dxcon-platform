@@ -10,7 +10,8 @@ export type SampleCollectionAuth = {
 
 export type SampleCollectionItem = {
   id: string;
-  source?: "field" | "desk" | string;
+  source?: "field" | "desk" | "reception" | string;
+  collection_mode?: "AT_RECEPTION" | "HOME_COLLECTION" | "CLINIC_COLLECTION" | string;
   status: string;
   order_id?: string;
   marketplace_booking_id?: string | null;
@@ -21,6 +22,20 @@ export type SampleCollectionItem = {
   expected_barcode?: string | null;
   collection_location?: string | null;
   location_city?: string | null;
+  pickup_address?: string | null;
+  pickup_city?: string | null;
+  pickup_province?: string | null;
+  pickup_district?: string | null;
+  pickup_ward?: string | null;
+  contact_person?: string | null;
+  contact_phone?: string | null;
+  requested_date?: string | null;
+  requested_time_window?: string | null;
+  clinic_name?: string | null;
+  priority?: string | null;
+  dispatcher_actionable?: boolean;
+  actionable?: boolean;
+  workflow_path?: string | null;
   quality_status?: string | null;
   rejection_reason?: string | null;
   collected_at?: string | null;
@@ -50,8 +65,6 @@ export type SampleCollectionItem = {
   } | null;
   order?: Record<string, unknown> | null;
   sample_code?: string;
-  pickup_address?: string;
-  actionable?: boolean;
   status_raw?: string;
   [key: string]: unknown;
 };

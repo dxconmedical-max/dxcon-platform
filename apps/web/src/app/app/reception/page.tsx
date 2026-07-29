@@ -9,12 +9,22 @@ const ACTIONS = [
   {
     label: "Create laboratory order",
     href: "/app/reception/workflow",
-    description: "Patient → tests → review pricing → create order (Milestone 1).",
+    description: "Patient → tests → collection method → create order.",
+  },
+  {
+    label: "Desk collections",
+    href: "/app/reception/desk-collections",
+    description: "AT_RECEPTION specimens: verify, collect, hand over to lab.",
+  },
+  {
+    label: "Field collection requests",
+    href: "/app/reception/m2/field-requests",
+    description: "HOME / CLINIC requests awaiting field collector assignment.",
   },
   {
     label: "Reception M2 foundation",
     href: "/app/reception/m2",
-    description: "Architecture hub: payment, receipt, barcode, QR, lab/sample queues (no logic yet).",
+    description: "Architecture hub: payment, receipt, barcode, QR, lab/sample queues.",
   },
   {
     label: "Receipts",

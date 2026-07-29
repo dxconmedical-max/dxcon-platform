@@ -212,6 +212,8 @@ def create_reception_order(
     queue_entry_id: str | None = None,
     actor: str | None = None,
     organization_id: str | None = None,
+    collection_mode: str | None = None,
+    pickup: dict | None = None,
 ) -> dict[str, Any]:
     if not test_catalog_ids:
         raise ReceptionWorkspaceError("At least one test is required")
@@ -238,29 +240,39 @@ def create_reception_order(
             entry.invoice_id = invoice.id
             entry.workflow_status = WORKFLOW_PAYMENT_PENDING
 
-    # Authoritative routing: specimen-requiring orders enter Collector Queue via SampleCollection
     sample_collection = None
-    from app.sample_collection_workspace.desk_bridge import (
-        ensure_desk_sample_collection,
+    from app.sample_collection_workspace.collection_domain import (
+        CollectionDomainError,
+        MODE_AT_RECEPTION,
+        workflow_path_for_mode,
+    )
+    from app.sample_collection_workspace.collection_routing import (
+        ensure_collection_for_order,
         order_requires_specimen_collection,
     )
 
     if order_requires_specimen_collection(order):
+        mode = (collection_mode or "").strip() or MODE_AT_RECEPTION
         if not order.barcode_value:
             order.barcode_value = f"BC-{order.order_code}"
+            db.session.flush()
         try:
-            sample_collection = ensure_desk_sample_collection(
+            sample_collection = ensure_collection_for_order(
                 order,
-                actor=actor,
+                collection_mode=mode,
+                pickup=pickup or {},
                 organization_id=organization_id,
+                actor=actor,
             )
+        except CollectionDomainError as exc:
+            raise ReceptionWorkspaceError(exc.message) from exc
         except Exception as exc:
             raise ReceptionWorkspaceError(
-                f"Failed to create collector queue record for order {order.order_code}: {exc}"
+                f"Failed to create collection record for order {order.order_code}: {exc}"
             ) from exc
         if sample_collection is None:
             raise ReceptionWorkspaceError(
-                f"Collector queue record missing after create for order {order.order_code}"
+                f"Collection record missing after create for order {order.order_code}"
             )
 
     write_reception_audit(action="order_created", object_type="order", object_id=order.order_code, actor=actor)
@@ -270,12 +282,15 @@ def create_reception_order(
         "pricing": {"subtotal": order.subtotal, "discount": order.discount, "total": order.total_amount},
     }
     if sample_collection:
+        mode = sample_collection.collection_mode or MODE_AT_RECEPTION
         result["sample_collection_id"] = sample_collection.id
-        result["collector_queue"] = {
+        result["collection"] = {
             "id": sample_collection.id,
-            "source": "desk",
+            "collection_mode": mode,
             "status": sample_collection.status,
-            "collector_name": sample_collection.collector_name,
+            "workflow_path": workflow_path_for_mode(mode),
+            "pickup_address": sample_collection.pickup_address,
+            "pickup_city": sample_collection.pickup_city,
             "collection_location": sample_collection.collection_location,
         }
     return result

@@ -58,6 +58,7 @@ def dashboard():
 @sample_collections_bp.route("/queue", methods=["GET"])
 @collection_api_read
 def queue():
+    """Field collector queue by default (HOME_COLLECTION / CLINIC_COLLECTION)."""
     try:
         payload = list_production_queue(
             status=request.args.get("status"),
@@ -66,7 +67,8 @@ def queue():
             date_from=request.args.get("date") or request.args.get("date_from"),
             date_to=request.args.get("date_to"),
             partner_id=request.args.get("partner_id") or request.headers.get("X-Partner-Id"),
-            include_desk=request.args.get("include_desk", "true").lower() != "false",
+            include_desk=False,
+            queue=request.args.get("queue") or "field",
             role=_role(),
             scoped_collector_id=_scoped_collector_id(),
             organization_id=request.headers.get("X-Organization-ID")
@@ -85,9 +87,9 @@ def queue():
 @collection_api_read
 def get_collection(collection_id):
     try:
-        from app.sample_collection_workspace.desk_bridge import annotate_queue_item
+        from app.sample_collection_workspace.collection_routing import annotate_collection_payload
 
-        payload = annotate_queue_item(
+        payload = annotate_collection_payload(
             SampleCollectionWorkflowService.get_collection(collection_id)
         )
     except SampleCollectionWorkflowError as exc:

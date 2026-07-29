@@ -98,10 +98,13 @@ function CollectorWorkflowPanel() {
     setLoading(true);
     setError(null);
     try {
-      // Desk SampleCollections are first-class workflow records (include_desk only
-      // controls legacy BizCollection backfill on the API).
-      const data = await fetchCollectionQueue(auth, { include_desk: true });
-      const items = data.items ?? [];
+      const data = await fetchCollectionQueue(auth, { include_desk: false });
+      const items = (data.items ?? []).filter(
+        (item) =>
+          item.collection_mode !== "AT_RECEPTION" &&
+          item.source !== "desk" &&
+          item.source !== "reception",
+      );
       setQueue(items);
       const target = selectedId || idParam || items[0]?.id || null;
       setSelectedId(target);

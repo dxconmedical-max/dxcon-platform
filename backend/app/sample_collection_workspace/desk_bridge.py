@@ -225,76 +225,21 @@ def ensure_desk_sample_collection(
     commit: bool = False,
     require_specimen: bool | None = None,
 ) -> SampleCollection | None:
-    """Idempotent: one active SampleCollection per specimen-requiring BizOrder.
+    """Deprecated alias → ensure_collection_for_order(..., AT_RECEPTION)."""
+    from app.sample_collection_workspace.collection_domain import MODE_AT_RECEPTION
+    from app.sample_collection_workspace.collection_routing import ensure_collection_for_order
 
-    Returns None when the order does not require specimen collection.
-    Raises on persistence failure (caller must not swallow silently).
-    """
-    del actor  # reserved for audit callers
-    needs = order_requires_specimen_collection(order) if require_specimen is None else require_specimen
-    if not needs:
+    if require_specimen is False:
         return None
-
-    existing = (
-        SampleCollection.query.filter_by(order_id=order.id)
-        .filter(SampleCollection.status != COLLECTION_REJECTED)
-        .order_by(SampleCollection.created_at.desc())
-        .first()
+    if require_specimen is None and not order_requires_specimen_collection(order):
+        return None
+    return ensure_collection_for_order(
+        order,
+        collection_mode=MODE_AT_RECEPTION,
+        organization_id=organization_id,
+        actor=actor,
+        commit=commit,
     )
-    columns = _sample_collection_columns()
-    if existing:
-        notes = getattr(existing, "notes", None) or ""
-        if "source:desk" not in notes and (not columns or "notes" in columns):
-            existing.notes = (notes + "\nsource:desk").strip()
-        if not getattr(existing, "expected_barcode", None) and (not columns or "expected_barcode" in columns):
-            existing.expected_barcode = order.barcode_value or f"BC-{order.order_code}"
-        if not getattr(existing, "collector_name", None) and (not columns or "collector_name" in columns):
-            existing.collector_name = WALK_IN_COLLECTOR
-        if not getattr(existing, "collection_location", None) and (
-            not columns or "collection_location" in columns
-        ):
-            existing.collection_location = RECEPTION_DESK_LOCATION
-        if organization_id and (not columns or "partner_id" in columns):
-            if not existing.partner_id:
-                existing.partner_id = organization_id
-        if commit:
-            db.session.commit()
-        else:
-            db.session.flush()
-        return existing
-
-    if not order.barcode_value:
-        order.barcode_value = f"BC-{order.order_code}"
-
-    kwargs: dict[str, Any] = {"order_id": order.id, "status": COLLECTION_PENDING}
-    _apply_if_column(kwargs, columns, "marketplace_booking_id", None)
-    _apply_if_column(kwargs, columns, "collector_name", WALK_IN_COLLECTOR)
-    _apply_if_column(kwargs, columns, "collection_location", RECEPTION_DESK_LOCATION)
-    _apply_if_column(kwargs, columns, "location_city", None)
-    _apply_if_column(kwargs, columns, "expected_barcode", order.barcode_value)
-    _apply_if_column(kwargs, columns, "barcode_value", None)
-    _apply_if_column(kwargs, columns, "notes", "source:desk")
-    _apply_if_column(kwargs, columns, "patient_verified", False)
-    _apply_if_column(kwargs, columns, "order_verified", False)
-    _apply_if_column(kwargs, columns, "specimen_type", "BLOOD")
-    if organization_id:
-        _apply_if_column(kwargs, columns, "partner_id", organization_id)
-
-    collection = SampleCollection(**kwargs)
-    db.session.add(collection)
-    try:
-        db.session.flush()
-    except Exception:
-        logger.exception(
-            "Failed to create desk SampleCollection for order %s",
-            order.order_code,
-        )
-        raise
-
-    if commit:
-        db.session.commit()
-    return collection
-
 
 def ensure_biz_collection_row(
     order: BizOrder,
