@@ -461,5 +461,6 @@ class CollectionModeRoutingTests(unittest.TestCase):
         board = list_home_field_requests(role="COLLECTOR", organization_id="org-home")
         self.assertNotIn(sc.id, {i["id"] for i in board["items"]})
 
+
 if __name__ == "__main__":
     unittest.main()
