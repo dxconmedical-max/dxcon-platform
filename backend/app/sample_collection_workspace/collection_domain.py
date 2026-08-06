@@ -117,6 +117,27 @@ FIELD_QUEUE_STATUSES = frozenset(
     }
 )
 
+# Reception Field Collection Requests — unassigned / awaiting assignment
+FIELD_REQUEST_BOARD_STATUSES = frozenset(
+    {
+        ST_REQUESTED,
+        ST_PENDING_ASSIGNMENT,
+        ST_RECOLLECT_REQUIRED,
+        "PENDING",
+        "AWAITING_COLLECTION",
+    }
+)
+
+# Collector Queue — assigned jobs ready for field work
+COLLECTOR_ACTIVE_QUEUE_STATUSES = frozenset(
+    {
+        ST_ASSIGNED,
+        ST_VERIFIED,
+        "CHECKED_IN",
+        "assigned",
+    }
+)
+
 TRANSITIONS: dict[str, frozenset[str]] = {
     ST_DRAFT: frozenset({ST_REQUESTED, ST_PENDING_ASSIGNMENT, ST_CANCELLED}),
     ST_REQUESTED: frozenset(
@@ -301,9 +322,12 @@ def validate_pickup_details(mode: str, payload: dict[str, Any]) -> dict[str, Any
 
 
 def initial_status_for_mode(mode: str) -> str:
-    mode = validate_mode(mode)
-    if mode in FIELD_COLLECTION_MODES:
-        return ST_PENDING_ASSIGNMENT
+    """New SampleCollection rows start as REQUESTED for every mode.
+
+    Field HOME/CLINIC rows are assignable from REQUESTED (see TRANSITIONS).
+    PENDING_ASSIGNMENT remains a valid post-release / dispatcher state.
+    """
+    validate_mode(mode)
     return ST_REQUESTED
 
 

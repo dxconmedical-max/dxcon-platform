@@ -117,33 +117,32 @@ class CollectionRoutingSmokeTests(unittest.TestCase):
         sc = SampleCollection.query.get(result["sample_collection_id"])
         self.assertIsNotNone(sc)
         self.assertEqual(sc.collection_mode, MODE_HOME_COLLECTION)
-        self.assertEqual(sc.status, ST_PENDING_ASSIGNMENT)
+        self.assertEqual(sc.status, ST_REQUESTED)
         self.assertEqual(sc.pickup_address, "12 Nguyen Trai")
         self.assertIsNone(sc.collector_id)
 
-        # ✓ Field Collection Request created
+        # ✓ Field Collection Request created (REQUESTED)
         field_board = list_home_field_requests()
         self.assertIn(sc.id, {i["id"] for i in field_board["items"]})
         home_only = [i for i in field_board["items"] if i.get("collection_mode") == MODE_HOME_COLLECTION]
         self.assertIn(sc.id, {i["id"] for i in home_only})
 
-        # ✓ Collector queue has one pending job (HOME)
+        # ✓ Collector queue does NOT show unassigned REQUESTED jobs
         collector = list_production_queue()
         collector_ids = {i["id"] for i in collector["items"]}
-        self.assertIn(sc.id, collector_ids)
-        self.assertEqual(collector["count"], 1)
-        job = next(i for i in collector["items"] if i["id"] == sc.id)
-        self.assertEqual(job["collection_mode"], MODE_HOME_COLLECTION)
-        self.assertIn(job["status"], {ST_PENDING_ASSIGNMENT, "PENDING_ASSIGNMENT", "REQUESTED"})
+        self.assertNotIn(sc.id, collector_ids)
 
-        # API parity
+        # API parity — field requests
         self._session()
         fq = self.client.get("/api/v1/sample-collections/queue")
         self.assertEqual(fq.status_code, 200)
-        self.assertIn(sc.id, {i["id"] for i in fq.get_json()["data"]["items"]})
+        self.assertNotIn(sc.id, {i["id"] for i in fq.get_json()["data"]["items"]})
         fr = self.client.get("/api/v1/reception/workspace/field-collection-requests")
         self.assertEqual(fr.status_code, 200)
         self.assertIn(sc.id, {i["id"] for i in fr.get_json()["data"]["items"]})
+        fr2 = self.client.get("/api/v1/reception/field-requests")
+        self.assertEqual(fr2.status_code, 200)
+        self.assertIn(sc.id, {i["id"] for i in fr2.get_json()["data"]["items"]})
 
     def test_scenario_2_at_reception_no_collector_queue(self):
         """Reception → CBC → AT_RECEPTION → order + SC, NO collector queue."""
@@ -210,7 +209,7 @@ class CollectionRoutingSmokeTests(unittest.TestCase):
         sc = SampleCollection.query.get(result["sample_collection_id"])
         self.assertIsNotNone(sc)
         self.assertEqual(sc.collection_mode, MODE_CLINIC_COLLECTION)
-        self.assertEqual(sc.status, ST_PENDING_ASSIGNMENT)
+        self.assertEqual(sc.status, ST_REQUESTED)
         self.assertEqual(sc.clinic_name, "DxCon Partner Clinic")
         self.assertEqual(sc.collection_location, "DxCon Partner Clinic")
 

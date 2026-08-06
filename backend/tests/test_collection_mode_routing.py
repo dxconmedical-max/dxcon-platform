@@ -23,6 +23,7 @@ from app.sample_collection_workspace.collection_domain import (
     MODE_AT_RECEPTION,
     MODE_CLINIC_COLLECTION,
     MODE_HOME_COLLECTION,
+    ST_ASSIGNED,
     ST_COLLECTED,
     ST_PENDING_ASSIGNMENT,
     ST_REQUESTED,
@@ -164,14 +165,15 @@ class CollectionModeRoutingTests(unittest.TestCase):
         sc_id = result["sample_collection_id"]
         sc = SampleCollection.query.get(sc_id)
         self.assertEqual(sc.collection_mode, MODE_HOME_COLLECTION)
-        self.assertEqual(sc.status, ST_PENDING_ASSIGNMENT)
+        self.assertEqual(sc.status, ST_REQUESTED)
         self.assertEqual(sc.pickup_address, "12 Nguyen Trai")
         self.assertIsNotNone(sc.sample_tracking_id)
         self.assertIsNone(sc.collector_id)
         home_board = list_home_field_requests()
         self.assertIn(sc_id, {i["id"] for i in home_board["items"]})
 
-        self.assertIn(sc_id, {i["id"] for i in list_field_collector_queue()["items"]})
+        # Unassigned REQUESTED stays off Collector Queue
+        self.assertNotIn(sc_id, {i["id"] for i in list_field_collector_queue()["items"]})
         self.assertNotIn(sc_id, {i["id"] for i in list_reception_desk_queue()["items"]})
 
         # Dispatcher assignment before collector workflow
@@ -179,6 +181,9 @@ class CollectionModeRoutingTests(unittest.TestCase):
         sc.collector_id = "collector-1"
         sc.status = "ASSIGNED"
         db.session.commit()
+
+        self.assertIn(sc_id, {i["id"] for i in list_field_collector_queue()["items"]})
+        self.assertNotIn(sc_id, {i["id"] for i in list_home_field_requests()["items"]})
 
         barcode = result["order"].get("barcode_value") or f"BC-{result['order']['order_code']}"
         SampleCollectionWorkflowService.verify_identifiers(
@@ -286,6 +291,11 @@ class CollectionModeRoutingTests(unittest.TestCase):
             actor=self.admin.email,
         )
         db.session.commit()
+        for payload in (a, b):
+            row = SampleCollection.query.get(payload["sample_collection_id"])
+            row.status = ST_ASSIGNED
+            row.collector_id = "collector-org"
+        db.session.commit()
         scoped = list_field_collector_queue(role="COLLECTOR", organization_id="org-A")
         ids = {i["id"] for i in scoped["items"]}
         self.assertIn(a["sample_collection_id"], ids)
@@ -333,11 +343,27 @@ class CollectionModeRoutingTests(unittest.TestCase):
         self.assertIn(desk["sample_collection_id"], desk_ids)
         self.assertNotIn(field["sample_collection_id"], desk_ids)
 
+        fr = self.client.get("/api/v1/reception/workspace/field-collection-requests")
+        self.assertEqual(fr.status_code, 200)
+        request_ids = {i["id"] for i in fr.get_json()["data"]["items"]}
+        self.assertIn(field["sample_collection_id"], request_ids)
+        self.assertNotIn(desk["sample_collection_id"], request_ids)
+
+        # REQUESTED home jobs stay off collector queue until ASSIGNED
         fq = self.client.get("/api/v1/sample-collections/queue")
         self.assertEqual(fq.status_code, 200)
         field_ids = {i["id"] for i in fq.get_json()["data"]["items"]}
-        self.assertIn(field["sample_collection_id"], field_ids)
+        self.assertNotIn(field["sample_collection_id"], field_ids)
         self.assertNotIn(desk["sample_collection_id"], field_ids)
+
+        sc = SampleCollection.query.get(field["sample_collection_id"])
+        sc.status = ST_ASSIGNED
+        sc.collector_id = "collector-api"
+        db.session.commit()
+        fq2 = self.client.get("/api/v1/sample-collections/queue")
+        self.assertEqual(fq2.status_code, 200)
+        assigned_ids = {i["id"] for i in fq2.get_json()["data"]["items"]}
+        self.assertIn(field["sample_collection_id"], assigned_ids)
 
 
 
@@ -397,7 +423,11 @@ class CollectionModeRoutingTests(unittest.TestCase):
         ):
             payload = SampleCollectionWorkflowService._enrich_payload(sc, live_columns)
             self.assertEqual(payload.get("collection_mode"), MODE_HOME_COLLECTION)
-            queue = list_field_collector_queue()
+
+        sc.status = "ASSIGNED"
+        sc.collector_id = "collector-compat"
+        db.session.commit()
+        queue = list_field_collector_queue()
         self.assertIn(sc_id, {i["id"] for i in queue["items"]})
 
     def test_l_null_partner_id_visible_to_org_collector(self):
@@ -421,12 +451,16 @@ class CollectionModeRoutingTests(unittest.TestCase):
         db.session.commit()
         sc = SampleCollection.query.get(result["sample_collection_id"])
         sc.partner_id = None
+        sc.status = ST_ASSIGNED
+        sc.collector_id = "collector-null-org"
         db.session.commit()
 
         scoped = list_field_collector_queue(role="COLLECTOR", organization_id="org-home")
         self.assertIn(sc.id, {i["id"] for i in scoped["items"]})
+        # REQUESTED board excludes ASSIGNED
         board = list_home_field_requests(role="COLLECTOR", organization_id="org-home")
-        self.assertIn(sc.id, {i["id"] for i in board["items"]})
+        self.assertNotIn(sc.id, {i["id"] for i in board["items"]})
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -58,8 +58,9 @@ def dashboard():
 @sample_collections_bp.route("/queue", methods=["GET"])
 @collection_api_read
 def queue():
-    """Field collector queue by default (HOME_COLLECTION / CLINIC_COLLECTION)."""
+    """Field collector queue by default (HOME_COLLECTION)."""
     try:
+        mine_raw = (request.args.get("mine") or "").strip().lower()
         payload = list_production_queue(
             status=request.args.get("status"),
             collector_id=request.args.get("collector"),
@@ -73,6 +74,7 @@ def queue():
             scoped_collector_id=_scoped_collector_id(),
             organization_id=request.headers.get("X-Organization-ID")
             or request.headers.get("X-Organization-Id"),
+            mine=mine_raw in {"1", "true", "yes"},
         )
     except SampleCollectionWorkflowError as exc:
         code = "SERVICE_UNAVAILABLE" if exc.status_code == 503 else "WORKFLOW_ERROR"

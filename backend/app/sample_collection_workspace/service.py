@@ -97,19 +97,22 @@ def list_production_queue(
     scoped_collector_id: str | None = None,
     organization_id: str | None = None,
     queue: str | None = None,
+    mine: bool = False,
 ) -> dict[str, Any]:
-    """Collector field queue by default (HOME/CLINIC only).
+    """Collector field queue by default (HOME only via list_field_collector_queue).
 
-    include_desk is deprecated for merging desks into the field queue.
-    Use queue=desk or GET /reception/.../desk-collections for AT_RECEPTION.
+    Unassigned jobs stay visible on the default queue. Pass mine=True (or an
+    explicit collector_id) to restrict to one collector's assignments.
     """
     from app.sample_collection_workspace.collection_routing import (
         list_field_collector_queue,
         list_reception_desk_queue,
     )
 
+    # Do not auto-scope awaiting queue to the logged-in collector — that hid
+    # every unassigned HOME request (collector_id IS NULL) from COLLECTOR roles.
     effective_collector = collector_id
-    if role in {"COLLECTOR", "PARTNER_COLLECTOR", "DRIVER"} and scoped_collector_id:
+    if mine and not effective_collector and scoped_collector_id:
         effective_collector = scoped_collector_id
 
     effective_partner = partner_id
@@ -117,6 +120,9 @@ def list_production_queue(
         "COLLECTOR",
         "PARTNER_COLLECTOR",
         "DRIVER",
+        "RECEPTION",
+        "RECEPTIONIST",
+        "PARTNER_RECEPTION",
     }:
         effective_partner = organization_id
 
