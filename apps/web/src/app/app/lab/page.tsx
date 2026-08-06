@@ -16,6 +16,11 @@ const ACTIONS = [
     href: "/app/lab/workflow",
     description: "Receive → accession → process → results → tech & medical validation.",
   },
+  {
+    label: "Release results",
+    href: "/app/lab/release",
+    description: "Release medically approved reports for patient download.",
+  },
 ];
 
 export default function LabPage() {

@@ -94,6 +94,11 @@ def tests_search():
 def orders_create():
     payload = request.get_json(silent=True) or {}
     try:
+        organization_id = (
+            request.headers.get("X-Organization-ID")
+            or request.headers.get("X-Organization-Id")
+            or payload.get("organization_id")
+        )
         result = create_reception_order(
             patient_code=payload.get("patient_code", ""),
             test_catalog_ids=payload.get("test_catalog_ids") or payload.get("tests") or [],
@@ -101,6 +106,29 @@ def orders_create():
             note=payload.get("note"),
             queue_entry_id=payload.get("queue_entry_id"),
             actor=_actor(),
+            organization_id=organization_id,
+            collection_mode=payload.get("collection_mode"),
+            pickup={
+                "specimen_type": payload.get("specimen_type"),
+                "pickup_address": payload.get("pickup_address"),
+                "pickup_city": payload.get("pickup_city") or payload.get("city"),
+                "pickup_province": payload.get("pickup_province") or payload.get("province"),
+                "pickup_district": payload.get("pickup_district") or payload.get("district"),
+                "pickup_ward": payload.get("pickup_ward") or payload.get("ward"),
+                "contact_person": payload.get("contact_person"),
+                "contact_phone": payload.get("contact_phone") or payload.get("phone"),
+                "requested_date": payload.get("requested_date"),
+                "requested_time_window": payload.get("requested_time_window")
+                or payload.get("preferred_time")
+                or payload.get("time_window"),
+                "clinic_name": payload.get("clinic_name") or payload.get("clinic"),
+                "priority": payload.get("priority"),
+                "note": payload.get("collection_note")
+                or payload.get("pickup_note")
+                or payload.get("notes"),
+                "latitude": payload.get("latitude") or payload.get("pickup_latitude"),
+                "longitude": payload.get("longitude") or payload.get("pickup_longitude"),
+            },
         )
         db.session.commit()
         return {"success": True, "data": result}, 201
@@ -663,6 +691,46 @@ def lab_queue_priority(order_ref: str):
         message = str(exc)
         status = 404 if "not found" in message.lower() else 400
         return {"success": False, "error": message}, status
+
+
+@reception_workspace_bp.route("/desk-collections", methods=["GET"])
+@reception_api_read
+def desk_collections_queue():
+    """AT_RECEPTION worklist — never mixed into field Collector Queue."""
+    from app.sample_collection_workspace.collection_routing import list_reception_desk_queue
+
+    try:
+        payload = list_reception_desk_queue(
+            status=request.args.get("status"),
+            location=request.args.get("location"),
+            date_from=request.args.get("date") or request.args.get("date_from"),
+            date_to=request.args.get("date_to"),
+            role=session.get("role") or request.headers.get("X-User-Role"),
+            organization_id=request.headers.get("X-Organization-ID")
+            or request.headers.get("X-Organization-Id"),
+        )
+        return {"success": True, "data": payload}, 200
+    except Exception as exc:
+        return {"success": False, "error": str(exc)}, 400
+
+
+@reception_workspace_bp.route("/field-collection-requests", methods=["GET"])
+@reception_api_read
+def field_collection_requests():
+    """HOME/CLINIC collection requests for Reception field board."""
+    from app.sample_collection_workspace.collection_routing import list_home_field_requests
+
+    try:
+        payload = list_home_field_requests(
+            status=request.args.get("status"),
+            role=session.get("role") or request.headers.get("X-User-Role"),
+            organization_id=request.headers.get("X-Organization-ID")
+            or request.headers.get("X-Organization-Id"),
+            limit=int(request.args.get("limit") or 200),
+        )
+        return {"success": True, "data": payload}, 200
+    except Exception as exc:
+        return {"success": False, "error": str(exc)}, 400
 
 
 @reception_workspace_bp.route("/sample-queue", methods=["GET"])

@@ -325,23 +325,49 @@ COLLECTION_IN_TRANSIT = "IN_TRANSIT"
 COLLECTION_RECEIVED = "RECEIVED"
 COLLECTION_REJECTED = "REJECTED"
 COLLECTION_RECOLLECT_REQUIRED = "RECOLLECT_REQUIRED"
+COLLECTION_ASSIGNED = "ASSIGNED"
 
-VALID_SAMPLE_COLLECTION_STATUSES = [
-    COLLECTION_PENDING,
-    COLLECTION_CHECKED_IN,
-    COLLECTION_COLLECTED,
-    COLLECTION_IN_TRANSIT,
-    COLLECTION_RECEIVED,
-    COLLECTION_REJECTED,
-    COLLECTION_RECOLLECT_REQUIRED,
-]
+# SampleCollection SSOT lives in collection_domain (ST_* + normalize_status + TRANSITIONS).
+# These lists stay for legacy imports; values must remain aligned with collection_domain.
+def _sample_collection_valid_statuses() -> list[str]:
+    from app.sample_collection_workspace.collection_domain import CANONICAL_STATUSES
 
-# Awaiting field/desk collection (queue eligibility)
-COLLECTION_QUEUE_STATUSES = [
-    COLLECTION_PENDING,
-    COLLECTION_CHECKED_IN,
-    COLLECTION_RECOLLECT_REQUIRED,
-]
+    out: list[str] = []
+    seen: set[str] = set()
+    for value in (
+        COLLECTION_PENDING,
+        COLLECTION_CHECKED_IN,
+        *CANONICAL_STATUSES,
+        "assigned",
+        "AWAITING_COLLECTION",
+    ):
+        if value not in seen:
+            seen.add(value)
+            out.append(value)
+    return out
+
+
+def _sample_collection_queue_statuses() -> list[str]:
+    from app.sample_collection_workspace.collection_domain import FIELD_QUEUE_STATUSES
+
+    out: list[str] = []
+    seen: set[str] = set()
+    for value in (
+        COLLECTION_PENDING,
+        COLLECTION_ASSIGNED,
+        "assigned",
+        "AWAITING_COLLECTION",
+        COLLECTION_CHECKED_IN,
+        *sorted(FIELD_QUEUE_STATUSES),
+    ):
+        if value not in seen:
+            seen.add(value)
+            out.append(value)
+    return out
+
+
+VALID_SAMPLE_COLLECTION_STATUSES = _sample_collection_valid_statuses()
+COLLECTION_QUEUE_STATUSES = _sample_collection_queue_statuses()
 
 SAMPLE_EVENT_CHECKED_IN = "CHECKED_IN"
 SAMPLE_EVENT_COLLECTED = "COLLECTED"

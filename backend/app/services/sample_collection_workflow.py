@@ -154,6 +154,10 @@ class SampleCollectionWorkflowService:
             location_city=booking.city,
             collection_location=booking.patient_address,
             expected_barcode=f"BC-{booking.booking_code}",
+            collection_mode="HOME_COLLECTION",
+            pickup_address=booking.patient_address,
+            pickup_city=booking.city,
+            contact_phone=getattr(booking, "patient_phone", None),
         )
         db.session.add(collection)
         db.session.flush()
@@ -209,12 +213,35 @@ class SampleCollectionWorkflowService:
             return getattr(collection, name, default)
 
         def _iso(value):
-            return value.isoformat() if value else None
+            if not value:
+                return None
+            if hasattr(value, "isoformat"):
+                return value.isoformat()
+            return str(value)
 
-        return {
+        def _routing(name, default=None):
+            """Routing fields: always read from loaded instance when attribute exists."""
+            if hasattr(collection, name):
+                value = getattr(collection, name, default)
+                if name in {
+                    "requested_date",
+                    "collected_at",
+                    "created_at",
+                    "picked_up_at",
+                    "dispatched_at",
+                    "handoff_at",
+                    "arrived_at_lab",
+                    "updated_at",
+                }:
+                    return _iso(value)
+                return value
+            return _get(name, default)
+
+        payload = {
             "id": _get("id"),
             "order_id": _get("order_id"),
             "marketplace_booking_id": _get("marketplace_booking_id"),
+            "collection_mode": _routing("collection_mode"),
             "collector_id": _get("collector_id"),
             "sample_tracking_id": _get("sample_tracking_id"),
             "collector_name": _get("collector_name"),
@@ -244,17 +271,39 @@ class SampleCollectionWorkflowService:
             "eta_minutes": _get("eta_minutes"),
             "temperature_c": _get("temperature_c"),
             "iot_device_id": _get("iot_device_id"),
+            "pickup_address": _routing("pickup_address"),
+            "pickup_city": _routing("pickup_city"),
+            "pickup_province": _routing("pickup_province"),
+            "pickup_district": _routing("pickup_district"),
+            "pickup_ward": _routing("pickup_ward"),
+            "contact_person": _routing("contact_person"),
+            "contact_phone": _routing("contact_phone"),
+            "requested_date": _routing("requested_date"),
+            "requested_time_window": _routing("requested_time_window"),
+            "pickup_latitude": _routing("pickup_latitude"),
+            "pickup_longitude": _routing("pickup_longitude"),
+            "collection_request_note": _routing("collection_request_note"),
+            "clinic_name": _routing("clinic_name"),
+            "priority": _routing("priority"),
             "updated_at": _iso(_get("updated_at")),
         }
+        return payload
 
     @staticmethod
     def _enrich_payload(collection, columns: Optional[Set[str]] = None):
         columns = columns if columns is not None else SampleCollectionWorkflowService._sample_collection_db_columns()
         # Empty columns → full schema assumed (unit tests / create_all)
-        if columns and (
-            "marketplace_booking_id" not in columns
-            or len(columns) < len(SampleCollection.__table__.columns)
-        ):
+        use_compatible = False
+        if columns:
+            if "collection_mode" in columns:
+                # Live schema has collection_mode — full to_dict is safe for queue routing.
+                use_compatible = False
+            elif (
+                "marketplace_booking_id" not in columns
+                or len(columns) < len(SampleCollection.__table__.columns)
+            ):
+                use_compatible = True
+        if use_compatible:
             payload = SampleCollectionWorkflowService._collection_to_dict_compatible(collection, columns)
         else:
             payload = collection.to_dict()
@@ -346,7 +395,26 @@ class SampleCollectionWorkflowService:
                 return []
 
         if awaiting_only and not status:
-            query = query.filter(SampleCollection.status.in_(COLLECTION_QUEUE_STATUSES))
+            from app.sample_collection_workspace.collection_domain import (
+                ST_ASSIGNED,
+                ST_PENDING_ASSIGNMENT,
+                ST_RECOLLECT_REQUIRED,
+                ST_REQUESTED,
+                ST_VERIFIED,
+            )
+
+            awaiting_statuses = (
+                ST_REQUESTED,
+                ST_PENDING_ASSIGNMENT,
+                ST_ASSIGNED,
+                ST_VERIFIED,
+                ST_RECOLLECT_REQUIRED,
+                "PENDING",
+                "CHECKED_IN",
+                "assigned",
+                "AWAITING_COLLECTION",
+            )
+            query = query.filter(SampleCollection.status.in_(awaiting_statuses))
         elif status:
             from app.sample_collection_workspace.desk_bridge import resolve_filter_statuses
 
@@ -362,7 +430,12 @@ class SampleCollectionWorkflowService:
         if collector_id and (not columns or "collector_id" in columns):
             query = query.filter(SampleCollection.collector_id == collector_id)
         if partner_id and (not columns or "partner_id" in columns):
-            query = query.filter(SampleCollection.partner_id == partner_id)
+            query = query.filter(
+                or_(
+                    SampleCollection.partner_id == partner_id,
+                    SampleCollection.partner_id.is_(None),
+                )
+            )
         if location:
             like = f"%{location}%"
             loc_clauses = []
@@ -394,12 +467,14 @@ class SampleCollectionWorkflowService:
             db.session.rollback()
             logger.exception(
                 "sample collection queue query failed; apply "
-                "backend/migrations/020_sample_collections_marketplace_booking_id.sql"
+                "backend/migrations/021_schema_reconciliation.sql"
             )
             # Backward compatible: empty queue rather than HTTP 500 for schema drift
             raise SampleCollectionWorkflowError(
                 "Sample collection schema is out of date; apply "
-                "backend/migrations/020_sample_collections_marketplace_booking_id.sql",
+                "backend/migrations/021_schema_reconciliation.sql "
+                "(python backend/scripts/apply_migrations.py "
+                "--only 021_schema_reconciliation.sql)",
                 503,
             ) from exc
 
@@ -428,6 +503,8 @@ class SampleCollectionWorkflowService:
         booking = SampleCollectionWorkflowService._get_booking_or_raise(booking_id)
         order = SampleCollectionWorkflowService._get_order_for_booking(booking_id)
         collection = SampleCollectionWorkflowService._get_or_create_collection(booking, order)
+        if not getattr(collection, "collection_mode", None):
+            collection.collection_mode = "HOME_COLLECTION"
         collection.expected_barcode = SampleCollectionWorkflowService._expected_barcode_for(
             booking, order, collection
         )
@@ -544,8 +621,15 @@ class SampleCollectionWorkflowService:
 
             collection.patient_verified = True
             collection.order_verified = True
-            if collection.status == COLLECTION_PENDING:
-                collection.status = COLLECTION_CHECKED_IN
+            from app.sample_collection_workspace.collection_domain import (
+                ST_ASSIGNED,
+                ST_REQUESTED,
+                ST_VERIFIED,
+                normalize_status,
+            )
+
+            if normalize_status(collection.status) in {ST_REQUESTED, ST_ASSIGNED, "PENDING", "CHECKED_IN"}:
+                collection.status = ST_VERIFIED
             collection.updated_at = datetime.utcnow()
             write_audit(
                 action="SAMPLE_COLLECTION_VERIFIED",
@@ -631,6 +715,10 @@ class SampleCollectionWorkflowService:
             COLLECTION_PENDING,
             COLLECTION_CHECKED_IN,
             COLLECTION_RECOLLECT_REQUIRED,
+            "REQUESTED",
+            "ASSIGNED",
+            "VERIFIED",
+            "assigned",
         ):
             raise SampleCollectionWorkflowError(
                 f"Sample cannot be collected from status {collection.status}",
@@ -1143,6 +1231,10 @@ class SampleCollectionWorkflowService:
             COLLECTION_PENDING,
             COLLECTION_CHECKED_IN,
             COLLECTION_RECOLLECT_REQUIRED,
+            "REQUESTED",
+            "ASSIGNED",
+            "VERIFIED",
+            "assigned",
         ):
             raise SampleCollectionWorkflowError(
                 f"Sample cannot be collected from status {collection.status}",
@@ -1271,7 +1363,7 @@ class SampleCollectionWorkflowService:
             sync_biz_collection_from_sample,
         )
 
-        if collection.status != COLLECTION_COLLECTED:
+        if collection.status != COLLECTION_COLLECTED and collection.status != "COLLECTED":
             raise SampleCollectionWorkflowError(
                 "Sample must be collected before dispatch",
                 409,
@@ -1352,7 +1444,8 @@ class SampleCollectionWorkflowService:
         now = datetime.utcnow()
         sample.status = SAMPLE_RECEIVED
         sample.updated_at = now
-        collection.status = COLLECTION_RECEIVED
+        # Canonical collection status; desk_bridge treats ARRIVED_AT_LAB as lab arrival
+        collection.status = "ARRIVED_AT_LAB"
         collection.arrived_at_lab = now
         collection.updated_at = now
         if temperature_c is not None:
@@ -1361,7 +1454,7 @@ class SampleCollectionWorkflowService:
         SampleCollectionWorkflowService._write_sample_event(
             sample.id,
             SAMPLE_EVENT_LAB_RECEIVED,
-            note=note or f"Desk sample received at lab at {now.isoformat()}",
+            note=note or f"Sample arrived at lab at {now.isoformat()}",
         )
         write_audit(
             action="SAMPLE_COLLECTION_LAB_RECEIVED",

@@ -58,6 +58,7 @@ def dashboard():
 @sample_collections_bp.route("/queue", methods=["GET"])
 @collection_api_read
 def queue():
+    """Field collector queue by default (HOME_COLLECTION / CLINIC_COLLECTION)."""
     try:
         payload = list_production_queue(
             status=request.args.get("status"),
@@ -66,9 +67,12 @@ def queue():
             date_from=request.args.get("date") or request.args.get("date_from"),
             date_to=request.args.get("date_to"),
             partner_id=request.args.get("partner_id") or request.headers.get("X-Partner-Id"),
-            include_desk=request.args.get("include_desk", "true").lower() != "false",
+            include_desk=False,
+            queue=request.args.get("queue") or "field",
             role=_role(),
             scoped_collector_id=_scoped_collector_id(),
+            organization_id=request.headers.get("X-Organization-ID")
+            or request.headers.get("X-Organization-Id"),
         )
     except SampleCollectionWorkflowError as exc:
         code = "SERVICE_UNAVAILABLE" if exc.status_code == 503 else "WORKFLOW_ERROR"
@@ -83,9 +87,9 @@ def queue():
 @collection_api_read
 def get_collection(collection_id):
     try:
-        from app.sample_collection_workspace.desk_bridge import annotate_queue_item
+        from app.sample_collection_workspace.collection_routing import annotate_collection_payload
 
-        payload = annotate_queue_item(
+        payload = annotate_collection_payload(
             SampleCollectionWorkflowService.get_collection(collection_id)
         )
     except SampleCollectionWorkflowError as exc:
@@ -341,6 +345,62 @@ def lab_arrive_by_collection(collection_id):
             "sample_tracking": sample.to_dict(),
             "synthetic_specimen_id": sample.sample_code,
         },
+    }, 200
+
+
+@sample_collections_bp.route("/collectors", methods=["GET"])
+@collection_api_read
+def list_collectors():
+    from app.sample_collection_workspace.collection_routing import list_assignable_collectors
+
+    org = request.headers.get("X-Organization-ID") or request.headers.get("X-Organization-Id")
+    return {
+        "success": True,
+        "data": {"items": list_assignable_collectors(organization_id=org)},
+    }, 200
+
+
+@sample_collections_bp.route("/<collection_id>/assign", methods=["POST"])
+@collection_api_write
+def assign_collection_collector(collection_id):
+    """Assign or reassign a field collector (HOME/CLINIC)."""
+    from app.sample_collection_workspace.collection_domain import CollectionDomainError
+    from app.sample_collection_workspace.collection_routing import assign_collector
+
+    data = request.get_json(silent=True) or {}
+    try:
+        collection = assign_collector(
+            collection_id,
+            collector_id=data.get("collector_id") or "",
+            collector_name=data.get("collector_name"),
+            actor=_actor(),
+        )
+        db.session.commit()
+    except CollectionDomainError as exc:
+        db.session.rollback()
+        return {"success": False, "error": exc.message}, exc.status_code
+    return {
+        "success": True,
+        "data": SampleCollectionWorkflowService._enrich_payload(collection),
+    }, 200
+
+
+@sample_collections_bp.route("/<collection_id>/unassign", methods=["POST"])
+@collection_api_write
+def unassign_collection_collector(collection_id):
+    """Release collector assignment → PENDING_ASSIGNMENT."""
+    from app.sample_collection_workspace.collection_domain import CollectionDomainError
+    from app.sample_collection_workspace.collection_routing import release_collector_assignment
+
+    try:
+        collection = release_collector_assignment(collection_id, actor=_actor())
+        db.session.commit()
+    except CollectionDomainError as exc:
+        db.session.rollback()
+        return {"success": False, "error": exc.message}, exc.status_code
+    return {
+        "success": True,
+        "data": SampleCollectionWorkflowService._enrich_payload(collection),
     }, 200
 
 

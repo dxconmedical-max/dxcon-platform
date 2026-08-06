@@ -36,26 +36,65 @@ def is_postgresql(url: str) -> bool:
 
 
 def apply_migrations(db) -> None:
-    for name in (
+    """Apply critical numbered SQL migrations including full schema reconciliation."""
+    migrations_dir = ROOT / "migrations"
+
+    def _split_sql(sql: str) -> list[str]:
+        statements: list[str] = []
+        buf: list[str] = []
+        in_do = False
+        for raw in sql.splitlines():
+            line = raw.rstrip()
+            stripped = line.strip()
+            if not stripped:
+                if in_do:
+                    buf.append(line)
+                continue
+            if not in_do and stripped.startswith("--"):
+                continue
+            upper = stripped.upper()
+            if not in_do and upper.startswith("DO $$"):
+                in_do = True
+                buf = [line]
+                continue
+            if in_do:
+                buf.append(line)
+                if stripped.endswith("$$;") or stripped == "$$;":
+                    in_do = False
+                    statements.append("\n".join(buf).strip())
+                    buf = []
+                continue
+            if stripped.startswith("--"):
+                continue
+            buf.append(line)
+            if stripped.endswith(";"):
+                statements.append("\n".join(buf).strip().rstrip(";").strip())
+                buf = []
+        if buf:
+            statements.append("\n".join(buf).strip().rstrip(";").strip())
+        return [s for s in statements if s and not s.strip().startswith("--")]
+
+    preferred = [
         "007_reporting_engine.sql",
         "008_portal.sql",
         "009_executive_platform.sql",
         "010_operations_center.sql",
         "013_mobile_mvp.sql",
         "014_pilot_readiness.sql",
-    ):
-        path = ROOT / "migrations" / name
+        "020_sample_collections_marketplace_booking_id.sql",
+        "021_sample_collection_missing_columns.sql",
+        "021_schema_reconciliation.sql",
+    ]
+    for name in preferred:
+        path = migrations_dir / name
         if not path.exists():
             continue
-        lines = [ln for ln in path.read_text(encoding="utf-8").splitlines() if ln.strip() and not ln.strip().startswith("--")]
-        for stmt in " ".join(lines).split(";"):
-            stmt = stmt.strip()
-            if stmt:
-                try:
-                    db.session.execute(db.text(stmt))
-                    db.session.commit()
-                except Exception:
-                    db.session.rollback()
+        for stmt in _split_sql(path.read_text(encoding="utf-8")):
+            try:
+                db.session.execute(db.text(stmt))
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
 
 
 def finding(status: str, name: str, detail: str = "", **extra) -> dict:

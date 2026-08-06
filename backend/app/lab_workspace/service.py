@@ -665,6 +665,224 @@ def medical_validate(
     }
 
 
+def medical_reject(
+    order_code: str,
+    *,
+    reason: str | None = None,
+    actor: str | None = None,
+) -> dict:
+    """Doctor rejects pending medical review → returns to testing / validation_required."""
+    order = _get_order(order_code=order_code)
+    result = BizResult.query.filter_by(order_id=order.id).first()
+    if not result:
+        raise LabWorkspaceError("Result not found")
+    if order.status in {ORDER_RELEASED}:
+        raise LabWorkspaceError("Cannot reject a released result")
+    if order.status not in {ORDER_PENDING_REVIEW, ORDER_APPROVED} and (result.workflow_status or "") not in {
+        "pending_review",
+        "approved",
+    }:
+        raise LabWorkspaceError("Medical reject requires pending_review or approved status")
+
+    if order.status == ORDER_APPROVED:
+        # Reopen first then reject into lab
+        order.status = ORDER_PENDING_REVIEW
+    if order.status == ORDER_PENDING_REVIEW:
+        order.status = ORDER_TESTING
+        result.status = RESULT_TESTING
+    result.workflow_status = "validation_required"
+    accession = _accession_for(order)
+    if accession:
+        accession.processing_status = "results_entered"
+    write_lab_audit(
+        action="medical_validation_rejected",
+        object_type="result",
+        object_id=result.result_code,
+        actor=actor,
+    )
+    write_lab_audit(
+        action="medical_reject_timeline",
+        object_type="order",
+        object_id=order_code,
+        actor=actor,
+    )
+    return {
+        "order_code": order_code,
+        "result_code": result.result_code,
+        "status": order.status,
+        "workflow_status": result.workflow_status,
+        "reason": reason,
+        "locked": False,
+    }
+
+
+def medical_reopen(
+    order_code: str,
+    *,
+    reason: str | None = None,
+    actor: str | None = None,
+) -> dict:
+    """Reopen medically approved (not released) result back to pending_review."""
+    order = _get_order(order_code=order_code)
+    result = BizResult.query.filter_by(order_id=order.id).first()
+    if not result:
+        raise LabWorkspaceError("Result not found")
+    if order.status == ORDER_RELEASED or (result.workflow_status or "") == "released":
+        raise LabWorkspaceError("Released results cannot be reopened; issue an amendment instead")
+    if order.status != ORDER_APPROVED and (result.workflow_status or "") != "approved":
+        raise LabWorkspaceError("Only medically approved results can be reopened")
+
+    order.status = ORDER_PENDING_REVIEW
+    result.status = RESULT_PENDING_REVIEW
+    result.workflow_status = "pending_review"
+    result.approved_at = None
+    result.approved_by = None
+    accession = _accession_for(order)
+    if accession:
+        accession.processing_status = "tech_validated"
+    write_lab_audit(
+        action="medical_validation_reopened",
+        object_type="result",
+        object_id=result.result_code,
+        actor=actor,
+    )
+    write_lab_audit(
+        action="medical_reopen_timeline",
+        object_type="order",
+        object_id=order_code,
+        actor=actor,
+    )
+    return {
+        "order_code": order_code,
+        "result_code": result.result_code,
+        "status": ORDER_PENDING_REVIEW,
+        "workflow_status": "pending_review",
+        "reason": reason,
+        "locked": True,
+    }
+
+
+def release_result(order_code: str, *, actor: str | None = None) -> dict:
+    """Release medically approved result to patient (HTML + email-ready notification)."""
+    order = _get_order(order_code=order_code)
+    result = BizResult.query.filter_by(order_id=order.id).first()
+    if not result:
+        raise LabWorkspaceError("Result not found")
+    if order.status == ORDER_RELEASED and (result.status == RESULT_RELEASED or result.patient_visible):
+        return {
+            "order_code": order_code,
+            "result_code": result.result_code,
+            "status": ORDER_RELEASED,
+            "idempotent": True,
+            "patient_visible": True,
+            "email_ready": True,
+            "html_ready": bool(result.html_content),
+        }
+    if order.status != ORDER_APPROVED and (result.workflow_status or "") != "approved":
+        raise LabWorkspaceError("Release requires medical approval first")
+
+    released = biz.release_report(order_code, actor=actor)
+    released.workflow_status = "released"
+    accession = _accession_for(order)
+    if accession:
+        accession.processing_status = "released"
+        accession.processing_completed_at = accession.processing_completed_at or _utcnow()
+
+    # Keep SampleCollection in sync when linked
+    from app.models.sample_collection import SampleCollection
+
+    sc = SampleCollection.query.filter_by(order_id=order.id).order_by(SampleCollection.created_at.desc()).first()
+    if sc:
+        sc.status = "RELEASED"
+        sc.updated_at = _utcnow()
+
+    write_lab_audit(action="result_released", object_type="result", object_id=released.result_code, actor=actor)
+    write_lab_audit(action="result_release_timeline", object_type="order", object_id=order_code, actor=actor)
+    write_lab_audit(
+        action="result_email_ready",
+        object_type="result",
+        object_id=released.result_code,
+        actor=actor,
+    )
+    return {
+        "order_code": order_code,
+        "result_code": released.result_code,
+        "status": ORDER_RELEASED,
+        "workflow_status": "released",
+        "patient_visible": True,
+        "email_ready": True,
+        "html_content": released.html_content,
+        "html_ready": bool(released.html_content),
+        "released_at": released.released_at.isoformat() if released.released_at else None,
+    }
+
+
+def list_pending_medical_review(limit: int = 50) -> list[dict]:
+    rows = (
+        BizOrder.query.filter(BizOrder.status == ORDER_PENDING_REVIEW)
+        .order_by(BizOrder.updated_at.desc())
+        .limit(limit)
+        .all()
+    )
+    out = []
+    for order in rows:
+        result = BizResult.query.filter_by(order_id=order.id).first()
+        out.append(
+            {
+                "order_code": order.order_code,
+                "patient_name": order.patient_name,
+                "patient_code": order.patient_code,
+                "status": order.status,
+                "workflow_status": result.workflow_status if result else None,
+                "result_code": result.result_code if result else None,
+            }
+        )
+    return out
+
+
+def list_releasable_results(limit: int = 50) -> list[dict]:
+    rows = (
+        BizOrder.query.filter(BizOrder.status.in_([ORDER_APPROVED, ORDER_RELEASED]))
+        .order_by(BizOrder.updated_at.desc())
+        .limit(limit)
+        .all()
+    )
+    out = []
+    for order in rows:
+        result = BizResult.query.filter_by(order_id=order.id).first()
+        out.append(
+            {
+                "order_code": order.order_code,
+                "patient_name": order.patient_name,
+                "patient_code": order.patient_code,
+                "status": order.status,
+                "workflow_status": result.workflow_status if result else None,
+                "result_code": result.result_code if result else None,
+                "patient_visible": bool(result.patient_visible) if result else False,
+                "html_ready": bool(result.html_content) if result else False,
+                "email_ready": order.status == ORDER_RELEASED,
+                "released_at": result.released_at.isoformat() if result and result.released_at else None,
+            }
+        )
+    return out
+
+
+def get_released_report_html(order_code: str) -> dict:
+    order = _get_order(order_code=order_code)
+    result = BizResult.query.filter_by(order_id=order.id).first()
+    if not result or not result.patient_visible:
+        raise LabWorkspaceError("Released report not available")
+    return {
+        "order_code": order.order_code,
+        "patient_code": order.patient_code,
+        "patient_name": order.patient_name,
+        "result_code": result.result_code,
+        "html_content": result.html_content or biz.render_report_html(result, order),
+        "status": order.status,
+        "email_ready": True,
+    }
+
+
 def workspace_dashboard() -> dict[str, Any]:
     incoming = biz.list_lab_incoming(limit=50)
     received = BizOrder.query.filter_by(status=ORDER_LAB_RECEIVED).count()

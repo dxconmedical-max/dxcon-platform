@@ -1,12 +1,13 @@
 """Bridge Reception (BizOrder) → SampleCollection for collector workflow.
 
-Reception M2 creates BizOrders. Collector workflow operates on SampleCollection.
-This module ensures one active desk SampleCollection per BizOrder (idempotent)
-and keeps BizCollection / sample-queue / lab-queue in sync on transitions.
+Reception M2 creates BizOrders. Collector Queue reads SampleCollection rows.
+This module ensures one active desk SampleCollection per specimen-requiring
+BizOrder (idempotent) and keeps BizCollection / sample/lab queues in sync.
 """
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime
 from typing import Any
 
@@ -22,56 +23,103 @@ from app.core.statuses import (
     COLLECTION_IN_TRANSIT,
     COLLECTION_PENDING,
     COLLECTION_RECEIVED,
+    COLLECTION_RECOLLECT_REQUIRED,
     COLLECTION_REJECTED,
 )
 from app.extensions.db import db
 from app.models.biz_order import BizCollection, BizOrder
 from app.models.sample_collection import SampleCollection
 from app.models.sample_tracking import SampleTracking
+from app.sample_collection_workspace.collection_domain import (
+    ST_ARRIVED_AT_LAB,
+    ST_ASSIGNED,
+    ST_CANCELLED,
+    ST_COLLECTED,
+    ST_IN_TRANSIT,
+    ST_PENDING_ASSIGNMENT,
+    ST_REJECTED,
+    ST_RECOLLECT_REQUIRED,
+    ST_RELEASED,
+    ST_REQUESTED,
+    ST_VERIFIED,
+    normalize_status,
+    order_requires_specimen_collection,
+)
+
+logger = logging.getLogger("dxcon.desk_bridge")
 
 DESK_SOURCE = "desk"
 FIELD_SOURCE = "field"
+WALK_IN_COLLECTOR = "Walk-in Collector"
+RECEPTION_DESK_LOCATION = "Reception Desk"
 
-STATUS_PENDING = "PENDING"
-STATUS_ASSIGNED = "ASSIGNED"
-STATUS_VERIFIED = "VERIFIED"
-STATUS_COLLECTED = "COLLECTED"
-STATUS_IN_TRANSIT = "IN_TRANSIT"
-STATUS_ARRIVED_AT_LAB = "ARRIVED_AT_LAB"
+# Aliases kept for call sites; values come from collection_domain (SSOT).
+STATUS_PENDING = "PENDING"  # legacy desk awaiting; normalize_status → REQUESTED
+STATUS_ASSIGNED = ST_ASSIGNED
+STATUS_VERIFIED = ST_VERIFIED
+STATUS_COLLECTED = ST_COLLECTED
+STATUS_IN_TRANSIT = ST_IN_TRANSIT
+STATUS_ARRIVED_AT_LAB = ST_ARRIVED_AT_LAB
+
+# Statuses that mean the specimen has arrived at the laboratory (sync + queue)
+LAB_ARRIVAL_DB_STATUSES = frozenset(
+    {
+        COLLECTION_RECEIVED,
+        ST_ARRIVED_AT_LAB,
+        "ARRIVED_AT_LAB",
+        "RECEIVED",
+        "delivered",
+    }
+)
 
 BIZ_TO_CANONICAL = {
     "assigned": STATUS_PENDING,
-    "accepted": STATUS_VERIFIED,
-    "collected": STATUS_COLLECTED,
-    "in_transit": STATUS_IN_TRANSIT,
-    "delivered": STATUS_ARRIVED_AT_LAB,
+    "accepted": ST_VERIFIED,
+    "collected": ST_COLLECTED,
+    "in_transit": ST_IN_TRANSIT,
+    "delivered": ST_ARRIVED_AT_LAB,
     "cancelled": COLLECTION_REJECTED,
 }
 
 CLINICAL_TO_CANONICAL = {
     COLLECTION_PENDING: STATUS_PENDING,
-    COLLECTION_CHECKED_IN: STATUS_VERIFIED,
-    COLLECTION_COLLECTED: STATUS_COLLECTED,
-    COLLECTION_IN_TRANSIT: STATUS_IN_TRANSIT,
-    COLLECTION_RECEIVED: STATUS_ARRIVED_AT_LAB,
+    COLLECTION_CHECKED_IN: ST_VERIFIED,
+    COLLECTION_COLLECTED: ST_COLLECTED,
+    COLLECTION_IN_TRANSIT: ST_IN_TRANSIT,
+    COLLECTION_RECEIVED: ST_ARRIVED_AT_LAB,
     COLLECTION_REJECTED: COLLECTION_REJECTED,
-    STATUS_ASSIGNED: STATUS_PENDING,
-    STATUS_VERIFIED: STATUS_VERIFIED,
-    STATUS_ARRIVED_AT_LAB: STATUS_ARRIVED_AT_LAB,
+    ST_ASSIGNED: STATUS_PENDING,
+    ST_VERIFIED: ST_VERIFIED,
+    ST_ARRIVED_AT_LAB: ST_ARRIVED_AT_LAB,
+    "AWAITING_COLLECTION": STATUS_PENDING,
 }
 
-# API filter aliases → DB SampleCollection statuses
+# API filter aliases → DB SampleCollection statuses (legacy + canonical)
 FILTER_STATUS_TO_DB = {
-    STATUS_PENDING: (COLLECTION_PENDING,),
-    STATUS_ASSIGNED: (COLLECTION_PENDING,),
-    STATUS_VERIFIED: (COLLECTION_PENDING, COLLECTION_CHECKED_IN),
-    "CHECKED_IN": (COLLECTION_CHECKED_IN, COLLECTION_PENDING),
-    STATUS_COLLECTED: (COLLECTION_COLLECTED,),
-    STATUS_IN_TRANSIT: (COLLECTION_IN_TRANSIT,),
-    STATUS_ARRIVED_AT_LAB: (COLLECTION_RECEIVED,),
-    "RECEIVED": (COLLECTION_RECEIVED,),
-    COLLECTION_REJECTED: (COLLECTION_REJECTED,),
+    STATUS_PENDING: (COLLECTION_PENDING, ST_REQUESTED, ST_ASSIGNED, "assigned", "AWAITING_COLLECTION"),
+    ST_ASSIGNED: (COLLECTION_PENDING, ST_ASSIGNED, "assigned"),
+    "AWAITING_COLLECTION": (COLLECTION_PENDING, ST_REQUESTED, ST_ASSIGNED, "assigned", "AWAITING_COLLECTION"),
+    ST_VERIFIED: (COLLECTION_PENDING, COLLECTION_CHECKED_IN, ST_ASSIGNED, ST_VERIFIED),
+    "CHECKED_IN": (COLLECTION_CHECKED_IN, COLLECTION_PENDING, ST_VERIFIED),
+    ST_COLLECTED: (COLLECTION_COLLECTED, ST_COLLECTED),
+    ST_IN_TRANSIT: (COLLECTION_IN_TRANSIT, ST_IN_TRANSIT),
+    ST_ARRIVED_AT_LAB: (COLLECTION_RECEIVED, ST_ARRIVED_AT_LAB, "RECEIVED"),
+    "RECEIVED": (COLLECTION_RECEIVED, ST_ARRIVED_AT_LAB),
+    COLLECTION_REJECTED: (COLLECTION_REJECTED, ST_REJECTED),
 }
+
+# Default Collector Queue "Awaiting" eligibility (stored DB values)
+AWAITING_QUEUE_DB_STATUSES = (
+    COLLECTION_PENDING,
+    ST_REQUESTED,
+    ST_PENDING_ASSIGNMENT,
+    ST_ASSIGNED,
+    "assigned",
+    "AWAITING_COLLECTION",
+    COLLECTION_CHECKED_IN,
+    ST_VERIFIED,
+    ST_RECOLLECT_REQUIRED,
+)
 
 
 def normalize_collection_status(
@@ -80,28 +128,37 @@ def normalize_collection_status(
     patient_verified: bool = False,
     order_verified: bool = False,
 ) -> str:
+    """Normalize to SampleCollection lifecycle status (collection_domain SSOT).
+
+    Desk queue still stores legacy PENDING for unverified awaiting rows.
+    """
     raw = (status or "").strip()
     if not raw:
         return STATUS_PENDING
-    upper = raw.upper()
     lower = raw.lower()
+    upper = raw.upper()
     if lower in BIZ_TO_CANONICAL:
         canonical = BIZ_TO_CANONICAL[lower]
     elif upper in CLINICAL_TO_CANONICAL:
         canonical = CLINICAL_TO_CANONICAL[upper]
     else:
-        canonical = upper
-    if canonical == STATUS_PENDING and patient_verified and order_verified:
-        return STATUS_VERIFIED
+        canonical = normalize_status(raw)
+        # Keep legacy PENDING surface for desk awaiting (not yet REQUESTED in DB)
+        if canonical == ST_REQUESTED and upper in {"PENDING", "AWAITING_COLLECTION"}:
+            canonical = STATUS_PENDING
+    if canonical in {STATUS_PENDING, ST_REQUESTED, ST_ASSIGNED} and patient_verified and order_verified:
+        return ST_VERIFIED
     return canonical
 
 
 def is_terminal_status(status: str | None) -> bool:
     canonical = normalize_collection_status(status)
     return canonical in {
-        STATUS_ARRIVED_AT_LAB,
+        ST_ARRIVED_AT_LAB,
+        ST_RELEASED,
+        ST_CANCELLED,
+        ST_REJECTED,
         COLLECTION_REJECTED,
-        "CANCELLED",
         "COMPLETED",
         "RECEIVED",
     }
@@ -119,7 +176,6 @@ def resolve_filter_statuses(status: str | None) -> list[str] | None:
             resolved.extend(mapped)
         else:
             resolved.append(part)
-    # unique preserve order
     seen: set[str] = set()
     out: list[str] = []
     for value in resolved:
@@ -145,56 +201,43 @@ def collection_source(collection: SampleCollection | dict[str, Any]) -> str:
     return DESK_SOURCE
 
 
+def _sample_collection_columns() -> set[str]:
+    try:
+        from app.services.sample_collection_workflow import SampleCollectionWorkflowService
+
+        return set(SampleCollectionWorkflowService._sample_collection_db_columns() or set())
+    except Exception:
+        return set()
+
+
+def _apply_if_column(kwargs: dict[str, Any], columns: set[str], name: str, value: Any) -> None:
+    if not columns or name in columns:
+        kwargs[name] = value
+
+
 def ensure_desk_sample_collection(
     order: BizOrder,
     *,
     actor: str | None = None,
+    organization_id: str | None = None,
     commit: bool = False,
-) -> SampleCollection:
-    """Idempotent: one active SampleCollection per BizOrder requiring specimen."""
-    del actor  # reserved for audit callers
-    existing = (
-        SampleCollection.query.filter_by(order_id=order.id)
-        .filter(SampleCollection.status != COLLECTION_REJECTED)
-        .order_by(SampleCollection.created_at.desc())
-        .first()
+    require_specimen: bool | None = None,
+) -> SampleCollection | None:
+    """Deprecated alias → ensure_collection_for_order(..., AT_RECEPTION)."""
+    from app.sample_collection_workspace.collection_domain import MODE_AT_RECEPTION
+    from app.sample_collection_workspace.collection_routing import ensure_collection_for_order
+
+    if require_specimen is False:
+        return None
+    if require_specimen is None and not order_requires_specimen_collection(order):
+        return None
+    return ensure_collection_for_order(
+        order,
+        collection_mode=MODE_AT_RECEPTION,
+        organization_id=organization_id,
+        actor=actor,
+        commit=commit,
     )
-    if existing:
-        notes = existing.notes or ""
-        if "source:desk" not in notes:
-            existing.notes = (notes + "\nsource:desk").strip()
-        if not existing.expected_barcode:
-            existing.expected_barcode = order.barcode_value or f"BC-{order.order_code}"
-        if commit:
-            db.session.commit()
-        else:
-            db.session.flush()
-        return existing
-
-    if not order.barcode_value:
-        order.barcode_value = f"BC-{order.order_code}"
-
-    collection = SampleCollection(
-        order_id=order.id,
-        marketplace_booking_id=None,
-        status=COLLECTION_PENDING,
-        collector_name=None,
-        collection_location="Reception Desk",
-        location_city=None,
-        expected_barcode=order.barcode_value,
-        barcode_value=None,
-        notes="source:desk",
-        patient_verified=False,
-        order_verified=False,
-        specimen_type="BLOOD",
-    )
-    db.session.add(collection)
-    db.session.flush()
-
-    if commit:
-        db.session.commit()
-    return collection
-
 
 def ensure_biz_collection_row(
     order: BizOrder,
@@ -209,8 +252,8 @@ def ensure_biz_collection_row(
     sample_code = f"SMP-{order.order_code}"
     row = BizCollection(
         order_id=order.id,
-        collector_name=actor or "Reception Desk",
-        pickup_address="Reception Desk",
+        collector_name=actor or WALK_IN_COLLECTOR,
+        pickup_address=RECEPTION_DESK_LOCATION,
         scheduled_at=datetime.utcnow(),
         status=status,
         sample_code=sample_code,
@@ -230,23 +273,35 @@ def sync_biz_collection_from_sample(
     order = BizOrder.query.get(collection.order_id)
     if not order:
         return None
-    biz_row = ensure_biz_collection_row(order, actor=actor)
+    biz_row = ensure_biz_collection_row(order, actor=actor or WALK_IN_COLLECTOR)
 
     status = collection.status
-    if status in {COLLECTION_PENDING, COLLECTION_CHECKED_IN}:
+    awaiting = {
+        COLLECTION_PENDING,
+        ST_REQUESTED,
+        ST_PENDING_ASSIGNMENT,
+        COLLECTION_CHECKED_IN,
+        STATUS_ASSIGNED,
+        ST_ASSIGNED,
+        ST_VERIFIED,
+        "assigned",
+    }
+    if status in awaiting:
         if biz_row.status not in {BIZ_ASSIGNED, "accepted", BIZ_COLLECTED, BIZ_IN_TRANSIT, BIZ_DELIVERED}:
             biz_row.status = BIZ_ASSIGNED
         if (order.status or "").lower() in {"draft", "payment_pending", "paid"}:
             order.status = "sampling"
-    elif status == COLLECTION_COLLECTED:
+    elif status in {COLLECTION_COLLECTED, ST_COLLECTED}:
         biz_row.status = BIZ_COLLECTED
         order.status = "collected"
-    elif status == COLLECTION_IN_TRANSIT:
+    elif status in {COLLECTION_IN_TRANSIT, ST_IN_TRANSIT}:
         biz_row.status = BIZ_IN_TRANSIT
         order.status = "in_transit"
-    elif status == COLLECTION_RECEIVED:
+    elif status in LAB_ARRIVAL_DB_STATUSES:
         biz_row.status = BIZ_DELIVERED
         order.status = "lab_received"
+        if not collection.arrived_at_lab:
+            collection.arrived_at_lab = datetime.utcnow()
     biz_row.updated_at = datetime.utcnow()
     order.updated_at = datetime.utcnow()
     if collection.barcode_value:
@@ -262,16 +317,11 @@ def enqueue_sample_and_lab_after_transition(
     *,
     actor: str | None = None,
 ) -> dict[str, Any]:
-    """After COLLECTED/IN_TRANSIT/RECEIVED, sync reception sample queue + lab queue."""
+    """After COLLECTED/IN_TRANSIT/lab-arrival, sync reception sample queue + lab queue."""
     result: dict[str, Any] = {}
-    if collection.marketplace_booking_id:
-        # Field marketplace path — reception sample queue is desk-oriented
-        if collection.status != COLLECTION_RECEIVED:
-            return result
-        # Still allow lab queue bridge when desk order id happens to be set
-        order = BizOrder.query.get(collection.order_id)
-        if not order:
-            return result
+    arrived = collection.status in LAB_ARRIVAL_DB_STATUSES
+    if collection.marketplace_booking_id and not arrived:
+        return result
 
     order = BizOrder.query.get(collection.order_id)
     if not order:
@@ -279,7 +329,13 @@ def enqueue_sample_and_lab_after_transition(
 
     sync_biz_collection_from_sample(collection, actor=actor)
 
-    if collection.status in {COLLECTION_COLLECTED, COLLECTION_IN_TRANSIT, COLLECTION_RECEIVED}:
+    collected_or_transit = collection.status in {
+        COLLECTION_COLLECTED,
+        ST_COLLECTED,
+        COLLECTION_IN_TRANSIT,
+        ST_IN_TRANSIT,
+    }
+    if collected_or_transit or arrived:
         try:
             from app.reception_workspace.sample_queue_engine import (
                 STAGE_COLLECTED,
@@ -293,14 +349,14 @@ def enqueue_sample_and_lab_after_transition(
             ensure_sample_queue_item(order.order_code, actor=actor, sync_collection=False)
             item = get_sample_queue_item(order.order_code)
             if item:
-                if collection.status == COLLECTION_IN_TRANSIT and item.stage == STAGE_COLLECTED:
+                if collection.status in {COLLECTION_IN_TRANSIT, ST_IN_TRANSIT} and item.stage == STAGE_COLLECTED:
                     advance_sample_queue(
                         order.order_code,
                         to_stage=STAGE_TRANSPORT,
                         actor=actor,
                         sync_collection=False,
                     )
-                elif collection.status == COLLECTION_RECEIVED and item.stage in {
+                elif arrived and item.stage in {
                     STAGE_COLLECTED,
                     STAGE_TRANSPORT,
                 }:
@@ -323,12 +379,13 @@ def enqueue_sample_and_lab_after_transition(
         except Exception as exc:
             result["sample_queue_error"] = str(exc)
 
-    if collection.status == COLLECTION_RECEIVED:
+    if arrived:
         try:
             from app.reception_workspace.lab_queue_engine import ensure_lab_queue_item
 
             ensure_lab_queue_item(order.order_code, actor=actor)
             result["lab_queue"] = True
+            result["order_status"] = order.status
         except Exception as exc:
             result["lab_queue_error"] = str(exc)
 
@@ -349,16 +406,21 @@ def annotate_queue_item(item: dict[str, Any]) -> dict[str, Any]:
     item["status"] = status
     item["actionable"] = not is_terminal_status(status)
 
-    if source == DESK_SOURCE and not item.get("booking"):
-        order = item.get("order") or {}
-        item["booking"] = {
-            "patient_name": order.get("patient_name"),
-            "booking_code": order.get("order_code"),
-            "patient_address": item.get("collection_location")
-            or item.get("pickup_address")
-            or "Reception Desk",
-            "city": item.get("location_city"),
-        }
+    if source == DESK_SOURCE:
+        if not item.get("collector_name"):
+            item["collector_name"] = WALK_IN_COLLECTOR
+        if not item.get("collection_location") and not item.get("pickup_address"):
+            item["collection_location"] = RECEPTION_DESK_LOCATION
+        if not item.get("booking"):
+            order = item.get("order") or {}
+            item["booking"] = {
+                "patient_name": order.get("patient_name"),
+                "booking_code": order.get("order_code"),
+                "patient_address": item.get("collection_location")
+                or item.get("pickup_address")
+                or RECEPTION_DESK_LOCATION,
+                "city": item.get("location_city"),
+            }
     return item
 
 
@@ -378,11 +440,10 @@ def backfill_desk_sample_collections(*, limit: int = 200) -> int:
         if not order:
             continue
         before = SampleCollection.query.filter_by(order_id=order.id).count()
-        ensure_desk_sample_collection(order)
+        ensure_desk_sample_collection(order, require_specimen=True)
         after = SampleCollection.query.filter_by(order_id=order.id).count()
         if after > before:
             created += 1
-            # Mirror biz status onto new SC when already progressed
             sc = (
                 SampleCollection.query.filter_by(order_id=order.id)
                 .order_by(SampleCollection.created_at.desc())

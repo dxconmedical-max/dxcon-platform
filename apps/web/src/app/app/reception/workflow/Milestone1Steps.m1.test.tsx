@@ -33,7 +33,13 @@ import {
   PatientStep,
   ReviewPricingStep,
   type CatalogSelection,
+  type CollectionRequestDraft,
 } from "./Milestone1Steps";
+
+const deskCollection: CollectionRequestDraft = {
+  mode: "AT_RECEPTION",
+  specimen_type: "BLOOD",
+};
 
 const patient = { patientCode: "P-1", patientName: "Ada" };
 
@@ -145,6 +151,7 @@ describe("Reception Milestone 1 steps", () => {
         accessToken="t"
         organizationId="org"
         patient={patient}
+        collectionRequest={deskCollection}
         selection={selection({ testIds: [], tests: [] })}
         onBack={vi.fn()}
         onCreated={vi.fn()}
@@ -256,6 +263,7 @@ describe("Reception Milestone 1 steps", () => {
         accessToken="t"
         organizationId="org"
         patient={{ patientCode: "", patientName: "Ghost" }}
+        collectionRequest={deskCollection}
         selection={selection({ testIds: [], tests: [] })}
         onBack={vi.fn()}
         onCreated={onCreated}
@@ -280,6 +288,7 @@ describe("Reception Milestone 1 steps", () => {
         accessToken="t"
         organizationId="org"
         patient={patient}
+        collectionRequest={deskCollection}
         selection={selection()}
         onBack={vi.fn()}
         onCreated={onCreated}
@@ -309,6 +318,7 @@ describe("Reception Milestone 1 steps", () => {
         accessToken="t"
         organizationId="org"
         patient={patient}
+        collectionRequest={deskCollection}
         selection={selection()}
         onBack={vi.fn()}
         onCreated={onCreated}
@@ -337,6 +347,7 @@ describe("Reception Milestone 1 steps", () => {
         accessToken="t"
         organizationId="org"
         patient={patient}
+        collectionRequest={deskCollection}
         selection={selection()}
         onBack={vi.fn()}
         onCreated={onCreated}
@@ -361,6 +372,7 @@ describe("Reception Milestone 1 steps", () => {
         accessToken="t"
         organizationId="org"
         patient={patient}
+        collectionRequest={deskCollection}
         selection={selection()}
         onBack={vi.fn()}
         onCreated={vi.fn()}
@@ -390,6 +402,7 @@ describe("Reception Milestone 1 steps", () => {
         accessToken="t"
         organizationId="org"
         patient={patient}
+        collectionRequest={deskCollection}
         selection={selection()}
         onBack={vi.fn()}
         onCreated={vi.fn()}
@@ -468,6 +481,7 @@ describe("Reception Milestone 1 steps", () => {
         accessToken="t"
         organizationId="org"
         patient={patient}
+        collectionRequest={deskCollection}
         selection={captured!}
         onBack={vi.fn()}
         onCreated={onCreated}
@@ -479,6 +493,8 @@ describe("Reception Milestone 1 steps", () => {
       expect.objectContaining({
         patient_code: "P-1",
         test_catalog_ids: ["t1"],
+        collection_mode: "AT_RECEPTION",
+        specimen_type: "BLOOD",
       }),
     );
   });

@@ -48,6 +48,246 @@ export type CatalogSelection = {
   estimateTotal: number;
 };
 
+export type CollectionRequestDraft = {
+  mode: "AT_RECEPTION" | "HOME_COLLECTION" | "CLINIC_COLLECTION";
+  specimen_type: string;
+  pickup_address?: string;
+  pickup_province?: string;
+  pickup_district?: string;
+  pickup_ward?: string;
+  contact_person?: string;
+  contact_phone?: string;
+  requested_date?: string;
+  requested_time_window?: string;
+  notes?: string;
+  priority?: string;
+  clinic_name?: string;
+};
+
+export function collectionModeLabel(mode: CollectionRequestDraft["mode"]): string {
+  if (mode === "AT_RECEPTION") return "DESK (at reception)";
+  if (mode === "HOME_COLLECTION") return "HOME collection";
+  return "CLINIC collection";
+}
+
+export function CollectionRequestStep({
+  patient,
+  selection,
+  initial,
+  onContinue,
+  onBack,
+}: {
+  patient: SelectedPatient;
+  selection: CatalogSelection;
+  initial?: CollectionRequestDraft | null;
+  onContinue: (draft: CollectionRequestDraft) => void;
+  onBack: () => void;
+}) {
+  const defaultSpecimen =
+    selection.tests.map((t) => t.sample_type).find((s) => s && s.trim() && s.toLowerCase() !== "consult") ||
+    "BLOOD";
+  const [mode, setMode] = useState<CollectionRequestDraft["mode"]>(initial?.mode ?? "AT_RECEPTION");
+  const [specimenType, setSpecimenType] = useState(initial?.specimen_type || String(defaultSpecimen));
+  const [pickupAddress, setPickupAddress] = useState(initial?.pickup_address ?? "");
+  const [province, setProvince] = useState(initial?.pickup_province ?? "");
+  const [district, setDistrict] = useState(initial?.pickup_district ?? "");
+  const [ward, setWard] = useState(initial?.pickup_ward ?? "");
+  const [contactPerson, setContactPerson] = useState(initial?.contact_person ?? patient.patientName);
+  const [contactPhone, setContactPhone] = useState(initial?.contact_phone ?? "");
+  const [requestedDate, setRequestedDate] = useState(initial?.requested_date ?? "");
+  const [timeWindow, setTimeWindow] = useState(initial?.requested_time_window ?? "");
+  const [notes, setNotes] = useState(initial?.notes ?? "");
+  const [priority, setPriority] = useState(initial?.priority ?? "ROUTINE");
+  const [clinicName, setClinicName] = useState(initial?.clinic_name ?? "");
+  const [error, setError] = useState<string | null>(null);
+
+  function submit() {
+    setError(null);
+    if (!specimenType.trim()) {
+      setError("Specimen type is required.");
+      return;
+    }
+    if (mode === "HOME_COLLECTION") {
+      if (
+        !pickupAddress.trim() ||
+        !province.trim() ||
+        !district.trim() ||
+        !contactPerson.trim() ||
+        !contactPhone.trim() ||
+        !requestedDate ||
+        !timeWindow.trim()
+      ) {
+        setError(
+          "HOME collection requires address, province, district, contact person, phone, date, and time window.",
+        );
+        return;
+      }
+    }
+    if (mode === "CLINIC_COLLECTION") {
+      if (!clinicName.trim() || !requestedDate || !timeWindow.trim()) {
+        setError("CLINIC collection requires clinic, preferred date, and preferred time.");
+        return;
+      }
+    }
+    onContinue({
+      mode,
+      specimen_type: specimenType.trim(),
+      pickup_address: mode === "HOME_COLLECTION" ? pickupAddress.trim() : undefined,
+      pickup_province: mode === "HOME_COLLECTION" ? province.trim() : undefined,
+      pickup_district: mode === "HOME_COLLECTION" ? district.trim() : undefined,
+      pickup_ward: mode === "HOME_COLLECTION" ? ward.trim() || undefined : undefined,
+      contact_person:
+        mode === "HOME_COLLECTION" ? contactPerson.trim() : mode === "CLINIC_COLLECTION" ? contactPerson.trim() || undefined : undefined,
+      contact_phone: mode === "HOME_COLLECTION" ? contactPhone.trim() : undefined,
+      requested_date: mode === "AT_RECEPTION" ? undefined : requestedDate,
+      requested_time_window: mode === "AT_RECEPTION" ? undefined : timeWindow.trim(),
+      notes: notes.trim() || undefined,
+      priority: mode === "AT_RECEPTION" ? undefined : priority,
+      clinic_name: mode === "CLINIC_COLLECTION" ? clinicName.trim() : undefined,
+    });
+  }
+
+  return (
+    <div className="space-y-5">
+      <SectionHeader
+        title="Collection request"
+        description="Choose how the specimen will be collected before pricing and order creation."
+        actions={
+          <Button size="sm" variant="outline" onClick={onBack}>
+            Back
+          </Button>
+        }
+      />
+      <Card className="space-y-4">
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <p className="text-xs text-slate-500">Patient</p>
+          <p className="font-medium">{patient.patientName}</p>
+          <p className="font-mono text-xs text-slate-500">{patient.patientCode}</p>
+        </div>
+
+        <div>
+          <Label htmlFor="collection-mode">Collection mode</Label>
+          <select
+            id="collection-mode"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            value={mode}
+            onChange={(e) => setMode(e.target.value as CollectionRequestDraft["mode"])}
+          >
+            <option value="AT_RECEPTION">DESK (at reception)</option>
+            <option value="HOME_COLLECTION">HOME</option>
+            <option value="CLINIC_COLLECTION">CLINIC</option>
+          </select>
+          <p className="mt-1 text-xs text-slate-500">
+            {mode === "AT_RECEPTION"
+              ? "Creates a reception desk SampleCollection only — not a field collector job."
+              : mode === "HOME_COLLECTION"
+                ? "Creates a field collection request (PENDING_ASSIGNMENT) for the HOME collector queue."
+                : "Creates a CLINIC pickup request on Field Collection Requests (not the HOME collector queue)."}
+          </p>
+        </div>
+
+        <div>
+          <Label htmlFor="specimen-type">Specimen type</Label>
+          <Input
+            id="specimen-type"
+            value={specimenType}
+            onChange={(e) => setSpecimenType(e.target.value)}
+            placeholder="e.g. BLOOD"
+          />
+        </div>
+
+        {mode === "HOME_COLLECTION" ? (
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <Label htmlFor="pickup-address">Pickup address *</Label>
+              <Input id="pickup-address" value={pickupAddress} onChange={(e) => setPickupAddress(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="province">Province *</Label>
+              <Input id="province" value={province} onChange={(e) => setProvince(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="district">District *</Label>
+              <Input id="district" value={district} onChange={(e) => setDistrict(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="ward">Ward</Label>
+              <Input id="ward" value={ward} onChange={(e) => setWard(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="contact-person">Contact person *</Label>
+              <Input id="contact-person" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="contact-phone">Phone *</Label>
+              <Input id="contact-phone" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="req-date">Preferred date *</Label>
+              <Input id="req-date" type="date" value={requestedDate} onChange={(e) => setRequestedDate(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="time-window">Preferred time window *</Label>
+              <Input
+                id="time-window"
+                placeholder="e.g. 08:00–10:00"
+                value={timeWindow}
+                onChange={(e) => setTimeWindow(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="priority">Priority</Label>
+              <select
+                id="priority"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+              >
+                <option value="ROUTINE">ROUTINE</option>
+                <option value="URGENT">URGENT</option>
+                <option value="STAT">STAT</option>
+              </select>
+            </div>
+            <div className="md:col-span-2">
+              <Label htmlFor="home-notes">Notes</Label>
+              <Input id="home-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+            </div>
+          </div>
+        ) : null}
+
+        {mode === "CLINIC_COLLECTION" ? (
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <Label htmlFor="clinic-name">Clinic *</Label>
+              <Input id="clinic-name" value={clinicName} onChange={(e) => setClinicName(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="clinic-date">Preferred date *</Label>
+              <Input id="clinic-date" type="date" value={requestedDate} onChange={(e) => setRequestedDate(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="clinic-time">Preferred time *</Label>
+              <Input
+                id="clinic-time"
+                placeholder="e.g. 09:00"
+                value={timeWindow}
+                onChange={(e) => setTimeWindow(e.target.value)}
+              />
+            </div>
+            <div className="md:col-span-2">
+              <Label htmlFor="clinic-notes">Notes</Label>
+              <Input id="clinic-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+            </div>
+          </div>
+        ) : null}
+
+        {error ? <p className="text-sm text-rose-600">{error}</p> : null}
+        <Button onClick={submit}>Continue to pricing</Button>
+      </Card>
+    </div>
+  );
+}
+
 export function CatalogSelectStep({
   accessToken,
   organizationId,
@@ -249,6 +489,7 @@ export function ReviewPricingStep({
   organizationId,
   patient,
   selection,
+  collectionRequest,
   onBack,
   onCreated,
 }: {
@@ -256,6 +497,7 @@ export function ReviewPricingStep({
   organizationId?: string | null;
   patient: SelectedPatient;
   selection: CatalogSelection;
+  collectionRequest: CollectionRequestDraft;
   onBack: () => void;
   onCreated: (result: {
     orderRef: string;
@@ -308,6 +550,19 @@ export function ReviewPricingStep({
           test_catalog_ids: uniqueIds(selection.testIds),
           discount: selection.discount,
           note: selection.note || undefined,
+          collection_mode: collectionRequest.mode,
+          specimen_type: collectionRequest.specimen_type,
+          pickup_address: collectionRequest.pickup_address,
+          pickup_province: collectionRequest.pickup_province,
+          pickup_district: collectionRequest.pickup_district,
+          pickup_ward: collectionRequest.pickup_ward,
+          contact_person: collectionRequest.contact_person,
+          contact_phone: collectionRequest.contact_phone,
+          requested_date: collectionRequest.requested_date,
+          requested_time_window: collectionRequest.requested_time_window,
+          clinic_name: collectionRequest.clinic_name,
+          priority: collectionRequest.priority,
+          collection_note: collectionRequest.notes,
         },
       );
       const orderRef = getOrderCode(response.order);
@@ -341,7 +596,7 @@ export function ReviewPricingStep({
     <div className="space-y-5">
       <SectionHeader
         title="Review and pricing"
-        description="Confirm selection, then create the laboratory order. Backend pricing is authoritative."
+        description="Confirm selection and collection route, then create the laboratory order. Backend pricing is authoritative."
         actions={
           <Button size="sm" variant="outline" disabled={creating} onClick={onBack}>
             Back
@@ -349,11 +604,23 @@ export function ReviewPricingStep({
         }
       />
       <Card className="space-y-4">
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
             <p className="text-xs text-slate-500">Patient</p>
             <p className="font-medium">{patient.patientName}</p>
             <p className="font-mono text-xs text-slate-500">{patient.patientCode}</p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs text-slate-500">Collection route</p>
+            <p className="font-medium">{collectionModeLabel(collectionRequest.mode)}</p>
+            <p className="text-xs text-slate-500">
+              Specimen: {collectionRequest.specimen_type}
+              {collectionRequest.mode === "HOME_COLLECTION"
+                ? ` · ${collectionRequest.pickup_address || ""}`
+                : collectionRequest.mode === "CLINIC_COLLECTION"
+                  ? ` · ${collectionRequest.clinic_name || ""}`
+                  : " · Reception desk"}
+            </p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
             <p className="text-xs text-slate-500">Display estimate (not final)</p>
