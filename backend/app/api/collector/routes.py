@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, session
 from datetime import datetime
 import uuid
 
@@ -9,6 +9,7 @@ from app.models.sample_tracking import SampleTracking
 from app.models.sample_event import SampleEvent
 from app.models.shipment import Shipment
 from app.core.statuses import VALID_COLLECTOR_SHIPMENT_STATUSES
+from app.sample_collection_workspace.auth import collection_api_read
 from app.services.collector_workflow import (
     CollectorWorkflowError,
     accept_shipment,
@@ -330,3 +331,36 @@ def start_collector_trip(shipment_id):
         "success": True,
         "shipment": shipment.to_dict(),
     }
+
+
+@collector_bp.route("/queue", methods=["GET"])
+@collection_api_read
+def collector_queue_alias():
+    """Canonical: GET /api/v1/collector/queue → SampleCollection field collector queue."""
+    from app.sample_collection_workspace.service import list_production_queue
+    from app.services.sample_collection_workflow import SampleCollectionWorkflowError
+
+    try:
+        mine_raw = (request.args.get("mine") or "").strip().lower()
+        payload = list_production_queue(
+            status=request.args.get("status"),
+            collector_id=request.args.get("collector"),
+            location=request.args.get("location"),
+            date_from=request.args.get("date") or request.args.get("date_from"),
+            date_to=request.args.get("date_to"),
+            partner_id=request.args.get("partner_id") or request.headers.get("X-Partner-Id"),
+            include_desk=False,
+            queue=request.args.get("queue") or "field",
+            role=session.get("role") or request.headers.get("X-User-Role"),
+            scoped_collector_id=(
+                request.headers.get("X-Collector-Id")
+                or session.get("collector_id")
+                or request.args.get("scoped_collector_id")
+            ),
+            organization_id=request.headers.get("X-Organization-ID")
+            or request.headers.get("X-Organization-Id"),
+            mine=mine_raw in {"1", "true", "yes"},
+        )
+    except SampleCollectionWorkflowError as exc:
+        return {"success": False, "error": exc.message}, exc.status_code
+    return {"success": True, "data": payload}, 200

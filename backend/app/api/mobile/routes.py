@@ -190,6 +190,15 @@ def create_home_collection():
     )
 
     db.session.add(booking)
+    db.session.flush()
+    try:
+        from app.sample_collection_workspace.collection_routing import (
+            ensure_sample_collection_from_home_collection,
+        )
+
+        ensure_sample_collection_from_home_collection(booking, actor="mobile_api")
+    except Exception:
+        pass
     db.session.commit()
 
     return {

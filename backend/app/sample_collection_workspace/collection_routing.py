@@ -11,8 +11,10 @@ from app.models.biz_order import BizOrder
 from app.models.sample_collection import SampleCollection
 from app.models.sample_tracking import SampleTracking
 from app.sample_collection_workspace.collection_domain import (
+    COLLECTOR_ACTIVE_QUEUE_STATUSES,
     FIELD_COLLECTION_MODES,
     FIELD_QUEUE_STATUSES,
+    FIELD_REQUEST_BOARD_STATUSES,
     HOME_COLLECTOR_QUEUE_MODES,
     MODE_AT_RECEPTION,
     MODE_CLINIC_COLLECTION,
@@ -200,6 +202,138 @@ def ensure_collection_for_order(
     return collection
 
 
+def _resolve_patient_code_for_home(home) -> str:
+    from app.models.patient import Patient
+
+    raw = str(getattr(home, "patient_id", None) or "").strip()
+    if not raw:
+        raise CollectionDomainError("HomeCollection.patient_id is required", 400)
+    patient = Patient.query.get(raw)
+    if patient:
+        return patient.patient_code
+    from app.business_engine import service as biz
+    from app.business_engine.service import BusinessEngineError
+
+    try:
+        created = biz.create_patient(
+            full_name=f"Home Patient {raw[:8]}",
+            phone=f"09{raw.replace('-', '')[-8:]}" if len(raw) >= 8 else "0900000000",
+            patient_code=raw[:50],
+            actor="home_collection_bridge",
+        )
+        return getattr(created, "patient_code", None) or raw[:50]
+    except BusinessEngineError:
+        # Race / already exists
+        patient = Patient.query.get(raw[:50])
+        if patient:
+            return patient.patient_code
+        raise
+
+
+def ensure_sample_collection_from_home_collection(
+    home,
+    *,
+    actor: str | None = None,
+    commit: bool = False,
+) -> SampleCollection:
+    """Create SampleCollection for a legacy HomeCollection if missing.
+
+    Gap: /api/v1/home-collections and /api/v1/workflow/bookings wrote HomeCollection
+    only — Reception Field Requests / Collector Queue read SampleCollection.
+    """
+    from app.business_engine import service as biz
+
+    # Prefer SampleTracking.home_collection_id link
+    tracking = SampleTracking.query.filter_by(home_collection_id=home.id).first()
+    if tracking:
+        existing = SampleCollection.query.filter_by(sample_tracking_id=tracking.id).first()
+        if existing:
+            if not existing.collection_mode:
+                existing.collection_mode = MODE_HOME_COLLECTION
+            if commit:
+                db.session.commit()
+            return existing
+
+    note_token = f"home_collection_id:{home.id}"
+    existing = (
+        SampleCollection.query.filter(SampleCollection.notes.ilike(f"%{note_token}%"))
+        .order_by(SampleCollection.created_at.desc())
+        .first()
+    )
+    if existing:
+        return existing
+
+    patient_code = _resolve_patient_code_for_home(home)
+    order = biz.create_order(patient_code=patient_code, actor=actor or "home_collection_bridge")
+    try:
+        biz.submit_order_for_payment(order.order_code, actor=actor)
+    except Exception:
+        logger.exception("submit_order_for_payment skipped for home bridge %s", home.id)
+
+    address = (getattr(home, "address", None) or "").strip() or "Home address TBD"
+    scheduled = (getattr(home, "scheduled_time", None) or "").strip() or "TBD"
+    from datetime import date as date_cls
+
+    pickup = {
+        "specimen_type": "BLOOD",
+        "pickup_address": address,
+        "pickup_province": "Unknown",
+        "pickup_district": "Unknown",
+        "contact_person": order.patient_name or "Patient",
+        "contact_phone": "0000000000",
+        "requested_date": scheduled[:10] if len(scheduled) >= 10 and scheduled[0].isdigit() else date_cls.today().isoformat(),
+        "requested_time_window": scheduled or "TBD",
+        "note": note_token,
+    }
+    collection = ensure_collection_for_order(
+        order,
+        collection_mode=MODE_HOME_COLLECTION,
+        pickup=pickup,
+        actor=actor,
+        commit=False,
+    )
+    if collection is None:
+        raise CollectionDomainError("Failed to create SampleCollection for HomeCollection", 500)
+
+    collection.notes = note_token if not collection.notes else f"{collection.notes}\n{note_token}"
+    if getattr(home, "collector_id", None):
+        collection.collector_id = home.collector_id
+        home_status = normalize_status(getattr(home, "status", None))
+        if home_status in {ST_ASSIGNED, "ASSIGNED", "assigned"} or home.collector_id:
+            if normalize_status(collection.status) in {ST_REQUESTED, ST_PENDING_ASSIGNMENT}:
+                collection.status = ST_ASSIGNED
+
+    tracking = _ensure_sample_tracking(collection, order)
+    tracking.home_collection_id = home.id
+    db.session.flush()
+    if commit:
+        db.session.commit()
+    return collection
+
+
+def sync_legacy_home_collections_to_sample_collections(*, limit: int = 50) -> int:
+    """Backfill SampleCollection for open HomeCollection rows (REQUESTED/ASSIGNED/PENDING)."""
+    from app.models.home_collection import HomeCollection
+
+    open_statuses = ("REQUESTED", "PENDING", "ASSIGNED", "assigned", "PENDING_ASSIGNMENT")
+    rows = (
+        HomeCollection.query.filter(HomeCollection.status.in_(open_statuses))
+        .order_by(HomeCollection.created_at.desc())
+        .limit(limit)
+        .all()
+    )
+    created = 0
+    for home in rows:
+        before = SampleCollection.query.count()
+        ensure_sample_collection_from_home_collection(home, actor="home_collection_sync")
+        after = SampleCollection.query.count()
+        if after > before:
+            created += 1
+    if created:
+        db.session.flush()
+    return created
+
+
 def annotate_collection_payload(item: dict[str, Any]) -> dict[str, Any]:
     mode = (item.get("collection_mode") or "").strip().upper() or None
     if not mode:
@@ -218,7 +352,16 @@ def annotate_collection_payload(item: dict[str, Any]) -> dict[str, Any]:
     }:
         item["status"] = ST_VERIFIED
     item["actionable"] = item["status"] not in TERMINAL and item["status"] != ST_PENDING_ASSIGNMENT
-    if item["status"] == ST_PENDING_ASSIGNMENT and mode in FIELD_COLLECTION_MODES:
+    unassigned_field = (
+        mode in FIELD_COLLECTION_MODES
+        and not item.get("collector_id")
+        and item["status"] in {ST_REQUESTED, ST_PENDING_ASSIGNMENT, "PENDING"}
+    )
+    if unassigned_field:
+        # Collectors see the job; Reception/dispatcher assigns before check-in.
+        item["actionable"] = True
+        item["dispatcher_actionable"] = True
+    elif item["status"] == ST_PENDING_ASSIGNMENT and mode in FIELD_COLLECTION_MODES:
         item["actionable"] = False
         item["dispatcher_actionable"] = True
     elif mode in FIELD_COLLECTION_MODES and item["status"] == ST_ASSIGNED:
@@ -248,19 +391,21 @@ def annotate_collection_payload(item: dict[str, Any]) -> dict[str, Any]:
 
 
 def list_field_collector_queue(**filters) -> dict[str, Any]:
-    """Default Collector Queue = HOME_COLLECTION only (home field jobs).
+    """Default Collector Queue = HOME_COLLECTION jobs in ASSIGNED(+ verified) status.
 
-    CLINIC jobs are clinic pickup requests (field-collection-requests board),
-    not home collector queue rows. Pass modes=FIELD_COLLECTION_MODES to include both.
+    Unassigned REQUESTED jobs stay on Reception Field Collection Requests until
+    a collector is assigned (REQUESTED → ASSIGNED).
     """
+    explicit_status = filters.get("status")
+    status_filter = explicit_status or ",".join(sorted(COLLECTOR_ACTIVE_QUEUE_STATUSES))
     items = SampleCollectionWorkflowService.list_queue(
-        status=filters.get("status"),
+        status=status_filter,
         collector_id=filters.get("collector_id"),
         location=filters.get("location"),
         date_from=filters.get("date_from"),
         date_to=filters.get("date_to"),
         partner_id=filters.get("partner_id"),
-        awaiting_only=not bool(filters.get("status")),
+        awaiting_only=False,
     )
     mode_filter = filters.get("modes") or HOME_COLLECTOR_QUEUE_MODES
     field_items = []
@@ -270,6 +415,11 @@ def list_field_collector_queue(**filters) -> dict[str, Any]:
             mode, _ = infer_legacy_mode(item)
         if mode not in mode_filter:
             continue
+        if not explicit_status:
+            raw = item.get("status")
+            canonical = normalize_status(raw)
+            if canonical not in COLLECTOR_ACTIVE_QUEUE_STATUSES and (raw or "") not in COLLECTOR_ACTIVE_QUEUE_STATUSES:
+                continue
         field_items.append(annotate_collection_payload({**item, "collection_mode": mode}))
 
     role = filters.get("role")
@@ -290,19 +440,21 @@ def list_field_collector_queue(**filters) -> dict[str, Any]:
 
 
 def list_home_field_requests(**filters) -> dict[str, Any]:
-    """Reception Field Collection Requests — HOME and CLINIC."""
+    """Reception Field Collection Requests — HOME/CLINIC in REQUESTED (unassigned)."""
     from sqlalchemy import or_
+
+    # Bridge legacy HomeCollection rows that never created SampleCollection.
+    try:
+        sync_legacy_home_collections_to_sample_collections(limit=50)
+    except Exception:
+        logger.exception("legacy HomeCollection → SampleCollection sync failed")
 
     modes = filters.get("modes") or {MODE_HOME_COLLECTION, MODE_CLINIC_COLLECTION}
     q = SampleCollection.query.filter(SampleCollection.collection_mode.in_(list(modes)))
     if filters.get("status"):
         q = q.filter(SampleCollection.status == filters["status"])
     else:
-        q = q.filter(
-            SampleCollection.status.in_(
-                list(FIELD_QUEUE_STATUSES) + [ST_PENDING_ASSIGNMENT, ST_REQUESTED, "PENDING", ST_ASSIGNED]
-            )
-        )
+        q = q.filter(SampleCollection.status.in_(list(FIELD_REQUEST_BOARD_STATUSES)))
     partner_id = filters.get("partner_id") or filters.get("organization_id")
     role = filters.get("role")
     if partner_id and role not in {"SUPER_ADMIN", "SYSTEM_ADMIN", "ADMIN", None}:
