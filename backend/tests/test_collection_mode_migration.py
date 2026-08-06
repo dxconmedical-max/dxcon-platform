@@ -37,11 +37,21 @@ class CollectionModeMigrationTests(unittest.TestCase):
         self.ctx.pop()
 
     def test_migration_file_exists(self):
-        path = ROOT / "migrations" / "021_sample_collections_collection_mode.sql"
+        path = ROOT / "migrations" / "021_schema_reconciliation.sql"
         self.assertTrue(path.exists())
         text = path.read_text(encoding="utf-8")
         self.assertIn("collection_mode", text)
-        self.assertIn("AT_RECEPTION", text)
+        self.assertIn("ADD COLUMN IF NOT EXISTS", text)
+        self.assertNotIn("DROP COLUMN", text.upper())
+        self.assertNotIn("ALTER COLUMN", text.upper())
+        self.assertIn(
+            "ALTER TABLE sample_collections ADD COLUMN IF NOT EXISTS collection_mode",
+            text,
+        )
+        self.assertIn(
+            "ALTER TABLE sample_collections ADD COLUMN IF NOT EXISTS marketplace_booking_id",
+            text,
+        )
 
     def test_infer_legacy_mode_deterministic(self):
         desk = SampleCollection(

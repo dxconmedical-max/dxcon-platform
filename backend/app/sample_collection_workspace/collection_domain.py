@@ -335,6 +335,55 @@ def infer_legacy_mode(row: dict[str, Any] | Any) -> tuple[str | None, str]:
 
 
 def workflow_path_for_mode(mode: str) -> str:
-    if validate_mode(mode) == MODE_AT_RECEPTION:
+    resolved = validate_mode(mode)
+    if resolved == MODE_AT_RECEPTION:
         return "/app/reception/desk-collections"
-    return "/app/collector/workflow"
+    if resolved == MODE_CLINIC_COLLECTION:
+        return "/app/reception/m2/field-requests"
+    return "/app/collector/queue"
+
+
+# --- Specimen requirement (single source of truth) ---
+
+NON_SPECIMEN_SAMPLE_TYPES = frozenset(
+    {
+        "none",
+        "n/a",
+        "na",
+        "consult",
+        "consultation",
+        "interpretation",
+        "report",
+        "report_only",
+        "document",
+        "service",
+        "imaging",
+    }
+)
+
+
+def order_requires_specimen_collection(order: Any) -> bool:
+    """True when at least one order line needs a physical specimen.
+
+    Blank/NULL sample_type requires collection (unknown → collect).
+    Only explicit non-specimen tokens skip SampleCollection creation.
+    """
+    from app.models.test_catalog import TestCatalog
+
+    items = list(getattr(order, "items", None) or [])
+    if not items:
+        return False
+    for item in items:
+        sample_type = None
+        test_catalog_id = getattr(item, "test_catalog_id", None)
+        if test_catalog_id:
+            catalog = TestCatalog.query.get(test_catalog_id)
+            if catalog and catalog.sample_type is not None:
+                sample_type = catalog.sample_type
+        if sample_type is None:
+            sample_type = getattr(item, "sample_type", None)
+        normalized = str(sample_type or "").strip().lower()
+        if normalized in NON_SPECIMEN_SAMPLE_TYPES:
+            continue
+        return True
+    return False

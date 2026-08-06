@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import tempfile
 import unittest
+from unittest.mock import patch
 import uuid
 
 _TEST_DB = tempfile.NamedTemporaryFile(prefix="dxcon_cmr_", suffix=".db", delete=False)
@@ -338,6 +339,94 @@ class CollectionModeRoutingTests(unittest.TestCase):
         self.assertIn(field["sample_collection_id"], field_ids)
         self.assertNotIn(desk["sample_collection_id"], field_ids)
 
+
+
+    def test_j_blank_sample_type_still_creates_collection(self):
+        blank_catalog = TestCatalog(
+            code=f"BLNK-{uuid.uuid4().hex[:4].upper()}",
+            name="Blank Sample Type",
+            category="Lab",
+            sample_type=None,
+            price=1,
+        )
+        db.session.add(blank_catalog)
+        db.session.commit()
+        patient = self._patient()
+        result = create_reception_order(
+            patient_code=patient.patient_code,
+            test_catalog_ids=[blank_catalog.id],
+            collection_mode=MODE_AT_RECEPTION,
+            actor=self.admin.email,
+        )
+        db.session.commit()
+        self.assertIn("sample_collection_id", result)
+        sc = SampleCollection.query.get(result["sample_collection_id"])
+        self.assertIsNotNone(sc)
+        self.assertEqual(sc.collection_mode, MODE_AT_RECEPTION)
+
+    def test_k_compatible_enrich_keeps_home_in_collector_queue(self):
+        patient = self._patient()
+        result = create_reception_order(
+            patient_code=patient.patient_code,
+            test_catalog_ids=[self.blood.id],
+            collection_mode=MODE_HOME_COLLECTION,
+            pickup={
+                "pickup_address": "99 Compatible Lane",
+                "pickup_province": "HN",
+                "pickup_district": "D1",
+                "contact_person": "CMR PATIENT",
+                "contact_phone": "0901111222",
+                "requested_date": "2026-08-03",
+                "requested_time_window": "10:00-12:00",
+                "specimen_type": "BLOOD",
+            },
+            actor=self.admin.email,
+        )
+        db.session.commit()
+        sc_id = result["sample_collection_id"]
+        sc = SampleCollection.query.get(sc_id)
+        self.assertEqual(sc.collection_mode, MODE_HOME_COLLECTION)
+
+        live_columns = set(SampleCollectionWorkflowService._sample_collection_db_columns())
+        live_columns.discard("collection_mode")
+
+        with patch.object(
+            SampleCollectionWorkflowService,
+            "_sample_collection_db_columns",
+            return_value=live_columns,
+        ):
+            payload = SampleCollectionWorkflowService._enrich_payload(sc, live_columns)
+            self.assertEqual(payload.get("collection_mode"), MODE_HOME_COLLECTION)
+            queue = list_field_collector_queue()
+        self.assertIn(sc_id, {i["id"] for i in queue["items"]})
+
+    def test_l_null_partner_id_visible_to_org_collector(self):
+        patient = self._patient()
+        result = create_reception_order(
+            patient_code=patient.patient_code,
+            test_catalog_ids=[self.blood.id],
+            collection_mode=MODE_HOME_COLLECTION,
+            pickup={
+                "pickup_address": "Unassigned Org Row",
+                "pickup_province": "HN",
+                "pickup_district": "D1",
+                "contact_person": "CMR PATIENT",
+                "contact_phone": "0903333444",
+                "requested_date": "2026-08-04",
+                "requested_time_window": "08:00-10:00",
+                "specimen_type": "BLOOD",
+            },
+            actor=self.admin.email,
+        )
+        db.session.commit()
+        sc = SampleCollection.query.get(result["sample_collection_id"])
+        sc.partner_id = None
+        db.session.commit()
+
+        scoped = list_field_collector_queue(role="COLLECTOR", organization_id="org-home")
+        self.assertIn(sc.id, {i["id"] for i in scoped["items"]})
+        board = list_home_field_requests(role="COLLECTOR", organization_id="org-home")
+        self.assertIn(sc.id, {i["id"] for i in board["items"]})
 
 if __name__ == "__main__":
     unittest.main()
