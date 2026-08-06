@@ -149,7 +149,7 @@ class SampleCollectionWorkflowService:
             marketplace_booking_id=booking.id,
             collector_id=collector_id,
             collector_name=collector_name,
-            status=COLLECTION_PENDING,
+            status="REQUESTED",
             partner_id=booking.partner_id,
             location_city=booking.city,
             collection_location=booking.patient_address,
@@ -443,6 +443,10 @@ class SampleCollectionWorkflowService:
                 loc_clauses.append(SampleCollection.location_city.ilike(like))
             if not columns or "collection_location" in columns:
                 loc_clauses.append(SampleCollection.collection_location.ilike(like))
+            if not columns or "pickup_city" in columns:
+                loc_clauses.append(SampleCollection.pickup_city.ilike(like))
+            if not columns or "pickup_address" in columns:
+                loc_clauses.append(SampleCollection.pickup_address.ilike(like))
             if loc_clauses:
                 query = query.filter(or_(*loc_clauses))
 

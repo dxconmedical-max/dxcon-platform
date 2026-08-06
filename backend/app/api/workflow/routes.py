@@ -80,12 +80,30 @@ def create_booking():
     safe_set(booking, "phone", data.get("phone"))
 
     db.session.add(booking)
+    db.session.flush()
+
+    sample_collection = None
+    try:
+        from app.sample_collection_workspace.collection_routing import (
+            ensure_sample_collection_from_home_collection,
+        )
+
+        sample_collection = ensure_sample_collection_from_home_collection(
+            booking,
+            actor=data.get("actor") or "workflow_api",
+        )
+    except Exception:
+        pass
+
     db.session.commit()
 
-    return {
+    payload = {
         "success": True,
-        "booking": booking.to_dict()
-    }, 201
+        "booking": booking.to_dict(),
+    }
+    if sample_collection:
+        payload["sample_collection_id"] = sample_collection.id
+    return payload, 201
 
 
 @workflow_bp.route("/assign/<booking_id>/<collector_id>", methods=["POST", "GET"])

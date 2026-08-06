@@ -3,6 +3,7 @@ from flask import Blueprint, request, session
 from app.models.patient import Patient
 from app.models.reception_queue_entry import ReceptionQueueEntry
 from app.models.clinic_booking import ClinicBooking
+from app.reception_workspace.auth import reception_api_read
 from app.services.reception_service import (
     ReceptionError,
     check_in_appointment,
@@ -124,3 +125,22 @@ def reception_activity_api():
 @reception_bp.route("/kpi", methods=["GET"])
 def reception_kpi_api():
     return get_kpis()
+
+
+@reception_bp.route("/field-requests", methods=["GET"])
+@reception_api_read
+def reception_field_requests_api():
+    """Canonical: GET /api/v1/reception/field-requests → HOME/CLINIC SampleCollections."""
+    from app.sample_collection_workspace.collection_routing import list_home_field_requests
+
+    try:
+        payload = list_home_field_requests(
+            status=request.args.get("status"),
+            role=session.get("role") or request.headers.get("X-User-Role"),
+            organization_id=request.headers.get("X-Organization-ID")
+            or request.headers.get("X-Organization-Id"),
+            limit=int(request.args.get("limit") or 200),
+        )
+        return {"success": True, "data": payload}, 200
+    except Exception as exc:
+        return {"success": False, "error": str(exc)}, 400
