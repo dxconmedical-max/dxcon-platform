@@ -1,78 +1,51 @@
-"""Apply sample_collections.collection_mode migration (idempotent)."""
+#!/usr/bin/env python3
+"""Apply SampleCollection / full ORM schema reconciliation (PostgreSQL).
+
+Canonical migration:
+  backend/migrations/021_schema_reconciliation.sql
+
+This runner delegates to apply_migrations.py so DO $$ blocks and the full
+ORM sync are applied correctly (not one column at a time).
+
+Usage:
+  cd backend
+  python scripts/apply_sample_collections_collection_mode.py
+  python scripts/apply_sample_collections_collection_mode.py --verify-only
+  python scripts/apply_sample_collections_collection_mode.py --json
+"""
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "scripts"))
 
-MIGRATION = ROOT / "migrations" / "021_sample_collections_collection_mode.sql"
-
-
-def apply(db) -> dict:
-    from sqlalchemy import text
-
-    sql = MIGRATION.read_text(encoding="utf-8")
-    # Split on statements carefully — migration uses plain SQL
-    for statement in sql.split(";"):
-        stmt = statement.strip()
-        if not stmt or stmt.startswith("--"):
-            # drop comment-only blocks
-            lines = [
-                line
-                for line in stmt.splitlines()
-                if line.strip() and not line.strip().startswith("--")
-            ]
-            stmt = "\n".join(lines).strip()
-        if not stmt:
-            continue
-        db.session.execute(text(stmt))
-    db.session.commit()
-
-    from app.infrastructure.schema_introspection import get_table_columns
-
-    columns = get_table_columns("sample_collections")
-    ambiguous = db.session.execute(
-        text(
-            "SELECT COUNT(*) FROM sample_collections "
-            "WHERE collection_mode IS NULL OR collection_mode = ''"
-        )
-    ).scalar()
-    by_mode = db.session.execute(
-        text(
-            "SELECT COALESCE(collection_mode, 'NULL'), COUNT(*) "
-            "FROM sample_collections GROUP BY 1 ORDER BY 1"
-        )
-    ).fetchall()
-    return {
-        "ok": "collection_mode" in columns,
-        "columns_include_collection_mode": "collection_mode" in columns,
-        "ambiguous_rows": int(ambiguous or 0),
-        "by_mode": {str(row[0]): int(row[1]) for row in by_mode},
-        "migration": str(MIGRATION),
-    }
+MIGRATION_NAME = "021_schema_reconciliation.sql"
 
 
-def main():
-    parser = argparse.ArgumentParser()
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--verify-only", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
-    from app import create_app
-    from app.extensions.db import db
 
-    app = create_app()
-    with app.app_context():
-        result = apply(db)
+    # Delegate to the production migration runner (reconciliation only).
+    from apply_migrations import main as apply_main
+
+    argv = ["apply_migrations.py", "--only", MIGRATION_NAME]
+    if args.verify_only:
+        argv.append("--verify-only")
     if args.json:
-        print(json.dumps(result, indent=2))
-    else:
-        print(result)
-    raise SystemExit(0 if result.get("ok") else 1)
+        argv.append("--json")
+    sys.argv = argv
+    return apply_main()
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

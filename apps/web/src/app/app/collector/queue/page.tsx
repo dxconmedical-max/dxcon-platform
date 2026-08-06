@@ -66,7 +66,7 @@ export default function CollectorQueuePage() {
       <div className="space-y-6">
         <SectionHeader
           title="Field collection jobs"
-          description="HOME_COLLECTION and CLINIC_COLLECTION only. Desk AT_RECEPTION work is on Reception → Desk collections."
+          description="HOME_COLLECTION field jobs only. CLINIC pickup requests are on Reception → Field Collection Requests. Desk AT_RECEPTION work is on Reception → Desk collections."
           actions={
             <Button size="sm" variant="outline" onClick={() => void load()}>
               Refresh

@@ -10,7 +10,6 @@ from app.extensions.db import db
 from app.models.biz_order import BizOrder
 from app.models.sample_collection import SampleCollection
 from app.models.sample_tracking import SampleTracking
-from app.models.test_catalog import TestCatalog
 from app.sample_collection_workspace.collection_domain import (
     FIELD_COLLECTION_MODES,
     FIELD_QUEUE_STATUSES,
@@ -18,6 +17,7 @@ from app.sample_collection_workspace.collection_domain import (
     MODE_AT_RECEPTION,
     MODE_CLINIC_COLLECTION,
     MODE_HOME_COLLECTION,
+    NON_SPECIMEN_SAMPLE_TYPES,
     ST_ARRIVED_AT_LAB,
     ST_ASSIGNED,
     ST_CANCELLED,
@@ -31,6 +31,7 @@ from app.sample_collection_workspace.collection_domain import (
     initial_status_for_mode,
     is_field_mode,
     normalize_status,
+    order_requires_specimen_collection,
     validate_collection_request,
     validate_mode,
     workflow_path_for_mode,
@@ -39,42 +40,7 @@ from app.services.sample_collection_workflow import SampleCollectionWorkflowServ
 
 logger = logging.getLogger("dxcon.collection_routing")
 
-NON_SPECIMEN_SAMPLE_TYPES = frozenset(
-    {
-        "",
-        "none",
-        "n/a",
-        "na",
-        "consult",
-        "consultation",
-        "interpretation",
-        "report",
-        "report_only",
-        "document",
-        "service",
-    }
-)
-
 TERMINAL = frozenset({ST_ARRIVED_AT_LAB, ST_CANCELLED, ST_REJECTED, "RECEIVED", "RELEASED", "COMPLETED"})
-
-
-def order_requires_specimen_collection(order: BizOrder) -> bool:
-    items = list(order.items or [])
-    if not items:
-        return False
-    for item in items:
-        sample_type = None
-        if item.test_catalog_id:
-            catalog = TestCatalog.query.get(item.test_catalog_id)
-            if catalog and catalog.sample_type is not None:
-                sample_type = catalog.sample_type
-        if sample_type is None:
-            sample_type = getattr(item, "sample_type", None)
-        normalized = str(sample_type or "").strip().lower()
-        if normalized in NON_SPECIMEN_SAMPLE_TYPES:
-            continue
-        return True
-    return False
 
 
 def _columns() -> set[str]:
@@ -309,7 +275,11 @@ def list_field_collector_queue(**filters) -> dict[str, Any]:
     role = filters.get("role")
     organization_id = filters.get("organization_id")
     if organization_id and role in {"COLLECTOR", "PARTNER_COLLECTOR", "DRIVER"}:
-        field_items = [i for i in field_items if i.get("partner_id") == organization_id]
+        field_items = [
+            i
+            for i in field_items
+            if not i.get("partner_id") or i.get("partner_id") == organization_id
+        ]
 
     return {
         "count": len(field_items),

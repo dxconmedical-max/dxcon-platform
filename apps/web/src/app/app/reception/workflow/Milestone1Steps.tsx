@@ -181,8 +181,8 @@ export function CollectionRequestStep({
             {mode === "AT_RECEPTION"
               ? "Creates a reception desk SampleCollection only — not a field collector job."
               : mode === "HOME_COLLECTION"
-                ? "Creates a field collection request (PENDING_ASSIGNMENT) for the collector queue."
-                : "Creates a clinic pickup request for the field collector queue."}
+                ? "Creates a field collection request (PENDING_ASSIGNMENT) for the HOME collector queue."
+                : "Creates a CLINIC pickup request on Field Collection Requests (not the HOME collector queue)."}
           </p>
         </div>
 
