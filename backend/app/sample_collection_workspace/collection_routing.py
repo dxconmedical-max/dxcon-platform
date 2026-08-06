@@ -203,18 +203,29 @@ def ensure_collection_for_order(
 
 
 def _resolve_patient_code_for_home(home) -> str:
+    from app.business_engine import service as biz
+    from app.business_engine.service import table_has_column
     from app.models.patient import Patient
 
     raw = str(getattr(home, "patient_id", None) or "").strip()
     if not raw:
         raise CollectionDomainError("HomeCollection.patient_id is required", 400)
-    patient = Patient.query.get(raw)
-    if patient:
-        return patient.patient_code
-    from app.business_engine import service as biz
-    from app.business_engine.service import BusinessEngineError
 
     try:
+        # HomeCollection.patient_id is typically patients.id (UUID PK in Postgres),
+        # while the ORM primary key is patient_code.
+        if table_has_column("patients", "id"):
+            row = db.session.execute(
+                db.text("SELECT patient_code FROM patients WHERE id = :raw LIMIT 1"),
+                {"raw": raw},
+            ).fetchone()
+            if row and row[0]:
+                return str(row[0])
+
+        patient = Patient.query.get(raw) or Patient.query.filter_by(patient_code=raw).first()
+        if patient:
+            return patient.patient_code
+
         created = biz.create_patient(
             full_name=f"Home Patient {raw[:8]}",
             phone=f"09{raw.replace('-', '')[-8:]}" if len(raw) >= 8 else "0900000000",
@@ -222,9 +233,17 @@ def _resolve_patient_code_for_home(home) -> str:
             actor="home_collection_bridge",
         )
         return getattr(created, "patient_code", None) or raw[:50]
-    except BusinessEngineError:
-        # Race / already exists
-        patient = Patient.query.get(raw[:50])
+    except Exception:
+        db.session.rollback()
+        # After rollback, re-resolve existing patient if the failure was a collision.
+        if table_has_column("patients", "id"):
+            row = db.session.execute(
+                db.text("SELECT patient_code FROM patients WHERE id = :raw LIMIT 1"),
+                {"raw": raw},
+            ).fetchone()
+            if row and row[0]:
+                return str(row[0])
+        patient = Patient.query.get(raw) or Patient.query.filter_by(patient_code=raw).first()
         if patient:
             return patient.patient_code
         raise
