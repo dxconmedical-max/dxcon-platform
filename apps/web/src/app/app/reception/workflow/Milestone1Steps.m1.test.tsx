@@ -247,7 +247,7 @@ describe("Reception Milestone 1 steps", () => {
     await user.click(checkbox);
     expect(screen.getByText(/Selected 0/i)).toBeInTheDocument();
     await user.click(checkbox);
-    await user.click(screen.getByRole("button", { name: "Review pricing" }));
+    await user.click(screen.getByRole("button", { name: "Continue to collection request" }));
     expect(onContinue).toHaveBeenCalledWith(
       expect.objectContaining({
         testIds: ["t1"],
@@ -474,7 +474,7 @@ describe("Reception Milestone 1 steps", () => {
     );
     await screen.findByText("CBC");
     await user.click(within(screen.getByRole("table")).getByRole("checkbox"));
-    await user.click(screen.getByRole("button", { name: "Review pricing" }));
+    await user.click(screen.getByRole("button", { name: "Continue to collection request" }));
     expect(captured).not.toBeNull();
     rerender(
       <ReviewPricingStep
