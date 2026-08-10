@@ -243,7 +243,9 @@ def create_reception_order(
     sample_collection = None
     from app.sample_collection_workspace.collection_domain import (
         CollectionDomainError,
+        FIELD_COLLECTION_MODES,
         MODE_AT_RECEPTION,
+        validate_mode,
         workflow_path_for_mode,
     )
     from app.sample_collection_workspace.collection_routing import (
@@ -251,8 +253,23 @@ def create_reception_order(
         order_requires_specimen_collection,
     )
 
-    if order_requires_specimen_collection(order):
-        mode = (collection_mode or "").strip() or MODE_AT_RECEPTION
+    explicit_mode = (collection_mode or "").strip()
+    # HOME/CLINIC must always create SampleCollection (assign board invariant).
+    # DESK/AT_RECEPTION still requires specimen-bearing order lines.
+    requires_collection = False
+    mode = MODE_AT_RECEPTION
+    if explicit_mode:
+        try:
+            mode = validate_mode(explicit_mode)
+        except CollectionDomainError as exc:
+            raise ReceptionWorkspaceError(exc.message) from exc
+        requires_collection = mode in FIELD_COLLECTION_MODES or order_requires_specimen_collection(
+            order
+        )
+    elif order_requires_specimen_collection(order):
+        requires_collection = True
+
+    if requires_collection:
         if not order.barcode_value:
             order.barcode_value = f"BC-{order.order_code}"
             db.session.flush()
@@ -273,6 +290,10 @@ def create_reception_order(
         if sample_collection is None:
             raise ReceptionWorkspaceError(
                 f"Collection record missing after create for order {order.order_code}"
+            )
+        if mode in FIELD_COLLECTION_MODES and not sample_collection.id:
+            raise ReceptionWorkspaceError(
+                f"Field collection SampleCollection id missing for order {order.order_code}"
             )
 
     write_reception_audit(action="order_created", object_type="order", object_id=order.order_code, actor=actor)

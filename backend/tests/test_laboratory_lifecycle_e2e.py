@@ -39,6 +39,7 @@ from app.sample_collection_workspace.collection_domain import (
     MODE_HOME_COLLECTION,
     ST_ASSIGNED,
     ST_PENDING_ASSIGNMENT,
+    ST_REQUESTED,
 )
 from app.sample_collection_workspace.collection_routing import (
     assign_collector,
@@ -149,7 +150,8 @@ class LaboratoryLifecycleE2ETests(unittest.TestCase):
         db.session.commit()
         sc_id = result["sample_collection_id"]
         sc = SampleCollection.query.get(sc_id)
-        self.assertEqual(sc.status, ST_PENDING_ASSIGNMENT)
+        # Canonical create status is REQUESTED (assignable on Field Requests board).
+        self.assertEqual(sc.status, ST_REQUESTED)
 
         assigned = assign_collector(
             sc_id,

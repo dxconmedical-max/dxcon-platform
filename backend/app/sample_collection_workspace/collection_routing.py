@@ -6,6 +6,8 @@ import logging
 from datetime import datetime
 from typing import Any
 
+from sqlalchemy import or_
+
 from app.extensions.db import db
 from app.models.biz_order import BizOrder
 from app.models.sample_collection import SampleCollection
@@ -129,6 +131,72 @@ def _apply_request_fields(target: Any, mode: str, request_data: dict[str, Any], 
         put("location_city", request_data.get("pickup_city") or clinic)
 
 
+def resolve_sample_collection(collection_ref: str) -> SampleCollection | None:
+    """Resolve SampleCollection by id, then order_id / order_code / tracking / booking.
+
+    Reception Field Requests must surface SampleCollection.id; assignment historically
+    failed when a client passed BizOrder.id (order_id) or when a bridged row was
+    listed before it was committed. Alternate keys only succeed when a real row exists.
+    """
+    ref = str(collection_ref or "").strip()
+    if not ref:
+        return None
+
+    collection = SampleCollection.query.get(ref)
+    if collection:
+        return collection
+
+    open_statuses_excluded = (ST_REJECTED, ST_CANCELLED, "REJECTED", "CANCELLED")
+
+    by_order = (
+        SampleCollection.query.filter_by(order_id=ref)
+        .filter(SampleCollection.status.notin_(open_statuses_excluded))
+        .order_by(SampleCollection.created_at.desc())
+        .first()
+    )
+    if by_order:
+        return by_order
+
+    order = BizOrder.query.filter(or_(BizOrder.id == ref, BizOrder.order_code == ref)).first()
+    if order:
+        by_order = (
+            SampleCollection.query.filter_by(order_id=order.id)
+            .filter(SampleCollection.status.notin_(open_statuses_excluded))
+            .order_by(SampleCollection.created_at.desc())
+            .first()
+        )
+        if by_order:
+            return by_order
+
+    by_tracking = SampleCollection.query.filter_by(sample_tracking_id=ref).first()
+    if by_tracking:
+        return by_tracking
+
+    by_booking = (
+        SampleCollection.query.filter_by(marketplace_booking_id=ref)
+        .filter(SampleCollection.status.notin_(open_statuses_excluded))
+        .order_by(SampleCollection.created_at.desc())
+        .first()
+    )
+    if by_booking:
+        return by_booking
+
+    # Legacy HomeCollection id → SampleTracking.home_collection_id → SampleCollection
+    home_tracking = SampleTracking.query.filter_by(home_collection_id=ref).first()
+    if home_tracking:
+        by_home = SampleCollection.query.filter_by(sample_tracking_id=home_tracking.id).first()
+        if by_home:
+            return by_home
+
+    note_token = f"home_collection_id:{ref}"
+    return (
+        SampleCollection.query.filter(SampleCollection.notes.ilike(f"%{note_token}%"))
+        .filter(SampleCollection.status.notin_(open_statuses_excluded))
+        .order_by(SampleCollection.created_at.desc())
+        .first()
+    )
+
+
 def ensure_collection_for_order(
     order: BizOrder,
     *,
@@ -156,7 +224,8 @@ def ensure_collection_for_order(
     columns = _columns()
 
     if existing:
-        if not getattr(existing, "collection_mode", None) and (not columns or "collection_mode" in columns):
+        # Caller mode is authoritative (do not leave a prior AT_RECEPTION stuck on HOME).
+        if existing.collection_mode != mode:
             existing.collection_mode = mode
         if organization_id and (not columns or "partner_id" in columns) and not existing.partner_id:
             existing.partner_id = organization_id
@@ -188,6 +257,9 @@ def ensure_collection_for_order(
     _apply_request_fields(kwargs, mode, request_data, columns)
 
     collection = SampleCollection(**kwargs)
+    # Force routing fields even when live schema introspection omits them from _set.
+    collection.collection_mode = mode
+    collection.status = status
     db.session.add(collection)
     try:
         db.session.flush()
@@ -280,6 +352,10 @@ def ensure_sample_collection_from_home_collection(
         .first()
     )
     if existing:
+        if not existing.collection_mode:
+            existing.collection_mode = MODE_HOME_COLLECTION
+        if commit:
+            db.session.commit()
         return existing
 
     patient_code = _resolve_patient_code_for_home(home)
@@ -331,7 +407,12 @@ def ensure_sample_collection_from_home_collection(
 
 
 def sync_legacy_home_collections_to_sample_collections(*, limit: int = 50) -> int:
-    """Backfill SampleCollection for open HomeCollection rows (REQUESTED/ASSIGNED/PENDING)."""
+    """Backfill SampleCollection for open HomeCollection rows (REQUESTED/ASSIGNED/PENDING).
+
+    Each successful bridge is committed immediately. Listing Field Requests without a
+    commit previously returned SampleCollection ids that vanished on session teardown,
+    causing Assign Collector → "Sample collection not found".
+    """
     from app.models.home_collection import HomeCollection
 
     open_statuses = ("REQUESTED", "PENDING", "ASSIGNED", "assigned", "PENDING_ASSIGNMENT")
@@ -343,13 +424,22 @@ def sync_legacy_home_collections_to_sample_collections(*, limit: int = 50) -> in
     )
     created = 0
     for home in rows:
-        before = SampleCollection.query.count()
-        ensure_sample_collection_from_home_collection(home, actor="home_collection_sync")
-        after = SampleCollection.query.count()
-        if after > before:
-            created += 1
-    if created:
-        db.session.flush()
+        try:
+            before = SampleCollection.query.count()
+            ensure_sample_collection_from_home_collection(
+                home,
+                actor="home_collection_sync",
+                commit=True,
+            )
+            after = SampleCollection.query.count()
+            if after > before:
+                created += 1
+        except Exception:
+            db.session.rollback()
+            logger.exception(
+                "legacy HomeCollection → SampleCollection bridge failed for %s",
+                getattr(home, "id", None),
+            )
     return created
 
 
@@ -460,8 +550,6 @@ def list_field_collector_queue(**filters) -> dict[str, Any]:
 
 def list_home_field_requests(**filters) -> dict[str, Any]:
     """Reception Field Collection Requests — HOME/CLINIC in REQUESTED (unassigned)."""
-    from sqlalchemy import or_
-
     # Bridge legacy HomeCollection rows that never created SampleCollection.
     try:
         sync_legacy_home_collections_to_sample_collections(limit=50)
@@ -482,6 +570,9 @@ def list_home_field_requests(**filters) -> dict[str, Any]:
     items = []
     for row in rows:
         payload = row.to_dict()
+        # Explicit alias so assign clients never confuse order_id with collection id.
+        payload["sample_collection_id"] = row.id
+        payload["id"] = row.id
         order = BizOrder.query.get(row.order_id)
         if order:
             payload["order"] = {
@@ -534,7 +625,7 @@ def list_reception_desk_queue(**filters) -> dict[str, Any]:
 
 def apply_status_transition(collection_id: str, target: str, *, actor: str | None = None) -> SampleCollection:
     del actor
-    collection = SampleCollection.query.get(collection_id)
+    collection = resolve_sample_collection(collection_id)
     if not collection:
         raise CollectionDomainError("Sample collection not found", 404)
     new_status = assert_transition(collection.status, target)
@@ -558,7 +649,7 @@ def assign_collector(
     from app.models.user import User
     from app.core.audit import write_audit
 
-    collection = SampleCollection.query.get(collection_id)
+    collection = resolve_sample_collection(collection_id)
     if not collection:
         raise CollectionDomainError("Sample collection not found", 404)
     if not is_field_mode(collection.collection_mode):
@@ -612,7 +703,7 @@ def release_collector_assignment(
     """Release assignment → PENDING_ASSIGNMENT; clears collector."""
     from app.core.audit import write_audit
 
-    collection = SampleCollection.query.get(collection_id)
+    collection = resolve_sample_collection(collection_id)
     if not collection:
         raise CollectionDomainError("Sample collection not found", 404)
     if not is_field_mode(collection.collection_mode):

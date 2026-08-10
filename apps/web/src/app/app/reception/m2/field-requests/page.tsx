@@ -69,6 +69,7 @@ export default function FieldCollectionRequestsPage() {
   }, [load]);
 
   async function onAssign(row: SampleCollectionItem) {
+    const collectionId = String(row.sample_collection_id || row.id);
     const collectorId = selectedCollector[row.id] || collectors[0]?.id;
     if (!collectorId) {
       setError("Select a collector first.");
@@ -79,7 +80,7 @@ export default function FieldCollectionRequestsPage() {
     setError(null);
     setMessage(null);
     try {
-      await assignCollector(auth, row.id, {
+      await assignCollector(auth, collectionId, {
         collector_id: collectorId,
         collector_name: collector?.full_name || collector?.email,
       });
@@ -93,11 +94,12 @@ export default function FieldCollectionRequestsPage() {
   }
 
   async function onRelease(row: SampleCollectionItem) {
+    const collectionId = String(row.sample_collection_id || row.id);
     setBusyId(row.id);
     setError(null);
     setMessage(null);
     try {
-      await unassignCollector(auth, row.id);
+      await unassignCollector(auth, collectionId);
       setMessage("Assignment released.");
       await load();
     } catch (err) {
