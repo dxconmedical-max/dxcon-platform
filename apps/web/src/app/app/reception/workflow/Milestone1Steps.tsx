@@ -187,6 +187,21 @@ export function CollectionRequestStep({
         </div>
 
         <div>
+          <Label htmlFor="laboratory">Laboratory</Label>
+          <select
+            id="laboratory"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            defaultValue="central"
+            aria-label="Laboratory"
+          >
+            <option value="central">DxCon Central Laboratory</option>
+          </select>
+          <p className="mt-1 text-xs text-slate-500">
+            Destination laboratory for this order (handoff target after collection).
+          </p>
+        </div>
+
+        <div>
           <Label htmlFor="specimen-type">Specimen type</Label>
           <Input
             id="specimen-type"
@@ -393,28 +408,29 @@ export function CatalogSelectStep({
         placeholder="Search test catalog by code or name"
         aria-label="Catalog search"
       />
-      <DataState
-        loading={loading}
-        error={error}
-        empty={!loading && tests.length === 0}
-        emptyLabel="No tests found in master data."
-        onRetry={() => void loadCatalog(catalogQuery)}
-      >
-        <div className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <Label htmlFor="m1-discount">Discount (estimate)</Label>
-              <Input
-                id="m1-discount"
-                value={discount}
-                onChange={(event) => setDiscount(event.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="m1-note">Note</Label>
-              <Input id="m1-note" value={note} onChange={(event) => setNote(event.target.value)} />
-            </div>
+      {/* Keep create-order controls visible when catalog is empty/erroring. */}
+      <div className="space-y-4">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <Label htmlFor="m1-discount">Discount (estimate)</Label>
+            <Input
+              id="m1-discount"
+              value={discount}
+              onChange={(event) => setDiscount(event.target.value)}
+            />
           </div>
+          <div>
+            <Label htmlFor="m1-note">Note</Label>
+            <Input id="m1-note" value={note} onChange={(event) => setNote(event.target.value)} />
+          </div>
+        </div>
+        <DataState
+          loading={loading}
+          error={error}
+          empty={!loading && tests.length === 0}
+          emptyLabel="No tests found in master data."
+          onRetry={() => void loadCatalog(catalogQuery)}
+        >
           <SimpleTable<ReceptionTest>
             rows={tests}
             rowKey={(row) => row.id}
@@ -451,35 +467,35 @@ export function CatalogSelectStep({
               },
             ]}
           />
-          {selectedTests.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {selectedTests.map((test) => (
-                <Button
-                  key={test.id}
-                  size="sm"
-                  variant="outline"
-                  onClick={() => toggleTest(test)}
-                  aria-label={`Remove ${test.code}`}
-                >
-                  {test.code} ×
-                </Button>
-              ))}
-            </div>
-          ) : null}
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
-            <p>
-              Selected {selectedTests.length} · Estimate subtotal{" "}
-              {formatCurrency(estimateSubtotal)} · Estimate total {formatCurrency(estimateTotal)}
-            </p>
-            <p className="mt-1 text-xs text-slate-500">
-              Estimate only — final totals come from the order create response.
-            </p>
+        </DataState>
+        {selectedTests.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {selectedTests.map((test) => (
+              <Button
+                key={test.id}
+                size="sm"
+                variant="outline"
+                onClick={() => toggleTest(test)}
+                aria-label={`Remove ${test.code}`}
+              >
+                {test.code} ×
+              </Button>
+            ))}
           </div>
-          <Button disabled={selectedTests.length === 0} onClick={continueNext}>
-            Review pricing
-          </Button>
+        ) : null}
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
+          <p>
+            Selected {selectedTests.length} · Estimate subtotal{" "}
+            {formatCurrency(estimateSubtotal)} · Estimate total {formatCurrency(estimateTotal)}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            Estimate only — final totals come from the order create response.
+          </p>
         </div>
-      </DataState>
+        <Button disabled={selectedTests.length === 0} onClick={continueNext}>
+          Continue to collection request
+        </Button>
+      </div>
     </div>
   );
 }

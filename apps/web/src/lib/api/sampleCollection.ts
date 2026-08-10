@@ -10,6 +10,8 @@ export type SampleCollectionAuth = {
 
 export type SampleCollectionItem = {
   id: string;
+  /** Canonical SampleCollection PK; prefer over id when assigning. */
+  sample_collection_id?: string;
   source?: "field" | "desk" | "reception" | string;
   collection_mode?: "AT_RECEPTION" | "HOME_COLLECTION" | "CLINIC_COLLECTION" | string;
   status: string;

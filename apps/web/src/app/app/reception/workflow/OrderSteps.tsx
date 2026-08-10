@@ -603,10 +603,11 @@ export function TestsStep({
         placeholder="Search test catalog"
         aria-label="Catalog search"
       />
+      {/* empty=false: catalog miss must not hide collection method / create order controls */}
       <DataState
         loading={loading}
         error={error}
-        empty={!loading && tests.length === 0}
+        empty={false}
         emptyLabel="No tests found in master data."
         onRetry={() => void loadCatalog(catalogQuery)}
       >
@@ -684,6 +685,17 @@ export function TestsStep({
                 <option value="CLINIC_COLLECTION">CLINIC</option>
               </select>
               <div>
+                <Label htmlFor="laboratory-legacy">Laboratory</Label>
+                <select
+                  id="laboratory-legacy"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  defaultValue="central"
+                  aria-label="Laboratory"
+                >
+                  <option value="central">DxCon Central Laboratory</option>
+                </select>
+              </div>
+              <div>
                 <Label htmlFor="specimen-type-legacy">Specimen type</Label>
                 <Input
                   id="specimen-type-legacy"
@@ -745,6 +757,11 @@ export function TestsStep({
               ) : null}
             </div>
 
+            {!loading && !error && tests.length === 0 ? (
+              <p className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
+                No tests found in master data. Collection method below stays available; retry catalog search above.
+              </p>
+            ) : null}
             <SimpleTable<ReceptionTest>
               rows={tests}
               rowKey={(row) => row.id}
