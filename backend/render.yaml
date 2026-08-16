@@ -43,6 +43,132 @@ services:
       - key: BUILD_VERSION
         value: "2.0.0-rc1"
 
+  - type: worker
+    name: dxcon-worker
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python production_start.py worker
+    envVars:
+      - key: APP_ENV
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: APP_ENV
+      - key: QUEUE_PROVIDER
+        value: redis
+      - key: CORS_ORIGINS
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: CORS_ORIGINS
+      - key: LOG_FORMAT
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: LOG_FORMAT
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: SECRET_KEY
+      - key: JWT_SECRET_KEY
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: JWT_SECRET_KEY
+      - key: DATABASE_URL
+        fromDatabase:
+          name: dxcon-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: REDIS_URL
+      - key: SMTP_HOST
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: SMTP_HOST
+      - key: SMTP_PORT
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: SMTP_PORT
+      - key: SMTP_FROM
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: SMTP_FROM
+      - key: SMTP_USE_TLS
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: SMTP_USE_TLS
+
+  - type: worker
+    name: dxcon-scheduler
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python production_start.py scheduler
+    envVars:
+      - key: APP_ENV
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: APP_ENV
+      - key: QUEUE_PROVIDER
+        value: redis
+      - key: CORS_ORIGINS
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: CORS_ORIGINS
+      - key: LOG_FORMAT
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: LOG_FORMAT
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: SECRET_KEY
+      - key: JWT_SECRET_KEY
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: JWT_SECRET_KEY
+      - key: DATABASE_URL
+        fromDatabase:
+          name: dxcon-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: REDIS_URL
+      - key: SMTP_HOST
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: SMTP_HOST
+      - key: SMTP_PORT
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: SMTP_PORT
+      - key: SMTP_FROM
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: SMTP_FROM
+      - key: SMTP_USE_TLS
+        fromService:
+          type: web
+          name: dxcon-api
+          envVarKey: SMTP_USE_TLS
+
 databases:
   - name: dxcon-postgres
     databaseName: dxcon
