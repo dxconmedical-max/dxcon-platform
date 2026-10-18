@@ -31,6 +31,8 @@ class DoctorPortalTestCase(unittest.TestCase):
         self.ctx = self.app.app_context()
         self.ctx.push()
         db.create_all()
+        from tests.p06_auth_helper import attach_admin_client
+        attach_admin_client(self, role="SUPER_ADMIN")
 
         db.session.add(Company(company_code="DX", company_name="DxCon", tax_code="01"))
         cat = DiagnosticCategory(category_code="BIO", name="Bio", is_active=True)

@@ -43,11 +43,14 @@ from app.services.sample_collection_workflow import SampleCollectionWorkflowServ
 
 class CollectionModeRoutingTests(unittest.TestCase):
     def setUp(self):
+        # Re-bind per-module DB URI — import order otherwise leaves a stale DATABASE_URL.
+        os.environ["DATABASE_URL"] = f"sqlite:///{_TEST_DB.name}"
         self.app = create_app()
         self.app.config["TESTING"] = True
         self.client = self.app.test_client()
         self.ctx = self.app.app_context()
         self.ctx.push()
+        db.session.remove()
         db.drop_all()
         db.create_all()
         biz.ensure_test_catalog_seed()

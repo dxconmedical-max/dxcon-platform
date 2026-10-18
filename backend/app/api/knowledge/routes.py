@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.services.knowledge_engine_service import (
     BiomarkerService,
     CorrelationService,
@@ -27,6 +28,11 @@ guidelines_bp = Blueprint("guidelines", __name__, url_prefix="/api/v1/guidelines
 biomarkers_bp = Blueprint("biomarkers", __name__, url_prefix="/api/v1/biomarkers")
 diseases_bp = Blueprint("diseases", __name__, url_prefix="/api/v1/diseases")
 correlations_bp = Blueprint("correlations", __name__, url_prefix="/api/v1/correlations")
+blueprint_require_authenticated_user(knowledge_bp)
+blueprint_require_authenticated_user(guidelines_bp)
+blueprint_require_authenticated_user(biomarkers_bp)
+blueprint_require_authenticated_user(diseases_bp)
+blueprint_require_authenticated_user(correlations_bp)
 
 
 @knowledge_bp.route("", methods=["GET"])

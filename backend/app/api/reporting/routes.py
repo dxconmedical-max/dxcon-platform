@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.services.dashboard_platform_service import DashboardPlatformService
 from app.services.report_platform_service import ReportPlatformError, ReportPlatformService
 from app.services.reporting_service import (
@@ -14,6 +18,7 @@ reporting_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/reports",
 )
+blueprint_require_authenticated_user(reporting_bp)
 
 
 def _date_args():
@@ -25,6 +30,10 @@ def _pagination_args():
         max(int(request.args.get("page", 1)), 1),
         min(max(int(request.args.get("page_size", 50)), 1), 200),
     )
+
+
+def _actor_email():
+    return authenticated_actor_email()
 
 
 @reporting_bp.route("", methods=["GET"])
@@ -39,7 +48,7 @@ def generate_report():
     try:
         job, payload = ReportPlatformService.generate(
             data,
-            actor_email=request.headers.get("X-User-Email", "SYSTEM"),
+            actor_email=_actor_email(),
         )
     except ReportPlatformError as exc:
         return {"error": exc.message}, exc.status_code
@@ -79,7 +88,7 @@ def report_schedule():
     data = request.get_json(silent=True) or {}
     schedule = ReportPlatformService.create_schedule(
         data,
-        actor_email=request.headers.get("X-User-Email", "SYSTEM"),
+        actor_email=_actor_email(),
     )
     return {"message": "Schedule created", "schedule": schedule.to_dict()}, 201
 

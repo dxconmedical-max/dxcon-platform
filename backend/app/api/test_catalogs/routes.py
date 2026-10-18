@@ -1,6 +1,7 @@
 from flask import Blueprint, request
 from sqlalchemy.exc import IntegrityError
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.extensions.db import db
 from app.models.test_catalog import TestCatalog
 
@@ -9,6 +10,7 @@ test_catalogs_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/test-catalogs"
 )
+blueprint_require_authenticated_user(test_catalogs_bp)
 
 
 @test_catalogs_bp.route("", methods=["GET"])

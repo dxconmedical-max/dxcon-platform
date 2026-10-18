@@ -1,6 +1,10 @@
 from flask import Blueprint, request
 from datetime import datetime
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.extensions.db import db
 from app.models.shipment import Shipment
 from app.models.transport_box import TransportBox
@@ -17,6 +21,11 @@ shipments_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/shipments"
 )
+blueprint_require_authenticated_user(shipments_bp)
+
+
+def _shipment_actor():
+    return authenticated_actor_email()
 
 
 def next_shipment_code():
@@ -64,7 +73,7 @@ def create_shipment():
         action="CREATE_SHIPMENT",
         object_type="SHIPMENT",
         object_id=item.id,
-        user_email=data.get("created_by") or "SYSTEM"
+        user_email=_shipment_actor()
     )
     db.session.commit()
 
@@ -96,7 +105,7 @@ def start_shipment(shipment_id):
     try:
         legacy_start_shipment(
             item,
-            actor=data.get("actor") or "COLLECTOR",
+            actor=_shipment_actor(),
             gps_location=resolve_gps(data),
             collector_id=data.get("collector_id") or item.collector_id,
         )

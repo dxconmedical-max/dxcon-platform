@@ -3,6 +3,25 @@ INSECURE_DEFAULTS = {
     "JWT_SECRET_KEY": "dxcon-dev-jwt",
 }
 
+PLACEHOLDER_SECRET_MARKERS = (
+    "replace-me",
+    "replace-with-production",
+    "changeme",
+    "dxcon-dev-secret",
+    "dxcon-dev-jwt",
+)
+PRODUCTION_SECRET_MIN_LENGTH = 32
+
+
+def production_secret_is_safe(value, *, min_length=PRODUCTION_SECRET_MIN_LENGTH) -> bool:
+    if value is None:
+        return False
+    text = str(value).strip()
+    if not text or len(text) < min_length:
+        return False
+    lowered = text.lower()
+    return not any(marker in lowered for marker in PLACEHOLDER_SECRET_MARKERS)
+
 
 def _cors_strict_safe(app):
     from app.infrastructure.production_readiness import cors_status
@@ -18,6 +37,14 @@ def validate_config(app):
         value = app.config.get(key)
         if value == default and env == "production":
             issues.append(f"{key} must be overridden in production")
+
+    if env == "production":
+        for key in ("SECRET_KEY", "JWT_SECRET_KEY"):
+            if not production_secret_is_safe(app.config.get(key)):
+                issues.append(
+                    f"{key} is missing, shorter than {PRODUCTION_SECRET_MIN_LENGTH} characters, "
+                    "uses an insecure default, or contains a placeholder"
+                )
 
     if not app.config.get("SQLALCHEMY_DATABASE_URI"):
         issues.append("DATABASE_URL must be configured")
@@ -67,6 +94,7 @@ def config_summary(app):
         "cors_origins": app.config.get("CORS_ORIGINS"),
         "cors_strict_safe": _cors_strict_safe(app),
         "redis_configured": bool(app.config.get("REDIS_URL")),
+        "queue_provider": app.config.get("QUEUE_PROVIDER"),
         "smtp_configured": bool(app.config.get("SMTP_HOST")),
         "database_dialect": (app.config.get("SQLALCHEMY_DATABASE_URI") or "").split(":", 1)[0],
         "storage_backend": app.config.get("STORAGE_BACKEND"),

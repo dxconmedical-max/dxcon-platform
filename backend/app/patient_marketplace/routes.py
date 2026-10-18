@@ -6,6 +6,10 @@ import os
 
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    blueprint_require_authenticated_user_except,
+    get_authenticated_identity,
+)
 from app.patient_marketplace.service import (
     BookingService,
     CatalogService,
@@ -18,14 +22,46 @@ from app.patient_marketplace.service import (
 )
 
 patient_marketplace_bp = Blueprint("patient_marketplace", __name__, url_prefix="/api/v1/marketplace")
+blueprint_require_authenticated_user_except(
+    patient_marketplace_bp,
+    public_exact=(
+        "/api/v1/marketplace/v2/health",
+        "/api/v1/marketplace/v2/payments/webhook",
+    ),
+    public_prefixes=("/api/v1/marketplace/catalog/",),
+)
 
 
-def _org_id() -> str | None:
-    return request.headers.get("X-Organization-Id")
+def _org_id():
+    """Membership-validated org. Returns str or error response tuple."""
+    from app.core.tenant_authorization import (
+        AuthorizedTenant,
+        client_requested_organization_id,
+        resolve_authorized_tenant,
+    )
+
+    tenant = resolve_authorized_tenant(
+        requested_organization_id=client_requested_organization_id(),
+        require_scope=True,
+    )
+    if not isinstance(tenant, AuthorizedTenant):
+        return tenant
+    org = tenant.organization_id
+    if not org:
+        return {"error": "organization required", "code": "ORG_REQUIRED"}, 400
+    return org
 
 
 def _user_id() -> str | None:
-    return request.headers.get("X-User-Id")
+    identity = get_authenticated_identity()
+    return identity.user_id if identity else None
+
+
+def _require_org():
+    org = _org_id()
+    if isinstance(org, str):
+        return org, None
+    return None, org
 
 
 @patient_marketplace_bp.route("/catalog/search", methods=["GET"])
@@ -86,9 +122,9 @@ def check_serviceability():
 @patient_marketplace_bp.route("/v2/bookings", methods=["POST"])
 def create_booking_v2():
     data = request.get_json(silent=True) or {}
-    org = _org_id() or data.get("organization_id")
-    if not org:
-        return {"error": "organization required", "code": "ORG_REQUIRED"}, 400
+    org, err = _require_org()
+    if err:
+        return err
     try:
         return BookingService.create_booking(data, org, patient_user_id=_user_id()), 201
     except MarketplaceError as exc:
@@ -97,9 +133,9 @@ def create_booking_v2():
 
 @patient_marketplace_bp.route("/v2/bookings/<booking_id>/confirm", methods=["POST"])
 def confirm_booking_v2(booking_id):
-    org = _org_id()
-    if not org:
-        return {"error": "organization required", "code": "ORG_REQUIRED"}, 400
+    org, err = _require_org()
+    if err:
+        return err
     try:
         return BookingService.confirm_booking(booking_id, org, actor=_user_id())
     except MarketplaceError as exc:
@@ -109,9 +145,9 @@ def confirm_booking_v2(booking_id):
 @patient_marketplace_bp.route("/v2/bookings/<booking_id>/cancel", methods=["POST"])
 def cancel_booking_v2(booking_id):
     data = request.get_json(silent=True) or {}
-    org = _org_id()
-    if not org:
-        return {"error": "organization required", "code": "ORG_REQUIRED"}, 400
+    org, err = _require_org()
+    if err:
+        return err
     try:
         return BookingService.cancel_booking(booking_id, org, data.get("reason", ""), actor=_user_id())
     except MarketplaceError as exc:
@@ -121,9 +157,9 @@ def cancel_booking_v2(booking_id):
 @patient_marketplace_bp.route("/v2/payments/qr", methods=["POST"])
 def create_qr_payment():
     data = request.get_json(silent=True) or {}
-    org = _org_id()
-    if not org:
-        return {"error": "organization required", "code": "ORG_REQUIRED"}, 400
+    org, err = _require_org()
+    if err:
+        return err
     try:
         return PaymentService.create_qr_payment(data["booking_id"], org, actor=_user_id()), 201
     except MarketplaceError as exc:
@@ -132,9 +168,9 @@ def create_qr_payment():
 
 @patient_marketplace_bp.route("/v2/payments/<payment_reference>/status", methods=["GET"])
 def payment_status(payment_reference):
-    org = _org_id()
-    if not org:
-        return {"error": "organization required", "code": "ORG_REQUIRED"}, 400
+    org, err = _require_org()
+    if err:
+        return err
     try:
         return PaymentService.payment_status(payment_reference, org)
     except MarketplaceError as exc:
@@ -155,17 +191,17 @@ def payment_webhook():
 @patient_marketplace_bp.route("/v2/listings", methods=["POST"])
 def create_listing():
     data = request.get_json(silent=True) or {}
-    org = _org_id()
-    if not org:
-        return {"error": "organization required", "code": "ORG_REQUIRED"}, 400
+    org, err = _require_org()
+    if err:
+        return err
     return CatalogService.create_listing(data, org, actor=_user_id()), 201
 
 
 @patient_marketplace_bp.route("/v2/listings/<listing_id>/approve", methods=["POST"])
 def approve_listing(listing_id):
-    org = _org_id()
-    if not org:
-        return {"error": "organization required", "code": "ORG_REQUIRED"}, 400
+    org, err = _require_org()
+    if err:
+        return err
     try:
         return CatalogService.approve_listing(listing_id, org, actor=_user_id())
     except MarketplaceError as exc:
@@ -175,9 +211,11 @@ def approve_listing(listing_id):
 @patient_marketplace_bp.route("/v2/reviews", methods=["POST"])
 def submit_review():
     data = request.get_json(silent=True) or {}
-    org = _org_id()
+    org, err = _require_org()
+    if err:
+        return err
     user = _user_id()
-    if not org or not user:
+    if not user:
         return {"error": "auth required", "code": "AUTH_REQUIRED"}, 401
     try:
         return ReviewService.submit_review(data, org, user), 201

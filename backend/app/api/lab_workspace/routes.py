@@ -61,7 +61,18 @@ lab_workspace_bp = Blueprint("lab_workspace", __name__, url_prefix="/api/v1/lab/
 
 
 def _actor() -> str | None:
-    return session.get("email") or request.headers.get("X-Actor") or request.headers.get("X-User-Email")
+    from app.core.authenticated_identity import (
+        authenticated_actor_email,
+        bind_authenticated_identity,
+        get_authenticated_identity,
+    )
+
+    if get_authenticated_identity() is None:
+        bind_authenticated_identity()
+    try:
+        return authenticated_actor_email()
+    except RuntimeError:
+        return session.get("email")
 
 
 def _err(exc: Exception, code: int = 400):
@@ -72,6 +83,11 @@ def _err(exc: Exception, code: int = 400):
 @lab_workspace_bp.route("/dashboard", methods=["GET"])
 @lab_api_read
 def dashboard():
+    from app.core.tenant_authorization import AuthorizedTenant, resolve_authorized_tenant
+
+    tenant = resolve_authorized_tenant(require_scope=True)
+    if not isinstance(tenant, AuthorizedTenant):
+        return tenant
     return {"success": True, "data": workspace_dashboard()}, 200
 
 
@@ -84,10 +100,34 @@ def status_contract_route():
 @lab_workspace_bp.route("/orders/<order_code>", methods=["GET"])
 @lab_api_read
 def order_detail(order_code: str):
+    from app.core.tenant_authorization import (
+        AuthorizedTenant,
+        authorize_partner_record,
+        resolve_authorized_tenant,
+    )
+    from app.models.biz_order import BizOrder
+    from app.models.medical_order import MedicalOrder
+
     try:
+        order = BizOrder.query.filter(
+            db.or_(BizOrder.order_code == order_code, BizOrder.id == order_code)
+        ).first()
+        if order:
+            # Prefer medical order partner stamp when present.
+            med = MedicalOrder.query.filter_by(order_code=order.order_code).first()
+            partner_id = med.partner_id if med else getattr(order, "partner_id", None)
+            if partner_id:
+                tenant = authorize_partner_record(partner_id)
+                if not isinstance(tenant, AuthorizedTenant):
+                    return tenant
+            else:
+                # Legacy biz orders without partner stamp: still require an authorized tenant.
+                tenant = resolve_authorized_tenant(require_scope=True)
+                if not isinstance(tenant, AuthorizedTenant):
+                    return tenant
         return {"success": True, "data": get_order_workspace(order_code)}, 200
     except LabWorkspaceError as exc:
-        return _err(exc, 404)
+        return _err(exc, getattr(exc, "status_code", 400))
 
 
 @lab_workspace_bp.route("/verify", methods=["POST"])

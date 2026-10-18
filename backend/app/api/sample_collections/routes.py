@@ -29,19 +29,34 @@ def _client_ip() -> str:
 
 
 def _actor() -> str:
-    return (
-        session.get("email")
-        or request.headers.get("X-Actor")
-        or request.headers.get("X-User-Email")
-        or "SYSTEM"
+    from app.core.authenticated_identity import (
+        authenticated_actor_email,
+        bind_authenticated_identity,
+        get_authenticated_identity,
     )
+
+    if get_authenticated_identity() is None:
+        bind_authenticated_identity()
+    return authenticated_actor_email()
 
 
 def _role() -> str | None:
-    return session.get("role") or request.headers.get("X-User-Role")
+    from app.core.authenticated_identity import (
+        bind_authenticated_identity,
+        get_authenticated_identity,
+    )
+
+    identity = get_authenticated_identity()
+    if identity is None:
+        result = bind_authenticated_identity()
+        from app.core.authenticated_identity import AuthenticatedIdentity
+
+        identity = result if isinstance(result, AuthenticatedIdentity) else None
+    return identity.platform_role if identity else None
 
 
 def _scoped_collector_id() -> str | None:
+    # Resource scope hint — membership binding enforced in P0-C.
     return (
         request.headers.get("X-Collector-Id")
         or session.get("collector_id")
@@ -49,9 +64,33 @@ def _scoped_collector_id() -> str | None:
     )
 
 
+def _authorized_org_or_error():
+    """Membership-validated organization stamp for collection/queue scoping."""
+    from app.core.tenant_authorization import AuthorizedTenant, resolve_authorized_tenant
+
+    requested = (
+        request.args.get("partner_id")
+        or request.headers.get("X-Partner-Id")
+        or request.headers.get("X-Organization-ID")
+        or request.headers.get("X-Organization-Id")
+        or request.args.get("organization_id")
+    )
+    tenant = resolve_authorized_tenant(
+        requested_organization_id=requested,
+        require_scope=True,
+    )
+    if not isinstance(tenant, AuthorizedTenant):
+        return None, tenant
+    # Global SUPER_ADMIN may omit org; tenant-scoped users always get an org id.
+    return tenant.organization_id, None
+
+
 @sample_collections_bp.route("/dashboard", methods=["GET"])
 @collection_api_read
 def dashboard():
+    _, err = _authorized_org_or_error()
+    if err:
+        return err
     return {"success": True, "data": workspace_dashboard()}, 200
 
 
@@ -59,6 +98,9 @@ def dashboard():
 @collection_api_read
 def queue():
     """Field collector queue by default (HOME_COLLECTION)."""
+    org_id, err = _authorized_org_or_error()
+    if err:
+        return err
     try:
         mine_raw = (request.args.get("mine") or "").strip().lower()
         payload = list_production_queue(
@@ -67,13 +109,12 @@ def queue():
             location=request.args.get("location"),
             date_from=request.args.get("date") or request.args.get("date_from"),
             date_to=request.args.get("date_to"),
-            partner_id=request.args.get("partner_id") or request.headers.get("X-Partner-Id"),
+            partner_id=org_id,
             include_desk=False,
             queue=request.args.get("queue") or "field",
             role=_role(),
             scoped_collector_id=_scoped_collector_id(),
-            organization_id=request.headers.get("X-Organization-ID")
-            or request.headers.get("X-Organization-Id"),
+            organization_id=org_id,
             mine=mine_raw in {"1", "true", "yes"},
         )
     except SampleCollectionWorkflowError as exc:
@@ -88,6 +129,15 @@ def queue():
 @sample_collections_bp.route("/<collection_id>", methods=["GET"])
 @collection_api_read
 def get_collection(collection_id):
+    from app.core.tenant_authorization import AuthorizedTenant, authorize_partner_record
+    from app.models.sample_collection import SampleCollection
+
+    collection = SampleCollection.query.get(collection_id)
+    if not collection:
+        return {"success": False, "error": "Sample collection not found"}, 404
+    tenant = authorize_partner_record(collection.partner_id)
+    if not isinstance(tenant, AuthorizedTenant):
+        return tenant
     try:
         from app.sample_collection_workspace.collection_routing import annotate_collection_payload
 
@@ -355,10 +405,12 @@ def lab_arrive_by_collection(collection_id):
 def list_collectors():
     from app.sample_collection_workspace.collection_routing import list_assignable_collectors
 
-    org = request.headers.get("X-Organization-ID") or request.headers.get("X-Organization-Id")
+    org_id, err = _authorized_org_or_error()
+    if err:
+        return err
     return {
         "success": True,
-        "data": {"items": list_assignable_collectors(organization_id=org)},
+        "data": {"items": list_assignable_collectors(organization_id=org_id)},
     }, 200
 
 

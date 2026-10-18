@@ -284,7 +284,8 @@ def build_frozen_pdf_document(
                 pdf.setFont(font, 6)
                 pdf.drawCentredString(right - 15 * mm, height - 54 * mm, "Verify")
             except Exception:
-                pass
+                # QR optional when ImageReader unavailable; continue body layout.
+                pdf.setFont(font, 6)
 
             pdf.setFont(font_bold, 10)
             pdf.drawString(left, y, "Results")

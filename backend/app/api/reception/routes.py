@@ -1,5 +1,6 @@
 from flask import Blueprint, request, session
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.models.patient import Patient
 from app.models.reception_queue_entry import ReceptionQueueEntry
 from app.models.clinic_booking import ClinicBooking
@@ -18,6 +19,7 @@ from app.services.reception_service import (
 )
 
 reception_bp = Blueprint("reception_api", __name__, url_prefix="/api/v1/reception")
+blueprint_require_authenticated_user(reception_bp)
 
 
 @reception_bp.route("/dashboard", methods=["GET"])
@@ -134,11 +136,24 @@ def reception_field_requests_api():
     from app.sample_collection_workspace.collection_routing import list_home_field_requests
 
     try:
+        from app.core.authz import current_platform_role
+        from app.core.tenant_authorization import AuthorizedTenant, resolve_authorized_tenant
+
+        requested = (
+            request.headers.get("X-Organization-ID")
+            or request.headers.get("X-Organization-Id")
+            or request.args.get("organization_id")
+        )
+        tenant = resolve_authorized_tenant(
+            requested_organization_id=requested,
+            require_scope=True,
+        )
+        if not isinstance(tenant, AuthorizedTenant):
+            return tenant
         payload = list_home_field_requests(
             status=request.args.get("status"),
-            role=session.get("role") or request.headers.get("X-User-Role"),
-            organization_id=request.headers.get("X-Organization-ID")
-            or request.headers.get("X-Organization-Id"),
+            role=current_platform_role(),
+            organization_id=tenant.organization_id,
             limit=int(request.args.get("limit") or 200),
         )
         return {"success": True, "data": payload}, 200

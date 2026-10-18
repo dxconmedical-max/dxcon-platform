@@ -24,7 +24,9 @@ operations_center_bp = Blueprint(
 
 
 def _actor() -> str | None:
-    return session.get("email") or request.headers.get("X-Actor")
+    from app.core.audit_actor import resolve_human_audit_actor
+
+    return resolve_human_audit_actor(unauthenticated_fallback="") or None
 
 
 @operations_center_bp.route("/dashboard", methods=["GET"])

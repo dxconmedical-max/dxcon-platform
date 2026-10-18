@@ -23,7 +23,9 @@ class DeploymentPipelineTestCase(unittest.TestCase):
         self.assertGreaterEqual(len(manifest["kubernetes_manifests"]), 5)
 
     def test_write_report(self):
-        path = ROOT / "deployment" / "reports" / "test-report.json"
+        from scripts.artifact_paths import deployment_reports_dir
+
+        path = deployment_reports_dir() / "test-report.json"
         written = write_report(path, {"ok": True})
         self.assertTrue(Path(written).exists())
         payload = json.loads(Path(written).read_text(encoding="utf-8"))

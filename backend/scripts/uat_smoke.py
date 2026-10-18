@@ -53,16 +53,24 @@ def run_uat_smoke():
 
         register = client.post(
             "/api/v1/auth/register",
-            json={"email": "uat@dxcon.test", "password": "SecurePass123!", "role": "ADMIN"},
+            json={"email": "uat-patient-reg@dxcon.test", "password": "SecurePass123!"},
         )
+        from scripts.smoke_auth_provision import ensure_user
+
+        ensure_user(email="uat@dxcon.test", password="SecurePass123!", role="ADMIN")
         login = client.post(
             "/api/v1/auth/login",
             json={"email": "uat@dxcon.test", "password": "SecurePass123!"},
         )
         login_payload = _response_payload(login)
-        steps["register_login"] = login.status_code == 200 and bool(login_payload.get("access_token"))
+        steps["register_login"] = (
+            register.status_code in {201, 400}
+            and login.status_code == 200
+            and bool(login_payload.get("access_token"))
+        )
 
         token = login_payload.get("access_token", "")
+        auth_headers = {"Authorization": f"Bearer {token}"} if token else {}
         patient = client.post(
             "/api/v1/patients",
             json={
@@ -72,13 +80,13 @@ def run_uat_smoke():
                 "phone": "0909111222",
                 "email": "uat-patient@dxcon.test",
             },
-            headers={"Authorization": f"Bearer {token}"} if token else {},
+            headers=auth_headers,
         )
         patient_payload = _response_payload(patient)
         patient_id = (patient_payload.get("patient") or patient_payload).get("id")
         steps["create_patient"] = patient.status_code == 201 and bool(patient_id)
 
-        patients = client.get("/api/v1/patients")
+        patients = client.get("/api/v1/patients", headers=auth_headers)
         patients_payload = _response_payload(patients)
         steps["list_patients"] = patients.status_code == 200 and patients_payload.get("count", 0) >= 0
 

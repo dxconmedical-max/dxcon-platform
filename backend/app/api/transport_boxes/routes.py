@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.extensions.db import db
 from app.models.transport_box import TransportBox
 
@@ -9,6 +10,7 @@ transport_boxes_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/transport-boxes"
 )
+blueprint_require_authenticated_user(transport_boxes_bp)
 
 
 @transport_boxes_bp.route("", methods=["GET"])

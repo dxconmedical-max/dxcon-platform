@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.extensions.db import db
 from app.models.sample_tracking import SampleTracking
 
@@ -11,6 +12,7 @@ sample_trackings_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/sample-trackings"
 )
+blueprint_require_authenticated_user(sample_trackings_bp)
 
 
 def generate_sample_code():

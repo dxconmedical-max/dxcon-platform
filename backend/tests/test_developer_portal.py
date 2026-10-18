@@ -22,6 +22,8 @@ class DeveloperPortalTestCase(unittest.TestCase):
         db.create_all()
         ApiClientService.ensure_defaults()
         self.client = self.app.test_client()
+        from tests.p06_auth_helper import attach_admin_client
+        attach_admin_client(self)
 
     def tearDown(self):
         from app.extensions.db import db

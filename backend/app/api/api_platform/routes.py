@@ -5,6 +5,7 @@ from flask import Blueprint, Response, current_app, request
 
 from app.api_platform.openapi_generator import build_openapi, write_openapi_artifacts
 from app.api_platform.versioning import apply_version_headers
+from app.core.authenticated_identity import require_authenticated_user
 from app.services.api_platform_service import (
     ApiClientService,
     ApiKeyService,
@@ -58,12 +59,14 @@ def openapi_yaml():
 
 
 @api_platform_bp.route("/api-clients", methods=["GET"])
+@require_authenticated_user
 def list_clients():
     ApiClientService.ensure_defaults()
     return ApiClientService.list_clients()
 
 
 @api_platform_bp.route("/api-clients", methods=["POST"])
+@require_authenticated_user
 def create_client():
     try:
         return ApiClientService.create(request.get_json(silent=True) or {}), 201
@@ -72,11 +75,13 @@ def create_client():
 
 
 @api_platform_bp.route("/api-keys", methods=["GET"])
+@require_authenticated_user
 def list_keys():
     return ApiKeyService.list_keys(client_id=request.args.get("client_id"))
 
 
 @api_platform_bp.route("/api-keys", methods=["POST"])
+@require_authenticated_user
 def create_key():
     try:
         return ApiKeyService.create(request.get_json(silent=True) or {}), 201
@@ -85,6 +90,7 @@ def create_key():
 
 
 @api_platform_bp.route("/api-keys/<key_id>/revoke", methods=["POST"])
+@require_authenticated_user
 def revoke_key(key_id):
     try:
         return ApiKeyService.revoke(key_id)
@@ -93,6 +99,7 @@ def revoke_key(key_id):
 
 
 @api_platform_bp.route("/api-usage", methods=["GET"])
+@require_authenticated_user
 def list_usage():
     return ApiUsageService.list_usage(
         client_id=request.args.get("client_id"),
@@ -101,6 +108,7 @@ def list_usage():
 
 
 @api_platform_bp.route("/developer/sandbox/request", methods=["POST"])
+@require_authenticated_user
 def developer_sandbox_request():
     try:
         return DeveloperSandboxService.execute(

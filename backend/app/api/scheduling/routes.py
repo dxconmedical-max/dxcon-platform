@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.services.booking_assignment import BookingAssignmentError, BookingAssignmentService
 from app.services.scheduling import SchedulingError, SchedulingService
 from app.services.slot_generation import SlotGenerationService
@@ -10,6 +14,7 @@ scheduling_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/scheduling",
 )
+blueprint_require_authenticated_user(scheduling_bp)
 
 
 def _client_ip():
@@ -17,7 +22,7 @@ def _client_ip():
 
 
 def _actor_email():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    return authenticated_actor_email()
 
 
 @scheduling_bp.route("/partners/<partner_id>/slots", methods=["GET"])

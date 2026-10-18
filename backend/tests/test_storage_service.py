@@ -29,6 +29,8 @@ class StorageServiceTestCase(unittest.TestCase):
         self.ctx = self.app.app_context()
         self.ctx.push()
         db.create_all()
+        from tests.p06_auth_helper import attach_admin_client
+        attach_admin_client(self)
         from app.storage.factory import init_storage_platform
 
         init_storage_platform(self.app)
@@ -52,7 +54,16 @@ class StorageServiceTestCase(unittest.TestCase):
         listing = self.client.get("/api/v1/files")
         self.assertEqual(listing.status_code, 200)
         self.assertGreaterEqual(listing.get_json()["count"], 1)
-        download = self.client.get(f"/api/v1/files/{file_id}/download")
+        signed = self.client.post(f"/api/v1/files/{file_id}/signed-url")
+        self.assertEqual(signed.status_code, 200)
+        signed_payload = signed.get_json()["signed_url"]
+        download = self.client.get(
+            f"/api/v1/files/{file_id}/download",
+            query_string={
+                "token": signed_payload["token"],
+                "expires": signed_payload["expires_at"],
+            },
+        )
         self.assertEqual(download.status_code, 200)
         self.assertEqual(download.data, b"dxcon")
 

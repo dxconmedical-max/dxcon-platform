@@ -189,12 +189,21 @@ class ResultGatewayBase:
         return payload
 
     @staticmethod
-    def list_results(status=None, medical_order_id=None):
+    def list_results(status=None, medical_order_id=None, partner_ids=None):
+        """List results. When partner_ids is a set/frozenset, scope to those tenants.
+
+        partner_ids=None means global (SUPER_ADMIN only — callers must enforce).
+        partner_ids=empty means fail-closed empty result.
+        """
         query = LabResult.query
         if status:
             query = query.filter(LabResult.status == status)
         if medical_order_id:
             query = query.filter(LabResult.medical_order_id == medical_order_id)
+        if partner_ids is not None:
+            if not partner_ids:
+                return []
+            query = query.filter(LabResult.partner_id.in_(sorted(partner_ids)))
         return query.order_by(LabResult.created_at.desc()).all()
 
     @staticmethod

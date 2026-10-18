@@ -25,26 +25,40 @@ class AccessionService:
         worklist_id=None,
         analyzer_id=None,
         q=None,
+        partner_ids=None,
     ):
-        filters = {
-            "status": status,
-            "workflow_stage": workflow_stage,
-            "worklist_id": worklist_id,
-            "analyzer_id": analyzer_id,
-            "q": q,
-        }
-        return list_resource(
-            SampleAccession,
-            lambda item: item.to_dict(),
-            search_fields=[
-                "accession_code",
-                "sample_code",
-                "patient_name",
-                "assigned_technician",
-            ],
-            filters=filters,
-            page=page,
-            per_page=per_page,
+        from app.models.medical_order import MedicalOrder
+
+        query = SampleAccession.query
+        if partner_ids is not None:
+            if not partner_ids:
+                query = query.filter(False)
+            else:
+                query = query.outerjoin(
+                    MedicalOrder, SampleAccession.medical_order_id == MedicalOrder.id
+                ).filter(MedicalOrder.partner_id.in_(sorted(partner_ids)))
+        if status:
+            query = query.filter(SampleAccession.status == status)
+        if workflow_stage:
+            query = query.filter(SampleAccession.workflow_stage == workflow_stage)
+        if worklist_id:
+            query = query.filter(SampleAccession.worklist_id == worklist_id)
+        if analyzer_id:
+            query = query.filter(SampleAccession.analyzer_id == analyzer_id)
+        if q:
+            like = f"%{q}%"
+            query = query.filter(
+                db.or_(
+                    SampleAccession.accession_code.ilike(like),
+                    SampleAccession.sample_code.ilike(like),
+                    SampleAccession.patient_name.ilike(like),
+                    SampleAccession.assigned_technician.ilike(like),
+                )
+            )
+        page_result = paginate_query(query.order_by(SampleAccession.created_at.desc()), page, per_page)
+        return pagination_payload(
+            [item.to_dict() for item in page_result["items"]],
+            page_result["pagination"],
         )
 
     @staticmethod

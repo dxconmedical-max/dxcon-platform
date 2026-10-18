@@ -13,18 +13,20 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT.parent
-REPORT_DIR = ROOT / "generated_release"
+
+
+def write_report(name: str, payload: dict) -> str:
+    from scripts.artifact_paths import generated_release_dir
+
+    report_dir = generated_release_dir()
+    report_dir.mkdir(parents=True, exist_ok=True)
+    path = report_dir / name
+    path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
+    return str(path)
 
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
-
-
-def write_report(name: str, payload: dict) -> str:
-    REPORT_DIR.mkdir(parents=True, exist_ok=True)
-    path = REPORT_DIR / name
-    path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
-    return str(path)
 
 
 def scan_python_files(base: Path):

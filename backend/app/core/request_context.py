@@ -31,13 +31,11 @@ def get_tenant_id():
 
 
 def _resolve_user_id():
-    user_id = request.headers.get("X-User-Id")
-    if user_id:
-        return user_id
-
-    user_email = request.headers.get("X-User-Email")
-    if user_email:
-        return user_email
+    """Resolve request log user_id from server auth only (never client identity headers)."""
+    # Already bound by require_authenticated_user / bind_authenticated_identity
+    bound = getattr(g, "authenticated_identity", None)
+    if bound is not None and getattr(bound, "user_id", None):
+        return str(bound.user_id)
 
     try:
         from flask import session
@@ -47,6 +45,17 @@ def _resolve_user_id():
             return str(session_user_id)
     except RuntimeError:
         pass
+
+    # Optional JWT for logging — never X-User-Id / X-User-Email
+    try:
+        from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+
+        verify_jwt_in_request(optional=True)
+        jwt_user_id = get_jwt_identity()
+        if jwt_user_id:
+            return str(jwt_user_id)
+    except Exception:
+        return None
 
     return None
 

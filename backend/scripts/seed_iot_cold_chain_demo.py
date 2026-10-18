@@ -28,6 +28,7 @@ def seed_iot_cold_chain_demo():
             "serial_number": "SN-COLD-001",
             "min_temp_c": 2.0,
             "max_temp_c": 8.0,
+            "ingest_secret": "DXCON-IOT-INGEST-SECRET",
         }
     )
     device_id = registered["device"]["id"]

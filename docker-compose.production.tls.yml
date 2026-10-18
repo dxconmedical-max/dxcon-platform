@@ -1,0 +1,18 @@
+# Optional TLS overlay for public cutover.
+# Usage (only after real certs exist under deployment/certs/):
+#   docker compose -f docker-compose.production.yml -f docker-compose.production.tls.yml up -d
+#
+# Prerequisites:
+#   - deployment/certs/fullchain.pem
+#   - deployment/certs/privkey.pem
+#   - deployment/nginx/https.conf (copied from https.conf.example)
+# Does not delete volumes. Does not provision certificates.
+
+services:
+  nginx:
+    volumes:
+      - ./deployment/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deployment/nginx/https.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./deployment/certs:/etc/nginx/certs:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- https://127.0.0.1/live --no-check-certificate >/dev/null 2>&1 || wget -qO- http://127.0.0.1/live >/dev/null 2>&1 || exit 1"]

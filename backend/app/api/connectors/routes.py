@@ -1,11 +1,13 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.integrations.connector_health import ConnectorHealthService
 from app.integrations.connector_registry import ConnectorRegistry
 from app.services.integration_platform_service import IntegrationError
 
 
 connectors_bp = Blueprint("connectors", __name__, url_prefix="/api/v1/connectors")
+blueprint_require_authenticated_user(connectors_bp)
 
 
 def _error(message, status_code=400):

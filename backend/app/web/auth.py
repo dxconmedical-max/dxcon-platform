@@ -1,8 +1,6 @@
 from flask import Blueprint, current_app, redirect, request, session
 
-import bcrypt
-
-from app.core.passwords import verify_password as verify_password_hash
+from app.core.passwords import verify_password
 from app.models.patient import Patient
 from app.models.user import User
 from app.web.launch_ui_lib import (
@@ -20,18 +18,6 @@ from app.web_gateway.session import (
 )
 
 auth_web_bp = Blueprint("auth_web", __name__)
-
-
-def verify_password(stored_password, input_password):
-    if verify_password_hash(stored_password, input_password):
-        return True
-    try:
-        return bcrypt.checkpw(
-            input_password.encode("utf-8"),
-            stored_password.encode("utf-8"),
-        )
-    except (ValueError, TypeError, AttributeError):
-        return False
 
 
 def attach_patient_to_session(user):

@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.extensions.db import db
 from app.mdm import ENTITY_LABELS, ENTITY_TYPES
 from app.mdm.import_engine import (
@@ -26,6 +30,11 @@ from app.mdm.service import (
 from app.models.mdm import MdmImportBatch
 
 mdm_bp = Blueprint("mdm", __name__, url_prefix="/api/v1/mdm")
+blueprint_require_authenticated_user(mdm_bp)
+
+
+def _mdm_actor():
+    return authenticated_actor_email()
 
 
 @mdm_bp.route("/entities", methods=["GET"])
@@ -67,7 +76,7 @@ def records_get(entity_type: str, code: str):
 @mdm_bp.route("/records/<entity_type>", methods=["POST"])
 def records_upsert(entity_type: str):
     try:
-        row = upsert_record(entity_type, request.get_json() or {}, actor=request.headers.get("X-Actor"))
+        row = upsert_record(entity_type, request.get_json() or {}, actor=_mdm_actor())
         db.session.commit()
         return {"message": "Saved", "record": row}, 201
     except (MdmServiceError, ValueError) as exc:
@@ -78,7 +87,7 @@ def records_upsert(entity_type: str):
 @mdm_bp.route("/records/<entity_type>/<code>/deactivate", methods=["POST"])
 def records_deactivate(entity_type: str, code: str):
     try:
-        row = deactivate_record(entity_type, code, actor=request.headers.get("X-Actor"))
+        row = deactivate_record(entity_type, code, actor=_mdm_actor())
         db.session.commit()
         return {"message": "Deactivated", "record": row}, 200
     except MdmServiceError as exc:
@@ -108,7 +117,7 @@ def import_upload(entity_type: str):
             entity_type,
             content,
             file_name=file.filename or "upload.csv",
-            actor=request.headers.get("X-Actor"),
+            actor=_mdm_actor(),
             auto_approve=auto_approve,
             auto_commit=auto_commit,
         )
@@ -133,7 +142,7 @@ def import_batch_detail(batch_id: str):
 @mdm_bp.route("/imports/batches/<batch_id>/approve", methods=["POST"])
 def import_approve(batch_id: str):
     try:
-        batch = approve_batch(batch_id, actor=request.headers.get("X-Actor"))
+        batch = approve_batch(batch_id, actor=_mdm_actor())
         db.session.commit()
         return {"message": "Approved", "batch": batch.to_dict()}, 200
     except MdmImportError as exc:
@@ -144,7 +153,7 @@ def import_approve(batch_id: str):
 @mdm_bp.route("/imports/batches/<batch_id>/commit", methods=["POST"])
 def import_commit(batch_id: str):
     try:
-        batch = commit_batch(batch_id, actor=request.headers.get("X-Actor"))
+        batch = commit_batch(batch_id, actor=_mdm_actor())
         db.session.commit()
         return {"message": "Committed", "batch": batch.to_dict()}, 200
     except MdmImportError as exc:
@@ -155,7 +164,7 @@ def import_commit(batch_id: str):
 @mdm_bp.route("/imports/batches/<batch_id>/rollback", methods=["POST"])
 def import_rollback(batch_id: str):
     try:
-        batch = rollback_batch(batch_id, actor=request.headers.get("X-Actor"))
+        batch = rollback_batch(batch_id, actor=_mdm_actor())
         db.session.commit()
         return {"message": "Rolled back", "batch": batch.to_dict()}, 200
     except MdmImportError as exc:

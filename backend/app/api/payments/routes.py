@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user_except,
+)
 from app.services.payment_gateway_service import (
     PaymentGatewayError,
     PaymentGatewayService,
@@ -14,6 +18,10 @@ payments_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/payments",
 )
+blueprint_require_authenticated_user_except(
+    payments_bp,
+    public_exact=("/api/v1/payments/webhook",),
+)
 
 
 def _client_ip():
@@ -21,7 +29,7 @@ def _client_ip():
 
 
 def _actor_email():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    return authenticated_actor_email()
 
 
 @payments_bp.route("", methods=["GET"])
@@ -52,11 +60,13 @@ def payment_webhook():
     data = request.get_json(silent=True) or {}
     provider = data.get("provider") or request.headers.get("X-Payment-Provider", "VNPAY")
     try:
+        from app.core.audit_actor import system_audit_actor
+
         payload = WebhookService.process_webhook(
             provider,
             data,
             headers=dict(request.headers),
-            actor_email=_actor_email(),
+            actor_email=system_audit_actor("payment_webhook"),
             ip_address=_client_ip(),
         )
     except PaymentGatewayError as exc:

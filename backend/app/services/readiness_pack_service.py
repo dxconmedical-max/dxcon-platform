@@ -16,8 +16,30 @@ READINESS_PACK_ROLES = ("SUPER_ADMIN", "ADMIN")
 
 ROOT = Path(__file__).resolve().parents[2]
 REPO = ROOT.parent
-GENERATED = ROOT / "generated_release"
 
+
+def _generated() -> Path:
+    try:
+        from scripts.artifact_paths import generated_release_dir
+
+        return generated_release_dir()
+    except Exception:
+        return ROOT / "generated_release"
+
+
+def _readiness_assets() -> dict[str, Path]:
+    generated = _generated()
+    return {
+        "system_report": generated / "SYSTEM_READINESS_REPORT.json",
+        "security_report": generated / "SECURITY_READINESS_REPORT.json",
+        "pilot_report": generated / "PILOT_READINESS_REPORT.json",
+        "go_live_checklist": generated / "GO_LIVE_CHECKLIST.json",
+        "known_limitations": REPO / "docs" / "KNOWN_LIMITATIONS.md",
+        "roadmap_v2": REPO / "docs" / "ROADMAP_v2.md",
+    }
+
+
+GENERATED = ROOT / "generated_release"
 READINESS_ASSETS = {
     "system_report": GENERATED / "SYSTEM_READINESS_REPORT.json",
     "security_report": GENERATED / "SECURITY_READINESS_REPORT.json",
@@ -298,10 +320,12 @@ def dashboard_payload() -> dict[str, Any]:
 
 def write_generated_artifacts() -> dict[str, Any]:
     """Persist live system and checklist snapshots for verify/report consumers."""
-    GENERATED.mkdir(parents=True, exist_ok=True)
+    assets = _readiness_assets()
+    generated = _generated()
+    generated.mkdir(parents=True, exist_ok=True)
     system = system_readiness_report()
     checklist = go_live_checklist_report()
-    READINESS_ASSETS["system_report"].write_text(json.dumps(system, indent=2, default=str), encoding="utf-8")
+    assets["system_report"].write_text(json.dumps(system, indent=2, default=str), encoding="utf-8")
     checklist_payload = {
         "generated_at": datetime.utcnow().isoformat(),
         "phase": "5.14",
@@ -315,11 +339,11 @@ def write_generated_artifacts() -> dict[str, Any]:
         "items": checklist["items"],
         "verify_scripts": checklist.get("verify_scripts", []),
     }
-    READINESS_ASSETS["go_live_checklist"].write_text(
+    assets["go_live_checklist"].write_text(
         json.dumps(checklist_payload, indent=2, default=str),
         encoding="utf-8",
     )
     return {
-        "system_report": str(READINESS_ASSETS["system_report"]),
-        "go_live_checklist": str(READINESS_ASSETS["go_live_checklist"]),
+        "system_report": str(assets["system_report"]),
+        "go_live_checklist": str(assets["go_live_checklist"]),
     }

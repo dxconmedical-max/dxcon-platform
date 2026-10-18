@@ -1,4 +1,5 @@
 from app.core.audit import write_audit
+from app.core.authenticated_identity import authenticated_actor_email
 from app.core.authz import roles_required
 from app.core.passwords import hash_password
 from app.core.roles import ALL_ROLES
@@ -76,7 +77,7 @@ def create_user():
         action="CREATE_USER",
         object_type="USER",
         object_id=user.id,
-        user_email="ADMIN"
+        user_email=authenticated_actor_email(),
     )
     db.session.commit()
 
@@ -103,7 +104,7 @@ def update_role(user_id):
         action="CHANGE_ROLE",
         object_type="USER",
         object_id=user.id,
-        user_email="ADMIN"
+        user_email=authenticated_actor_email(),
     )
     db.session.commit()
 

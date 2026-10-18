@@ -128,20 +128,55 @@ def _ready_response():
         # Cached startup migration_status can be stale/wrong if startup ran without context.
         verify_database_connection(app, retries=1, delay_seconds=0)
         migration = verify_migrations(app)
-        if migration.get("ready"):
-            email = EmailProvider().health_check()
-            email_dry_run = bool(os.environ.get("EMAIL_DRY_RUN", "").lower() in ("1", "true", "yes"))
+        from app.infrastructure.production_readiness import check_redis_health, is_production
+        from app.infrastructure.queue_provider import PRODUCTION_QUEUE_PROVIDER, provider_name
+
+        redis_health = check_redis_health(app)
+        queue_name = provider_name(app)
+        redis_required = is_production(app)
+        redis_ok = (not redis_required) or bool(redis_health.get("ok"))
+        queue_detail = {"provider": queue_name, "durable": False, "ping": False, "ok": not redis_required}
+        if redis_required:
+            if queue_name != PRODUCTION_QUEUE_PROVIDER:
+                queue_detail["ok"] = False
+                queue_detail["error"] = "QUEUE_PROVIDER must be redis in production"
+            else:
+                try:
+                    from app.infrastructure.queue_provider import get_queue
+
+                    queue = get_queue(app)
+                    queue_detail["durable"] = bool(getattr(queue, "durable", False))
+                    queue_detail["ping"] = bool(queue.ping())
+                    queue_detail["ok"] = queue_detail["durable"] and queue_detail["ping"]
+                except Exception as queue_exc:
+                    queue_detail["ok"] = False
+                    queue_detail["error"] = str(queue_exc)
+        queue_ok = bool(queue_detail.get("ok"))
+        email = EmailProvider().health_check()
+        email_dry_run = bool(os.environ.get("EMAIL_DRY_RUN", "").lower() in ("1", "true", "yes"))
+        if migration.get("ready") and redis_ok and queue_ok:
             payload = {
                 "status": "OK",
                 "ready": True,
                 "database": "OK",
                 "migrations": migration,
+                "redis": redis_health,
+                "queue_provider": queue_name,
+                "queue": queue_detail,
                 "email": {"dry_run": email_dry_run, **email},
             }
             if app.config.get("TESTING"):
                 return payload
             return success_response(payload)[0]
-        payload = {"status": "DEGRADED", "ready": False, "migrations": migration}
+        payload = {
+            "status": "DEGRADED",
+            "ready": False,
+            "migrations": migration,
+            "redis": redis_health,
+            "queue_provider": queue_name,
+            "queue": queue_detail,
+            "email": {"dry_run": email_dry_run, **email},
+        }
         if app.config.get("TESTING"):
             return payload, 503
         return api_envelope(False, data=payload, error={"code": "NOT_READY", "message": "Service not ready"}), 503

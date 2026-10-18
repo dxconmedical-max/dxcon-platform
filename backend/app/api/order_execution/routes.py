@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.services.incident_service import IncidentService, IncidentServiceError
 from app.services.order_workflow_service import OrderWorkflowError, OrderWorkflowService
 from app.services.sample_tracking_service import SampleTrackingService, SampleTrackingServiceError
@@ -10,6 +14,7 @@ order_execution_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/order-execution",
 )
+blueprint_require_authenticated_user(order_execution_bp)
 
 
 def _client_ip():
@@ -17,7 +22,7 @@ def _client_ip():
 
 
 def _actor_email():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    return authenticated_actor_email()
 
 
 @order_execution_bp.route("/orders", methods=["GET"])

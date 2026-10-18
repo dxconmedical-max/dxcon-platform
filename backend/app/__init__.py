@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 
 from app.core.config import Config
@@ -11,9 +13,34 @@ from app.bootstrap.middleware import register_middleware
 from app.models import *
 
 
+def _apply_runtime_env_overrides(app: Flask) -> None:
+    """Re-apply process env after Config class import.
+
+    Test modules set DATABASE_URL (and related keys) before importing the app.
+    Config attributes are evaluated once at import time, so later modules would
+    otherwise inherit a stale URI (e.g. sqlite:///:memory:) and share the wrong DB.
+    """
+    database_url = os.getenv("DATABASE_URL")
+    if database_url is not None and str(database_url).strip() != "":
+        app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+
+    secret_key = os.getenv("SECRET_KEY")
+    if secret_key is not None and str(secret_key).strip() != "":
+        app.config["SECRET_KEY"] = secret_key
+
+    jwt_secret = os.getenv("JWT_SECRET_KEY")
+    if jwt_secret is not None and str(jwt_secret).strip() != "":
+        app.config["JWT_SECRET_KEY"] = jwt_secret
+
+    app_env = os.getenv("APP_ENV")
+    if app_env is not None and str(app_env).strip() != "":
+        app.config["APP_ENV"] = app_env
+
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    _apply_runtime_env_overrides(app)
     app.secret_key = app.config["SECRET_KEY"]
     validate_config(app)
 

@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.notifications.notification_service import (
     NotificationCenterError,
     NotificationCenterService,
@@ -12,6 +13,7 @@ def _error(exc):
 
 
 notification_center_bp = Blueprint("notification_center", __name__, url_prefix="/api/v1/notifications")
+blueprint_require_authenticated_user(notification_center_bp)
 
 
 @notification_center_bp.route("/templates", methods=["GET"])

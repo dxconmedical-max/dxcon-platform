@@ -5,21 +5,35 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Production must not silently inherit unsafe local defaults when env vars are absent.
+_APP_ENV = (os.getenv("APP_ENV") or "development").lower()
+_IS_PRODUCTION = _APP_ENV in {"production", "prod", "live"}
+
+
+def _env_or(key: str, *, default: str = "", production_default: str = "") -> str:
+    value = os.getenv(key)
+    if value is not None and str(value).strip() != "":
+        return value
+    return production_default if _IS_PRODUCTION else default
+
 
 class Config:
-    SECRET_KEY = os.getenv(
+    SECRET_KEY = _env_or(
         "SECRET_KEY",
-        "dxcon-dev-secret",
+        default="dxcon-dev-secret",
+        production_default="",
     )
 
-    JWT_SECRET_KEY = os.getenv(
+    JWT_SECRET_KEY = _env_or(
         "JWT_SECRET_KEY",
-        "dxcon-dev-jwt",
+        default="dxcon-dev-jwt",
+        production_default="",
     )
 
-    SQLALCHEMY_DATABASE_URI = os.getenv(
+    SQLALCHEMY_DATABASE_URI = _env_or(
         "DATABASE_URL",
-        "sqlite:///dxcon.db",
+        default="sqlite:///dxcon.db",
+        production_default="",
     )
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -27,6 +41,27 @@ class Config:
     APP_ENV = os.getenv(
         "APP_ENV",
         "development",
+    )
+
+    # Browser session cookies (web gateway). Production defaults are fail-closed.
+    SESSION_COOKIE_HTTPONLY = os.getenv("SESSION_COOKIE_HTTPONLY", "true").lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    SESSION_COOKIE_SAMESITE = os.getenv(
+        "SESSION_COOKIE_SAMESITE",
+        "Lax",
+    )
+    _cookie_secure_default = "true" if _IS_PRODUCTION else "false"
+    SESSION_COOKIE_SECURE = os.getenv(
+        "SESSION_COOKIE_SECURE",
+        _cookie_secure_default,
+    ).lower() in {"1", "true", "yes", "on"}
+    PREFERRED_URL_SCHEME = os.getenv(
+        "PREFERRED_URL_SCHEME",
+        "https" if _IS_PRODUCTION else "http",
     )
 
     LOG_LEVEL = os.getenv(
@@ -87,7 +122,11 @@ class Config:
     CACHE_DEFAULT_TTL_SECONDS = int(os.getenv("CACHE_DEFAULT_TTL_SECONDS", "60"))
     SLOW_QUERY_THRESHOLD_MS = float(os.getenv("SLOW_QUERY_THRESHOLD_MS", "100"))
     BACKGROUND_TASK_WORKERS = int(os.getenv("BACKGROUND_TASK_WORKERS", "4"))
-    QUEUE_PROVIDER = os.getenv("QUEUE_PROVIDER", "memory")
+    QUEUE_PROVIDER = _env_or(
+        "QUEUE_PROVIDER",
+        default="memory",
+        production_default="redis",
+    )
     SCHEDULER_PROVIDER = os.getenv("SCHEDULER_PROVIDER", "apscheduler")
     CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "")
     RABBITMQ_URL = os.getenv("RABBITMQ_URL", "")

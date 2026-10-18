@@ -172,16 +172,16 @@ def check_production_config_safety() -> dict:
             "DEBUG": False,
             "APP_ENV": "production",
             "CORS_ORIGINS": production_values.get("CORS_ORIGINS", "https://app.dxcon.com"),
-            "SQLALCHEMY_DATABASE_URI": production_values.get(
-                "DATABASE_URL",
-                "postgresql://dxcon:secret@postgres:5432/dxcon",
-            ),
+            # Example env files intentionally contain replace-me placeholders.
+            # Preflight must use safe synthetic values when proving validate_config.
+            "SQLALCHEMY_DATABASE_URI": "postgresql://dxcon:preflight-db-secret@postgres:5432/dxcon",
             "REDIS_URL": production_values.get("REDIS_URL", "redis://redis:6379/0"),
+            "QUEUE_PROVIDER": "redis",
             "SMTP_HOST": production_values.get("SMTP_HOST", "smtp.example.com"),
             "SMTP_PORT": int(production_values.get("SMTP_PORT", "587")),
             "SMTP_FROM": production_values.get("SMTP_FROM", "noreply@dxcon.com"),
-            "SECRET_KEY": production_values.get("SECRET_KEY", "production-secret-key-min-32-chars"),
-            "JWT_SECRET_KEY": production_values.get("JWT_SECRET_KEY", "production-jwt-secret-min-32-chars"),
+            "SECRET_KEY": "p07-security-preflight-secret-key-32ch",
+            "JWT_SECRET_KEY": "p07-security-preflight-jwt-secret-32ch",
             "STORAGE_PATH": production_values.get("STORAGE_PATH", "/var/lib/dxcon/uploads"),
             "LOG_FORMAT": production_values.get("LOG_FORMAT", "json"),
             "RATE_LIMIT_ENABLED": True,

@@ -45,13 +45,15 @@ def utc_now():
 
 
 def ensure_generated_dir():
-    GENERATED_DIR.mkdir(parents=True, exist_ok=True)
-    return GENERATED_DIR
+    from scripts.artifact_paths import generated_release_dir
+
+    generated = generated_release_dir()
+    generated.mkdir(parents=True, exist_ok=True)
+    return generated
 
 
 def write_json(name, payload):
-    ensure_generated_dir()
-    path = GENERATED_DIR / name
+    path = ensure_generated_dir() / name
     path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
     return str(path)
 
@@ -445,18 +447,28 @@ def run_final_smoke(app, client):
 
     steps = {}
 
+    # Public register is PATIENT-only; provision ADMIN for privileged API steps.
+    from scripts.smoke_auth_provision import ensure_user
+
     register = client.post(
         "/api/v1/auth/register",
-        json={"email": "rc2-user@dxcon.test", "password": "SecurePass123!", "role": "ADMIN"},
+        json={"email": "rc2-patient@dxcon.test", "password": "SecurePass123!"},
     )
+    ensure_user(email="rc2-user@dxcon.test", password="SecurePass123!", role="ADMIN")
     login = client.post(
         "/api/v1/auth/login",
         json={"email": "rc2-user@dxcon.test", "password": "SecurePass123!"},
     )
     login_payload = _response_payload(login)
     steps["register_login"] = {
-        "ok": login.status_code == 200 and bool(login_payload.get("access_token")),
+        "ok": register.status_code in {201, 400}
+        and login.status_code == 200
+        and bool(login_payload.get("access_token")),
     }
+    auth_headers = {}
+    token = login_payload.get("access_token")
+    if token:
+        auth_headers["Authorization"] = f"Bearer {token}"
 
     patient_resp = client.post(
         "/api/v1/patients",
@@ -467,6 +479,7 @@ def run_final_smoke(app, client):
             "phone": "0909000123",
             "email": "rc2-patient@dxcon.test",
         },
+        headers=auth_headers,
     )
     patient_payload = _response_payload(patient_resp)
     patient_id = (patient_payload.get("patient") or patient_payload).get("id") or patient_payload.get("id")

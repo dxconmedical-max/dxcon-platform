@@ -30,7 +30,43 @@ partner_foundation_bp = Blueprint("partner_foundation", __name__, url_prefix="/a
 
 
 def _actor() -> str | None:
-    return session.get("email") or request.headers.get("X-Actor") or request.headers.get("X-User-Email")
+    from app.core.audit_actor import resolve_human_audit_actor
+
+    return resolve_human_audit_actor(unauthenticated_fallback="") or None
+
+
+def _scoped_org_filter(query, model, *, column_name: str = "organization_id"):
+    """Apply membership-validated org filter; optional client selector must be authorized."""
+    from app.core.tenant_authorization import (
+        AuthorizedTenant,
+        apply_authorized_organization_filter,
+        resolve_authorized_tenant,
+    )
+
+    requested = request.args.get("organization_id")
+    tenant = resolve_authorized_tenant(
+        requested_organization_id=requested,
+        require_scope=True,
+    )
+    if not isinstance(tenant, AuthorizedTenant):
+        return None, tenant
+    if tenant.is_global_scope and not requested:
+        return query, None
+    if requested and not tenant.is_global_scope and requested != tenant.organization_id:
+        if requested not in tenant.organization_ids:
+            from app.core.errors import build_error_response
+
+            return None, build_error_response(
+                "MEMBERSHIP_NOT_FOUND", "Organization membership not found", 403
+            )
+    try:
+        return apply_authorized_organization_filter(query, model, column_name=column_name), None
+    except Exception as exc:
+        from app.core.tenant_authorization import TenantAuthorizationError
+
+        if isinstance(exc, TenantAuthorizationError):
+            return None, exc.as_response()
+        raise
 
 
 @partner_foundation_bp.route("/bootstrap", methods=["POST"])
@@ -102,10 +138,10 @@ def organizations_update(org_id: str):
 @partner_foundation_bp.route("/users", methods=["GET"])
 @roles_required(*PARTNER_READ_ROLES)
 def partner_users_list():
-    org_id = request.args.get("organization_id")
     query = OrganizationUser.query
-    if org_id:
-        query = query.filter_by(organization_id=org_id)
+    query, err = _scoped_org_filter(query, OrganizationUser)
+    if err:
+        return err
     page = max(int(request.args.get("page", 1)), 1)
     per_page = min(max(int(request.args.get("per_page", 25)), 1), 500)
     total = query.count()
@@ -148,10 +184,10 @@ def partner_users_disable(organization_id: str, user_id: str):
 @partner_foundation_bp.route("/contracts", methods=["GET"])
 @roles_required(*PARTNER_READ_ROLES)
 def contracts_list():
-    org_id = request.args.get("organization_id")
     query = PartnerContract.query
-    if org_id:
-        query = query.filter_by(organization_id=org_id)
+    query, err = _scoped_org_filter(query, PartnerContract)
+    if err:
+        return err
     rows = query.limit(int(request.args.get("limit", 100))).all()
     return {"success": True, "data": [r.to_dict() for r in rows]}, 200
 
@@ -170,10 +206,10 @@ def contracts_create():
 @partner_foundation_bp.route("/price-lists", methods=["GET"])
 @roles_required(*PARTNER_READ_ROLES)
 def price_lists_list():
-    org_id = request.args.get("organization_id")
     query = OrganizationPriceList.query
-    if org_id:
-        query = query.filter_by(organization_id=org_id)
+    query, err = _scoped_org_filter(query, OrganizationPriceList)
+    if err:
+        return err
     rows = query.limit(int(request.args.get("limit", 100))).all()
     return {"success": True, "data": [r.to_dict() for r in rows]}, 200
 

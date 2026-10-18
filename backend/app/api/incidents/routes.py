@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from datetime import datetime
 import uuid
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.extensions.db import db
 from app.models.incident import Incident
 
@@ -11,6 +12,7 @@ incidents_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/incidents"
 )
+blueprint_require_authenticated_user(incidents_bp)
 
 
 def incident_code():

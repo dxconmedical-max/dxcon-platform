@@ -103,9 +103,20 @@ class BillingService:
         return invoice
 
     @staticmethod
-    def list_invoices(partner_id=None, status=None):
+    def list_invoices(partner_id=None, status=None, partner_ids=None):
+        """List invoices.
+
+        partner_ids=None → global (SUPER_ADMIN only; callers enforce).
+        partner_ids=empty → fail-closed empty.
+        partner_ids=set → membership scope.
+        partner_id (legacy) narrows further when provided and authorized by caller.
+        """
         query = Invoice.query.filter(Invoice.medical_order_id.isnot(None))
-        if partner_id:
+        if partner_ids is not None:
+            if not partner_ids:
+                return []
+            query = query.filter(Invoice.partner_id.in_(sorted(partner_ids)))
+        elif partner_id:
             query = query.filter_by(partner_id=partner_id)
         if status:
             query = query.filter_by(billing_status=status)
@@ -175,9 +186,14 @@ class BillingService:
         return query.order_by(PaymentRecord.created_at.desc()).all()
 
     @staticmethod
-    def get_summary(partner_id=None):
+    def get_summary(partner_id=None, partner_ids=None):
         query = Invoice.query.filter(Invoice.medical_order_id.isnot(None))
-        if partner_id:
+        if partner_ids is not None:
+            if not partner_ids:
+                query = query.filter(False)
+            else:
+                query = query.filter(Invoice.partner_id.in_(sorted(partner_ids)))
+        elif partner_id:
             query = query.filter_by(partner_id=partner_id)
         invoices = query.all()
         paid = [inv for inv in invoices if inv.billing_status == BILLING_INVOICE_PAID]
@@ -325,8 +341,12 @@ class TaxService:
 class InvoiceService:
 
     @staticmethod
-    def list_invoices(partner_id=None, status=None):
-        invoices = BillingService.list_invoices(partner_id=partner_id, status=status)
+    def list_invoices(partner_id=None, status=None, partner_ids=None):
+        invoices = BillingService.list_invoices(
+            partner_id=partner_id,
+            status=status,
+            partner_ids=partner_ids,
+        )
         return {"count": len(invoices), "invoices": [inv.to_dict() for inv in invoices]}
 
     @staticmethod

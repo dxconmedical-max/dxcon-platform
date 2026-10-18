@@ -68,6 +68,9 @@ def write_audit(
     ip_address="",
     request_id=None,
 ):
+    from app.core.audit_actor import canonicalize_audit_actor
+
+    user_email = canonicalize_audit_actor(user_email)
     audit_id = str(uuid.uuid4())
     created_at = datetime.utcnow()
     if table_has_column("audit_logs", "request_id"):

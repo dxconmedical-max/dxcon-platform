@@ -5,7 +5,14 @@ def build_engine_options(database_uri, pool_size=5, max_overflow=10, pool_recycl
         options = {
             "connect_args": {"check_same_thread": False},
         }
-        if ":memory:" not in uri:
+        # sqlite:///:memory: is a fresh empty DB per connection unless StaticPool
+        # is used. Without it, create_all/insert/update across pooled connections
+        # produce StaleDataError and "table missing" flakes in the full suite.
+        if ":memory:" in uri:
+            from sqlalchemy.pool import StaticPool
+
+            options["poolclass"] = StaticPool
+        else:
             options["pool_pre_ping"] = True
         return options
 

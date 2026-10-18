@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-from flask import Blueprint, request, g
+from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.integration.audit import write_integration_audit
 from app.integration.mappings.engine import preview_mapping, upsert_mapping_rule
 from app.integration.parsers.fhir_foundation import map_fhir_resource
@@ -35,10 +39,11 @@ from app.models.user import User
 from app.partner_foundation.service import ensure_default_organization
 
 integration_platform_bp = Blueprint("integration_platform", __name__, url_prefix="/api/v1/integration")
+blueprint_require_authenticated_user(integration_platform_bp)
 
 
 def _actor() -> str:
-    return getattr(g, "user_email", None) or request.headers.get("X-User-Email") or "api"
+    return authenticated_actor_email()
 
 
 def _org_id(user: User) -> str:

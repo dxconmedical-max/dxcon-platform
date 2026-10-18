@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.services.crm_dashboard_service import CrmDashboardService
 from app.services.crm_service import CrmError, CrmService
 from app.services.quotation_service import QuotationError, QuotationService
@@ -7,6 +8,7 @@ from app.services.sales_contract_service import SalesContractError, SalesContrac
 
 
 crm_bp = Blueprint("crm_api", __name__, url_prefix="/api/v1/crm")
+blueprint_require_authenticated_user(crm_bp)
 
 
 def _page_args():

@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.extensions.db import db
 from app.models.patient import Patient
 
@@ -9,6 +10,7 @@ patients_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/patients"
 )
+blueprint_require_authenticated_user(patients_bp)
 
 
 @patients_bp.route("", methods=["GET"])

@@ -11,6 +11,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _report_path() -> Path:
+    from scripts.artifact_paths import generated_release_dir
+
+    return generated_release_dir() / "DEMO_WORKFLOW_REPORT.json"
+
+
 REPORT_PATH = ROOT / "generated_release" / "DEMO_WORKFLOW_REPORT.json"
 
 DASHBOARD_ROUTES = (
@@ -127,8 +135,9 @@ def main() -> int:
             name for name, item in checks.items() if not item.get("ok")
         ],
     }
-    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_PATH.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+    report_path = _report_path()
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
 
     print(f"Checks passed: {passed}/{len(checks)}")
     print(f"Demo users: {checks['seeded_counts']['demo']['users']}")

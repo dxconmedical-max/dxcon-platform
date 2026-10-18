@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.services.accession_service import AccessionService, WorklistService
 from app.services.analyzer_service import AnalyzerService
 from app.services.delta_check_service import CriticalResultService, DeltaCheckService
@@ -11,6 +15,7 @@ from app.services.review_service import ReviewService
 
 
 lab_bp = Blueprint("lab_operations", __name__, url_prefix="/api/v1/lab")
+blueprint_require_authenticated_user(lab_bp)
 
 
 def _page_args():
@@ -22,16 +27,59 @@ def _error(exc):
 
 
 def _actor():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    return authenticated_actor_email()
+
+
+def _partner_scope():
+    from app.core.tenant_authorization import AuthorizedTenant, resolve_authorized_tenant, scoped_partner_ids
+
+    requested = (
+        request.args.get("partner_id")
+        or request.args.get("organization_id")
+        or request.headers.get("X-Organization-ID")
+        or request.headers.get("X-Organization-Id")
+    )
+    tenant = resolve_authorized_tenant(
+        requested_organization_id=requested,
+        require_scope=True,
+    )
+    if not isinstance(tenant, AuthorizedTenant):
+        return None, tenant
+    return scoped_partner_ids(tenant), None
+
+
+def _assert_accession_access(accession_id):
+    from app.core.errors import build_error_response
+    from app.core.tenant_authorization import (
+        AuthorizedTenant,
+        authorize_partner_record,
+        medical_order_partner_id,
+    )
+    from app.models.lab_accession import SampleAccession
+
+    accession = SampleAccession.query.get(accession_id)
+    if not accession:
+        return None, build_error_response("NOT_FOUND", "Accession not found", 404)
+    partner_id = medical_order_partner_id(accession.medical_order_id)
+    tenant = authorize_partner_record(partner_id)
+    if not isinstance(tenant, AuthorizedTenant):
+        return None, tenant
+    return accession, None
 
 
 @lab_bp.route("/dashboard", methods=["GET"])
 def lab_dashboard():
-    return LabDashboardService.get_dashboard()
+    partner_ids, err = _partner_scope()
+    if err:
+        return err
+    return LabDashboardService.get_dashboard(partner_ids=partner_ids)
 
 
 @lab_bp.route("/accessions", methods=["GET"])
 def list_accessions():
+    partner_ids, err = _partner_scope()
+    if err:
+        return err
     page, per_page = _page_args()
     return AccessionService.list_accessions(
         page=page,
@@ -41,6 +89,7 @@ def list_accessions():
         worklist_id=request.args.get("worklist_id"),
         analyzer_id=request.args.get("analyzer_id"),
         q=request.args.get("q"),
+        partner_ids=partner_ids,
     )
 
 
@@ -56,6 +105,9 @@ def create_accession():
 
 @lab_bp.route("/accessions/<accession_id>", methods=["GET"])
 def get_accession(accession_id):
+    _, err = _assert_accession_access(accession_id)
+    if err:
+        return err
     try:
         return {"accession": AccessionService.get_accession(accession_id)}
     except LabWorkflowError as exc:
@@ -64,6 +116,9 @@ def get_accession(accession_id):
 
 @lab_bp.route("/accessions/<accession_id>", methods=["PUT"])
 def update_accession(accession_id):
+    _, err = _assert_accession_access(accession_id)
+    if err:
+        return err
     data = request.get_json(silent=True) or {}
     try:
         accession = AccessionService.update_accession(accession_id, data)
@@ -74,6 +129,9 @@ def update_accession(accession_id):
 
 @lab_bp.route("/accessions/<accession_id>", methods=["DELETE"])
 def delete_accession(accession_id):
+    _, err = _assert_accession_access(accession_id)
+    if err:
+        return err
     try:
         AccessionService.delete_accession(accession_id)
     except LabWorkflowError as exc:
@@ -83,6 +141,9 @@ def delete_accession(accession_id):
 
 @lab_bp.route("/accessions/<accession_id>/advance", methods=["POST"])
 def advance_accession(accession_id):
+    _, err = _assert_accession_access(accession_id)
+    if err:
+        return err
     data = request.get_json(silent=True) or {}
     try:
         accession, transition = AccessionService.advance_accession(
@@ -101,6 +162,9 @@ def advance_accession(accession_id):
 
 @lab_bp.route("/accessions/<accession_id>/receive", methods=["POST"])
 def receive_accession(accession_id):
+    _, err = _assert_accession_access(accession_id)
+    if err:
+        return err
     try:
         accession, transition = AccessionService.receive_at_lab(accession_id, actor=_actor())
     except LabWorkflowError as exc:

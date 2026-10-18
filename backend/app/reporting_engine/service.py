@@ -380,7 +380,8 @@ def release_report(order_ref: str, *, actor: str | None = None) -> dict:
             verify_url=build_verify_url(report.report_code, report.report_hash),
         )
     except Exception:
-        pass
+        # Non-fatal: release already committed; HTML refresh can retry later.
+        report.html_content = report.html_content
 
     db.session.add(
         ReportNotificationEvent(

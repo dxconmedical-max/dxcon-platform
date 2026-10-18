@@ -20,8 +20,13 @@ class ReceiptPdfError(RuntimeError):
 
 
 def default_receipt_pdf_dir() -> Path:
-    root = Path(__file__).resolve().parents[2]
-    path = root / "uploads" / "receipts"
+    try:
+        from scripts.artifact_paths import uploads_dir
+
+        path = uploads_dir() / "receipts"
+    except Exception:
+        root = Path(__file__).resolve().parents[2]
+        path = root / "uploads" / "receipts"
     path.mkdir(parents=True, exist_ok=True)
     return path
 

@@ -111,8 +111,11 @@ def score_findings(findings: list[dict]) -> dict:
 
 
 def write_report(name: str, payload: dict) -> Path:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    path = GENERATED / name
+    from scripts.artifact_paths import generated_release_dir
+
+    generated = generated_release_dir()
+    generated.mkdir(parents=True, exist_ok=True)
+    path = generated / name
     path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
     return path
 

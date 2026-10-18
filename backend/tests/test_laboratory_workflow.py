@@ -69,6 +69,7 @@ def _seed_to_transit(tag: str):
 
 class LaboratoryWorkflowTests(unittest.TestCase):
     def setUp(self):
+        os.environ["DATABASE_URL"] = "sqlite:///:memory:"
         self.app = create_app()
         self.app.config["TESTING"] = True
         self.ctx = self.app.app_context()
@@ -94,6 +95,38 @@ class LaboratoryWorkflowTests(unittest.TestCase):
             is_active=True,
         )
         db.session.add_all([self.lab_user, self.doctor, self.collector])
+        db.session.flush()
+
+        from app.models.partner_foundation import (
+            ORG_STATUS_ACTIVE,
+            OrganizationUser,
+            PartnerOrganization,
+        )
+
+        self.org = PartnerOrganization(
+            organization_code=f"LAB-{self.tag}",
+            organization_name="Lab Workflow Org",
+            organization_type="LABORATORY",
+            status=ORG_STATUS_ACTIVE,
+        )
+        db.session.add(self.org)
+        db.session.flush()
+        db.session.add_all(
+            [
+                OrganizationUser(
+                    organization_id=self.org.id,
+                    user_id=self.lab_user.id,
+                    role_code="LAB",
+                    active=True,
+                ),
+                OrganizationUser(
+                    organization_id=self.org.id,
+                    user_id=self.doctor.id,
+                    role_code="DOCTOR",
+                    active=True,
+                ),
+            ]
+        )
         db.session.commit()
         self.client = self.app.test_client()
 
@@ -107,9 +140,24 @@ class LaboratoryWorkflowTests(unittest.TestCase):
 
     def _session(self, user: User):
         with self.client.session_transaction() as sess:
+            sess.clear()
             sess["user_id"] = user.id
             sess["role"] = user.role
             sess["email"] = user.email
+            if user.id in {self.lab_user.id, self.doctor.id}:
+                sess["organization_id"] = self.org.id
+
+    def _auth_headers(self, user: User) -> dict:
+        from flask_jwt_extended import create_access_token
+
+        token = create_access_token(
+            identity=user.id,
+            additional_claims={"role": user.role, "email": user.email},
+        )
+        headers = {"Authorization": f"Bearer {token}"}
+        if user.id in {self.lab_user.id, self.doctor.id}:
+            headers["X-Organization-ID"] = self.org.id
+        return headers
 
     def test_status_contract_and_accession_format(self):
         contract = status_contract()
@@ -347,53 +395,58 @@ class LaboratoryWorkflowTests(unittest.TestCase):
         db.session.commit()
 
         # Collector cannot medical validate
-        self._session(self.collector)
         resp = self.client.post(
             "/api/v1/lab/workspace/medical-validation/approve",
             json={"order_code": order.order_code},
+            headers=self._auth_headers(self.collector),
         )
         self.assertIn(resp.status_code, (401, 403))
 
         # Lab can tech-validate endpoint (already done) but medical requires doctor
-        self._session(self.lab_user)
         resp = self.client.post(
             "/api/v1/lab/workspace/medical-validation/approve",
             json={"order_code": order.order_code},
+            headers=self._auth_headers(self.lab_user),
         )
         self.assertIn(resp.status_code, (401, 403))
 
-        self._session(self.doctor)
         resp = self.client.post(
             "/api/v1/lab/workspace/medical-validation/approve",
             json={"order_code": order.order_code, "doctor_note": "signed"},
+            headers=self._auth_headers(self.doctor),
         )
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(resp.get_json()["success"])
 
         # Lab can read dashboard
-        self._session(self.lab_user)
-        resp = self.client.get("/api/v1/lab/workspace/dashboard")
+        resp = self.client.get(
+            "/api/v1/lab/workspace/dashboard",
+            headers=self._auth_headers(self.lab_user),
+        )
         self.assertEqual(resp.status_code, 200)
 
         # Collector cannot write receive
-        self._session(self.collector)
         resp = self.client.post(
             "/api/v1/lab/workspace/receive",
             json={"order_code": order.order_code, "received_by": "x"},
+            headers=self._auth_headers(self.collector),
         )
         self.assertIn(resp.status_code, (401, 403))
 
     def test_e2e_api_path(self):
         order, catalog = _seed_to_transit(self.tag + "X")
-        self._session(self.lab_user)
+        lab = self._auth_headers(self.lab_user)
+        doc = self._auth_headers(self.doctor)
         r = self.client.post(
             "/api/v1/lab/workspace/receive",
             json={"order_code": order.order_code, "condition_status": "acceptable", "received_by": "API"},
+            headers=lab,
         )
         self.assertEqual(r.status_code, 200)
         r = self.client.post(
             "/api/v1/lab/workspace/accession",
             json={"order_code": order.order_code},
+            headers=lab,
         )
         self.assertEqual(r.status_code, 201)
         acc = r.get_json()["data"]["accession_number"]
@@ -401,11 +454,13 @@ class LaboratoryWorkflowTests(unittest.TestCase):
         r = self.client.post(
             "/api/v1/lab/workspace/assign",
             json={"order_code": order.order_code, "bench_id": "B", "instrument_id": "I"},
+            headers=lab,
         )
         self.assertEqual(r.status_code, 200)
         r = self.client.post(
             "/api/v1/lab/workspace/processing/start",
             json={"order_code": order.order_code},
+            headers=lab,
         )
         self.assertEqual(r.status_code, 200)
         r = self.client.post(
@@ -417,22 +472,26 @@ class LaboratoryWorkflowTests(unittest.TestCase):
                 "unit": "u",
                 "reference_range": "3-5",
             },
+            headers=lab,
         )
         self.assertEqual(r.status_code, 201)
         r = self.client.post(
             "/api/v1/lab/workspace/validation/approve",
             json={"order_code": order.order_code},
+            headers=lab,
         )
         self.assertEqual(r.status_code, 200)
-        self._session(self.doctor)
         r = self.client.post(
             "/api/v1/lab/workspace/medical-validation/approve",
             json={"order_code": order.order_code},
+            headers=doc,
         )
         self.assertEqual(r.status_code, 200)
         # refresh persistence
-        self._session(self.lab_user)
-        r = self.client.get(f"/api/v1/lab/workspace/orders/{order.order_code}")
+        r = self.client.get(
+            f"/api/v1/lab/workspace/orders/{order.order_code}",
+            headers=lab,
+        )
         self.assertEqual(r.status_code, 200)
         body = r.get_json()["data"]
         self.assertTrue(body["locked"])

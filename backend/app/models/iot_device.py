@@ -24,6 +24,12 @@ class IoTDevice(db.Model):
 
     status = db.Column(db.String(20), default="ACTIVE")
 
+    # Device ingestion credentials (P0-D).
+    # Stored as a hashed secret (Werkzeug password hash format) so the raw
+    # secret is never persisted.
+    ingest_secret_hash = db.Column(db.String(255))
+    ingest_secret_set_at = db.Column(db.DateTime)
+
     last_seen_at = db.Column(db.DateTime)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

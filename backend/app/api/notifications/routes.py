@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.services.notification_service import NotificationError, NotificationService
 
 
@@ -8,12 +12,14 @@ notifications_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/notification-legacy",
 )
+blueprint_require_authenticated_user(notifications_bp)
 
 notification_templates_bp = Blueprint(
     "notification_templates",
     __name__,
     url_prefix="/api/v1/notification-templates",
 )
+blueprint_require_authenticated_user(notification_templates_bp)
 
 
 def _client_ip():
@@ -21,7 +27,7 @@ def _client_ip():
 
 
 def _actor_email():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    return authenticated_actor_email()
 
 
 @notifications_bp.route("", methods=["GET"])

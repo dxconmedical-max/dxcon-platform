@@ -10,6 +10,7 @@ from app.core.statuses import (
     IOT_DEVICE_ACTIVE,
 )
 from app.extensions.db import db
+from app.core.passwords import hash_password
 from app.models.battery_event import BatteryEvent
 from app.models.cold_box_device import ColdBoxDevice
 from app.models.cold_chain_alert import ColdChainAlert
@@ -63,6 +64,11 @@ class IoTDeviceService:
             status=data.get("status", IOT_DEVICE_ACTIVE),
             last_seen_at=datetime.utcnow(),
         )
+
+        ingest_secret = data.get("ingest_secret") or data.get("device_secret") or data.get("api_key")
+        if ingest_secret:
+            device.ingest_secret_hash = hash_password(str(ingest_secret))
+            device.ingest_secret_set_at = datetime.utcnow()
         db.session.add(device)
         db.session.flush()
 
@@ -121,13 +127,21 @@ class TemperatureMonitoringService:
         celsius = data.get("celsius")
         if device_id is None or celsius is None:
             raise IoTError("device_id and celsius are required", 400)
+        try:
+            celsius_f = float(celsius)
+        except (TypeError, ValueError):
+            raise IoTError("Invalid temperature value", 400)
+        # Physical plausibility bounds (device-reported temperature can breach
+        # operational limits; this is only for obviously invalid values).
+        if celsius_f < -50 or celsius_f > 60:
+            raise IoTError("Temperature out of physical bounds", 400)
 
         device = IoTDeviceService._get_device_or_raise(device_id)
         cold_box = ColdBoxDevice.query.filter_by(device_id=device_id).first()
         reading = TemperatureReading(
             device_id=device_id,
             cold_box_id=cold_box.id if cold_box else None,
-            celsius=float(celsius),
+            celsius=celsius_f,
             recorded_at=datetime.utcnow(),
         )
         db.session.add(reading)
@@ -135,17 +149,17 @@ class TemperatureMonitoringService:
 
         alert = None
         if cold_box:
-            if celsius > cold_box.max_temp_c:
+            if celsius_f > cold_box.max_temp_c:
                 alert = ColdChainAlertService.create_alert(
                     device_id,
                     COLD_CHAIN_ALERT_TEMP_HIGH,
-                    f"Temperature {celsius}C exceeds max {cold_box.max_temp_c}C",
+                    f"Temperature {celsius_f}C exceeds max {cold_box.max_temp_c}C",
                 )
-            elif celsius < cold_box.min_temp_c:
+            elif celsius_f < cold_box.min_temp_c:
                 alert = ColdChainAlertService.create_alert(
                     device_id,
                     COLD_CHAIN_ALERT_TEMP_LOW,
-                    f"Temperature {celsius}C below min {cold_box.min_temp_c}C",
+                    f"Temperature {celsius_f}C below min {cold_box.min_temp_c}C",
                 )
 
         db.session.commit()
@@ -162,9 +176,15 @@ class TemperatureMonitoringService:
             raise IoTError("device_id and humidity_percent are required", 400)
 
         device = IoTDeviceService._get_device_or_raise(device_id)
+        try:
+            humidity_f = float(humidity_percent)
+        except (TypeError, ValueError):
+            raise IoTError("Invalid humidity value", 400)
+        if humidity_f < 0 or humidity_f > 100:
+            raise IoTError("Humidity out of bounds", 400)
         reading = HumidityReading(
             device_id=device_id,
-            humidity_percent=float(humidity_percent),
+            humidity_percent=humidity_f,
             recorded_at=datetime.utcnow(),
         )
         db.session.add(reading)
@@ -183,11 +203,21 @@ class GPSMonitoringService:
         if device_id is None or latitude is None or longitude is None:
             raise IoTError("device_id, latitude, and longitude are required", 400)
 
+        try:
+            lat_f = float(latitude)
+            lon_f = float(longitude)
+        except (TypeError, ValueError):
+            raise IoTError("Invalid GPS coordinates", 400)
+        if lat_f < -90 or lat_f > 90:
+            raise IoTError("Latitude out of bounds", 400)
+        if lon_f < -180 or lon_f > 180:
+            raise IoTError("Longitude out of bounds", 400)
+
         device = IoTDeviceService._get_device_or_raise(device_id)
         reading = GPSReading(
             device_id=device_id,
-            latitude=float(latitude),
-            longitude=float(longitude),
+            latitude=lat_f,
+            longitude=lon_f,
             recorded_at=datetime.utcnow(),
         )
         db.session.add(reading)
@@ -202,21 +232,28 @@ class GPSMonitoringService:
         if device_id is None or g_force is None:
             raise IoTError("device_id and g_force are required", 400)
 
+        try:
+            g_f = float(g_force)
+        except (TypeError, ValueError):
+            raise IoTError("Invalid shock value", 400)
+        if g_f < 0 or g_f > 20:
+            raise IoTError("Shock out of bounds", 400)
+
         device = IoTDeviceService._get_device_or_raise(device_id)
         event = ShockEvent(
             device_id=device_id,
-            g_force=float(g_force),
+            g_force=g_f,
             recorded_at=datetime.utcnow(),
         )
         db.session.add(event)
         device.last_seen_at = datetime.utcnow()
 
         alert = None
-        if float(g_force) >= 3.0:
+        if g_f >= 3.0:
             alert = ColdChainAlertService.create_alert(
                 device_id,
                 COLD_CHAIN_ALERT_SHOCK,
-                f"Shock event detected: {g_force}g",
+                f"Shock event detected: {g_f}g",
             )
 
         db.session.commit()
@@ -232,21 +269,28 @@ class GPSMonitoringService:
         if device_id is None or battery_percent is None:
             raise IoTError("device_id and battery_percent are required", 400)
 
+        try:
+            battery_f = float(battery_percent)
+        except (TypeError, ValueError):
+            raise IoTError("Invalid battery value", 400)
+        if battery_f < 0 or battery_f > 100:
+            raise IoTError("Battery out of bounds", 400)
+
         device = IoTDeviceService._get_device_or_raise(device_id)
         event = BatteryEvent(
             device_id=device_id,
-            battery_percent=float(battery_percent),
+            battery_percent=battery_f,
             recorded_at=datetime.utcnow(),
         )
         db.session.add(event)
         device.last_seen_at = datetime.utcnow()
 
         alert = None
-        if float(battery_percent) <= 20:
+        if battery_f <= 20:
             alert = ColdChainAlertService.create_alert(
                 device_id,
                 COLD_CHAIN_ALERT_BATTERY_LOW,
-                f"Battery low: {battery_percent}%",
+                f"Battery low: {battery_f}%",
                 severity="MEDIUM",
             )
 

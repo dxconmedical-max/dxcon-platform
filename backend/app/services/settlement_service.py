@@ -130,9 +130,13 @@ class SettlementService:
         return settlement
 
     @staticmethod
-    def list_settlements(partner_id=None):
+    def list_settlements(partner_id=None, partner_ids=None):
         query = PartnerSettlement.query
-        if partner_id:
+        if partner_ids is not None:
+            if not partner_ids:
+                return []
+            query = query.filter(PartnerSettlement.partner_id.in_(sorted(partner_ids)))
+        elif partner_id:
             query = query.filter_by(partner_id=partner_id)
         return query.order_by(PartnerSettlement.created_at.desc()).all()
 

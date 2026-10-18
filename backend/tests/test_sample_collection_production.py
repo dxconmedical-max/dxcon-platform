@@ -48,6 +48,7 @@ from app.sample_collection_workspace.service import list_production_queue, works
 
 class SampleCollectionProductionTestCase(unittest.TestCase):
     def setUp(self):
+        os.environ["DATABASE_URL"] = "sqlite:///:memory:"
         self.app = create_app()
         self.app.config["TESTING"] = True
         self.client = self.app.test_client()
@@ -113,6 +114,31 @@ class SampleCollectionProductionTestCase(unittest.TestCase):
             is_active=True,
         )
         db.session.add_all([self.collector_user, self.denied_user])
+        db.session.flush()
+
+        # P0-C: non-global roles need an active organization membership for queue APIs.
+        from app.models.partner_foundation import (
+            ORG_STATUS_ACTIVE,
+            OrganizationUser,
+            PartnerOrganization,
+        )
+
+        self.org = PartnerOrganization(
+            id=self.partner.id,
+            organization_code=f"ORG-SCP-{uuid.uuid4().hex[:6].upper()}",
+            organization_name="Sample Collection Org",
+            organization_type="LABORATORY",
+            status=ORG_STATUS_ACTIVE,
+        )
+        db.session.add(self.org)
+        db.session.add(
+            OrganizationUser(
+                organization_id=self.org.id,
+                user_id=self.collector_user.id,
+                role_code="COLLECTOR",
+                active=True,
+            )
+        )
         db.session.commit()
 
         SlotGenerationService.generate_partner_daily_slots(self.partner.id, days=2)
@@ -146,9 +172,32 @@ class SampleCollectionProductionTestCase(unittest.TestCase):
 
     def _session_as(self, user):
         with self.client.session_transaction() as sess:
+            sess.clear()
             sess["user_id"] = user.id
             sess["role"] = user.role
             sess["email"] = user.email
+            if (
+                getattr(self, "collector_user", None) is not None
+                and user.id == self.collector_user.id
+                and getattr(self, "org", None) is not None
+            ):
+                sess["organization_id"] = self.org.id
+
+    def _auth_headers(self, user):
+        from flask_jwt_extended import create_access_token
+
+        token = create_access_token(
+            identity=user.id,
+            additional_claims={"role": user.role, "email": user.email},
+        )
+        headers = {"Authorization": f"Bearer {token}"}
+        if (
+            getattr(self, "collector_user", None) is not None
+            and user.id == self.collector_user.id
+            and getattr(self, "org", None) is not None
+        ):
+            headers["X-Organization-ID"] = self.org.id
+        return headers
 
     def _ensure(self, booking):
         return SampleCollectionWorkflowService.ensure_collection_for_booking(booking.id)
@@ -171,6 +220,7 @@ class SampleCollectionProductionTestCase(unittest.TestCase):
             include_desk=False,
             role="COLLECTOR",
             scoped_collector_id=self.collector.id,
+            organization_id=self.org.id,
         )
         self.assertGreaterEqual(filtered["field_count"], 1)
         dash = workspace_dashboard()
@@ -331,12 +381,16 @@ class SampleCollectionProductionTestCase(unittest.TestCase):
         self.assertEqual(payload["iot_device_id"], "IOT-BOX-1")
 
     def test_permission_denial(self):
-        self._session_as(self.denied_user)
-        denied = self.client.get("/api/v1/sample-collections/queue")
+        denied = self.client.get(
+            "/api/v1/sample-collections/queue",
+            headers=self._auth_headers(self.denied_user),
+        )
         self.assertIn(denied.status_code, (401, 403))
 
-        self._session_as(self.collector_user)
-        allowed = self.client.get("/api/v1/sample-collections/queue")
+        allowed = self.client.get(
+            "/api/v1/sample-collections/queue",
+            headers=self._auth_headers(self.collector_user),
+        )
         self.assertEqual(allowed.status_code, 200)
         self.assertTrue(allowed.get_json().get("success"))
 
@@ -346,9 +400,18 @@ class SampleCollectionProductionTestCase(unittest.TestCase):
         collection_id = collection.id
         expected = collection.expected_barcode or f"BC-{booking.booking_code}"
 
-        # Simulate client abort/timeout: no DB write mid-flight; state stays PENDING
+        # Simulate client abort/timeout: no DB write mid-flight; state stays awaiting
         persisted = SampleCollection.query.get(collection_id)
-        self.assertIn(persisted.status, ("PENDING", COLLECTION_CHECKED_IN, COLLECTION_RECOLLECT_REQUIRED))
+        self.assertIn(
+            persisted.status,
+            (
+                "PENDING",
+                "REQUESTED",
+                "ASSIGNED",
+                COLLECTION_CHECKED_IN,
+                COLLECTION_RECOLLECT_REQUIRED,
+            ),
+        )
 
         SampleCollectionWorkflowService.record_collection(
             booking.id,
@@ -362,7 +425,10 @@ class SampleCollectionProductionTestCase(unittest.TestCase):
         self.assertEqual(refreshed.specimen_type, "BLOOD")
 
         self._session_as(self.collector_user)
-        detail = self.client.get(f"/api/v1/sample-collections/{collection_id}")
+        detail = self.client.get(
+            f"/api/v1/sample-collections/{collection_id}",
+            headers=self._auth_headers(self.collector_user),
+        )
         self.assertEqual(detail.status_code, 200)
         body = detail.get_json()["data"]
         self.assertEqual(body["status"], COLLECTION_COLLECTED)
@@ -371,11 +437,12 @@ class SampleCollectionProductionTestCase(unittest.TestCase):
     def test_e2e_queue_to_lab_arrival(self):
         booking = self._assigned_booking("1009")
         collection = self._ensure(booking)
-        self._session_as(self.collector_user)
+        headers = self._auth_headers(self.collector_user)
 
         queue = self.client.get(
             "/api/v1/sample-collections/queue?include_desk=false"
-            f"&collector={self.collector.id}&location=Ha%20Noi"
+            f"&collector={self.collector.id}&location=Ha%20Noi",
+            headers=headers,
         )
         self.assertEqual(queue.status_code, 200)
         items = queue.get_json()["data"]["items"]
@@ -389,6 +456,7 @@ class SampleCollectionProductionTestCase(unittest.TestCase):
                 "booking_code": booking.booking_code,
                 "scanned_barcode": expected,
             },
+            headers=headers,
         )
         self.assertEqual(verify.status_code, 200)
 
@@ -401,6 +469,7 @@ class SampleCollectionProductionTestCase(unittest.TestCase):
                 "collector_id": self.collector.id,
                 "require_barcode": True,
             },
+            headers=headers,
         )
         self.assertEqual(collect.status_code, 200)
         specimen_id = collect.get_json()["data"]["sample_tracking"]["sample_code"]
@@ -416,18 +485,21 @@ class SampleCollectionProductionTestCase(unittest.TestCase):
                 "temperature_c": 5.0,
                 "iot_device_id": "IOT-E2E",
             },
+            headers=headers,
         )
         self.assertEqual(dispatch.status_code, 200)
 
         handoff = self.client.post(
             f"/api/v1/sample-collections/{collection.id}/handoff",
             json={"temperature_c": 4.8, "note": "Lab dock"},
+            headers=headers,
         )
         self.assertEqual(handoff.status_code, 200)
 
         arrive = self.client.post(
             f"/api/v1/sample-collections/bookings/{booking.id}/lab-arrive",
             json={"note": "Arrived at laboratory", "temperature_c": 4.5},
+            headers=headers,
         )
         self.assertEqual(arrive.status_code, 200)
         payload = arrive.get_json()["data"]

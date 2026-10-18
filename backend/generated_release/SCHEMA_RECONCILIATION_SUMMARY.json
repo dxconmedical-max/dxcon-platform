@@ -1,0 +1,208 @@
+{
+  "orm_tables": 375,
+  "prior_migration_tables": 80,
+  "drift": {
+    "missing_tables": 295,
+    "missing_columns": 2779,
+    "missing_indexes": 332,
+    "missing_unique_constraints": 250,
+    "missing_foreign_keys": 292
+  },
+  "sample_collections": {
+    "orm_columns": [
+      "arrived_at_lab",
+      "barcode_value",
+      "clinic_name",
+      "collected_at",
+      "collection_location",
+      "collection_mode",
+      "collection_request_note",
+      "collector_id",
+      "collector_name",
+      "contact_person",
+      "contact_phone",
+      "created_at",
+      "dispatched_at",
+      "distance_km",
+      "driver_id",
+      "eta_minutes",
+      "expected_barcode",
+      "handoff_at",
+      "id",
+      "iot_device_id",
+      "location_city",
+      "marketplace_booking_id",
+      "notes",
+      "order_id",
+      "order_verified",
+      "partner_id",
+      "patient_verified",
+      "picked_up_at",
+      "pickup_address",
+      "pickup_city",
+      "pickup_district",
+      "pickup_latitude",
+      "pickup_longitude",
+      "pickup_province",
+      "pickup_ward",
+      "priority",
+      "quality_status",
+      "recollect_of_id",
+      "rejection_reason",
+      "requested_date",
+      "requested_time_window",
+      "sample_tracking_id",
+      "specimen_type",
+      "status",
+      "temperature_c",
+      "transport_box_id",
+      "updated_at",
+      "vehicle_id"
+    ],
+    "migration_columns_before": [
+      "arrived_at_lab",
+      "barcode_value",
+      "clinic_name",
+      "collected_at",
+      "collection_location",
+      "collection_mode",
+      "collection_request_note",
+      "collector_id",
+      "collector_name",
+      "contact_person",
+      "contact_phone",
+      "created_at",
+      "dispatched_at",
+      "distance_km",
+      "driver_id",
+      "eta_minutes",
+      "expected_barcode",
+      "handoff_at",
+      "id",
+      "iot_device_id",
+      "location_city",
+      "marketplace_booking_id",
+      "notes",
+      "order_id",
+      "order_verified",
+      "partner_id",
+      "patient_verified",
+      "picked_up_at",
+      "pickup_address",
+      "pickup_city",
+      "pickup_district",
+      "pickup_latitude",
+      "pickup_longitude",
+      "pickup_province",
+      "pickup_ward",
+      "priority",
+      "quality_status",
+      "recollect_of_id",
+      "rejection_reason",
+      "requested_date",
+      "requested_time_window",
+      "sample_tracking_id",
+      "specimen_type",
+      "status",
+      "temperature_c",
+      "transport_box_id",
+      "updated_at",
+      "vehicle_id"
+    ],
+    "missing_before": []
+  },
+  "critical_tables_missing_from_prior_migrations": [
+    "users",
+    "patients",
+    "orders",
+    "order_items",
+    "sample_trackings",
+    "biz_orders",
+    "transport_boxes"
+  ],
+  "verification": {
+    "mode": "offline",
+    "ok": true,
+    "pass_count": 374,
+    "fail_count": 0
+  },
+  "migration": "backend/migrations/021_schema_reconciliation.sql",
+  "apply": "python backend/scripts/apply_migrations.py --only 021_schema_reconciliation.sql",
+  "verify": "python backend/scripts/verify_schema_reconciliation.py",
+  "critical_detail": {
+    "sample_collections": {
+      "table_missing_from_prior": false,
+      "columns_missing_from_prior": []
+    },
+    "biz_orders": {
+      "table_missing_from_prior": false,
+      "columns_missing_from_prior": [
+        "barcode_value"
+      ]
+    },
+    "users": {
+      "table_missing_from_prior": false,
+      "columns_missing_from_prior": [
+        "created_at",
+        "email",
+        "id",
+        "is_active",
+        "password_hash",
+        "phone",
+        "role",
+        "updated_at"
+      ]
+    },
+    "patients": {
+      "table_missing_from_prior": false,
+      "columns_missing_from_prior": [
+        "address",
+        "created_at",
+        "date_of_birth",
+        "email",
+        "full_name",
+        "gender",
+        "national_id",
+        "patient_code",
+        "phone"
+      ]
+    },
+    "orders": {
+      "table_missing_from_prior": true,
+      "columns_missing_from_prior": [
+        "company_id",
+        "contract_id",
+        "created_at",
+        "id",
+        "laboratory_id",
+        "marketplace_booking_id",
+        "order_code",
+        "patient_id",
+        "status",
+        "total_amount"
+      ]
+    },
+    "sample_trackings": {
+      "table_missing_from_prior": true,
+      "columns_missing_from_prior": [
+        "collector_id",
+        "created_at",
+        "home_collection_id",
+        "id",
+        "latitude",
+        "longitude",
+        "marketplace_booking_id",
+        "medical_order_id",
+        "medical_sample_id",
+        "sample_code",
+        "status",
+        "transport_box_id",
+        "updated_at"
+      ]
+    },
+    "lab_accession_records": {
+      "table_missing_from_prior": false,
+      "columns_missing_from_prior": []
+    }
+  }
+}

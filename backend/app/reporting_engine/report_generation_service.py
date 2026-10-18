@@ -40,13 +40,13 @@ def build_verify_url(report_code: str, report_hash: str | None = None) -> str:
         try:
             return request.url_root.rstrip("/") + path
         except Exception:
-            pass
+            return path
     try:
         base = (current_app.config.get("PUBLIC_BASE_URL") or "").rstrip("/")
         if base:
             return f"{base}{path}"
     except Exception:
-        pass
+        return path
     return path
 
 

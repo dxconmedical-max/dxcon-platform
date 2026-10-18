@@ -63,6 +63,11 @@ def database_dialect_report(app):
     }
 
 
+def _database_uri_has_placeholder(uri: str) -> bool:
+    lowered = (uri or "").lower()
+    return "replace-me" in lowered or "changeme" in lowered
+
+
 def validate_database(app):
     report = database_dialect_report(app)
     if report["sqlite_blocked_in_env"]:
@@ -71,6 +76,31 @@ def validate_database(app):
         raise RuntimeError("DATABASE_URL must use PostgreSQL in staging/production")
     if not report["configured"]:
         raise RuntimeError("DATABASE_URL must be configured")
+    uri = (app.config.get("SQLALCHEMY_DATABASE_URI") or "").strip()
+    if is_production(app) and _database_uri_has_placeholder(uri):
+        raise RuntimeError("DATABASE_URL contains a placeholder value in production")
+    return True
+
+
+def validate_queue_provider(app):
+    from app.infrastructure.queue_provider import (
+        PRODUCTION_QUEUE_PROVIDER,
+        SUPPORTED_PROVIDERS,
+        provider_name,
+    )
+
+    name = provider_name(app)
+    if name not in SUPPORTED_PROVIDERS:
+        raise RuntimeError(
+            f"Unsupported QUEUE_PROVIDER={name!r}; supported: {sorted(SUPPORTED_PROVIDERS)}"
+        )
+    if name == "redis" and not (app.config.get("REDIS_URL") or "").strip():
+        raise RuntimeError("REDIS_URL is required when QUEUE_PROVIDER=redis")
+    if is_production(app) and name != PRODUCTION_QUEUE_PROVIDER:
+        raise RuntimeError("QUEUE_PROVIDER must be redis in production")
+    scheduler = (app.config.get("SCHEDULER_PROVIDER") or "").strip().lower()
+    if is_production(app) and scheduler == "memory":
+        raise RuntimeError("SCHEDULER_PROVIDER=memory is not allowed in production")
     return True
 
 
@@ -210,6 +240,7 @@ def validate_production_config(app):
         validate_database(app)
         validate_redis(app)
         validate_smtp(app)
+        validate_queue_provider(app)
     return True
 
 
@@ -285,6 +316,19 @@ def evaluate_go_live_blockers(app):
             }
         )
 
+    from app.infrastructure.queue_provider import PRODUCTION_QUEUE_PROVIDER, provider_name
+
+    queue_name = provider_name(app)
+    if is_production(app) and queue_name != PRODUCTION_QUEUE_PROVIDER:
+        blockers.append(
+            {
+                "id": "memory_queue",
+                "severity": "high",
+                "message": "QUEUE_PROVIDER must be redis in production",
+                "detail": {"queue_provider": queue_name},
+            }
+        )
+
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "app_env": app_env(app),
@@ -297,4 +341,5 @@ def evaluate_go_live_blockers(app):
         "database": database,
         "redis": redis,
         "smtp": smtp,
+        "queue_provider": queue_name,
     }

@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.services.order_lifecycle import OrderLifecycleError, OrderLifecycleService
 from app.services.sample_collection_workflow import (
     SampleCollectionWorkflowError,
@@ -12,6 +16,7 @@ order_lifecycle_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/order-lifecycle",
 )
+blueprint_require_authenticated_user(order_lifecycle_bp)
 
 
 def _client_ip():
@@ -19,14 +24,30 @@ def _client_ip():
 
 
 def _actor_email():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    return authenticated_actor_email()
+
+
+def _partner_scope():
+    from app.core.tenant_authorization import AuthorizedTenant, resolve_authorized_tenant, scoped_partner_ids
+
+    requested = request.args.get("partner_id") or request.args.get("organization_id")
+    tenant = resolve_authorized_tenant(
+        requested_organization_id=requested,
+        require_scope=True,
+    )
+    if not isinstance(tenant, AuthorizedTenant):
+        return None, tenant
+    return scoped_partner_ids(tenant), None
 
 
 @order_lifecycle_bp.route("/orders", methods=["GET"])
 def list_orders():
+    partner_ids, err = _partner_scope()
+    if err:
+        return err
     orders = OrderLifecycleService.list_orders(
         status=request.args.get("status"),
-        partner_id=request.args.get("partner_id"),
+        partner_ids=partner_ids,
     )
 
     return {
@@ -37,6 +58,15 @@ def list_orders():
 
 @order_lifecycle_bp.route("/orders/<order_id>", methods=["GET"])
 def get_order(order_id):
+    from app.core.tenant_authorization import AuthorizedTenant, authorize_partner_record
+    from app.models.order import Order
+
+    order = Order.query.get(order_id)
+    if not order:
+        return {"error": "Order not found"}, 404
+    tenant = authorize_partner_record(order.laboratory_id)
+    if not isinstance(tenant, AuthorizedTenant):
+        return tenant
     try:
         payload = OrderLifecycleService.get_order_detail(order_id)
     except OrderLifecycleError as exc:

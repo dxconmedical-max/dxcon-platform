@@ -71,7 +71,7 @@
                 {
                   "name": "storage",
                   "status": "pass",
-                  "path": "/Users/mac/dxcon-platform/uploads"
+                  "path": "/Users/mac/DXCON APP-WEB/dxcon-platform/uploads"
                 },
                 {
                   "name": "jwt",
@@ -91,8 +91,8 @@
                 {
                   "name": "plugins",
                   "status": "pass",
-                  "blueprint_count": 169,
-                  "api_v1_route_count": 625
+                  "blueprint_count": 264,
+                  "api_v1_route_count": 1328
                 },
                 {
                   "name": "smtp",
@@ -212,8 +212,14 @@
           "name": "database_migrations",
           "status": "warn",
           "detail": {
-            "ready": false,
-            "error": "Working outside of application context.\n\nThis typically means that you attempted to use functionality that needed\nthe current application. To solve this, set up an application context\nwith app.app_context(). See the documentation for more information."
+            "alembic_present": false,
+            "table_count": 0,
+            "missing_core_tables": [
+              "orders",
+              "patients",
+              "users"
+            ],
+            "ready": false
           }
         },
         {
@@ -242,7 +248,7 @@
       }
     },
     "go_live_blockers": {
-      "generated_at": "2026-07-02T07:17:57.510824+00:00",
+      "generated_at": "2026-08-12T14:40:09.474285+00:00",
       "app_env": "development",
       "ready": true,
       "blocker_count": 0,
@@ -273,8 +279,10 @@
         "status": "DEGRADED",
         "blocker": false,
         "mode": "not_configured",
-        "ok": true
-      }
+        "ok": true,
+        "dry_run": false
+      },
+      "queue_provider": "memory"
     },
     "issues": []
   },
@@ -388,7 +396,7 @@
                 {
                   "name": "storage",
                   "status": "pass",
-                  "path": "/Users/mac/dxcon-platform/uploads"
+                  "path": "/Users/mac/DXCON APP-WEB/dxcon-platform/uploads"
                 },
                 {
                   "name": "jwt",
@@ -408,8 +416,8 @@
                 {
                   "name": "plugins",
                   "status": "pass",
-                  "blueprint_count": 169,
-                  "api_v1_route_count": 625
+                  "blueprint_count": 264,
+                  "api_v1_route_count": 1328
                 },
                 {
                   "name": "smtp",
@@ -515,7 +523,7 @@
     "ready_for_production": true
   },
   "manifest": {
-    "generated_at": "2026-07-02T07:17:57.512719+00:00",
+    "generated_at": "2026-08-12T14:40:09.477510+00:00",
     "environment": "development",
     "provider": "local",
     "kubernetes_manifests": [
@@ -530,8 +538,8 @@
       "service.yaml"
     ],
     "docker": {
-      "dockerfile": "/Users/mac/dxcon-platform/backend/Dockerfile",
-      "compose": "/Users/mac/dxcon-platform/docker-compose.yml"
+      "dockerfile": "/Users/mac/DXCON APP-WEB/dxcon-platform/backend/Dockerfile",
+      "compose": "/Users/mac/DXCON APP-WEB/dxcon-platform/docker-compose.yml"
     }
   }
 }

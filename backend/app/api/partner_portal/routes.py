@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.services.partner_portal_service import (
     PartnerDashboardService,
     PartnerOrderService,
@@ -15,10 +19,11 @@ partner_portal_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/partner-portal",
 )
+blueprint_require_authenticated_user(partner_portal_bp)
 
 
 def _actor_email():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    return authenticated_actor_email()
 
 
 @partner_portal_bp.route("/dashboard", methods=["GET"])

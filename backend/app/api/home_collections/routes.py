@@ -1,17 +1,26 @@
 from flask import Blueprint, request
 import logging
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.extensions.db import db
 from app.models.home_collection import HomeCollection
 
 
 logger = logging.getLogger("dxcon.home_collections")
 
+
+def _home_collection_actor():
+    return authenticated_actor_email()
+
 home_collections_bp = Blueprint(
     "home_collections",
     __name__,
     url_prefix="/api/v1/home-collections"
 )
+blueprint_require_authenticated_user(home_collections_bp)
 
 
 @home_collections_bp.route("", methods=["GET"])
@@ -52,7 +61,7 @@ def create_home_collection():
 
         sample_collection = ensure_sample_collection_from_home_collection(
             item,
-            actor=request.headers.get("X-Actor") or "home_collections_api",
+            actor=_home_collection_actor(),
         )
     except Exception:
         logger.exception("SampleCollection bridge failed for HomeCollection %s", item.id)

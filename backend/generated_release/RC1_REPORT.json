@@ -1,27 +1,27 @@
 {
-  "generated_at": "2026-07-02T09:05:17.249325+00:00",
+  "generated_at": "2026-08-12T14:56:49.078247+00:00",
   "release": "v1.0.0-rc1",
   "route_summary": {
-    "total_routes": 861,
-    "api_routes": 626
+    "total_routes": 2044,
+    "api_routes": 1329
   },
   "score": {
-    "score": 100.0,
-    "ready_for_rc1": true,
+    "score": 91.66,
+    "ready_for_rc1": false,
     "breakdown": {
       "workflows": {
         "weight": 40,
-        "passed": 18,
+        "passed": 15,
         "total": 18,
-        "score": 40.0,
-        "ok": true
+        "score": 33.33,
+        "ok": false
       },
       "security": {
         "weight": 20,
-        "passed": 12,
+        "passed": 11,
         "total": 12,
-        "score": 20.0,
-        "ok": true
+        "score": 18.33,
+        "ok": false
       },
       "deployment": {
         "weight": 15,
@@ -47,15 +47,15 @@
     }
   },
   "workflows": {
-    "ok": true,
-    "passed": 18,
+    "ok": false,
+    "passed": 15,
     "total": 18,
     "workflows": {
       "auth_register_login": {
-        "ok": true
+        "ok": false
       },
       "partner_onboarding": {
-        "ok": true
+        "ok": false
       },
       "marketplace_search_booking": {
         "ok": true
@@ -91,7 +91,7 @@
         "ok": true
       },
       "reporting_dashboard": {
-        "ok": true
+        "ok": false
       },
       "ai_interpretation": {
         "ok": true
@@ -108,8 +108,8 @@
     }
   },
   "security": {
-    "ok": true,
-    "passed": 12,
+    "ok": false,
+    "passed": 11,
     "total": 12,
     "checks": {
       "config_validation": {
@@ -130,8 +130,10 @@
         "ok": true
       },
       "security_headers": {
-        "ok": true,
-        "missing": []
+        "ok": false,
+        "missing": [
+          "Strict-Transport-Security"
+        ]
       },
       "error_handler": {
         "ok": true
@@ -203,8 +205,8 @@
       },
       "model_exports": {
         "ok": true,
-        "exported_count": 92,
-        "model_modules": 167
+        "exported_count": 102,
+        "model_modules": 179
       },
       "orphan_records": {
         "ok": true,
@@ -232,6 +234,7 @@
           "cors_origins": "*",
           "cors_strict_safe": true,
           "redis_configured": false,
+          "queue_provider": "memory",
           "smtp_configured": false,
           "database_dialect": "sqlite",
           "storage_backend": "local",
@@ -247,25 +250,25 @@
     "passed": 1,
     "total": 1,
     "timings": {
-      "app_startup_ms": 163.13,
+      "app_startup_ms": 599.59,
       "endpoint_latencies": {
         "/api/v1/system/health": {
-          "latency_ms": 1.87,
+          "latency_ms": 1.96,
           "status_code": 200
         },
         "/api/v1/infrastructure/status": {
-          "latency_ms": 4.36,
+          "latency_ms": 7.14,
           "status_code": 200
         },
         "/api/v1/marketplace/search": {
-          "latency_ms": 7.18,
+          "latency_ms": 11.23,
           "status_code": 200
         }
       },
-      "db_query_ms": 0.19,
-      "route_inventory_ms": 0.16,
-      "route_count": 861,
-      "memory_mb": 255.75
+      "db_query_ms": 0.4,
+      "route_inventory_ms": 0.37,
+      "route_count": 2044,
+      "memory_mb": 1645.45
     },
     "slow_or_failed_endpoints": []
   }

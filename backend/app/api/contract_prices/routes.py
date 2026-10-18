@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.extensions.db import db
 from app.models.contract_price import ContractPrice
 
@@ -9,6 +10,7 @@ contract_prices_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/contract-prices"
 )
+blueprint_require_authenticated_user(contract_prices_bp)
 
 
 @contract_prices_bp.route("", methods=["GET"])

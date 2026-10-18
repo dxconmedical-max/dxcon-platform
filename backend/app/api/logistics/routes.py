@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.services.logistics_platform_service import (
     DispatchBoardService,
     DriverService,
@@ -16,6 +20,7 @@ logistics_platform_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/logistics",
 )
+blueprint_require_authenticated_user(logistics_platform_bp)
 
 
 def _page_args():
@@ -27,7 +32,7 @@ def _error(exc):
 
 
 def _actor():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    return authenticated_actor_email()
 
 
 @logistics_platform_bp.route("/drivers", methods=["GET"])
@@ -142,7 +147,7 @@ def record_gps():
 @logistics_platform_bp.route("/proof", methods=["POST"])
 def record_proof():
     data = request.get_json(silent=True) or {}
-    data["captured_by"] = data.get("captured_by") or _actor()
+    data["captured_by"] = _actor()
     proof = ProofOfDeliveryService.record_proof(data)
     return {"message": "Delivery proof recorded", "proof": proof.to_dict()}, 201
 

@@ -35,6 +35,18 @@ from app.services.kpi_engine_service import KPIEngineService
 from app.services.reporting_service import ExecutiveDashboardService, ReportingService
 
 
+def _generated_reports_dir() -> str:
+    try:
+        from scripts.artifact_paths import generated_reports_dir
+
+        return str(generated_reports_dir())
+    except Exception:
+        return os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            "generated_reports",
+        )
+
+
 GENERATED_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "generated_reports")
 
 
@@ -111,9 +123,10 @@ class ReportPlatformService:
                     buffer.write(f"{key}\t{json.dumps(value) if isinstance(value, (dict, list)) else value}\n")
             return buffer.getvalue(), "application/vnd.ms-excel", ".xlsx"
         if output_format == REPORT_FORMAT_PDF:
-            os.makedirs(GENERATED_DIR, exist_ok=True)
+            reports_dir = _generated_reports_dir()
+            os.makedirs(reports_dir, exist_ok=True)
             filename = f"DxCon_Report_{uuid.uuid4().hex[:8]}.pdf"
-            path = os.path.join(GENERATED_DIR, filename)
+            path = os.path.join(reports_dir, filename)
             pdf = canvas.Canvas(path, pagesize=A4)
             pdf.setFont("Helvetica", 12)
             pdf.drawString(50, 800, "DxCon Analytics Report")
@@ -157,8 +170,8 @@ class ReportPlatformService:
             content, mime_type, ext = ReportPlatformService._render_content(payload, output_format)
             file_path = content if output_format == REPORT_FORMAT_PDF else None
             if output_format != REPORT_FORMAT_PDF:
-                os.makedirs(GENERATED_DIR, exist_ok=True)
-                file_path = os.path.join(GENERATED_DIR, f"{job.job_code}{ext}")
+                os.makedirs(_generated_reports_dir(), exist_ok=True)
+                file_path = os.path.join(_generated_reports_dir(), f"{job.job_code}{ext}")
                 with open(file_path, "w", encoding="utf-8") as handle:
                     handle.write(content if isinstance(content, str) else str(content))
             job.status = REPORT_JOB_COMPLETED

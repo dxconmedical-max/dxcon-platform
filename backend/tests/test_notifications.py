@@ -29,6 +29,8 @@ class NotificationsTestCase(unittest.TestCase):
         self.ctx = self.app.app_context()
         self.ctx.push()
         db.create_all()
+        from tests.p06_auth_helper import attach_admin_client
+        attach_admin_client(self)
         seed_notifications_demo()
         NotificationQueue.clear()
 

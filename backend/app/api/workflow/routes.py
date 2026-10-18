@@ -2,6 +2,10 @@ from flask import Blueprint, request
 from datetime import datetime
 import uuid
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.extensions.db import db
 from app.models.home_collection import HomeCollection
 from app.models.sample_tracking import SampleTracking
@@ -23,6 +27,11 @@ workflow_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/workflow"
 )
+blueprint_require_authenticated_user(workflow_bp)
+
+
+def _workflow_actor():
+    return authenticated_actor_email()
 
 
 def sample_code():
@@ -90,10 +99,11 @@ def create_booking():
 
         sample_collection = ensure_sample_collection_from_home_collection(
             booking,
-            actor=data.get("actor") or "workflow_api",
+            actor=_workflow_actor(),
         )
     except Exception:
-        pass
+        # Booking still succeeds; sample-collection bridge is best-effort.
+        sample_collection = None
 
     db.session.commit()
 

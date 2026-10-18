@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user_except,
+)
 from app.integrations.audit_trail import IntegrationAuditTrail
 from app.integrations.sandbox_tokens import SandboxTokenService
 from app.services.integration_service import (
@@ -17,10 +21,26 @@ integrations_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/integrations",
 )
+# LIS/HIS inbound ingest is SERVICE_AUTH_REQUIRED. No inbound service-credential
+# verifier exists; do not invent JWT or a spoofable header substitute.
+blueprint_require_authenticated_user_except(
+    integrations_bp,
+    public_prefixes=(
+        "/api/v1/integrations/lis/",
+        "/api/v1/integrations/his/",
+    ),
+)
 
 
 def _actor_email():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    from app.core.audit_actor import resolve_human_audit_actor, system_audit_actor
+    from app.core.authenticated_identity import get_authenticated_identity
+
+    if get_authenticated_identity() is not None:
+        return authenticated_actor_email()
+    return resolve_human_audit_actor(
+        unauthenticated_fallback=system_audit_actor("integration_ingest")
+    )
 
 
 def _connection_id(data):

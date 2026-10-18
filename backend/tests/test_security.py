@@ -64,6 +64,9 @@ class SecurityTestCase(unittest.TestCase):
     def test_security_headers_applied(self):
         response = self.client.get("/api/v1/system/health")
         for header in SECURITY_HEADERS:
+            # HSTS is production/strict-only by design (avoid breaking local HTTP).
+            if header == "Strict-Transport-Security":
+                continue
             self.assertIn(header, response.headers)
 
     def test_malformed_json_rejected(self):

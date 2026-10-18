@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import os
 import sys
-import time
 
 
 def _run_api():
@@ -20,10 +19,22 @@ def _run_api():
     )
 
 
-def _run_placeholder(role: str):
-    print(f"DXCON {role} placeholder active — configure background jobs before GA")
-    while True:
-        time.sleep(3600)
+def _create_app():
+    from app import create_app
+
+    return create_app()
+
+
+def _run_worker():
+    from app.operations.process_runtime import run_worker_loop
+
+    run_worker_loop(_create_app())
+
+
+def _run_scheduler():
+    from app.operations.process_runtime import run_scheduler_loop
+
+    run_scheduler_loop(_create_app())
 
 
 def main(argv=None):
@@ -32,8 +43,11 @@ def main(argv=None):
     if role == "api":
         _run_api()
         return 0
-    if role in {"worker", "scheduler"}:
-        _run_placeholder(role)
+    if role == "worker":
+        _run_worker()
+        return 0
+    if role == "scheduler":
+        _run_scheduler()
         return 0
     print(f"Unknown role: {role}", file=sys.stderr)
     return 1

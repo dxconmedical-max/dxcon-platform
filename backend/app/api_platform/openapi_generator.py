@@ -6,6 +6,16 @@ from app.api_platform.openapi_schema import base_openapi_document, operation_obj
 from app.api_platform.route_catalog import _domain_from_path
 from app.api_platform.versioning import route_metadata
 
+
+def _generated_api_dir() -> Path:
+    try:
+        from scripts.artifact_paths import generated_api_dir
+
+        return generated_api_dir()
+    except Exception:
+        return Path(__file__).resolve().parents[2] / "generated_api"
+
+
 GENERATED_DIR = Path(__file__).resolve().parents[2] / "generated_api"
 
 
@@ -74,7 +84,7 @@ def build_openapi(app, servers=None):
 
 
 def write_openapi_artifacts(app, output_dir=None):
-    output_dir = Path(output_dir or GENERATED_DIR)
+    output_dir = Path(output_dir or _generated_api_dir())
     output_dir.mkdir(parents=True, exist_ok=True)
     document = build_openapi(app)
     json_path = output_dir / "openapi.json"

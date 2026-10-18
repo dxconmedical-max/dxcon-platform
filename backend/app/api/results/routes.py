@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.services.result_gateway_service import (
     ResultApprovalService,
     ResultGatewayError,
@@ -16,6 +20,7 @@ results_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/results",
 )
+blueprint_require_authenticated_user(results_bp)
 
 
 def _client_ip():
@@ -23,14 +28,26 @@ def _client_ip():
 
 
 def _actor_email():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    return authenticated_actor_email()
 
 
 @results_bp.route("", methods=["GET"])
 def list_results():
+    from app.core.tenant_authorization import (
+        AuthorizedTenant,
+        resolve_authorized_tenant,
+        scoped_partner_ids,
+    )
+
+    tenant = resolve_authorized_tenant(require_scope=True)
+    if not isinstance(tenant, AuthorizedTenant):
+        return tenant
+
+    partner_ids = scoped_partner_ids(tenant)
     results = ResultGatewayBase.list_results(
         status=request.args.get("status"),
         medical_order_id=request.args.get("medical_order_id"),
+        partner_ids=partner_ids,
     )
     return {
         "count": len(results),
@@ -82,8 +99,25 @@ def manual_result():
     }, 201
 
 
+def _assert_result_access(result_id):
+    from app.core.tenant_authorization import AuthorizedTenant, authorize_partner_record
+    from app.core.errors import build_error_response
+    from app.models.lab_result import LabResult
+
+    result = LabResult.query.get(result_id)
+    if not result:
+        return None, build_error_response("NOT_FOUND", "Result not found", 404)
+    tenant = authorize_partner_record(result.partner_id)
+    if not isinstance(tenant, AuthorizedTenant):
+        return None, tenant
+    return result, None
+
+
 @results_bp.route("/<result_id>", methods=["GET"])
 def get_result(result_id):
+    _, err = _assert_result_access(result_id)
+    if err:
+        return err
     try:
         payload = ResultGatewayBase.get_result_detail(result_id)
     except ResultGatewayError as exc:
@@ -93,6 +127,9 @@ def get_result(result_id):
 
 @results_bp.route("/<result_id>/review", methods=["POST"])
 def review_result(result_id):
+    _, err = _assert_result_access(result_id)
+    if err:
+        return err
     data = request.get_json(silent=True) or {}
     try:
         result, review = ResultReviewService.submit_review(
@@ -112,6 +149,9 @@ def review_result(result_id):
 
 @results_bp.route("/<result_id>/approve", methods=["POST"])
 def approve_result(result_id):
+    _, err = _assert_result_access(result_id)
+    if err:
+        return err
     data = request.get_json(silent=True) or {}
     try:
         result = ResultApprovalService.approve(
@@ -130,6 +170,9 @@ def approve_result(result_id):
 
 @results_bp.route("/<result_id>/release", methods=["POST"])
 def release_result(result_id):
+    _, err = _assert_result_access(result_id)
+    if err:
+        return err
     data = request.get_json(silent=True) or {}
     try:
         result, release = ResultReleaseService.release(
@@ -149,6 +192,9 @@ def release_result(result_id):
 
 @results_bp.route("/<result_id>/timeline", methods=["GET"])
 def result_timeline(result_id):
+    _, err = _assert_result_access(result_id)
+    if err:
+        return err
     try:
         timeline = ResultGatewayBase.get_timeline(result_id)
     except ResultGatewayError as exc:

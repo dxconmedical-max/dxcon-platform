@@ -1,8 +1,29 @@
 {
-  "generated_at": "2026-07-02T09:05:17.249819+00:00",
-  "ready_for_rc1": true,
-  "score": 100.0,
-  "blockers": [],
+  "generated_at": "2026-08-12T14:56:49.079768+00:00",
+  "ready_for_rc1": false,
+  "score": 91.66,
+  "blockers": [
+    {
+      "area": "workflows",
+      "item": "auth_register_login",
+      "severity": "high"
+    },
+    {
+      "area": "workflows",
+      "item": "partner_onboarding",
+      "severity": "high"
+    },
+    {
+      "area": "workflows",
+      "item": "reporting_dashboard",
+      "severity": "high"
+    },
+    {
+      "area": "security",
+      "item": "security_headers",
+      "severity": "medium"
+    }
+  ],
   "known_risks": [
     {
       "risk": "Redis not configured",

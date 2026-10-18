@@ -59,12 +59,15 @@ def ensure_logistics() -> dict[str, Any]:
     IoTAdapterManager.initialize()
     devices = IoTDeviceService.list_devices()
     if devices["count"] == 0:
+        # Register a demo ingest credential so ingestion endpoints can be
+        # safely enabled in production-like mode (P0-D).
         IoTDeviceService.register_device(
             {
                 "device_code": "IOT-LOG-001",
                 "box_code": "BOX-LOG-001",
                 "device_type": "COLD_BOX",
                 "serial_number": "SN-LOG-001",
+                "ingest_secret": "DXCON-IOT-INGEST-SECRET",
             }
         )
     return {"ready": True}
@@ -115,6 +118,15 @@ def list_sensor_alerts(*, device_id: str | None = None, status: str | None = Non
     return ColdChainAlertService.list_alerts(device_id=device_id, status=status)
 
 
+def _sanitize_custody_detail(detail: dict | None) -> dict:
+    from app.core.audit_actor import sanitize_audit_payload
+
+    if not detail:
+        return {}
+    cleaned = sanitize_audit_payload(detail)
+    return cleaned if isinstance(cleaned, dict) else {}
+
+
 def _record_chain_of_custody(
     device_id: str,
     event_type: str,
@@ -130,7 +142,7 @@ def _record_chain_of_custody(
         reference_id=device_id,
         actor=actor or "SYSTEM",
         location=location,
-        metadata_json=json.dumps(detail or {}),
+        metadata_json=json.dumps(_sanitize_custody_detail(detail)),
     )
     db.session.add(row)
     db.session.flush()
@@ -285,8 +297,55 @@ def ingest_device_event(
     *,
     actor: str | None = None,
     offline: bool = False,
+    authenticated_device_id: str | None = None,
+    event_id_from_payload: str | None = None,
 ) -> dict[str, Any]:
     ensure_logistics()
+    device_id = authenticated_device_id or payload.get("device_id")
+    if not device_id:
+        raise IoTLogisticsError("device_id is required", 401)
+
+    from app.core.iot_device_auth import (
+        extract_event_id,
+        extract_nonce,
+        extract_event_timestamp,
+        ingest_idempotency_guard,
+        validate_event_timestamp,
+    )
+
+    # --- Integrity + idempotency + replay guard (P0-D) ---
+    event_id = event_id_from_payload or extract_event_id(payload)
+    nonce = extract_nonce(payload)
+    ts = extract_event_timestamp(payload)
+
+    if ts:
+        ok, msg = validate_event_timestamp(ts)
+        if not ok:
+            raise IoTLogisticsError(msg or "Invalid event timestamp", 400)
+
+    # Production rule: deterministic anti-replay boundary must not be optional.
+    if not event_id and not nonce:
+        raise IoTLogisticsError("event_id or nonce is required", 400)
+
+    action, meta = ingest_idempotency_guard(
+        device_id=str(device_id),
+        payload=payload,
+        event_id=event_id,
+        nonce=nonce,
+    )
+
+    if action == "already_processed":
+        return {
+            "adapter_type": (adapter_type or "GENERIC").upper(),
+            "ingested": True,
+            "already_processed": True,
+            **(meta or {}),
+        }
+    if action == "replay_rejected":
+        raise IoTLogisticsError("Replay request (nonce already used)", 409)
+    if action == "idempotency_conflict":
+        raise IoTLogisticsError("Idempotency conflict (payload differs)", 409)
+
     if offline or payload.get("offline"):
         return buffer_offline_event(adapter_type, payload, actor=actor)
     try:

@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.services.enterprise_platform_service import (
     AdminEnterpriseService,
     AuditEnterpriseService,
@@ -21,6 +25,11 @@ tenants_bp = Blueprint("enterprise_tenants", __name__, url_prefix="/api/v1/tenan
 licenses_bp = Blueprint("enterprise_licenses", __name__, url_prefix="/api/v1/licenses")
 enterprise_security_bp = Blueprint("enterprise_security", __name__, url_prefix="/api/v1/security")
 audit_bp = Blueprint("enterprise_audit", __name__, url_prefix="/api/v1/audit")
+blueprint_require_authenticated_user(enterprise_admin_bp)
+blueprint_require_authenticated_user(tenants_bp)
+blueprint_require_authenticated_user(licenses_bp)
+blueprint_require_authenticated_user(enterprise_security_bp)
+blueprint_require_authenticated_user(audit_bp)
 
 
 @enterprise_admin_bp.route("/overview", methods=["GET"])
@@ -198,13 +207,15 @@ def append_audit_record():
     data = request.get_json(silent=True) or {}
     if not data.get("action"):
         return {"error": "action is required"}, 400
+    from app.core.audit_actor import sanitize_audit_payload
+
     return AuditEnterpriseService.append_record(
         tenant_id=data.get("tenant_id"),
-        actor_email=data.get("actor_email"),
+        actor_email=authenticated_actor_email(),
         action=data.get("action"),
         resource_type=data.get("resource_type"),
         resource_id=data.get("resource_id"),
-        payload=data.get("payload"),
+        payload=sanitize_audit_payload(data.get("payload")),
     ), 201
 
 
@@ -215,7 +226,8 @@ def access_history():
 
 @audit_bp.route("/access-history", methods=["POST"])
 def log_access_history():
-    data = request.get_json(silent=True) or {}
+    data = dict(request.get_json(silent=True) or {})
+    data["user_email"] = authenticated_actor_email()
     return AuditEnterpriseService.log_access(data), 201
 
 
@@ -226,7 +238,9 @@ def security_events():
 
 @audit_bp.route("/security-events", methods=["POST"])
 def log_security_event():
-    data = request.get_json(silent=True) or {}
+    data = dict(request.get_json(silent=True) or {})
+    data["actor_email"] = authenticated_actor_email()
+    data["user_email"] = authenticated_actor_email()
     return AuditEnterpriseService.log_security_event(data), 201
 
 

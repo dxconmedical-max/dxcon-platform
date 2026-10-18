@@ -33,7 +33,9 @@ pilot_readiness_bp = Blueprint("pilot_readiness", __name__, url_prefix="/api/v1/
 
 
 def _actor() -> str:
-    return session.get("email") or request.headers.get("X-Actor") or request.headers.get("X-User-Email") or "SYSTEM"
+    from app.core.audit_actor import resolve_human_audit_actor
+
+    return resolve_human_audit_actor() or "SYSTEM"
 
 
 @pilot_readiness_bp.route("/audit", methods=["GET"])

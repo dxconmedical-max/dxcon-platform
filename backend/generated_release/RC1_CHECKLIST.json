@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-07-02T09:05:17.249685+00:00",
+  "generated_at": "2026-08-12T14:56:49.079245+00:00",
   "items": [
     {
       "section": "End-to-end workflows",
-      "status": "PASS",
-      "passed": 18,
+      "status": "FAIL",
+      "passed": 15,
       "total": 18
     },
     {
       "section": "Security and production checks",
-      "status": "PASS",
-      "passed": 12,
+      "status": "FAIL",
+      "passed": 11,
       "total": 12
     },
     {
@@ -33,8 +33,8 @@
     },
     {
       "section": "Release candidate score",
-      "status": "PASS",
-      "score": 100.0
+      "status": "FAIL",
+      "score": 91.66
     }
   ]
 }

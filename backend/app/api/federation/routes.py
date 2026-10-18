@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.services.federation_capacity_service import CapacityService
 from app.services.federation_failover_service import FailoverService
 from app.services.federation_routing_service import SmartRoutingService
@@ -16,6 +20,7 @@ federation_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/federation",
 )
+blueprint_require_authenticated_user(federation_bp)
 
 
 def _page_args():
@@ -26,7 +31,7 @@ def _page_args():
 
 
 def _actor():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    return authenticated_actor_email()
 
 
 def _error(exc):

@@ -40,7 +40,13 @@ def verify_deployment(phase="post"):
         "status": status,
         "manifest": build_manifest(config["profile"], config["environment"]["provider"]),
     }
-    output = ROOT / "deployment" / "reports" / f"{phase}-deployment-report.json"
+    output = None
+    try:
+        from scripts.artifact_paths import deployment_reports_dir
+
+        output = deployment_reports_dir() / f"{phase}-deployment-report.json"
+    except Exception:
+        output = ROOT / "deployment" / "reports" / f"{phase}-deployment-report.json"
     write_report(output, report)
     ok = runtime["status"] != "DOWN" and readiness["ready"]
     return ok, report
