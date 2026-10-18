@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-04T10:10:57.733249+00:00",
+  "generated_at": "2026-08-12T14:59:28.475507+00:00",
   "mode": "dry_run",
   "targets": {
     "super_admin_users": 1,
@@ -20,7 +20,9 @@
     "notifications": 50,
     "test_results": 500,
     "home_collections": 80,
-    "crm_leads": 60
+    "crm_leads": 60,
+    "clinic_bookings": 20,
+    "reception_queue_entries": 30
   },
   "created_counts": {
     "users": 67,
@@ -39,6 +41,8 @@
     "notifications": 50,
     "crm_leads": 60,
     "home_collections": 80,
+    "clinic_bookings": 20,
+    "reception_queue_entries": 30,
     "test_results": 500
   },
   "existing_counts": {
@@ -58,11 +62,13 @@
     "notifications": 0,
     "crm_leads": 0,
     "home_collections": 0,
+    "clinic_bookings": 0,
+    "reception_queue_entries": 0,
     "test_results": 0
   },
   "skipped_models": [],
   "errors": [],
-  "runtime_seconds": 0.219,
+  "runtime_seconds": 0.372,
   "ok": true,
   "demo_accounts": {
     "super_admin": "demo-superadmin@demo.dxcon.test",
@@ -153,7 +159,9 @@
           "id",
           "is_active",
           "name",
-          "phone"
+          "organization_id",
+          "phone",
+          "tenant_id"
         ],
         "primary_key": [
           "id"

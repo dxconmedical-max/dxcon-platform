@@ -177,13 +177,17 @@ class OrderLifecycleService:
         return order
 
     @staticmethod
-    def list_orders(status=None, partner_id=None):
+    def list_orders(status=None, partner_id=None, partner_ids=None):
         query = Order.query
 
         if status:
             query = query.filter(Order.status == status)
 
-        if partner_id:
+        if partner_ids is not None:
+            if not partner_ids:
+                return []
+            query = query.filter(Order.laboratory_id.in_(sorted(partner_ids)))
+        elif partner_id:
             query = query.filter(Order.laboratory_id == partner_id)
 
         return query.order_by(Order.created_at.desc()).all()

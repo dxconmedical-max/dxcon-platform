@@ -98,7 +98,7 @@ def _default_sql(column) -> str:
                 return f" DEFAULT {text}"
             return f" DEFAULT {text}"
         except Exception:
-            pass
+            return ""
     # Python-side defaults: only emit for simple scalars / bools
     default = column.default
     if default is not None and getattr(default, "is_scalar", False):
@@ -191,19 +191,19 @@ def generate() -> dict:
         try:
             import app.models.home_sampling  # noqa: F401
         except Exception:
-            pass
+            home_sampling = None
         try:
             import app.patient_marketplace.models  # noqa: F401
         except Exception:
-            pass
+            patient_marketplace = None
         try:
             import app.mobile_mvp.models  # noqa: F401
         except Exception:
-            pass
+            mobile_mvp = None
         try:
             import app.integration.models  # noqa: F401
         except Exception:
-            pass
+            integration_models = None
 
         metadata = db.Model.metadata
         mig = _scan_migrations()

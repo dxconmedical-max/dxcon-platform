@@ -28,6 +28,12 @@ __MACOSX/
 .env.*.local
 .env.development.local
 .env.production.local
+# Local production/staging secrets (copy from *.env.example — never commit)
+deployment/env/production.env
+deployment/env/staging.env
+# TLS private material (never commit)
+deployment/certs/
+deployment/nginx/https.conf
 .vercel/
 backend.zip
 *.zip

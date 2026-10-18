@@ -26,12 +26,18 @@ class ProductionStartupTestCase(unittest.TestCase):
             self.assertEqual(code, 0)
             run_api.assert_called_once()
 
-    def test_production_start_worker_placeholder(self):
+    def test_production_start_worker_and_scheduler(self):
         import production_start
 
-        with mock.patch.object(production_start.time, "sleep", side_effect=KeyboardInterrupt):
-            with self.assertRaises(KeyboardInterrupt):
-                production_start._run_placeholder("worker")
+        self.assertFalse(hasattr(production_start, "_run_placeholder"))
+        with mock.patch.object(production_start, "_run_worker") as run_worker:
+            code = production_start.main(["worker"])
+            self.assertEqual(code, 0)
+            run_worker.assert_called_once()
+        with mock.patch.object(production_start, "_run_scheduler") as run_scheduler:
+            code = production_start.main(["scheduler"])
+            self.assertEqual(code, 0)
+            run_scheduler.assert_called_once()
 
     def test_dockerfile_uses_production_start(self):
         dockerfile = ROOT / "Dockerfile"

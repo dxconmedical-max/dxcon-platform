@@ -5,6 +5,9 @@ from datetime import datetime, timezone
 
 SENSITIVE_KEYS = {
     "password",
+    "password_hash",
+    "password_secret",
+    "credential",
     "token",
     "secret",
     "authorization",
@@ -13,6 +16,10 @@ SENSITIVE_KEYS = {
     "refresh_token",
     "cookie",
     "jwt",
+    "device_secret",
+    "ingest_secret",
+    "x-device-secret",
+    "x-device-signature",
 }
 
 

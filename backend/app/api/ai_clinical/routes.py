@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
-from flask import Blueprint, request, session
+from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.services.ai_clinical_service import (
     AIClinicalError,
     clinical_summary,
@@ -25,10 +29,11 @@ from app.services.ai_clinical_service import (
 from app.clinical_ai.assistant import ClinicalAssistantError, assistant_critical_review, assistant_interpret, assistant_policy
 
 ai_clinical_bp = Blueprint("ai_clinical_api", __name__, url_prefix="/api/v1/ai-clinical")
+blueprint_require_authenticated_user(ai_clinical_bp)
 
 
-def _actor() -> str | None:
-    return session.get("email")
+def _actor() -> str:
+    return authenticated_actor_email()
 
 
 @ai_clinical_bp.route("/assistant/policy", methods=["GET"])

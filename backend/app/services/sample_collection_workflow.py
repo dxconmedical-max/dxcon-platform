@@ -3,6 +3,7 @@ import logging
 import uuid
 from typing import Optional, Set
 
+from sqlalchemy import inspect as sa_inspect
 from sqlalchemy import or_
 from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import load_only
@@ -144,12 +145,16 @@ class SampleCollectionWorkflowService:
             collector = Driver.query.get(collector_id)
             collector_name = collector.full_name if collector else None
 
+        # Assigned bookings enter the collector active queue (ASSIGNED), not the
+        # unassigned field-request board (REQUESTED).
+        initial_status = "ASSIGNED" if collector_id else "REQUESTED"
+
         collection = SampleCollection(
             order_id=order.id,
             marketplace_booking_id=booking.id,
             collector_id=collector_id,
             collector_name=collector_name,
-            status="REQUESTED",
+            status=initial_status,
             partner_id=booking.partner_id,
             location_city=booking.city,
             collection_location=booking.patient_address,
@@ -219,23 +224,44 @@ class SampleCollectionWorkflowService:
                 return value.isoformat()
             return str(value)
 
+        def _loaded_only(name, default=None):
+            """Read an attribute only when already present in instance state.
+
+            Avoids deferred SELECT against legacy DBs that lack the column, while
+            still preserving in-memory values (create_all / dual-write / tests)
+            so queue enrich keeps collection_mode and pickup routing.
+            """
+            try:
+                state = sa_inspect(collection)
+                if name in state.unloaded or name not in state.dict:
+                    return default
+                return state.dict.get(name, default)
+            except Exception:
+                return default
+
         def _routing(name, default=None):
-            """Routing fields: always read from loaded instance when attribute exists."""
-            if hasattr(collection, name):
+            """Routing fields: prefer live-schema columns; never deferred-load.
+
+            When the live schema lacks a routing column, use already-loaded
+            instance state only (no SQL). Do not use hasattr()/getattr on
+            unloaded attrs — legacy DBs would emit SELECT for missing columns.
+            """
+            if name not in columns:
+                value = _loaded_only(name, default)
+            else:
                 value = getattr(collection, name, default)
-                if name in {
-                    "requested_date",
-                    "collected_at",
-                    "created_at",
-                    "picked_up_at",
-                    "dispatched_at",
-                    "handoff_at",
-                    "arrived_at_lab",
-                    "updated_at",
-                }:
-                    return _iso(value)
-                return value
-            return _get(name, default)
+            if name in {
+                "requested_date",
+                "collected_at",
+                "created_at",
+                "picked_up_at",
+                "dispatched_at",
+                "handoff_at",
+                "arrived_at_lab",
+                "updated_at",
+            }:
+                return _iso(value)
+            return value
 
         payload = {
             "id": _get("id"),
@@ -534,7 +560,13 @@ class SampleCollectionWorkflowService:
         order = SampleCollectionWorkflowService._get_order_for_booking(booking_id)
         collection = SampleCollectionWorkflowService._get_or_create_collection(booking, order)
 
-        if collection.status not in (COLLECTION_PENDING, COLLECTION_RECOLLECT_REQUIRED):
+        if collection.status not in (
+            COLLECTION_PENDING,
+            COLLECTION_RECOLLECT_REQUIRED,
+            "REQUESTED",
+            "ASSIGNED",
+            "AWAITING_COLLECTION",
+        ):
             raise SampleCollectionWorkflowError(
                 f"Collection cannot be checked in from status {collection.status}",
                 409,

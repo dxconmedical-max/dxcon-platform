@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.services.collector_operations import (
     CollectorOperationsError,
     CollectorOperationsService,
@@ -12,6 +16,7 @@ collector_operations_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/collector-operations",
 )
+blueprint_require_authenticated_user(collector_operations_bp)
 
 
 def _client_ip():
@@ -19,7 +24,7 @@ def _client_ip():
 
 
 def _actor_email():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    return authenticated_actor_email()
 
 
 @collector_operations_bp.route("/collectors", methods=["GET"])
@@ -201,6 +206,8 @@ def collector_check_in(collector_id):
             actor_email=_actor_email(),
         )
     except CollectorOperationsError as exc:
+        return {"error": exc.message}, exc.status_code
+    except SampleCollectionWorkflowError as exc:
         return {"error": exc.message}, exc.status_code
     return {"message": "Check-in recorded", "event": event.to_dict()}
 

@@ -108,8 +108,11 @@ def utc_now() -> str:
 
 
 def write_report(name: str, payload: dict[str, Any]) -> Path:
-    GENERATED.mkdir(parents=True, exist_ok=True)
-    path = GENERATED / name
+    from scripts.artifact_paths import generated_release_dir
+
+    generated = generated_release_dir()
+    generated.mkdir(parents=True, exist_ok=True)
+    path = generated / name
     path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
     return path
 

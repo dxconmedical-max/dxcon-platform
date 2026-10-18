@@ -24,23 +24,38 @@ from app.models.lab_operations import (
 
 class LabDashboardService:
     @staticmethod
-    def get_dashboard():
+    def get_dashboard(partner_ids=None):
+        from app.models.medical_order import MedicalOrder
+
         now = datetime.utcnow()
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
-        pending_samples = SampleAccession.query.filter(
-            SampleAccession.status.in_([LAB_ACCESSION_PENDING, "IN_PROGRESS"])
+        def _scoped(query):
+            if partner_ids is None:
+                return query
+            if not partner_ids:
+                return query.filter(False)
+            return query.outerjoin(
+                MedicalOrder, SampleAccession.medical_order_id == MedicalOrder.id
+            ).filter(MedicalOrder.partner_id.in_(sorted(partner_ids)))
+
+        pending_samples = _scoped(
+            SampleAccession.query.filter(
+                SampleAccession.status.in_([LAB_ACCESSION_PENDING, "IN_PROGRESS"])
+            )
         ).count()
 
-        samples_in_analyzer = SampleAccession.query.filter_by(
-            workflow_stage=LAB_WF_ANALYZER_RUNNING
+        samples_in_analyzer = _scoped(
+            SampleAccession.query.filter_by(workflow_stage=LAB_WF_ANALYZER_RUNNING)
         ).count()
 
         qc_failed = QualityControl.query.filter_by(status=LAB_QC_FAILED).count()
 
-        awaiting_review = SampleAccession.query.filter(
-            SampleAccession.workflow_stage.in_(
-                [LAB_WF_TECHNICIAN_REVIEW, LAB_WF_PATHOLOGIST_REVIEW]
+        awaiting_review = _scoped(
+            SampleAccession.query.filter(
+                SampleAccession.workflow_stage.in_(
+                    [LAB_WF_TECHNICIAN_REVIEW, LAB_WF_PATHOLOGIST_REVIEW]
+                )
             )
         ).count()
 
@@ -51,9 +66,11 @@ class LabDashboardService:
             LabOperationResultRelease.status == LAB_RELEASE_RELEASED,
         ).count()
 
-        completed = SampleAccession.query.filter(
-            SampleAccession.released_at.isnot(None),
-            SampleAccession.received_at.isnot(None),
+        completed = _scoped(
+            SampleAccession.query.filter(
+                SampleAccession.released_at.isnot(None),
+                SampleAccession.received_at.isnot(None),
+            )
         ).all()
         tat_values = []
         sla_met = 0

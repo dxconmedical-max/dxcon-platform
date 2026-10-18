@@ -39,18 +39,47 @@ def live_payload(app) -> tuple[dict, int]:
     return payload, 200
 
 
+def _queue_ready(app, *, redis_required: bool) -> tuple[bool, str, dict]:
+    from app.infrastructure.queue_provider import PRODUCTION_QUEUE_PROVIDER, get_queue, provider_name
+
+    queue_name = provider_name(app)
+    detail = {"provider": queue_name, "durable": False, "ping": False}
+    if not redis_required:
+        detail["ok"] = True
+        return True, queue_name, detail
+    if queue_name != PRODUCTION_QUEUE_PROVIDER:
+        detail["ok"] = False
+        detail["error"] = "QUEUE_PROVIDER must be redis in production"
+        return False, queue_name, detail
+    try:
+        queue = get_queue(app)
+        detail["durable"] = bool(getattr(queue, "durable", False))
+        detail["ping"] = bool(queue.ping())
+        detail["ok"] = detail["durable"] and detail["ping"]
+        return detail["ok"], queue_name, detail
+    except Exception as exc:
+        detail["ok"] = False
+        detail["error"] = str(exc)
+        return False, queue_name, detail
+
+
 def ready_payload(app) -> tuple[dict, int]:
     payload = _base_payload(app)
     db_ok = payload["database"] == "OK"
     redis_ok = payload["redis"] == "OK"
     redis_required = is_production(app)
 
+    queue_ok, queue_name, queue_detail = _queue_ready(app, redis_required=redis_required)
+    payload["queue_provider"] = queue_name
+    payload["queue"] = queue_detail
+
     try:
         migrations_ready = bool(verify_migrations(app).get("ready", True))
     except Exception:
         migrations_ready = False
 
-    ready = db_ok and migrations_ready and (redis_ok or not redis_required)
+    ready = db_ok and migrations_ready and queue_ok and (redis_ok or not redis_required)
+    payload["ready"] = ready
     if not db_ok:
         payload["status"] = "ERROR"
     elif ready:

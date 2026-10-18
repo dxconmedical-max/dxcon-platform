@@ -18,8 +18,10 @@ ai_platform_bp = Blueprint("ai_platform", __name__, url_prefix="/api/v1/ai-platf
 
 
 def _actor():
+    from app.core.audit_actor import resolve_human_audit_actor
+
     ctx = getattr(request, "ai_context", None) or {}
-    return ctx.get("email") or request.headers.get("X-User-Email", "SYSTEM")
+    return ctx.get("email") or resolve_human_audit_actor()
 
 
 def _ctx():

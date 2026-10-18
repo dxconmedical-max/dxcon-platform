@@ -1,6 +1,7 @@
 from flask import Blueprint, request
 from sqlalchemy.exc import IntegrityError
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.extensions.db import db
 from app.models.contract import Contract
 
@@ -10,6 +11,7 @@ contracts_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/contracts"
 )
+blueprint_require_authenticated_user(contracts_bp)
 
 
 @contracts_bp.route("", methods=["GET"])

@@ -45,7 +45,9 @@ from app.services.sample_collection_workflow import SampleCollectionWorkflowServ
 class SchemaReconciliationTests(unittest.TestCase):
     def test_reconciliation_migration_covers_every_orm_column(self):
         self.assertTrue(RECON.exists(), "021_schema_reconciliation.sql missing")
-        text = RECON.read_text(encoding="utf-8")
+        recon_022 = ROOT / "migrations" / "022_iot_device_ingestion_security.sql"
+        self.assertTrue(recon_022.exists(), "022_iot_device_ingestion_security.sql missing")
+        text = RECON.read_text(encoding="utf-8") + "\n" + recon_022.read_text(encoding="utf-8")
         # Ignore documentation comments when scanning for forbidden DDL
         code_only = "\n".join(
             ln for ln in text.splitlines() if ln.strip() and not ln.strip().startswith("--")
@@ -57,9 +59,22 @@ class SchemaReconciliationTests(unittest.TestCase):
         self.assertIn("ADD COLUMN IF NOT EXISTS", text)
         self.assertIn("CREATE INDEX IF NOT EXISTS", text)
 
+        created_tables = {
+            m.group(1).lower()
+            for m in re.finditer(
+                r"CREATE TABLE IF NOT EXISTS\s+([a-zA-Z0-9_]+)",
+                text,
+                flags=re.IGNORECASE,
+            )
+        }
+
         app = create_app()
         with app.app_context():
             for table_name, table in db.Model.metadata.tables.items():
+                # Tables introduced via CREATE TABLE in additive migrations are covered
+                # without per-column ADD COLUMN statements.
+                if table_name.lower() in created_tables:
+                    continue
                 self.assertIn(
                     f"-- ===== {table_name} =====",
                     text,
@@ -96,6 +111,7 @@ class SchemaLifecycleRegressionTests(unittest.TestCase):
     """Reception → collector → lab receive → accession → validate → release."""
 
     def setUp(self):
+        os.environ["DATABASE_URL"] = f"sqlite:///{_TEST_DB.name}"
         self.app = create_app()
         self.app.config["TESTING"] = True
         self.ctx = self.app.app_context()

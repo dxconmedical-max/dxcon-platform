@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.extensions.db import db
 from app.models.laboratory import Laboratory
 
@@ -9,6 +10,7 @@ laboratories_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/laboratories"
 )
+blueprint_require_authenticated_user(laboratories_bp)
 
 
 @laboratories_bp.route("", methods=["GET"])

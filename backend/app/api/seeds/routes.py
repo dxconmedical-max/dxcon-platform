@@ -2,6 +2,7 @@ from flask import Blueprint, current_app
 from datetime import datetime, timedelta
 import uuid
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.extensions.db import db
 from app.infrastructure.production_readiness import is_production
 
@@ -24,6 +25,7 @@ from app.models.payment import Payment
 
 
 seeds_bp = Blueprint("seeds", __name__, url_prefix="/api/v1/seeds")
+blueprint_require_authenticated_user(seeds_bp)
 
 
 def sid():

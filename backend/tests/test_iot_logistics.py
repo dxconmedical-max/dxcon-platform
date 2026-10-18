@@ -40,6 +40,11 @@ class IoTLogisticsTestCase(unittest.TestCase):
         ensure_logistics()
         devices = self.client.get("/api/v1/iot-logistics/devices").get_json()
         self.device_id = devices["devices"][0]["id"]
+        from app.core.iot_device_auth import DEFAULT_IOT_DEVICE_INGEST_SECRET
+        self.device_secret = DEFAULT_IOT_DEVICE_INGEST_SECRET
+
+    def _device_headers(self):
+        return {"X-Device-Id": self.device_id, "X-Device-Secret": self.device_secret}
 
     def tearDown(self):
         from app.extensions.db import db
@@ -67,12 +72,14 @@ class IoTLogisticsTestCase(unittest.TestCase):
     def test_adapter_ingestion_and_timeline(self):
         response = self.client.post(
             "/api/v1/iot-logistics/ingest",
+            headers=self._device_headers(),
             json={
                 "adapter_type": "GENERIC",
                 "payload": {
                     "event_type": "TEMPERATURE",
                     "device_id": self.device_id,
                     "celsius": 4.5,
+                    "event_id": "evt-temp-1",
                 },
             },
         )
@@ -81,12 +88,16 @@ class IoTLogisticsTestCase(unittest.TestCase):
         self.assertTrue(payload["ingested"])
         self.assertIn("chain_of_custody", payload)
 
-        timeline = self.client.get(f"/api/v1/iot-logistics/timeline/{self.device_id}").get_json()
+        timeline = self.client.get(
+            f"/api/v1/iot-logistics/timeline/{self.device_id}",
+            headers=self._device_headers(),
+        ).get_json()
         self.assertGreaterEqual(timeline["count"], 1)
 
     def test_offline_buffer_sync(self):
         buffer_resp = self.client.post(
             "/api/v1/iot-logistics/ingest",
+            headers=self._device_headers(),
             json={
                 "adapter_type": "DEMO_SENSOR",
                 "offline": True,
@@ -96,6 +107,7 @@ class IoTLogisticsTestCase(unittest.TestCase):
                     "lat": 10.5,
                     "lng": 106.5,
                     "offline": True,
+                    "event_id": "evt-offline-gps-1",
                 },
             },
         )
@@ -104,18 +116,23 @@ class IoTLogisticsTestCase(unittest.TestCase):
 
         sync = self.client.post(
             "/api/v1/iot-logistics/offline-buffer/sync",
-            json={"device_id": self.device_id},
+            headers=self._device_headers(),
+            json={"device_id": self.device_id, "event_id": "evt-sync-1"},
         )
         self.assertEqual(sync.status_code, 200)
         self.assertGreaterEqual(sync.get_json()["synced_count"], 1)
 
     def test_device_health_and_breach(self):
-        health = self.client.get(f"/api/v1/iot-logistics/device-health/{self.device_id}")
+        health = self.client.get(
+            f"/api/v1/iot-logistics/device-health/{self.device_id}",
+            headers=self._device_headers(),
+        )
         self.assertEqual(health.status_code, 200)
         self.assertIn("health_score", health.get_json())
 
         breach = self.client.post(
             "/api/v1/iot-logistics/temperature-breach",
+            headers=self._device_headers(),
             json={"device_id": self.device_id, "celsius": 11.0},
         )
         self.assertEqual(breach.status_code, 200)

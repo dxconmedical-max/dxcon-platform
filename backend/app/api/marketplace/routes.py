@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user_except,
+)
 from app.services.marketplace_booking import MarketplaceBookingError, MarketplaceBookingService
 from app.services.marketplace_search import MarketplaceSearchService
 
@@ -9,6 +13,10 @@ marketplace_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/marketplace",
 )
+blueprint_require_authenticated_user_except(
+    marketplace_bp,
+    public_exact=("/api/v1/marketplace/search",),
+)
 
 
 def _client_ip():
@@ -16,7 +24,7 @@ def _client_ip():
 
 
 def _actor_email():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    return authenticated_actor_email()
 
 
 @marketplace_bp.route("/search", methods=["GET"])

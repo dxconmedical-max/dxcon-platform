@@ -2,6 +2,10 @@ from flask import Blueprint, request, session
 from datetime import datetime
 import uuid
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.extensions.db import db
 from app.models.driver import Driver
 from app.models.home_collection import HomeCollection
@@ -24,6 +28,7 @@ collector_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/collector"
 )
+blueprint_require_authenticated_user(collector_bp)
 
 
 def generate_sample_code():
@@ -251,12 +256,16 @@ def samples():
     }
 
 
+def _collector_actor():
+    return authenticated_actor_email()
+
+
 def _workflow_payload():
     data = request.json or {}
     return {
         "collector_id": data.get("collector_id"),
         "gps_location": resolve_gps(data),
-        "actor": data.get("actor") or data.get("user_email") or "COLLECTOR",
+        "actor": _collector_actor(),
     }
 
 
@@ -337,10 +346,26 @@ def start_collector_trip(shipment_id):
 @collection_api_read
 def collector_queue_alias():
     """Canonical: GET /api/v1/collector/queue → SampleCollection field collector queue."""
+    from app.core.authz import current_platform_role
+    from app.core.tenant_authorization import AuthorizedTenant, resolve_authorized_tenant
     from app.sample_collection_workspace.service import list_production_queue
     from app.services.sample_collection_workflow import SampleCollectionWorkflowError
 
     try:
+        requested = (
+            request.args.get("partner_id")
+            or request.headers.get("X-Partner-Id")
+            or request.headers.get("X-Organization-ID")
+            or request.headers.get("X-Organization-Id")
+            or request.args.get("organization_id")
+        )
+        tenant = resolve_authorized_tenant(
+            requested_organization_id=requested,
+            require_scope=True,
+        )
+        if not isinstance(tenant, AuthorizedTenant):
+            return tenant
+        org_id = tenant.organization_id
         mine_raw = (request.args.get("mine") or "").strip().lower()
         payload = list_production_queue(
             status=request.args.get("status"),
@@ -348,17 +373,16 @@ def collector_queue_alias():
             location=request.args.get("location"),
             date_from=request.args.get("date") or request.args.get("date_from"),
             date_to=request.args.get("date_to"),
-            partner_id=request.args.get("partner_id") or request.headers.get("X-Partner-Id"),
+            partner_id=org_id,
             include_desk=False,
             queue=request.args.get("queue") or "field",
-            role=session.get("role") or request.headers.get("X-User-Role"),
+            role=current_platform_role(),
             scoped_collector_id=(
                 request.headers.get("X-Collector-Id")
                 or session.get("collector_id")
                 or request.args.get("scoped_collector_id")
             ),
-            organization_id=request.headers.get("X-Organization-ID")
-            or request.headers.get("X-Organization-Id"),
+            organization_id=org_id,
             mine=mine_raw in {"1", "true", "yes"},
         )
     except SampleCollectionWorkflowError as exc:

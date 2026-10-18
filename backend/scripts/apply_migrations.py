@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Apply all numbered backend/migrations/*.sql in order (PostgreSQL production).
 
-Always includes 021_schema_reconciliation.sql when present.
+Always includes 021_schema_reconciliation.sql and 022_iot_device_ingestion_security.sql when present.
 
 Usage:
   cd backend
@@ -22,12 +22,44 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MIGRATIONS = ROOT / "migrations"
 RECONCILIATION = "021_schema_reconciliation.sql"
+IOT_INGEST_SECURITY = "022_iot_device_ingestion_security.sql"
+REQUIRED_MIGRATIONS = (
+    RECONCILIATION,
+    IOT_INGEST_SECURITY,
+)
 
 
 def list_migration_files() -> list[Path]:
     files = sorted(MIGRATIONS.glob("*.sql"))
-    # Ensure reconciliation is applied (already sorted by name among 021_*)
+    # Ordered numbered SQL set, including 021 reconciliation and 022 IoT ingest security.
     return files
+
+
+def ordered_migration_files(files: list[Path] | None = None) -> list[Path]:
+    """Bootstrap-safe apply order for empty and existing databases.
+
+    021_schema_reconciliation.sql creates the full ORM baseline (users/patients/orders).
+    Earlier sprint files assume that baseline and use CREATE/ADD IF NOT EXISTS, so they
+    must run after reconciliation on a fresh database. 022 stays last.
+    """
+    files = list(files if files is not None else list_migration_files())
+    by_name = {path.name: path for path in files}
+    ordered: list[Path] = []
+    if RECONCILIATION in by_name:
+        ordered.append(by_name.pop(RECONCILIATION))
+    rest = sorted(
+        (path for name, path in by_name.items() if name != IOT_INGEST_SECURITY),
+        key=lambda path: path.name,
+    )
+    ordered.extend(rest)
+    if IOT_INGEST_SECURITY in by_name:
+        ordered.append(by_name[IOT_INGEST_SECURITY])
+    return ordered
+
+
+def missing_required_migrations(files: list[Path] | None = None) -> list[str]:
+    names = {path.name for path in (files if files is not None else list_migration_files())}
+    return [name for name in REQUIRED_MIGRATIONS if name not in names]
 
 
 def split_sql(sql: str) -> list[str]:
@@ -43,6 +75,14 @@ def split_sql(sql: str) -> list[str]:
                 buf.append(line)
             continue
         if not in_do and stripped.startswith("--"):
+            continue
+        # Some historical .sql files use a Python module docstring as a header.
+        if (
+            not in_do
+            and stripped.startswith('"""')
+            and stripped.endswith('"""')
+            and len(stripped) >= 6
+        ):
             continue
         upper = stripped.upper()
         if not in_do and upper.startswith("DO $$"):
@@ -163,15 +203,21 @@ def main() -> int:
             return 1
 
         files = list_migration_files()
+        missing = missing_required_migrations(files)
+        if missing:
+            result["error"] = f"Required migrations missing: {', '.join(missing)}"
+            print(json.dumps(result, indent=2) if args.json else result["error"])
+            return 1
         if args.only:
             wanted = set(args.only)
             files = [p for p in files if p.name in wanted]
-        # Prefer ensuring reconciliation is present
-        names = [p.name for p in files]
-        if RECONCILIATION not in names and (MIGRATIONS / RECONCILIATION).exists():
-            if not args.only:
+            files = ordered_migration_files(files)
+        else:
+            # Prefer ensuring reconciliation is present
+            names = [p.name for p in files]
+            if RECONCILIATION not in names and (MIGRATIONS / RECONCILIATION).exists():
                 files.append(MIGRATIONS / RECONCILIATION)
-                files = sorted(set(files), key=lambda p: p.name)
+            files = ordered_migration_files(files)
 
         if not args.verify_only:
             for path in files:

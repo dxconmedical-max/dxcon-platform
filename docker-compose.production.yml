@@ -4,10 +4,12 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     env_file:
-      - deployment/env/production.env.example
+      - deployment/env/production.env
     environment:
       APP_ENV: production
       DXCON_DOCKER: "1"
+      QUEUE_PROVIDER: redis
+      REDIS_URL: redis://redis:6379/0
     expose:
       - "8000"
     volumes:
@@ -16,7 +18,7 @@ services:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/ready"]
       interval: 30s
@@ -33,10 +35,13 @@ services:
 
   postgres:
     image: postgres:16-alpine
+    env_file:
+      - deployment/env/production.env
     environment:
       POSTGRES_DB: dxcon
       POSTGRES_USER: dxcon
-      POSTGRES_PASSWORD: replace-me
+      # POSTGRES_PASSWORD must come from deployment/env/production.env
+      # (must match DATABASE_URL). Do not hardcode secrets here.
     volumes:
       - production_postgres:/var/lib/postgresql/data
     healthcheck:
@@ -82,18 +87,24 @@ services:
       dockerfile: Dockerfile
     command: ["python", "production_start.py", "worker"]
     env_file:
-      - deployment/env/production.env.example
+      - deployment/env/production.env
     environment:
       APP_ENV: production
       DXCON_PROCESS_ROLE: worker
       DXCON_DOCKER: "1"
+      QUEUE_PROVIDER: redis
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - production_uploads:/var/lib/dxcon/uploads
+    healthcheck:
+      disable: true
     depends_on:
       api:
         condition: service_started
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     restart: unless-stopped
 
   scheduler:
@@ -102,18 +113,24 @@ services:
       dockerfile: Dockerfile
     command: ["python", "production_start.py", "scheduler"]
     env_file:
-      - deployment/env/production.env.example
+      - deployment/env/production.env
     environment:
       APP_ENV: production
       DXCON_PROCESS_ROLE: scheduler
       DXCON_DOCKER: "1"
+      QUEUE_PROVIDER: redis
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - production_uploads:/var/lib/dxcon/uploads
+    healthcheck:
+      disable: true
     depends_on:
       api:
         condition: service_started
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:

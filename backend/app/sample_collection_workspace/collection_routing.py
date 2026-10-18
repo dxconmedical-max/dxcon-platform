@@ -533,11 +533,21 @@ def list_field_collector_queue(**filters) -> dict[str, Any]:
 
     role = filters.get("role")
     organization_id = filters.get("organization_id")
-    if organization_id and role in {"COLLECTOR", "PARTNER_COLLECTOR", "DRIVER"}:
+    # P0-C fail-closed for authenticated non-platform roles: org scope required.
+    # role=None is reserved for trusted internal/service callers (HTTP routes pass JWT role).
+    if role is not None and role not in {"SUPER_ADMIN", "SYSTEM_ADMIN"}:
+        if not organization_id:
+            return {
+                "count": 0,
+                "items": [],
+                "queue": "field_collector",
+                "modes": sorted(mode_filter),
+            }
         field_items = [
             i
             for i in field_items
-            if not i.get("partner_id") or i.get("partner_id") == organization_id
+            # Null partner_id = legacy/unscoped job visible within the org work queue.
+            if (not i.get("partner_id")) or i.get("partner_id") == organization_id
         ]
 
     return {
@@ -564,7 +574,18 @@ def list_home_field_requests(**filters) -> dict[str, Any]:
         q = q.filter(SampleCollection.status.in_(list(FIELD_REQUEST_BOARD_STATUSES)))
     partner_id = filters.get("partner_id") or filters.get("organization_id")
     role = filters.get("role")
-    if partner_id and role not in {"SUPER_ADMIN", "SYSTEM_ADMIN", "ADMIN", None}:
+    # P0-C: ADMIN no longer bypasses tenant filter. Only platform global roles do.
+    # role=None = trusted internal caller; HTTP handlers always supply JWT role.
+    if role is not None and role not in {"SUPER_ADMIN", "SYSTEM_ADMIN"}:
+        if not partner_id:
+            return {
+                "count": 0,
+                "items": [],
+                "queue": "field_collection_requests",
+                "modes": sorted(modes),
+            }
+        q = q.filter(SampleCollection.partner_id == partner_id)
+    elif partner_id:
         q = q.filter(or_(SampleCollection.partner_id == partner_id, SampleCollection.partner_id.is_(None)))
     rows = q.order_by(SampleCollection.created_at.desc()).limit(int(filters.get("limit") or 200)).all()
     items = []
@@ -612,7 +633,19 @@ def list_reception_desk_queue(**filters) -> dict[str, Any]:
 
     role = filters.get("role")
     organization_id = filters.get("organization_id")
-    if organization_id and role not in {"SUPER_ADMIN", "SYSTEM_ADMIN", "ADMIN"}:
+    # role=None = trusted internal caller; HTTP handlers always supply JWT role.
+    if role is not None and role not in {"SUPER_ADMIN", "SYSTEM_ADMIN"}:
+        if not organization_id:
+            return {
+                "count": 0,
+                "items": [],
+                "queue": "reception_desk",
+                "modes": [MODE_AT_RECEPTION],
+            }
+        desk_items = [
+            i for i in desk_items if i.get("partner_id") and i.get("partner_id") == organization_id
+        ]
+    elif organization_id:
         desk_items = [i for i in desk_items if not i.get("partner_id") or i.get("partner_id") == organization_id]
 
     return {
@@ -730,10 +763,23 @@ def release_collector_assignment(
 
 def list_assignable_collectors(*, organization_id: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
     from app.models.user import User
+    from app.models.partner_foundation import OrganizationUser
 
-    del organization_id
     roles = ("COLLECTOR", "PARTNER_COLLECTOR", "DRIVER", "ADMIN", "SUPER_ADMIN")
     q = User.query.filter(User.is_active.is_(True), User.role.in_(roles))
+    if organization_id:
+        member_ids = [
+            row.user_id
+            for row in OrganizationUser.query.filter_by(
+                organization_id=organization_id, active=True
+            ).all()
+        ]
+        q = q.filter(
+            db.or_(
+                User.id.in_(member_ids or ["__none__"]),
+                User.organization_id == organization_id,
+            )
+        )
     rows = q.order_by(User.email).limit(limit).all()
     return [
         {
@@ -741,6 +787,7 @@ def list_assignable_collectors(*, organization_id: str | None = None, limit: int
             "email": u.email,
             "role": u.role,
             "full_name": getattr(u, "full_name", None) or u.email,
+            "organization_id": u.organization_id,
         }
         for u in rows
     ]

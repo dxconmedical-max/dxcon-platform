@@ -1,30 +1,27 @@
 {
-  "generated_at": "2026-07-03T19:57:31.656410+00:00",
+  "generated_at": "2026-08-12T14:40:00.903202+00:00",
   "summary": {
-    "checks_passed": 4,
+    "checks_passed": 1,
     "checks_total": 4,
-    "ok": true,
-    "runtime_seconds": 1.027
+    "ok": false,
+    "runtime_seconds": 0.628
   },
   "checks": {
     "seeded_counts": {
-      "ok": true,
+      "ok": false,
       "demo": {
-        "users": 16,
-        "patients": 100,
-        "test_catalog": 200,
-        "orders": 50
+        "users": 0,
+        "patients": 0,
+        "test_catalog": 0,
+        "orders": 0
       },
       "totals": {
-        "users": 16,
-        "patients": 100,
-        "test_catalog": 200,
-        "orders": 50
+        "users": 0,
+        "patients": 0,
+        "test_catalog": 0,
+        "orders": 0
       },
-      "optional": {
-        "order_items": 50,
-        "sample_collections": 20
-      }
+      "optional": {}
     },
     "dashboard_routes": {
       "ok": true,
@@ -40,7 +37,7 @@
       "missing": []
     },
     "health_endpoints": {
-      "ok": true,
+      "ok": false,
       "routes": {
         "/health": {
           "status_code": 200,
@@ -49,20 +46,28 @@
             "database": "OK",
             "redis": "DEGRADED",
             "status": "OK",
-            "timestamp": "2026-07-03T19:57:31.606211+00:00"
+            "timestamp": "2026-08-12T14:40:00.862333+00:00"
           },
           "ok": true
         },
         "/ready": {
-          "status_code": 200,
+          "status_code": 503,
           "payload": {
             "app_env": "development",
             "database": "OK",
+            "queue": {
+              "durable": false,
+              "ok": true,
+              "ping": false,
+              "provider": "memory"
+            },
+            "queue_provider": "memory",
+            "ready": false,
             "redis": "DEGRADED",
-            "status": "OK",
-            "timestamp": "2026-07-03T19:57:31.607335+00:00"
+            "status": "DEGRADED",
+            "timestamp": "2026-08-12T14:40:00.863843+00:00"
           },
-          "ok": true
+          "ok": false
         },
         "/live": {
           "status_code": 200,
@@ -71,14 +76,14 @@
             "database": "OK",
             "redis": "DEGRADED",
             "status": "OK",
-            "timestamp": "2026-07-03T19:57:31.608633+00:00"
+            "timestamp": "2026-08-12T14:40:00.865502+00:00"
           },
           "ok": true
         }
       }
     },
     "dashboard_pages": {
-      "ok": true,
+      "ok": false,
       "routes": {
         "/": {
           "status_code": 200,
@@ -101,8 +106,8 @@
           "ok": true
         },
         "/doctor/dashboard": {
-          "status_code": 200,
-          "ok": true
+          "status_code": 500,
+          "ok": false
         },
         "/patient/demo": {
           "status_code": 200,
@@ -111,5 +116,9 @@
       }
     }
   },
-  "blockers": []
+  "blockers": [
+    "seeded_counts",
+    "health_endpoints",
+    "dashboard_pages"
+  ]
 }

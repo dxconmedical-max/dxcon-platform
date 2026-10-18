@@ -11,6 +11,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT.parent
+
+
+def _report_dir() -> Path:
+    from scripts.artifact_paths import generated_release_dir
+
+    return generated_release_dir()
+
+
+# Back-compat for callers that read REPORT_DIR at import time.
 REPORT_DIR = ROOT / "generated_release"
 
 
@@ -19,8 +28,9 @@ def utc_now() -> str:
 
 
 def write_report(name: str, payload: dict) -> str:
-    REPORT_DIR.mkdir(parents=True, exist_ok=True)
-    path = REPORT_DIR / name
+    report_dir = _report_dir()
+    report_dir.mkdir(parents=True, exist_ok=True)
+    path = report_dir / name
     path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
     return str(path)
 

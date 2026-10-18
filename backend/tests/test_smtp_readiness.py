@@ -138,11 +138,13 @@ class ProductionStartupContextTestCase(unittest.TestCase):
         """Render production boot: EMAIL_DRY_RUN=true + STARTUP_VALIDATE_DB can be skipped in unit test."""
         env = {
             "APP_ENV": "production",
-            "DATABASE_URL": "sqlite:///:memory:",
+            # Must be non-SQLite: create_app re-applies DATABASE_URL from env.
+            "DATABASE_URL": "postgresql://u:p@localhost/db",
             "REDIS_URL": "redis://localhost:6379/0",
             "CORS_ORIGINS": "https://dxcon.com.vn",
-            "SECRET_KEY": "prod-secret-key-not-default-xx",
-            "JWT_SECRET_KEY": "prod-jwt-secret-not-default-xx",
+            "SECRET_KEY": "prod-secret-key-not-default-xx-32ch",
+            "JWT_SECRET_KEY": "prod-jwt-secret-not-default-xx-32ch",
+            "QUEUE_PROVIDER": "redis",
             "LOG_FORMAT": "json",
             "STORAGE_PATH": "/tmp/dxcon-uploads-test",
             "STARTUP_VALIDATE_DB": "false",
@@ -166,20 +168,22 @@ class ProductionStartupContextTestCase(unittest.TestCase):
                 "EMAIL_DRY_RUN": config_module.Config.EMAIL_DRY_RUN,
                 "SMTP_HOST": config_module.Config.SMTP_HOST,
                 "SMTP_FROM": config_module.Config.SMTP_FROM,
+                "QUEUE_PROVIDER": config_module.Config.QUEUE_PROVIDER,
             }
             try:
                 config_module.Config.APP_ENV = "production"
                 config_module.Config.SQLALCHEMY_DATABASE_URI = "postgresql://u:p@localhost/db"
                 config_module.Config.REDIS_URL = "redis://localhost:6379/0"
                 config_module.Config.CORS_ORIGINS = "https://dxcon.com.vn"
-                config_module.Config.SECRET_KEY = "prod-secret-key-not-default-xx"
-                config_module.Config.JWT_SECRET_KEY = "prod-jwt-secret-not-default-xx"
+                config_module.Config.SECRET_KEY = "prod-secret-key-not-default-xx-32ch"
+                config_module.Config.JWT_SECRET_KEY = "prod-jwt-secret-not-default-xx-32ch"
                 config_module.Config.LOG_FORMAT = "json"
                 config_module.Config.STORAGE_PATH = "/tmp/dxcon-uploads-test"
                 config_module.Config.STARTUP_VALIDATE_DB = False
                 config_module.Config.EMAIL_DRY_RUN = True
                 config_module.Config.SMTP_HOST = ""
                 config_module.Config.SMTP_FROM = ""
+                config_module.Config.QUEUE_PROVIDER = "redis"
 
                 with mock.patch(
                     "app.infrastructure.production_readiness.check_redis_health",

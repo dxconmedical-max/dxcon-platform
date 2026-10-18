@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flask import has_request_context, session
+from flask import has_request_context
 
 from app.core.audit import write_audit
 from app.extensions.db import db
@@ -10,8 +10,10 @@ from app.models.biz_order import BizWorkflowAudit
 
 
 def _actor() -> str:
+    from app.core.audit_actor import resolve_human_audit_actor
+
     if has_request_context():
-        return session.get("email") or "SYSTEM"
+        return resolve_human_audit_actor() or "SYSTEM"
     return "SYSTEM"
 
 

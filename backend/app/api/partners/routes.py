@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.services.partner_platform import PartnerPlatformError, PartnerPlatformService
 
 
@@ -8,6 +12,7 @@ partners_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/partners",
 )
+blueprint_require_authenticated_user(partners_bp)
 
 
 def _client_ip():
@@ -15,7 +20,7 @@ def _client_ip():
 
 
 def _actor_email():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    return authenticated_actor_email()
 
 
 @partners_bp.route("", methods=["GET"])

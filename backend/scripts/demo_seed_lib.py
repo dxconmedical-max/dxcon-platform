@@ -25,6 +25,14 @@ from app.infrastructure.schema_introspection import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _demo_seed_report_path() -> Path:
+    from scripts.artifact_paths import generated_release_dir
+
+    return generated_release_dir() / "DEMO_SEED_REPORT.json"
+
+
 REPORT_PATH = ROOT / "generated_release" / "DEMO_SEED_REPORT.json"
 
 DEMO_DOMAIN = "demo.dxcon.test"
@@ -895,6 +903,7 @@ def demo_account_summary() -> dict:
 
 
 def write_report(report: dict) -> str:
+    REPORT_PATH = _demo_seed_report_path()
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
     return str(REPORT_PATH)

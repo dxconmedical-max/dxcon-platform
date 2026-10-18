@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.operations.backup_service import BackupService, OperationsPlatformError
 from app.operations.deployment_service import DeploymentService
 from app.operations.maintenance_service import MaintenanceService
@@ -14,6 +15,7 @@ def _error(exc):
 
 
 operations_bp = Blueprint("operations_platform", __name__, url_prefix="/api/v1/operations")
+blueprint_require_authenticated_user(operations_bp)
 
 
 @operations_bp.route("/jobs", methods=["GET"])

@@ -37,7 +37,9 @@ reporting_engine_bp = Blueprint("reporting_engine", __name__, url_prefix="/api/v
 
 
 def _actor() -> str | None:
-    return session.get("email") or request.headers.get("X-Actor")
+    from app.core.audit_actor import resolve_human_audit_actor
+
+    return resolve_human_audit_actor(unauthenticated_fallback="") or None
 
 
 def _pdf_response(bundle: dict) -> Response:

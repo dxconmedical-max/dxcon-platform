@@ -70,7 +70,9 @@ class ReadinessPackTestCase(unittest.TestCase):
 
         self.assertTrue((REPO / "docs" / "KNOWN_LIMITATIONS.md").exists())
         self.assertTrue((REPO / "docs" / "ROADMAP_v2.md").exists())
-        self.assertTrue((ROOT / "generated_release" / "SYSTEM_READINESS_REPORT.json").exists())
+        from scripts.artifact_paths import generated_release_dir
+
+        self.assertTrue((generated_release_dir() / "SYSTEM_READINESS_REPORT.json").exists())
 
     def test_legacy_pages_preserved(self):
         checklist = self.client.get("/pilot-checklist")

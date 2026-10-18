@@ -41,7 +41,9 @@ portal_patient_bp = Blueprint("portal_patient", __name__, url_prefix="/api/v1/po
 
 
 def _actor() -> str | None:
-    return session.get("email") or request.headers.get("X-Actor")
+    from app.core.audit_actor import resolve_human_audit_actor
+
+    return resolve_human_audit_actor(unauthenticated_fallback="") or None
 
 
 @portal_doctor_bp.route("/dashboard", methods=["GET"])

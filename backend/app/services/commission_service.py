@@ -139,9 +139,13 @@ class CommissionService:
         return entries
 
     @staticmethod
-    def list_commissions(partner_id=None, invoice_id=None):
+    def list_commissions(partner_id=None, invoice_id=None, partner_ids=None):
         query = CommissionLedger.query
-        if partner_id:
+        if partner_ids is not None:
+            if not partner_ids:
+                return []
+            query = query.filter(CommissionLedger.partner_id.in_(sorted(partner_ids)))
+        elif partner_id:
             query = query.filter_by(partner_id=partner_id)
         if invoice_id:
             query = query.filter_by(invoice_id=invoice_id)

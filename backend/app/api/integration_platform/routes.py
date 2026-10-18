@@ -1,5 +1,6 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.services.integration_platform_service import (
     EventPlatformService,
     IntegrationError,
@@ -27,6 +28,11 @@ events_bp = Blueprint("integration_events", __name__, url_prefix="/api/v1/events
 webhooks_bp = Blueprint("integration_webhooks", __name__, url_prefix="/api/v1/webhooks")
 queue_bp = Blueprint("integration_queue", __name__, url_prefix="/api/v1/integration-queue")
 sandbox_bp = Blueprint("integration_sandbox", __name__, url_prefix="/api/v1/sandbox")
+# Sandbox inbound stubs are SERVICE_AUTH_REQUIRED; no verifier exists yet.
+blueprint_require_authenticated_user(plugins_bp)
+blueprint_require_authenticated_user(events_bp)
+blueprint_require_authenticated_user(webhooks_bp)
+blueprint_require_authenticated_user(queue_bp)
 
 
 @plugins_bp.route("", methods=["GET"])

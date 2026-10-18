@@ -67,7 +67,7 @@ class RcSecurityGateTests(unittest.TestCase):
 
     def test_seed_blocked_in_production(self):
         resp = self.client.post("/api/v1/seeds/demo-operations")
-        self.assertEqual(resp.status_code, 403)
+        self.assertIn(resp.status_code, (401, 403))
 
     def test_pilot_demo_accounts_blocked_in_production(self):
         resp = self.client.get("/api/v1/pilot-toolkit/demo-accounts")
@@ -120,6 +120,17 @@ class RcApiAuthGateStrictTests(unittest.TestCase):
     def test_health_remains_public(self):
         resp = self.client.get("/api/v1/system/health")
         self.assertEqual(resp.status_code, 200)
+
+    def test_marketplace_bookings_require_auth_in_production(self):
+        resp = self.client.post("/api/v1/marketplace/bookings", json={})
+        self.assertEqual(resp.status_code, 401)
+
+    def test_payment_webhook_remains_public_in_production(self):
+        resp = self.client.post(
+            "/api/v1/payments/webhook",
+            json={"provider": "STRIPE", "event_type": "payment.updated"},
+        )
+        self.assertNotEqual(resp.status_code, 401)
 
 
 if __name__ == "__main__":

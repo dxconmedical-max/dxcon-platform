@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from datetime import datetime
 import uuid
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.extensions.db import db
 from app.models.alert import Alert
 from app.observability.alert_engine import AlertEngine
@@ -12,6 +13,7 @@ alerts_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/alerts"
 )
+blueprint_require_authenticated_user(alerts_bp)
 
 
 def alert_code():

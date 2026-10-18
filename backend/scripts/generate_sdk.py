@@ -7,11 +7,13 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SDK_ROOT = ROOT / "generated_api" / "sdk"
 sys.path.insert(0, str(ROOT))
 
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 
+from scripts.artifact_paths import generated_api_dir
+
+SDK_ROOT = generated_api_dir() / "sdk"
 from app import create_app
 from app.api_platform.route_catalog import build_catalog
 from app.api_platform.api_inventory import scan_routes

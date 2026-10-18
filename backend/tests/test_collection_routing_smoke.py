@@ -37,6 +37,7 @@ class CollectionRoutingSmokeTests(unittest.TestCase):
     """Exact production smoke scenarios from product QA."""
 
     def setUp(self):
+        os.environ["DATABASE_URL"] = f"sqlite:///{_TEST_DB.name}"
         self.app = create_app()
         self.app.config["TESTING"] = True
         self.client = self.app.test_client()

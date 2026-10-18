@@ -198,7 +198,8 @@ def create_home_collection():
 
         ensure_sample_collection_from_home_collection(booking, actor="mobile_api")
     except Exception:
-        pass
+        # Booking still succeeds; sample-collection bridge is best-effort.
+        sample_collection = None
     db.session.commit()
 
     return {

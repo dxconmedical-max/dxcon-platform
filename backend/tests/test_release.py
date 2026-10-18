@@ -25,6 +25,8 @@ class ReleaseTestCase(unittest.TestCase):
         self.ctx = self.app.app_context()
         self.ctx.push()
         db.create_all()
+        from tests.p06_auth_helper import attach_admin_client
+        attach_admin_client(self)
         self.accession = AccessionService.create_accession(
             {"sample_code": "SMP-REL-001", "patient_name": "Release Patient"}
         )

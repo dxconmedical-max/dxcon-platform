@@ -32,13 +32,15 @@ def utc_now():
 
 
 def ensure_generated_dir():
-    GENERATED_DIR.mkdir(parents=True, exist_ok=True)
-    return GENERATED_DIR
+    from scripts.artifact_paths import generated_release_dir
+
+    generated = generated_release_dir()
+    generated.mkdir(parents=True, exist_ok=True)
+    return generated
 
 
 def write_json(name, payload):
-    ensure_generated_dir()
-    path = GENERATED_DIR / name
+    path = ensure_generated_dir() / name
     path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
     return str(path)
 
@@ -356,17 +358,28 @@ def run_e2e_workflows(app, client):
 
     workflows = {}
 
+    # Public register is PATIENT-only; provision ADMIN for privileged API steps.
+    from scripts.smoke_auth_provision import ensure_user
+
     register = client.post(
         "/api/v1/auth/register",
-        json={"email": "rc1-user@dxcon.test", "password": "SecurePass123!", "role": "ADMIN"},
+        json={"email": "rc1-patient@dxcon.test", "password": "SecurePass123!"},
     )
+    ensure_user(email="rc1-user@dxcon.test", password="SecurePass123!", role="ADMIN")
     login = client.post(
         "/api/v1/auth/login",
         json={"email": "rc1-user@dxcon.test", "password": "SecurePass123!"},
     )
+    login_payload = login.get_json() or {}
     workflows["auth_register_login"] = {
-        "ok": register.status_code in {201, 400} and login.status_code == 200 and bool(login.get_json().get("access_token")),
+        "ok": register.status_code in {201, 400}
+        and login.status_code == 200
+        and bool(login_payload.get("access_token")),
     }
+    auth_headers = {}
+    token = login_payload.get("access_token")
+    if token:
+        auth_headers["Authorization"] = f"Bearer {token}"
 
     partner = client.post(
         "/api/v1/partners",
@@ -377,10 +390,13 @@ def run_e2e_workflows(app, client):
             "partner_type": "LABORATORY",
             "contact_email": "rc1-partner@dxcon.test",
         },
+        headers=auth_headers,
     )
     partner_payload = partner.get_json() or {}
     partner_id = (partner_payload.get("partner") or {}).get("id") or partner_payload.get("id")
-    submitted = client.post(f"/api/v1/partners/{partner_id}/submit") if partner_id else None
+    submitted = (
+        client.post(f"/api/v1/partners/{partner_id}/submit", headers=auth_headers) if partner_id else None
+    )
     workflows["partner_onboarding"] = {
         "ok": partner.status_code in {200, 201} and (submitted.status_code in {200, 201} if submitted else False),
     }

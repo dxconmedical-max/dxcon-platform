@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.services.billing_service import (
     BillingError,
     BillingService,
@@ -16,6 +20,7 @@ billing_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/billing",
 )
+blueprint_require_authenticated_user(billing_bp)
 
 
 def _client_ip():
@@ -23,14 +28,45 @@ def _client_ip():
 
 
 def _actor_email():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    return authenticated_actor_email()
+
+
+def _partner_scope():
+    """Membership-validated partner scope. Returns (partner_ids|None, error|None)."""
+    from app.core.tenant_authorization import AuthorizedTenant, resolve_authorized_tenant, scoped_partner_ids
+
+    requested = request.args.get("partner_id") or request.args.get("organization_id")
+    tenant = resolve_authorized_tenant(
+        requested_organization_id=requested,
+        require_scope=True,
+    )
+    if not isinstance(tenant, AuthorizedTenant):
+        return None, tenant
+    return scoped_partner_ids(tenant), None
+
+
+def _assert_invoice_access(invoice_id):
+    from app.core.tenant_authorization import AuthorizedTenant, authorize_partner_record
+    from app.core.errors import build_error_response
+    from app.models.invoice import Invoice
+
+    invoice = Invoice.query.get(invoice_id)
+    if not invoice:
+        return None, build_error_response("NOT_FOUND", "Invoice not found", 404)
+    tenant = authorize_partner_record(invoice.partner_id)
+    if not isinstance(tenant, AuthorizedTenant):
+        return None, tenant
+    return invoice, None
 
 
 @billing_bp.route("/invoices", methods=["GET"])
 def list_invoices():
+    partner_ids, err = _partner_scope()
+    if err:
+        return err
     payload = InvoiceService.list_invoices(
-        partner_id=request.args.get("partner_id"),
         status=request.args.get("status"),
+        partner_ids=partner_ids,
     )
     return payload
 
@@ -54,6 +90,9 @@ def create_invoice():
 
 @billing_bp.route("/invoices/<invoice_id>", methods=["GET"])
 def get_invoice(invoice_id):
+    _, err = _assert_invoice_access(invoice_id)
+    if err:
+        return err
     try:
         payload = InvoiceService.get_invoice(invoice_id)
     except BillingError as exc:
@@ -63,6 +102,9 @@ def get_invoice(invoice_id):
 
 @billing_bp.route("/invoices/<invoice_id>/mark-paid", methods=["POST"])
 def mark_invoice_paid(invoice_id):
+    _, err = _assert_invoice_access(invoice_id)
+    if err:
+        return err
     data = request.get_json(silent=True) or {}
     try:
         payload = InvoiceService.mark_paid(
@@ -89,7 +131,10 @@ def billing_ledger():
 
 @billing_bp.route("/summary", methods=["GET"])
 def billing_summary():
-    payload = BillingService.get_summary(partner_id=request.args.get("partner_id"))
+    partner_ids, err = _partner_scope()
+    if err:
+        return err
+    payload = BillingService.get_summary(partner_ids=partner_ids)
     return payload
 
 
@@ -154,9 +199,10 @@ def process_refund():
 
 @billing_bp.route("/settlements", methods=["GET"])
 def list_settlements():
-    settlements = SettlementService.list_settlements(
-        partner_id=request.args.get("partner_id")
-    )
+    partner_ids, err = _partner_scope()
+    if err:
+        return err
+    settlements = SettlementService.list_settlements(partner_ids=partner_ids)
     return {
         "count": len(settlements),
         "settlements": [s.to_dict() for s in settlements],
@@ -165,10 +211,16 @@ def list_settlements():
 
 @billing_bp.route("/settlements", methods=["POST"])
 def create_settlement():
+    from app.core.tenant_authorization import AuthorizedTenant, authorize_partner_scope
+
     data = request.get_json(silent=True) or {}
     partner_id = data.get("partner_id")
     if not partner_id:
         return {"error": "partner_id is required"}, 400
+    scoped = authorize_partner_scope(partner_id)
+    if isinstance(scoped, tuple):
+        return scoped
+    partner_id = scoped or partner_id
     try:
         if data.get("invoice_id"):
             CommissionService.calculate_for_invoice(
@@ -191,6 +243,15 @@ def create_settlement():
 
 @billing_bp.route("/settlements/<settlement_id>", methods=["GET"])
 def get_settlement(settlement_id):
+    from app.core.tenant_authorization import AuthorizedTenant, authorize_partner_record
+    from app.models.partner_settlement import PartnerSettlement
+
+    settlement = PartnerSettlement.query.get(settlement_id)
+    if not settlement:
+        return {"error": "Settlement not found"}, 404
+    tenant = authorize_partner_record(settlement.partner_id)
+    if not isinstance(tenant, AuthorizedTenant):
+        return tenant
     try:
         payload = SettlementService.get_settlement_detail(settlement_id)
     except SettlementError as exc:
@@ -200,6 +261,15 @@ def get_settlement(settlement_id):
 
 @billing_bp.route("/settlements/<settlement_id>/finalize", methods=["POST"])
 def finalize_settlement(settlement_id):
+    from app.core.tenant_authorization import AuthorizedTenant, authorize_partner_record
+    from app.models.partner_settlement import PartnerSettlement
+
+    settlement = PartnerSettlement.query.get(settlement_id)
+    if not settlement:
+        return {"error": "Settlement not found"}, 404
+    tenant = authorize_partner_record(settlement.partner_id)
+    if not isinstance(tenant, AuthorizedTenant):
+        return tenant
     try:
         settlement = SettlementService.finalize_settlement(
             settlement_id,
@@ -213,8 +283,11 @@ def finalize_settlement(settlement_id):
 
 @billing_bp.route("/commissions", methods=["GET"])
 def list_commissions():
+    partner_ids, err = _partner_scope()
+    if err:
+        return err
     commissions = CommissionService.list_commissions(
-        partner_id=request.args.get("partner_id"),
+        partner_ids=partner_ids,
         invoice_id=request.args.get("invoice_id"),
     )
     return {

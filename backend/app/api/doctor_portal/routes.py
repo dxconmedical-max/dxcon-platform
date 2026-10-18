@@ -1,5 +1,10 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
+from app.core.tenant_authorization import authorize_doctor_id, client_requested_doctor_id
 from app.services.doctor_portal_service import (
     DoctorDashboardService,
     DoctorFollowUpService,
@@ -15,6 +20,7 @@ doctor_portal_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/doctor",
 )
+blueprint_require_authenticated_user(doctor_portal_bp)
 
 
 def _client_ip():
@@ -22,22 +28,22 @@ def _client_ip():
 
 
 def _actor_email():
-    return request.headers.get("X-User-Email", "SYSTEM")
+    # P0-A: actor from authenticated JWT/session only (never X-User-Email).
+    return authenticated_actor_email()
 
 
-def _doctor_id():
-    doctor_id = request.args.get("doctor_id") or request.headers.get("X-Doctor-Id")
-    if request.method in ("POST", "PUT") and not doctor_id:
-        data = request.get_json(silent=True) or {}
-        doctor_id = data.get("doctor_id")
-    return doctor_id
+def _require_doctor_id():
+    result = authorize_doctor_id(client_requested_doctor_id())
+    if not isinstance(result, str):
+        return None, result
+    return result, None
 
 
 @doctor_portal_bp.route("/dashboard", methods=["GET"])
 def doctor_dashboard():
-    doctor_id = _doctor_id()
-    if not doctor_id:
-        return {"error": "doctor_id is required"}, 400
+    doctor_id, err = _require_doctor_id()
+    if err:
+        return err
     try:
         payload = DoctorDashboardService.get_dashboard(doctor_id)
     except DoctorPortalError as exc:
@@ -47,9 +53,9 @@ def doctor_dashboard():
 
 @doctor_portal_bp.route("/profile", methods=["GET"])
 def get_doctor_profile():
-    doctor_id = _doctor_id()
-    if not doctor_id:
-        return {"error": "doctor_id is required"}, 400
+    doctor_id, err = _require_doctor_id()
+    if err:
+        return err
     try:
         payload = DoctorPortalService.get_profile(doctor_id)
     except DoctorPortalError as exc:
@@ -59,9 +65,9 @@ def get_doctor_profile():
 
 @doctor_portal_bp.route("/profile", methods=["PUT"])
 def update_doctor_profile():
-    doctor_id = _doctor_id()
-    if not doctor_id:
-        return {"error": "doctor_id is required"}, 400
+    doctor_id, err = _require_doctor_id()
+    if err:
+        return err
     data = request.get_json(silent=True) or {}
     try:
         payload = DoctorPortalService.update_profile(
@@ -77,9 +83,9 @@ def update_doctor_profile():
 
 @doctor_portal_bp.route("/patients", methods=["GET"])
 def doctor_patients():
-    doctor_id = _doctor_id()
-    if not doctor_id:
-        return {"error": "doctor_id is required"}, 400
+    doctor_id, err = _require_doctor_id()
+    if err:
+        return err
     try:
         payload = DoctorPatientService.list_patients(doctor_id)
     except DoctorPortalError as exc:
@@ -89,9 +95,9 @@ def doctor_patients():
 
 @doctor_portal_bp.route("/results", methods=["GET"])
 def doctor_results():
-    doctor_id = _doctor_id()
-    if not doctor_id:
-        return {"error": "doctor_id is required"}, 400
+    doctor_id, err = _require_doctor_id()
+    if err:
+        return err
     try:
         payload = DoctorDashboardService.list_results(doctor_id)
     except DoctorPortalError as exc:
@@ -101,9 +107,9 @@ def doctor_results():
 
 @doctor_portal_bp.route("/referrals", methods=["GET"])
 def list_referrals():
-    doctor_id = _doctor_id()
-    if not doctor_id:
-        return {"error": "doctor_id is required"}, 400
+    doctor_id, err = _require_doctor_id()
+    if err:
+        return err
     try:
         payload = DoctorReferralService.list_referrals(doctor_id, status=request.args.get("status"))
     except DoctorPortalError as exc:
@@ -113,9 +119,9 @@ def list_referrals():
 
 @doctor_portal_bp.route("/referrals", methods=["POST"])
 def create_referral():
-    doctor_id = _doctor_id()
-    if not doctor_id:
-        return {"error": "doctor_id is required"}, 400
+    doctor_id, err = _require_doctor_id()
+    if err:
+        return err
     data = request.get_json(silent=True) or {}
     try:
         referral = DoctorReferralService.create_referral(
@@ -131,9 +137,9 @@ def create_referral():
 
 @doctor_portal_bp.route("/followups", methods=["POST"])
 def create_follow_up():
-    doctor_id = _doctor_id()
-    if not doctor_id:
-        return {"error": "doctor_id is required"}, 400
+    doctor_id, err = _require_doctor_id()
+    if err:
+        return err
     data = request.get_json(silent=True) or {}
     try:
         follow_up = DoctorFollowUpService.create_follow_up(
@@ -149,9 +155,9 @@ def create_follow_up():
 
 @doctor_portal_bp.route("/schedule", methods=["GET"])
 def doctor_schedule():
-    doctor_id = _doctor_id()
-    if not doctor_id:
-        return {"error": "doctor_id is required"}, 400
+    doctor_id, err = _require_doctor_id()
+    if err:
+        return err
     try:
         payload = DoctorDashboardService.get_schedule(doctor_id)
     except DoctorPortalError as exc:

@@ -1,5 +1,9 @@
 from flask import Blueprint, request
 
+from app.core.authenticated_identity import (
+    authenticated_actor_email,
+    blueprint_require_authenticated_user,
+)
 from app.extensions.db import db
 from app.models.shipment import Shipment
 from app.models.shipment_item import ShipmentItem
@@ -15,6 +19,11 @@ logistics_v2_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/logistics-v2"
 )
+blueprint_require_authenticated_user(logistics_v2_bp)
+
+
+def _logistics_actor():
+    return authenticated_actor_email()
 
 
 @logistics_v2_bp.route("/shipments/<shipment_id>/items")
@@ -83,7 +92,7 @@ def add_timeline_event(shipment_id):
         shipment_id=shipment_id,
         event_type=data.get("event_type") or "EVENT",
         note=data.get("note"),
-        actor=data.get("actor"),
+        actor=_logistics_actor(),
         gps_location=data.get("gps_location"),
         temperature=data.get("temperature")
     )

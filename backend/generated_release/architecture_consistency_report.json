@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-02T15:15:54.479441+00:00",
+  "generated_at": "2026-08-12T14:40:28.214042+00:00",
   "release": "enterprise-hardening-pack-2",
   "checks": {
     "bootstrap_layout": {
@@ -12,15 +12,35 @@
       "findings": []
     },
     "no_broad_except_pass": {
-      "ok": true,
-      "count": 0,
-      "findings": []
+      "ok": false,
+      "count": 11,
+      "findings": [
+        "app/reception_workspace/qr_engine.py",
+        "app/core/request_context.py",
+        "app/core/iot_device_auth.py",
+        "app/core/tenant_authorization.py",
+        "app/reporting_engine/service.py",
+        "app/reporting_engine/pdf_service.py",
+        "app/reporting_engine/report_generation_service.py",
+        "app/partner_foundation/isolation.py",
+        "app/api/mobile/routes.py",
+        "app/api/workflow/routes.py",
+        "scripts/generate_schema_reconciliation.py"
+      ]
     },
     "duplicate_helper_scan": {
       "ok": true,
-      "count": 0,
-      "duplicates": []
+      "count": 1,
+      "duplicates": [
+        {
+          "name": "table_has_column",
+          "paths": [
+            "app/core/audit.py",
+            "app/core/db_introspection.py"
+          ]
+        }
+      ]
     }
   },
-  "ok": true
+  "ok": false
 }

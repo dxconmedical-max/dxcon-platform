@@ -70,7 +70,7 @@ def _qr_secret() -> str:
             if cfg:
                 return str(cfg)
     except Exception:
-        pass
+        return os.getenv("DXCON_QR_SECRET") or os.getenv("SECRET_KEY") or "dxcon-dev-qr-secret"
     return os.getenv("DXCON_QR_SECRET") or os.getenv("SECRET_KEY") or "dxcon-dev-qr-secret"
 
 
@@ -85,7 +85,7 @@ def _public_base() -> str:
         if has_request_context():
             return request.url_root.rstrip("/")
     except Exception:
-        pass
+        return (os.getenv("PUBLIC_BASE_URL") or "").rstrip("/")
     return (os.getenv("PUBLIC_BASE_URL") or "").rstrip("/")
 
 

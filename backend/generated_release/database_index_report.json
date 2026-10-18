@@ -1,15 +1,39 @@
 {
-  "generated_at": "2026-07-02T15:36:11.375716+00:00",
+  "generated_at": "2026-08-12T14:39:53.112241+00:00",
   "release": "enterprise-hardening-pack-3",
   "checks": {
-    "tables_with_indexes": 19,
-    "total_indexes": 23,
-    "foreign_key_count": 245,
-    "unique_constraint_count": 206,
+    "tables_with_indexes": 71,
+    "total_indexes": 116,
+    "foreign_key_count": 294,
+    "unique_constraint_count": 252,
     "top_indexed_columns": [
       [
+        "organization_id",
+        27
+      ],
+      [
+        "status",
+        8
+      ],
+      [
+        "user_id",
+        6
+      ],
+      [
+        "order_code",
+        5
+      ],
+      [
+        "patient_id",
+        5
+      ],
+      [
         "action",
-        2
+        4
+      ],
+      [
+        "connector_id",
+        3
       ],
       [
         "prompt_id",
@@ -20,52 +44,28 @@
         2
       ],
       [
+        "session_id",
+        2
+      ],
+      [
         "task_type",
         2
       ],
       [
-        "status",
-        1
+        "stage",
+        2
       ],
       [
-        "provider_type",
-        1
+        "created_at",
+        2
       ],
       [
-        "key_prefix",
-        1
+        "sample_code",
+        2
       ],
       [
-        "clinic_id",
-        1
-      ],
-      [
-        "doctor_id",
-        1
-      ],
-      [
-        "fingerprint",
-        1
-      ],
-      [
-        "adapter_type",
-        1
-      ],
-      [
-        "event_type",
-        1
-      ],
-      [
-        "event_id",
-        1
-      ],
-      [
-        "user_id",
-        1
-      ],
-      [
-        "partner_id",
-        1
+        "order_id",
+        2
       ]
     ]
   },
@@ -81,7 +81,25 @@
         "dialect_options": {}
       }
     ],
+    "ai_platform_governance_policies": [
+      {
+        "name": "ix_ai_platform_governance_policies_organization_id",
+        "column_names": [
+          "organization_id"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      }
+    ],
     "ai_platform_inference_jobs": [
+      {
+        "name": "ix_ai_platform_inference_jobs_organization_id",
+        "column_names": [
+          "organization_id"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      },
       {
         "name": "ix_ai_platform_inference_jobs_prompt_id",
         "column_names": [
@@ -97,11 +115,31 @@
         ],
         "unique": 0,
         "dialect_options": {}
+      }
+    ],
+    "ai_platform_memory_messages": [
+      {
+        "name": "ix_ai_platform_memory_messages_session_id",
+        "column_names": [
+          "session_id"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      }
+    ],
+    "ai_platform_memory_sessions": [
+      {
+        "name": "ix_ai_platform_memory_sessions_organization_id",
+        "column_names": [
+          "organization_id"
+        ],
+        "unique": 0,
+        "dialect_options": {}
       },
       {
-        "name": "ix_ai_platform_inference_jobs_status",
+        "name": "ix_ai_platform_memory_sessions_user_id",
         "column_names": [
-          "status"
+          "user_id"
         ],
         "unique": 0,
         "dialect_options": {}
@@ -137,36 +175,25 @@
         "dialect_options": {}
       }
     ],
-    "ai_platform_usage_metrics": [
+    "ai_platform_rag_chunks": [
       {
-        "name": "ix_ai_platform_usage_metrics_provider_id",
+        "name": "ix_ai_platform_rag_chunks_document_id",
         "column_names": [
-          "provider_id"
-        ],
-        "unique": 0,
-        "dialect_options": {}
-      },
-      {
-        "name": "ix_ai_platform_usage_metrics_task_type",
-        "column_names": [
-          "task_type"
+          "document_id"
         ],
         "unique": 0,
         "dialect_options": {}
       }
     ],
-    "alerts": [],
-    "api_clients": [],
-    "api_keys": [
+    "ai_platform_rag_documents": [
       {
-        "name": "ix_api_keys_key_prefix",
+        "name": "ix_ai_platform_rag_documents_organization_id",
         "column_names": [
-          "key_prefix"
+          "organization_id"
         ],
         "unique": 0,
         "dialect_options": {}
       }
-    ],
-    "api_usage_logs": []
+    ]
   }
 }

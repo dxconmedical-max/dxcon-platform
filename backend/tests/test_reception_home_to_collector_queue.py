@@ -38,6 +38,7 @@ from app.services.sample_collection_workflow import SampleCollectionWorkflowServ
 
 class ReceptionHomeToCollectorQueueTests(unittest.TestCase):
     def setUp(self):
+        os.environ["DATABASE_URL"] = f"sqlite:///{_TEST_DB.name}"
         self.app = create_app()
         self.app.config["TESTING"] = True
         self.client = self.app.test_client()
@@ -45,6 +46,8 @@ class ReceptionHomeToCollectorQueueTests(unittest.TestCase):
         self.ctx.push()
         db.drop_all()
         db.create_all()
+        from tests.p06_auth_helper import attach_admin_client
+        attach_admin_client(self, role="SUPER_ADMIN")
         biz.ensure_test_catalog_seed()
         self.reception = User(
             email=f"rx-{uuid.uuid4().hex[:6]}@test.local",

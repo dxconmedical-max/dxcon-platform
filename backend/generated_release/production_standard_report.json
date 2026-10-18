@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-02T15:17:44.460889+00:00",
+  "generated_at": "2026-08-12T14:40:30.026271+00:00",
   "release": "enterprise-hardening-pack-2",
   "checks": {
     "logging": {
@@ -9,11 +9,18 @@
         "api_key",
         "authorization",
         "cookie",
+        "credential",
+        "device_secret",
+        "ingest_secret",
         "jwt",
         "password",
+        "password_hash",
+        "password_secret",
         "refresh_token",
         "secret",
-        "token"
+        "token",
+        "x-device-secret",
+        "x-device-signature"
       ],
       "json_formatter": "JsonLogFormatter"
     },
@@ -35,6 +42,7 @@
         "cors_origins": "*",
         "cors_strict_safe": true,
         "redis_configured": false,
+        "queue_provider": "memory",
         "smtp_configured": false,
         "database_dialect": "sqlite",
         "storage_backend": "local",

@@ -1,6 +1,7 @@
 from flask import Blueprint, request
 import uuid
 
+from app.core.authenticated_identity import blueprint_require_authenticated_user
 from app.extensions.db import db
 from app.models.invoice import Invoice
 from app.models.order import Order
@@ -12,6 +13,7 @@ invoices_bp = Blueprint(
     __name__,
     url_prefix="/api/v1/invoices"
 )
+blueprint_require_authenticated_user(invoices_bp)
 
 
 @invoices_bp.route("", methods=["GET"])

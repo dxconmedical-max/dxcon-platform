@@ -32,7 +32,42 @@ reception_workspace_bp = Blueprint("reception_workspace", __name__, url_prefix="
 
 
 def _actor() -> str | None:
-    return session.get("email") or request.headers.get("X-Actor") or request.headers.get("X-User-Email")
+    from app.core.authenticated_identity import (
+        authenticated_actor_email,
+        bind_authenticated_identity,
+        get_authenticated_identity,
+    )
+
+    if get_authenticated_identity() is None:
+        bind_authenticated_identity()
+    try:
+        return authenticated_actor_email()
+    except RuntimeError:
+        return session.get("email")
+
+
+def _platform_role() -> str | None:
+    """Server-derived platform role — never X-User-Role / query role."""
+    from app.core.authz import current_platform_role
+
+    return current_platform_role()
+
+
+def _authorized_organization_id():
+    from app.core.tenant_authorization import AuthorizedTenant, resolve_authorized_tenant
+
+    requested = (
+        request.headers.get("X-Organization-ID")
+        or request.headers.get("X-Organization-Id")
+        or request.args.get("organization_id")
+    )
+    tenant = resolve_authorized_tenant(
+        requested_organization_id=requested,
+        require_scope=True,
+    )
+    if not isinstance(tenant, AuthorizedTenant):
+        return None, tenant
+    return tenant.organization_id, None
 
 
 @reception_workspace_bp.route("/dashboard", methods=["GET"])
@@ -99,6 +134,17 @@ def orders_create():
             or request.headers.get("X-Organization-Id")
             or payload.get("organization_id")
         )
+        from app.core.tenant_authorization import AuthorizedTenant, resolve_authorized_tenant
+
+        tenant = resolve_authorized_tenant(
+            requested_organization_id=organization_id,
+            require_scope=True,
+        )
+        if not isinstance(tenant, AuthorizedTenant):
+            return tenant
+        # Non-global users may only stamp their authorized organization.
+        if not tenant.is_global_scope:
+            organization_id = tenant.organization_id
         result = create_reception_order(
             patient_code=payload.get("patient_code", ""),
             test_catalog_ids=payload.get("test_catalog_ids") or payload.get("tests") or [],
@@ -700,14 +746,16 @@ def desk_collections_queue():
     from app.sample_collection_workspace.collection_routing import list_reception_desk_queue
 
     try:
+        org_id, err = _authorized_organization_id()
+        if err:
+            return err
         payload = list_reception_desk_queue(
             status=request.args.get("status"),
             location=request.args.get("location"),
             date_from=request.args.get("date") or request.args.get("date_from"),
             date_to=request.args.get("date_to"),
-            role=session.get("role") or request.headers.get("X-User-Role"),
-            organization_id=request.headers.get("X-Organization-ID")
-            or request.headers.get("X-Organization-Id"),
+            role=_platform_role(),
+            organization_id=org_id,
         )
         return {"success": True, "data": payload}, 200
     except Exception as exc:
@@ -721,11 +769,13 @@ def field_collection_requests():
     from app.sample_collection_workspace.collection_routing import list_home_field_requests
 
     try:
+        org_id, err = _authorized_organization_id()
+        if err:
+            return err
         payload = list_home_field_requests(
             status=request.args.get("status"),
-            role=session.get("role") or request.headers.get("X-User-Role"),
-            organization_id=request.headers.get("X-Organization-ID")
-            or request.headers.get("X-Organization-Id"),
+            role=_platform_role(),
+            organization_id=org_id,
             limit=int(request.args.get("limit") or 200),
         )
         return {"success": True, "data": payload}, 200
