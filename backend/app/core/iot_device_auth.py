@@ -174,7 +174,10 @@ def extract_event_timestamp(payload: dict[str, Any]) -> datetime | None:
     except (TypeError, ValueError, OSError, OverflowError):
         return None
     try:
-        return datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        return parsed
     except Exception:
         return None
 
