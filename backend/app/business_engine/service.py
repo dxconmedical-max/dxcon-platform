@@ -788,19 +788,24 @@ def release_report(order_ref: str, actor: str | None = None) -> BizResult:
 
 
 def render_report_html(result: BizResult, order: BizOrder) -> str:
+    from html import escape as _e
+
     rows = []
     for item in result.items:
         rows.append(
-            f"<tr><td>{item.test_name}</td><td>{item.result_value} {item.unit or ''}</td>"
-            f"<td>{item.reference_range or '—'}</td><td>{item.flag}</td></tr>"
+            f"<tr><td>{_e(str(item.test_name))}</td>"
+            f"<td>{_e(str(item.result_value))} {_e(str(item.unit or ''))}</td>"
+            f"<td>{_e(str(item.reference_range or '—'))}</td><td>{_e(str(item.flag))}</td></tr>"
         )
     return (
-        f"<html><body><h1>DxCon Diagnostic Report</h1>"
-        f"<p>Order: {order.order_code} · Patient: {order.patient_name}</p>"
-        f"<p>Released: {result.released_at}</p>"
-        f"<table border='1' cellpadding='6'><tr><th>Test</th><th>Result</th><th>Reference</th><th>Flag</th></tr>"
+        "<!doctype html><html><head><meta charset=\"utf-8\">"
+        "<title>DxCon Diagnostic Report</title></head>"
+        "<body><h1>DxCon Diagnostic Report</h1>"
+        f"<p>Order: {_e(str(order.order_code))} · Patient: {_e(str(order.patient_name))}</p>"
+        f"<p>Released: {_e(str(result.released_at))}</p>"
+        "<table border='1' cellpadding='6'><tr><th>Test</th><th>Result</th><th>Reference</th><th>Flag</th></tr>"
         f"{''.join(rows)}</table>"
-        f"<p><em>Clinician note: {result.doctor_note or '—'}</em></p></body></html>"
+        f"<p><em>Clinician note: {_e(str(result.doctor_note or '—'))}</em></p></body></html>"
     )
 
 
