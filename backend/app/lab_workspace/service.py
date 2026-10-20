@@ -883,6 +883,20 @@ def ensure_utf8_html(html: str | None) -> str:
     return "<!doctype html><html><head>" + meta + "</head><body>" + text + "</body></html>"
 
 
+def ensure_approver_block(html: str, result) -> str:
+    """Inject the approver block into stored report HTML that predates it."""
+    if "Validated / approved by" in (html or ""):
+        return html
+    block = biz._approver_block_html(result)
+    if not block:
+        return html
+    low = html.lower()
+    i = low.rfind("</body>")
+    if i != -1:
+        return html[:i] + block + html[i:]
+    return html + block
+
+
 def get_released_report_html(order_code: str) -> dict:
     order = _get_order(order_code=order_code)
     result = BizResult.query.filter_by(order_id=order.id).first()
@@ -893,7 +907,7 @@ def get_released_report_html(order_code: str) -> dict:
         "patient_code": order.patient_code,
         "patient_name": order.patient_name,
         "result_code": result.result_code,
-        "html_content": ensure_utf8_html(result.html_content or biz.render_report_html(result, order)),
+        "html_content": ensure_approver_block(ensure_utf8_html(result.html_content or biz.render_report_html(result, order)), result),
         "status": order.status,
         "email_ready": True,
     }
