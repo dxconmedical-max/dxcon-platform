@@ -20,6 +20,8 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
+from app.reporting_engine.approver import describe_approver
+
 REPORT_PDF_TEMPLATE_VERSION = "1.0.0"
 REPORT_PDF_TEMPLATE_ID = "dxcon-clinical-report-v1"
 
@@ -356,7 +358,7 @@ def build_frozen_pdf_document(
             pdf.drawString(left, y, "Clinical authorization")
             y -= 12
             pdf.setFont(font, 9)
-            pdf.drawString(left, y, f"Validated / approved by: {approved_by or '—'}")
+            pdf.drawString(left, y, f"Validated / approved by: {describe_approver(approved_by) or '—'}")
             y -= 11
             pdf.drawString(left, y, f"Approved at: {_fmt_dt(approved_at)}")
             y -= 11
