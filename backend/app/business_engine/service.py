@@ -787,6 +787,24 @@ def release_report(order_ref: str, actor: str | None = None) -> BizResult:
     return result
 
 
+def _approver_block_html(result) -> str:
+    """Approver signature block: name/title from staff profile, falls back to the stored email."""
+    from html import escape as _e
+
+    from app.reporting_engine.approver import describe_approver
+
+    approved_by = getattr(result, "approved_by", None)
+    if not approved_by:
+        return ""
+    who = describe_approver(approved_by) or approved_by
+    at = getattr(result, "approved_at", None)
+    return (
+        "<hr><p><strong>Validated / approved by:</strong> "
+        f"{_e(str(who))}</p>"
+        f"<p><strong>Approved at:</strong> {_e(str(at or '—'))}</p>"
+    )
+
+
 def render_report_html(result: BizResult, order: BizOrder) -> str:
     from html import escape as _e
 
@@ -805,7 +823,8 @@ def render_report_html(result: BizResult, order: BizOrder) -> str:
         f"<p>Released: {_e(str(result.released_at))}</p>"
         "<table border='1' cellpadding='6'><tr><th>Test</th><th>Result</th><th>Reference</th><th>Flag</th></tr>"
         f"{''.join(rows)}</table>"
-        f"<p><em>Clinician note: {_e(str(result.doctor_note or '—'))}</em></p></body></html>"
+        f"<p><em>Clinician note: {_e(str(result.doctor_note or '—'))}</em></p>"
+        f"{_approver_block_html(result)}</body></html>"
     )
 
 
