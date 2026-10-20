@@ -867,6 +867,22 @@ def list_releasable_results(limit: int = 50) -> list[dict]:
     return out
 
 
+def ensure_utf8_html(html: str | None) -> str:
+    """Make sure an HTML document declares UTF-8 so Vietnamese text renders correctly."""
+    text = html or ""
+    if "charset" in text[:2000].lower():
+        return text
+    meta = '<meta charset="utf-8">'
+    low = text.lower()
+    i = low.find("<head>")
+    if i != -1:
+        return text[: i + 6] + meta + text[i + 6 :]
+    j = low.find("<html>")
+    if j != -1:
+        return text[: j + 6] + "<head>" + meta + "</head>" + text[j + 6 :]
+    return "<!doctype html><html><head>" + meta + "</head><body>" + text + "</body></html>"
+
+
 def get_released_report_html(order_code: str) -> dict:
     order = _get_order(order_code=order_code)
     result = BizResult.query.filter_by(order_id=order.id).first()
@@ -877,7 +893,7 @@ def get_released_report_html(order_code: str) -> dict:
         "patient_code": order.patient_code,
         "patient_name": order.patient_name,
         "result_code": result.result_code,
-        "html_content": result.html_content or biz.render_report_html(result, order),
+        "html_content": ensure_utf8_html(result.html_content or biz.render_report_html(result, order)),
         "status": order.status,
         "email_ready": True,
     }
