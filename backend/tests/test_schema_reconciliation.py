@@ -55,6 +55,8 @@ class SchemaReconciliationTests(unittest.TestCase):
             + recon_022.read_text(encoding="utf-8")
             + "\n"
             + recon_023.read_text(encoding="utf-8")
+            + "\n"
+            + (ROOT / "migrations" / "024_report_logos.sql").read_text(encoding="utf-8")
         )
         # Ignore documentation comments when scanning for forbidden DDL
         code_only = "\n".join(
