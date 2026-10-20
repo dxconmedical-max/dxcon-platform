@@ -787,6 +787,12 @@ def release_report(order_ref: str, actor: str | None = None) -> BizResult:
     return result
 
 
+def _logo_header_html() -> str:
+    from app.reporting_engine.logos import logo_header_html
+
+    return logo_header_html("DXCON", "")
+
+
 def _approver_block_html(result) -> str:
     """Approver signature block: name/title from staff profile, falls back to the stored email."""
     from html import escape as _e
@@ -818,7 +824,7 @@ def render_report_html(result: BizResult, order: BizOrder) -> str:
     return (
         "<!doctype html><html><head><meta charset=\"utf-8\">"
         "<title>DxCon Diagnostic Report</title></head>"
-        "<body><h1>DxCon Diagnostic Report</h1>"
+        f"<body>{_logo_header_html()}<h1>DxCon Diagnostic Report</h1>"
         f"<p>Order: {_e(str(order.order_code))} · Patient: {_e(str(order.patient_name))}</p>"
         f"<p>Released: {_e(str(result.released_at))}</p>"
         "<table border='1' cellpadding='6'><tr><th>Test</th><th>Result</th><th>Reference</th><th>Flag</th></tr>"

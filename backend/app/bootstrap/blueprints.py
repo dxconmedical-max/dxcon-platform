@@ -112,6 +112,7 @@ from app.api.regional_cloud.routes import regional_cloud_bp
 from app.api.healthcare_ecosystem.routes import healthcare_ecosystem_bp
 from app.api.laboratories.routes import laboratories_bp
 from app.api.staff_profiles.routes import staff_profiles_bp
+from app.api.report_logos.routes import report_logos_bp
 from app.api.test_catalogs.routes import test_catalogs_bp
 from app.api.orders.routes import orders_bp
 from app.api.order_items.routes import order_items_bp
@@ -318,6 +319,7 @@ def register_blueprints(app):
     app.register_blueprint(healthcare_ecosystem_bp)
     app.register_blueprint(laboratories_bp)
     app.register_blueprint(staff_profiles_bp)
+    app.register_blueprint(report_logos_bp)
     app.register_blueprint(test_catalogs_bp)
     app.register_blueprint(orders_bp)
     app.register_blueprint(order_items_bp)

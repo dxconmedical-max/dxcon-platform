@@ -883,6 +883,20 @@ def ensure_utf8_html(html: str | None) -> str:
     return "<!doctype html><html><head>" + meta + "</head><body>" + text + "</body></html>"
 
 
+def ensure_logo_header(html: str) -> str:
+    """Inject the DxCon logo into stored report HTML that predates it."""
+    if "data:image" in (html or "") or 'class="logo"' in (html or ""):
+        return html
+    header = biz._logo_header_html()
+    if not header:
+        return html
+    low = html.lower()
+    i = low.find("<body>")
+    if i != -1:
+        return html[: i + 6] + header + html[i + 6 :]
+    return header + html
+
+
 def ensure_approver_block(html: str, result) -> str:
     """Inject the approver block into stored report HTML that predates it."""
     if "Validated / approved by" in (html or ""):
@@ -907,7 +921,7 @@ def get_released_report_html(order_code: str) -> dict:
         "patient_code": order.patient_code,
         "patient_name": order.patient_name,
         "result_code": result.result_code,
-        "html_content": ensure_approver_block(ensure_utf8_html(result.html_content or biz.render_report_html(result, order)), result),
+        "html_content": ensure_logo_header(ensure_approver_block(ensure_utf8_html(result.html_content or biz.render_report_html(result, order)), result)),
         "status": order.status,
         "email_ready": True,
     }
