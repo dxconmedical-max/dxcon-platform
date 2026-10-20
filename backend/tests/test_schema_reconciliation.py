@@ -47,7 +47,15 @@ class SchemaReconciliationTests(unittest.TestCase):
         self.assertTrue(RECON.exists(), "021_schema_reconciliation.sql missing")
         recon_022 = ROOT / "migrations" / "022_iot_device_ingestion_security.sql"
         self.assertTrue(recon_022.exists(), "022_iot_device_ingestion_security.sql missing")
-        text = RECON.read_text(encoding="utf-8") + "\n" + recon_022.read_text(encoding="utf-8")
+        recon_023 = ROOT / "migrations" / "023_staff_profiles.sql"
+        self.assertTrue(recon_023.exists(), "023_staff_profiles.sql missing")
+        text = (
+            RECON.read_text(encoding="utf-8")
+            + "\n"
+            + recon_022.read_text(encoding="utf-8")
+            + "\n"
+            + recon_023.read_text(encoding="utf-8")
+        )
         # Ignore documentation comments when scanning for forbidden DDL
         code_only = "\n".join(
             ln for ln in text.splitlines() if ln.strip() and not ln.strip().startswith("--")
