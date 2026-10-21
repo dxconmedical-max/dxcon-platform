@@ -821,6 +821,12 @@ def release_report(order_ref: str, actor: str | None = None) -> BizResult:
     return result
 
 
+def _vn(value) -> str:
+    from app.core.vn_time import format_vn_time
+
+    return format_vn_time(value)
+
+
 def _logo_header_html() -> str:
     from app.reporting_engine.logos import logo_header_html
 
@@ -841,7 +847,7 @@ def _approver_block_html(result) -> str:
     return (
         "<hr><p><strong>Validated / approved by:</strong> "
         f"{_e(str(who))}</p>"
-        f"<p><strong>Approved at:</strong> {_e(str(at or '—'))}</p>"
+        f"<p><strong>Approved at:</strong> {_e(_vn(at))}</p>"
     )
 
 
@@ -860,7 +866,7 @@ def render_report_html(result: BizResult, order: BizOrder) -> str:
         "<title>DxCon Diagnostic Report</title></head>"
         f"<body>{_logo_header_html()}<h1>DxCon Diagnostic Report</h1>"
         f"<p>Order: {_e(str(order.order_code))} · Patient: {_e(str(order.patient_name))}</p>"
-        f"<p>Released: {_e(str(result.released_at))}</p>"
+        f"<p>Released: {_e(_vn(result.released_at))}</p>"
         "<table border='1' cellpadding='6'><tr><th>Test</th><th>Result</th><th>Reference</th><th>Flag</th></tr>"
         f"{''.join(rows)}</table>"
         f"<p><em>Clinician note: {_e(str(result.doctor_note or '—'))}</em></p>"
