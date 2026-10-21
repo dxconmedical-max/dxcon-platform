@@ -883,6 +883,13 @@ def ensure_utf8_html(html: str | None) -> str:
     return "<!doctype html><html><head>" + meta + "</head><body>" + text + "</body></html>"
 
 
+def ensure_vn_time(html: str) -> str:
+    """Show stored report timestamps in Vietnam time."""
+    from app.core.vn_time import localize_report_times
+
+    return localize_report_times(html)
+
+
 def ensure_logo_header(html: str) -> str:
     """Inject the DxCon logo into stored report HTML that predates it."""
     if "data:image" in (html or "") or 'class="logo"' in (html or ""):
@@ -921,7 +928,7 @@ def get_released_report_html(order_code: str) -> dict:
         "patient_code": order.patient_code,
         "patient_name": order.patient_name,
         "result_code": result.result_code,
-        "html_content": ensure_logo_header(ensure_approver_block(ensure_utf8_html(result.html_content or biz.render_report_html(result, order)), result)),
+        "html_content": ensure_vn_time(ensure_logo_header(ensure_approver_block(ensure_utf8_html(result.html_content or biz.render_report_html(result, order)), result))),
         "status": order.status,
         "email_ready": True,
     }

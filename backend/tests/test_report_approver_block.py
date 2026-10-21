@@ -24,7 +24,7 @@ class ApproverBlockTests(unittest.TestCase):
         html = render_report_html(*_fake())
         self.assertIn("Validated / approved by", html)
         self.assertIn("dr@x.vn", html)
-        self.assertIn("2026-10-20 16:00", html)
+        self.assertIn("20/10/2026 23:00:00 (GMT+7)", html)
 
     def test_no_block_without_approver_and_still_escaped(self):
         self.assertNotIn("Validated / approved by", render_report_html(*_fake(approved_by=None)))
