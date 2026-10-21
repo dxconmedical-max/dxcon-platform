@@ -34,7 +34,7 @@ jobs:
 
       - name: Unit tests
         env:
-          DATABASE_URL: sqlite:///:memory:
+          DATABASE_URL: "sqlite:///:memory:"
         run: |
           python -m unittest \
             tests.test_rc_security_gate \
@@ -50,19 +50,19 @@ jobs:
 
       - name: Health check
         env:
-          DATABASE_URL: sqlite:///:memory:
+          DATABASE_URL: "sqlite:///:memory:"
         run: |
           python3 scripts/health_check.py
 
       - name: Route check
         env:
-          DATABASE_URL: sqlite:///:memory:
+          DATABASE_URL: "sqlite:///:memory:"
         run: |
           python3 scripts/check_routes.py
 
       - name: Release 1 verification
         env:
-          DATABASE_URL: sqlite:///:memory:
+          DATABASE_URL: "sqlite:///:memory:"
         run: |
           python3 scripts/verify_release_1.py
 
