@@ -217,12 +217,14 @@ def create_reception_order(
 ) -> dict[str, Any]:
     if not test_catalog_ids:
         raise ReceptionWorkspaceError("At least one test is required")
+    source = biz.order_source_from_collection(collection_mode, (pickup or {}).get("clinic_name"))
     order = biz.create_order(
         patient_code=patient_code,
         test_catalog_ids=test_catalog_ids,
         discount=discount,
         note=note,
         actor=actor,
+        **source,
     )
     biz.submit_order_for_payment(order.order_code, actor=actor)
     invoice = biz.create_invoice_from_order(order.order_code, actor=actor)

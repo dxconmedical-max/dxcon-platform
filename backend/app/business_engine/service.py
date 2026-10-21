@@ -267,6 +267,19 @@ def patient_to_detail(patient: Patient) -> dict:
 ORDER_SOURCE_TYPES = {"CLINIC", "WALK_IN", "HOME", "OTHER"}
 
 
+def order_source_from_collection(collection_mode: str | None, clinic_name: str | None = None) -> dict:
+    """Derive order source from the reception collection mode. Unknown mode means unknown source."""
+    mode = str(collection_mode or "").strip().upper()
+    if mode in {"AT_RECEPTION", "DESK"}:
+        return {"source_type": "WALK_IN", "source_org_name_raw": None}
+    if mode in {"HOME", "HOME_COLLECTION"}:
+        return {"source_type": "HOME", "source_org_name_raw": None}
+    if mode in {"CLINIC", "CLINIC_COLLECTION"}:
+        name = str(clinic_name or "").strip()[:255] or None
+        return {"source_type": "CLINIC", "source_org_name_raw": name}
+    return {"source_type": None, "source_org_name_raw": None}
+
+
 def normalize_order_source(value: str | None) -> str | None:
     """Empty means unknown (older callers). Anything else must be a known source type."""
     text = str(value or "").strip().upper()
