@@ -26,6 +26,12 @@ class BizOrder(db.Model):
 
     items = db.relationship("BizOrderItem", backref="order", lazy=True, cascade="all, delete-orphan")
 
+    source_type = db.Column(db.String(30))
+    source_org_code = db.Column(db.String(100), index=True)
+    source_org_name_raw = db.Column(db.String(255))
+    external_ref = db.Column(db.String(100))
+    attributes = db.Column(db.Text)
+
     def to_dict(self, include_items: bool = True) -> dict:
         payload = {
             "id": self.id,
