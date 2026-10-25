@@ -224,6 +224,7 @@ def create_reception_order(
         discount=discount,
         note=note,
         actor=actor,
+        organization_id=organization_id,
         **source,
     )
     biz.submit_order_for_payment(order.order_code, actor=actor)

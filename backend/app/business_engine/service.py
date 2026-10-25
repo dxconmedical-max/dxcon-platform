@@ -301,6 +301,7 @@ def create_order(
     source_org_code: str | None = None,
     source_org_name_raw: str | None = None,
     external_ref: str | None = None,
+    organization_id: str | None = None,
 ) -> BizOrder:
     patient = Patient.query.get(patient_code)
     if not patient:
@@ -316,6 +317,7 @@ def create_order(
         source_org_code=(str(source_org_code).strip()[:100] or None) if source_org_code else None,
         source_org_name_raw=(str(source_org_name_raw).strip()[:255] or None) if source_org_name_raw else None,
         external_ref=(str(external_ref).strip()[:100] or None) if external_ref else None,
+        organization_id=(str(organization_id).strip()[:36] or None) if organization_id else None,
     )
     db.session.add(order)
     db.session.flush()
