@@ -6,6 +6,8 @@ class Patient(db.Model):
 
     __tablename__ = "patients"
 
+    organization_id = db.Column(db.String(36), index=True)
+
     patient_code = db.Column(
         db.String(50),
         primary_key=True,

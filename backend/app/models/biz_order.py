@@ -26,6 +26,7 @@ class BizOrder(db.Model):
 
     items = db.relationship("BizOrderItem", backref="order", lazy=True, cascade="all, delete-orphan")
 
+    organization_id = db.Column(db.String(36), index=True)
     source_type = db.Column(db.String(30))
     source_org_code = db.Column(db.String(100), index=True)
     source_org_name_raw = db.Column(db.String(255))
