@@ -70,14 +70,16 @@ def _collection_is_lab_received(collection: BizCollection | None) -> bool:
     return bool(collection.accession_number) or collection.status == COLLECTION_DELIVERED
 
 
-def duplicate_warnings(*, phone: str | None = None, national_id: str | None = None) -> list[dict]:
+def duplicate_warnings(*, phone: str | None = None, national_id: str | None = None, scope=None) -> list[dict]:
+    from app.core.patient_scope import apply_patient_scope
+
     warnings: list[dict] = []
     if phone and phone.strip():
-        existing = Patient.query.filter_by(phone=phone.strip()).first()
+        existing = apply_patient_scope(Patient.query.filter_by(phone=phone.strip()), scope).first()
         if existing:
             warnings.append({"field": "phone", "message": f"Phone already registered to {existing.full_name}", "patient_code": existing.patient_code})
     if national_id and national_id.strip():
-        existing = Patient.query.filter_by(national_id=national_id.strip()).first()
+        existing = apply_patient_scope(Patient.query.filter_by(national_id=national_id.strip()), scope).first()
         if existing:
             warnings.append({"field": "national_id", "message": f"National ID already registered to {existing.full_name}", "patient_code": existing.patient_code})
     return warnings
@@ -88,18 +90,22 @@ def fast_search_patients(
     *,
     limit: int = 20,
     page: int = 1,
+    scope=None,
 ) -> dict[str, Any]:
+    from app.core.patient_scope import apply_patient_scope
+
     q = (query or "").strip()
     if not q:
-        rows = Patient.query.order_by(Patient.created_at.desc()).limit(limit).offset((page - 1) * limit).all()
-        total = Patient.query.count()
+        scoped = apply_patient_scope(Patient.query, scope)
+        rows = scoped.order_by(Patient.created_at.desc()).limit(limit).offset((page - 1) * limit).all()
+        total = scoped.count()
         return {"data": [_patient_search_row(p) for p in rows], "pagination": {"page": page, "per_page": limit, "total": total}}
 
     if q.lower().startswith("dxcon:patient:"):
         q = q.split(":")[-1]
 
     pattern = f"%{q}%"
-    base = Patient.query.filter(
+    base = apply_patient_scope(Patient.query, scope).filter(
         or_(
             Patient.patient_code.ilike(pattern),
             Patient.full_name.ilike(pattern),
