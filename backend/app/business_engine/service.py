@@ -126,16 +126,18 @@ def create_patient(
     national_id: str | None = None,
     patient_code: str | None = None,
     actor: str | None = None,
+    organization_id: str | None = None,
 ) -> Patient:
+    scope_org = (str(organization_id).strip()[:36] or None) if organization_id else None
     if not full_name or not full_name.strip():
         raise BusinessEngineError("full_name is required")
     phone_norm = _normalize_phone(phone)
     if phone_norm:
-        existing = Patient.query.filter_by(phone=phone_norm).first()
+        existing = Patient.query.filter_by(phone=phone_norm, organization_id=scope_org).first()
         if existing:
             raise BusinessEngineError(f"Patient with phone {phone_norm} already exists")
     if national_id and national_id.strip():
-        existing_nid = Patient.query.filter_by(national_id=national_id.strip()).first()
+        existing_nid = Patient.query.filter_by(national_id=national_id.strip(), organization_id=scope_org).first()
         if existing_nid:
             raise BusinessEngineError(f"Patient with national_id already exists")
     code = (patient_code or _code("P")).strip()
@@ -175,6 +177,8 @@ def create_patient(
             national_id=(national_id or "").strip() or None,
         )
         db.session.add(patient)
+    if scope_org:
+        patient.organization_id = scope_org
     profile = PatientProfile(
         patient_id=code,
         qr_code=code,
@@ -194,7 +198,11 @@ def update_patient(patient_code: str, **fields) -> Patient:
     if phone is not None:
         phone_norm = _normalize_phone(phone)
         if phone_norm:
-            clash = Patient.query.filter(Patient.phone == phone_norm, Patient.patient_code != patient_code).first()
+            clash = Patient.query.filter(
+                Patient.phone == phone_norm,
+                Patient.patient_code != patient_code,
+                Patient.organization_id == patient.organization_id,
+            ).first()
             if clash:
                 raise BusinessEngineError("Phone already used by another patient")
         patient.phone = phone_norm
