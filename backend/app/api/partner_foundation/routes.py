@@ -70,7 +70,7 @@ def _scoped_org_filter(query, model, *, column_name: str = "organization_id"):
 
 
 @partner_foundation_bp.route("/bootstrap", methods=["POST"])
-@roles_required("SUPER_ADMIN", "SYSTEM_ADMIN", "ADMIN")
+@roles_required("SUPER_ADMIN", "SYSTEM_ADMIN")
 def bootstrap():
     ensure_default_organization()
     seed_organization_roles()
