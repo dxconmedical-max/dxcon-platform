@@ -1112,8 +1112,12 @@ def get_patient_portal_data(patient_code: str) -> dict:
 
 
 def ensure_test_catalog_seed() -> list[TestCatalog]:
+    import os
+
     if TestCatalog.query.count():
         return TestCatalog.query.limit(5).all()
+    if os.getenv("TEST_CATALOG_AUTOSEED", "true").strip().lower() in {"0", "false", "no", "off"}:
+        return []
     samples = [
         ("CBC", "Complete Blood Count", "Hematology", "Blood", 150000),
         ("GLU", "Glucose Fasting", "Chemistry", "Serum", 80000),
