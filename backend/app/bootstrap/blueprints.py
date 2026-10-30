@@ -158,6 +158,7 @@ from app.web.dashboard import dashboard_web_bp
 from app.web.patients import patients_web_bp
 from app.web.companies import companies_web_bp
 from app.web.marketplace import marketplace_web_bp
+from app.core.web_auth_gate import init_web_auth_gate
 from app.web.partners import partners_web_bp
 from app.web.scheduling import scheduling_web_bp
 from app.web.order_lifecycle import order_lifecycle_web_bp
@@ -367,6 +368,7 @@ def register_blueprints(app):
     app.register_blueprint(patients_web_bp)
     app.register_blueprint(companies_web_bp)
     app.register_blueprint(marketplace_web_bp)
+    init_web_auth_gate(app)
     app.register_blueprint(partners_web_bp)
     app.register_blueprint(scheduling_web_bp)
     app.register_blueprint(order_lifecycle_web_bp)
