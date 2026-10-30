@@ -7,6 +7,7 @@ from flask import Blueprint, request, session
 from app.business_engine.service import BusinessEngineError
 from app.extensions.db import db
 from app.reception_workspace.auth import reception_api_read, reception_api_write
+from app.core.patient_scope import resolve_patient_scope
 from app.reception_workspace.service import (
     ReceptionWorkspaceError,
     collect_payment,
@@ -79,10 +80,14 @@ def dashboard():
 @reception_workspace_bp.route("/search", methods=["GET"])
 @reception_api_read
 def search():
+    scope, scope_error = resolve_patient_scope()
+    if scope_error is not None:
+        return scope_error
     result = fast_search_patients(
         request.args.get("q") or request.args.get("query") or "",
         limit=int(request.args.get("limit", request.args.get("per_page", 20))),
         page=int(request.args.get("page", 1)),
+        scope=scope,
     )
     return {"success": True, **result}, 200
 
@@ -91,8 +96,11 @@ def search():
 @reception_api_write
 def patients_register():
     payload = request.get_json(silent=True) or {}
+    scope, scope_error = resolve_patient_scope()
+    if scope_error is not None:
+        return scope_error
     try:
-        result = register_patient(payload, actor=_actor(), force=bool(payload.get("force")))
+        result = register_patient(payload, actor=_actor(), force=bool(payload.get("force")), scope=scope)
         if result.get("duplicate") and not result.get("ok"):
             return {"success": False, "duplicate": True, "warnings": result.get("warnings", [])}, 409
         db.session.commit()

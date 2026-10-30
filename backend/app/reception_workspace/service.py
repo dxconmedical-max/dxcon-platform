@@ -131,8 +131,9 @@ def register_patient(
     *,
     actor: str | None = None,
     force: bool = False,
+    scope=None,
 ) -> dict[str, Any]:
-    warnings = duplicate_warnings(phone=data.get("phone"), national_id=data.get("national_id"))
+    warnings = duplicate_warnings(phone=data.get("phone"), national_id=data.get("national_id"), scope=scope)
     if warnings and not force:
         return {"ok": False, "warnings": warnings, "duplicate": True}
 
@@ -146,6 +147,7 @@ def register_patient(
         national_id=data.get("national_id"),
         patient_code=(str(data["patient_code"]).strip() if data.get("patient_code") else None),
         actor=actor,
+        organization_id=(scope.organization_id if scope is not None and not scope.is_global else None),
     )
     queue_entry = reception_service.create_queue_entry(
         patient.patient_code,
