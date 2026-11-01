@@ -33,10 +33,11 @@ jobs:
           python -m compileall app scripts tests
 
       - name: Unit tests
-        env:
-          DATABASE_URL: "sqlite:///:memory:"
         run: |
-          python -m unittest \
+          # One process per module, each with its own file database.
+          # These modules change process-wide state and break each other when run in one process.
+          failed=0
+          for m in \
             tests.test_rc_security_gate \
             tests.test_cors_hardening \
             tests.test_reception_workspace \
@@ -45,8 +46,13 @@ jobs:
             tests.test_role_dashboards \
             tests.test_executive_platform \
             tests.test_portal_workspace \
-            tests.test_reporting_engine \
-            -v
+            tests.test_reporting_engine; do
+            echo "=== $m"
+            if ! DATABASE_URL="sqlite:///$RUNNER_TEMP/${m#tests.}.db" python -m unittest "$m" -v; then
+              failed=1
+            fi
+          done
+          exit $failed
 
       - name: Health check
         env:

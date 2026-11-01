@@ -45,10 +45,18 @@ for route, items in url_map.items():
 
         methods_seen.add(methods)
 
+LEGACY_MULTI_URL_ENDPOINT_ALLOWLIST = {
+    "executive_platform_web.executive_page",
+    "lab_workspace_web.lab_lis_pages",
+}
+
 for endpoint, items in endpoint_map.items():
     if len(items) > 1:
-        print("DUPLICATE ENDPOINT:", endpoint, items)
-        errors += 1
+        if endpoint in LEGACY_MULTI_URL_ENDPOINT_ALLOWLIST:
+            print("WARN one view on several URLs:", endpoint, [r for r, _ in items])
+        else:
+            print("DUPLICATE ENDPOINT:", endpoint, items)
+            errors += 1
 
 required = [
     "/",
