@@ -5,6 +5,7 @@ from __future__ import annotations
 from flask import Blueprint, redirect, request
 
 from app.utils.auth import login_required
+from app.core.web_authz import web_roles_required
 from app.web.launch_ui_lib import (
     collector_dashboard_body,
     doctor_dashboard_body,
@@ -105,6 +106,7 @@ def app_doctor():
 
 
 @launch_ui_bp.route("/app/collector")
+@web_roles_required("SUPER_ADMIN", "SYSTEM_ADMIN", "ADMIN", "COLLECTOR")
 @login_required
 def app_collector():
     return render_page("Collector Dashboard", collector_dashboard_body(), active_nav="/app/collector")
@@ -117,6 +119,7 @@ def app_patient():
 
 
 @launch_ui_bp.route("/app/system")
+@web_roles_required("SUPER_ADMIN", "SYSTEM_ADMIN", "ADMIN")
 @login_required
 def app_system():
     return render_page("System Center", system_dashboard_body(), active_nav="/app/system")

@@ -6,6 +6,8 @@ import html
 
 from flask import Blueprint, render_template_string
 
+from app.core.web_authz import web_roles_required
+
 from app.mdm.registry import ENTITY_LABELS, ENTITY_TYPES
 from app.mdm.service import dashboard_stats
 
@@ -32,6 +34,7 @@ def _esc(value) -> str:
 
 
 @mdm_web_bp.route("/app/mdm")
+@web_roles_required("SUPER_ADMIN", "SYSTEM_ADMIN", "ADMIN")
 def mdm_dashboard():
     stats = dashboard_stats()
     totals = stats["totals"]
