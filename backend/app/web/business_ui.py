@@ -11,9 +11,19 @@ from app.business_engine.service import BusinessEngineError
 from app.extensions.db import db
 from app.models.test_catalog import TestCatalog
 from app.utils.auth import login_required
+from app.core.web_authz import web_roles_required
 from app.web.launch_ui_lib import render_page
 
 business_ui_bp = Blueprint("business_ui", __name__)
+
+_ADMINS = ("SUPER_ADMIN", "SYSTEM_ADMIN", "ADMIN")
+FRONT_DESK_ROLES = _ADMINS + ("RECEPTION",)
+PAYMENT_ROLES = _ADMINS + ("RECEPTION", "ACCOUNTING")
+COLLECT_ROLES = _ADMINS + ("RECEPTION", "COLLECTOR")
+LAB_ROLES = _ADMINS + ("LAB", "LAB_TECHNICIAN")
+APPROVE_ROLES = _ADMINS + ("DOCTOR", "LAB")
+RELEASE_ROLES = _ADMINS + ("DOCTOR",)
+STAFF_VIEW_ROLES = _ADMINS + ("RECEPTION", "COLLECTOR", "ACCOUNTING", "LAB", "LAB_TECHNICIAN", "DOCTOR")
 
 
 def _redirect_back(default: str):
@@ -33,6 +43,7 @@ def _error_page(title: str, message: str, back_href: str) -> str:
 
 
 @business_ui_bp.route("/app/business/patients/create", methods=["POST"])
+@web_roles_required(*FRONT_DESK_ROLES)
 @login_required
 def create_patient():
     try:
@@ -53,6 +64,7 @@ def create_patient():
 
 
 @business_ui_bp.route("/app/business/patients/<patient_code>/edit", methods=["POST"])
+@web_roles_required(*FRONT_DESK_ROLES)
 @login_required
 def edit_patient(patient_code: str):
     try:
@@ -74,6 +86,7 @@ def edit_patient(patient_code: str):
 
 
 @business_ui_bp.route("/app/business/orders/create", methods=["POST"])
+@web_roles_required(*FRONT_DESK_ROLES)
 @login_required
 def create_order():
     try:
@@ -94,6 +107,7 @@ def create_order():
 
 
 @business_ui_bp.route("/app/business/orders/<order_ref>/mark-paid", methods=["POST"])
+@web_roles_required(*PAYMENT_ROLES)
 @login_required
 def mark_paid(order_ref: str):
     try:
@@ -110,6 +124,7 @@ def mark_paid(order_ref: str):
 
 
 @business_ui_bp.route("/app/business/orders/<order_ref>/collection", methods=["POST"])
+@web_roles_required(*COLLECT_ROLES)
 @login_required
 def create_collection(order_ref: str):
     try:
@@ -126,6 +141,7 @@ def create_collection(order_ref: str):
 
 
 @business_ui_bp.route("/app/business/orders/<order_ref>/collect", methods=["POST"])
+@web_roles_required(*COLLECT_ROLES)
 @login_required
 def collect_sample(order_ref: str):
     try:
@@ -139,6 +155,7 @@ def collect_sample(order_ref: str):
 
 
 @business_ui_bp.route("/app/business/orders/<order_ref>/receive", methods=["POST"])
+@web_roles_required(*LAB_ROLES)
 @login_required
 def receive_sample(order_ref: str):
     try:
@@ -155,6 +172,7 @@ def receive_sample(order_ref: str):
 
 
 @business_ui_bp.route("/app/business/orders/<order_ref>/enter-results", methods=["POST"])
+@web_roles_required(*LAB_ROLES)
 @login_required
 def enter_results(order_ref: str):
     try:
@@ -182,6 +200,7 @@ def enter_results(order_ref: str):
 
 
 @business_ui_bp.route("/app/business/orders/<order_ref>/approve", methods=["POST"])
+@web_roles_required(*APPROVE_ROLES)
 @login_required
 def approve_result(order_ref: str):
     try:
@@ -194,6 +213,7 @@ def approve_result(order_ref: str):
 
 
 @business_ui_bp.route("/app/business/orders/<order_ref>/release", methods=["POST"])
+@web_roles_required(*RELEASE_ROLES)
 @login_required
 def release_report(order_ref: str):
     try:
@@ -206,6 +226,7 @@ def release_report(order_ref: str):
 
 
 @business_ui_bp.route("/app/business/reports/<result_code>/print", methods=["GET"])
+@web_roles_required(*STAFF_VIEW_ROLES)
 @login_required
 def print_report(result_code: str):
     try:
