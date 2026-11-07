@@ -15,6 +15,8 @@ import {
   fetchReceptionOrder,
   fetchReceptionTests,
   getOrderCode,
+  listReceptionClinics,
+  type ReceptionClinic,
   type ReceptionOrderCreate,
   type ReceptionOrderPricing,
   type ReceptionTest,
@@ -62,7 +64,12 @@ export type CollectionRequestDraft = {
   notes?: string;
   priority?: string;
   clinic_name?: string;
+  /** Organization id of the referring clinic when picked from the list (CLINIC_COLLECTION only). */
+  referring_organization_id?: string;
 };
+
+/** Select value meaning "type the clinic name by hand". */
+const CLINIC_MANUAL = "__manual__";
 
 export function collectionModeLabel(mode: CollectionRequestDraft["mode"]): string {
   if (mode === "AT_RECEPTION") return "DESK (at reception)";
@@ -74,12 +81,17 @@ export function CollectionRequestStep({
   patient,
   selection,
   initial,
+  accessToken,
+  organizationId,
   onContinue,
   onBack,
 }: {
   patient: SelectedPatient;
   selection: CatalogSelection;
   initial?: CollectionRequestDraft | null;
+  /** Needed to load the clinic list; without it the clinic is typed by hand as before. */
+  accessToken?: string;
+  organizationId?: string | null;
   onContinue: (draft: CollectionRequestDraft) => void;
   onBack: () => void;
 }) {
@@ -99,7 +111,53 @@ export function CollectionRequestStep({
   const [notes, setNotes] = useState(initial?.notes ?? "");
   const [priority, setPriority] = useState(initial?.priority ?? "ROUTINE");
   const [clinicName, setClinicName] = useState(initial?.clinic_name ?? "");
+  const [referringId, setReferringId] = useState(initial?.referring_organization_id ?? "");
+  const [manualClinic, setManualClinic] = useState(
+    Boolean(initial?.clinic_name) && !initial?.referring_organization_id,
+  );
+  const [clinics, setClinics] = useState<ReceptionClinic[]>([]);
+  const [clinicsStatus, setClinicsStatus] = useState<"idle" | "ready" | "failed">("idle");
+  const clinicsRequested = useRef(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Load the referring-clinic list once, the first time the CLINIC mode is chosen.
+  // State is only set in the promise callbacks (never synchronously in the effect body).
+  // Any failure (for example 403 for non-DxCon staff) falls back to typing the name by hand.
+  useEffect(() => {
+    if (mode !== "CLINIC_COLLECTION" || !accessToken || clinicsRequested.current) return;
+    clinicsRequested.current = true;
+    listReceptionClinics({ token: accessToken, organizationId, timeoutMs: 15_000 })
+      .then((items) => {
+        setClinics(items);
+        setClinicsStatus("ready");
+      })
+      .catch(() => {
+        setClinics([]);
+        setClinicsStatus("failed");
+      });
+  }, [mode, accessToken, organizationId]);
+
+  const showClinicSelect = clinicsStatus === "ready" && clinics.length > 0;
+  const showManualClinic = !showClinicSelect || manualClinic;
+
+  function onClinicSelect(value: string) {
+    if (value === CLINIC_MANUAL) {
+      setReferringId("");
+      setClinicName("");
+      setManualClinic(true);
+      return;
+    }
+    const picked = clinics.find((c) => c.id === value);
+    if (!picked) {
+      setReferringId("");
+      setClinicName("");
+      setManualClinic(false);
+      return;
+    }
+    setReferringId(picked.id);
+    setClinicName(picked.name);
+    setManualClinic(false);
+  }
 
   function submit() {
     setError(null);
@@ -144,6 +202,8 @@ export function CollectionRequestStep({
       notes: notes.trim() || undefined,
       priority: mode === "AT_RECEPTION" ? undefined : priority,
       clinic_name: mode === "CLINIC_COLLECTION" ? clinicName.trim() : undefined,
+      referring_organization_id:
+        mode === "CLINIC_COLLECTION" && referringId && !manualClinic ? referringId : undefined,
     });
   }
 
@@ -273,8 +333,35 @@ export function CollectionRequestStep({
         {mode === "CLINIC_COLLECTION" ? (
           <div className="grid gap-3 md:grid-cols-2">
             <div className="md:col-span-2">
-              <Label htmlFor="clinic-name">Clinic *</Label>
-              <Input id="clinic-name" value={clinicName} onChange={(e) => setClinicName(e.target.value)} />
+              <Label htmlFor="clinic-select">Clinic *</Label>
+              {showClinicSelect ? (
+                <select
+                  id="clinic-select"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  value={manualClinic ? CLINIC_MANUAL : referringId}
+                  onChange={(e) => onClinicSelect(e.target.value)}
+                >
+                  <option value="">-- Chọn phòng khám --</option>
+                  {clinics.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                  <option value={CLINIC_MANUAL}>Khác (nhập tay)</option>
+                </select>
+              ) : null}
+              {clinicsStatus === "idle" && Boolean(accessToken) ? (
+                <p className="mt-1 text-xs text-slate-500">Đang tải danh sách phòng khám…</p>
+              ) : null}
+              {showManualClinic ? (
+                <Input
+                  id="clinic-name"
+                  className={showClinicSelect ? "mt-2" : undefined}
+                  placeholder={showClinicSelect ? "Tên phòng khám" : undefined}
+                  value={clinicName}
+                  onChange={(e) => setClinicName(e.target.value)}
+                />
+              ) : null}
             </div>
             <div>
               <Label htmlFor="clinic-date">Preferred date *</Label>
@@ -577,6 +664,7 @@ export function ReviewPricingStep({
           requested_date: collectionRequest.requested_date,
           requested_time_window: collectionRequest.requested_time_window,
           clinic_name: collectionRequest.clinic_name,
+          referring_organization_id: collectionRequest.referring_organization_id,
           priority: collectionRequest.priority,
           collection_note: collectionRequest.notes,
         },
