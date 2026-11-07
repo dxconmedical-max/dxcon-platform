@@ -71,6 +71,52 @@ def _authorized_organization_id():
     return tenant.organization_id, None
 
 
+def _dxcon_staff_error():
+    """None when the caller is DxCon platform staff (global role or member of the internal organization)."""
+    from app.core.errors import build_error_response
+    from app.core.patient_scope import is_internal_org
+    from app.core.tenant_authorization import AuthorizedTenant, resolve_authorized_tenant
+
+    base = resolve_authorized_tenant(requested_organization_id=None, require_scope=True)
+    if not isinstance(base, AuthorizedTenant):
+        return base
+    if base.is_global_scope or is_internal_org(base.organization_id):
+        return None
+    return build_error_response("FORBIDDEN", "Only DxCon staff can choose a referring clinic", 403)
+
+
+def _resolve_referring_clinic(clinic_id: str):
+    from app.core.errors import build_error_response
+
+    denied = _dxcon_staff_error()
+    if denied is not None:
+        return None, denied
+    import app.models.partner_foundation as pf
+
+    clinic = pf.PartnerOrganization.query.filter_by(
+        id=clinic_id, organization_type="CLINIC", status=pf.ORG_STATUS_ACTIVE
+    ).first()
+    if clinic is None:
+        return None, build_error_response("NOT_FOUND", "Clinic not found", 404)
+    return clinic, None
+
+
+@reception_workspace_bp.route("/clinics", methods=["GET"])
+@reception_api_read
+def clinics_list():
+    denied = _dxcon_staff_error()
+    if denied is not None:
+        return denied
+    import app.models.partner_foundation as pf
+
+    rows = (
+        pf.PartnerOrganization.query.filter_by(organization_type="CLINIC", status=pf.ORG_STATUS_ACTIVE)
+        .order_by(pf.PartnerOrganization.organization_name)
+        .all()
+    )
+    return {"success": True, "data": [{"id": r.id, "code": r.organization_code, "name": r.organization_name} for r in rows]}, 200
+
+
 @reception_workspace_bp.route("/dashboard", methods=["GET"])
 @reception_api_read
 def dashboard():
@@ -153,6 +199,14 @@ def orders_create():
         # Non-global users may only stamp their authorized organization.
         if not tenant.is_global_scope:
             organization_id = tenant.organization_id
+        source_org_code = None
+        referring = payload.get("referring_organization_id")
+        if referring:
+            clinic, clinic_error = _resolve_referring_clinic(str(referring))
+            if clinic_error is not None:
+                return clinic_error
+            organization_id = clinic.id
+            source_org_code = clinic.organization_code
         result = create_reception_order(
             patient_code=payload.get("patient_code", ""),
             test_catalog_ids=payload.get("test_catalog_ids") or payload.get("tests") or [],
@@ -161,6 +215,7 @@ def orders_create():
             queue_entry_id=payload.get("queue_entry_id"),
             actor=_actor(),
             organization_id=organization_id,
+            source_org_code=source_org_code,
             collection_mode=payload.get("collection_mode"),
             pickup={
                 "specimen_type": payload.get("specimen_type"),
