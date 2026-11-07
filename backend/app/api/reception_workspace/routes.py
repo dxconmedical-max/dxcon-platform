@@ -199,6 +199,9 @@ def orders_create():
         # Non-global users may only stamp their authorized organization.
         if not tenant.is_global_scope:
             organization_id = tenant.organization_id
+        # The collection job belongs to the organization doing the work (DxCon),
+        # even when the order is stamped with the referring clinic.
+        collection_organization_id = organization_id
         source_org_code = None
         referring = payload.get("referring_organization_id")
         if referring:
@@ -215,6 +218,7 @@ def orders_create():
             queue_entry_id=payload.get("queue_entry_id"),
             actor=_actor(),
             organization_id=organization_id,
+            collection_organization_id=collection_organization_id,
             source_org_code=source_org_code,
             collection_mode=payload.get("collection_mode"),
             pickup={

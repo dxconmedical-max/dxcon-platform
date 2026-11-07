@@ -128,6 +128,27 @@ class ReferringClinicTests(unittest.TestCase):
         self.assertIn(name, self._client("viewerA").get(LOOKUP).get_data(as_text=True))
         self.assertNotIn(name, self._client("viewerB").get(LOOKUP).get_data(as_text=True))
 
+    def test_referred_clinic_pickup_is_owned_by_the_staff_organization(self):
+        from app.models.sample_collection import SampleCollection
+
+        code = self._patient("PICKUP")
+        r = self._post_order(
+            self._client("staff"),
+            code,
+            referring_organization_id=self.orgs["A"],
+            collection_mode="CLINIC_COLLECTION",
+            clinic_name=self.names["A"],
+            requested_date="2026-11-10",
+            requested_time_window="09:00-10:00",
+        )
+        self.assertEqual(r.status_code, 201, r.get_data(as_text=True)[:400])
+        with self.app.app_context():
+            order = self._order(code)
+            self.assertEqual(order.organization_id, self.orgs["A"])
+            collection = SampleCollection.query.filter_by(order_id=order.id).first()
+            self.assertIsNotNone(collection)
+            self.assertEqual(collection.partner_id, self.orgs["INT"])
+
     def test_bad_referring_clinic_is_rejected_and_creates_nothing(self):
         for key, referring, expected in (
             ("staff", str(uuid.uuid4()), 404),
