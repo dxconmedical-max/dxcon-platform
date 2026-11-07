@@ -27,6 +27,7 @@ ROLE_WORKSPACE_ROUTES: dict[str, str] = {
     "PARTNER_OWNER": "/app/clinic",
     "PARTNER_CLINIC_OWNER": "/app/clinic",
     "PATIENT": "/app/patient",
+    "CLINIC_VIEWER": "/app/clinic-results",
 }
 
 DEFAULT_WORKSPACE = "/app"
@@ -41,6 +42,7 @@ WORKSPACE_HOME_ROUTES = (
     "/app/collector",
     "/app/clinic",
     "/app/patient",
+    "/app/clinic-results",
 )
 
 

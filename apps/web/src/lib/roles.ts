@@ -25,6 +25,7 @@ export const ROLE_WORKSPACE_ROUTES: Record<string, string> = {
   PARTNER_OWNER: "/app/clinic",
   PARTNER_CLINIC_OWNER: "/app/clinic",
   PATIENT: "/app/patient",
+  CLINIC_VIEWER: "/app/clinic-results",
 };
 
 export const DEFAULT_WORKSPACE = "/app";
@@ -39,6 +40,7 @@ export const WORKSPACE_ROUTES = [
   "/app/collector",
   "/app/clinic",
   "/app/patient",
+  "/app/clinic-results",
 ] as const;
 
 export type WorkspaceRoute = (typeof WORKSPACE_ROUTES)[number];
