@@ -222,10 +222,15 @@ def create_reception_order(
     organization_id: str | None = None,
     collection_mode: str | None = None,
     pickup: dict | None = None,
+    source_org_code: str | None = None,
 ) -> dict[str, Any]:
     if not test_catalog_ids:
         raise ReceptionWorkspaceError("At least one test is required")
     source = biz.order_source_from_collection(collection_mode, (pickup or {}).get("clinic_name"))
+    if source_org_code:
+        source["source_org_code"] = source_org_code
+        if not source.get("source_type"):
+            source["source_type"] = "CLINIC"
     order = biz.create_order(
         patient_code=patient_code,
         test_catalog_ids=test_catalog_ids,
