@@ -223,6 +223,7 @@ def create_reception_order(
     collection_mode: str | None = None,
     pickup: dict | None = None,
     source_org_code: str | None = None,
+    collection_organization_id: str | None = None,
 ) -> dict[str, Any]:
     if not test_catalog_ids:
         raise ReceptionWorkspaceError("At least one test is required")
@@ -294,7 +295,7 @@ def create_reception_order(
                 order,
                 collection_mode=mode,
                 pickup=pickup or {},
-                organization_id=organization_id,
+                organization_id=collection_organization_id or organization_id,
                 actor=actor,
             )
         except CollectionDomainError as exc:
