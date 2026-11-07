@@ -15,6 +15,7 @@ import {
   fetchReceptionTests,
   getDuplicateWarnings,
   getOrderCode,
+  listReceptionClinics,
   registerWalkIn,
   searchReceptionPatients,
 } from "./reception";
@@ -280,5 +281,59 @@ describe("reception Milestone 1 API client", () => {
       expect.any(String),
       expect.objectContaining({ signal: controller.signal }),
     );
+  });
+});
+
+describe("reception referring clinics", () => {
+  beforeEach(() => {
+    vi.mocked(apiRequest).mockReset();
+  });
+
+  it("lists clinics from the clinics endpoint and drops malformed rows", async () => {
+    vi.mocked(apiRequest).mockResolvedValue({
+      success: true,
+      data: [
+        { id: "org-a", code: "CLN-A01", name: "Phong kham A" },
+        { id: "org-b", name: "Phong kham B" },
+        { code: "NO-ID", name: "Missing id" },
+        { id: "org-noname" },
+      ],
+    });
+    const clinics = await listReceptionClinics(ctx);
+    expect(clinics).toEqual([
+      { id: "org-a", code: "CLN-A01", name: "Phong kham A" },
+      { id: "org-b", code: "", name: "Phong kham B" },
+    ]);
+    expect(apiRequest).toHaveBeenCalledWith(
+      "/api/v1/reception/workspace/clinics",
+      expect.objectContaining({ token: "t", organizationId: "org-1" }),
+    );
+  });
+
+  it("returns an empty list when the response has no data array", async () => {
+    vi.mocked(apiRequest).mockResolvedValue({ success: true });
+    expect(await listReceptionClinics(ctx)).toEqual([]);
+  });
+
+  it("propagates API errors so the UI can fall back to manual entry", async () => {
+    vi.mocked(apiRequest).mockRejectedValue(new ApiError("forbidden", 403));
+    await expect(listReceptionClinics(ctx)).rejects.toBeInstanceOf(ApiError);
+  });
+
+  it("sends referring_organization_id when creating an order", async () => {
+    vi.mocked(apiRequest).mockResolvedValue({
+      success: true,
+      data: { order: { order_code: "ORD-1" }, invoice: {}, pricing: { subtotal: 1, discount: 0, total: 1 } },
+    });
+    await createReceptionOrder(ctx, {
+      patient_code: "P-1",
+      test_catalog_ids: ["t1"],
+      collection_mode: "CLINIC_COLLECTION",
+      clinic_name: "Phong kham A",
+      referring_organization_id: "org-a",
+    });
+    const call = vi.mocked(apiRequest).mock.calls[0];
+    expect(call[0]).toBe("/api/v1/reception/workspace/orders");
+    expect((call[1] as { body: Record<string, unknown> }).body.referring_organization_id).toBe("org-a");
   });
 });

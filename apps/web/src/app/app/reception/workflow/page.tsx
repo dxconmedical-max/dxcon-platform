@@ -195,6 +195,8 @@ function ReceptionMilestone1Panel() {
 
       {!reopening && step === 2 && patient && selection ? (
         <CollectionRequestStep
+          accessToken={accessToken}
+          organizationId={activeOrganizationId}
           patient={patient}
           selection={selection}
           initial={collectionRequest}

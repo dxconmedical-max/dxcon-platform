@@ -47,6 +47,13 @@ export type ReceptionTest = {
   price?: number | null;
 };
 
+/** A referring clinic (organization of type CLINIC) that DxCon staff can attach to an order. */
+export type ReceptionClinic = {
+  id: string;
+  code: string;
+  name: string;
+};
+
 export type ReceptionOrderPricing = {
   subtotal: number;
   discount: number;
@@ -361,6 +368,24 @@ export async function fetchReceptionTests(
   };
 }
 
+/**
+ * GET /api/v1/reception/workspace/clinics — active referring clinics (DxCon staff only).
+ * Non-staff callers get 403; callers should fall back to manual clinic entry.
+ */
+export async function listReceptionClinics(ctx: Ctx): Promise<ReceptionClinic[]> {
+  const response = await apiRequest<Record<string, unknown>>(
+    "/api/v1/reception/workspace/clinics",
+    requestOpts(ctx),
+  );
+  return asArray(response.data)
+    .filter((row) => row.id != null && row.name != null)
+    .map((row) => ({
+      id: String(row.id),
+      code: row.code != null ? String(row.code) : "",
+      name: String(row.name),
+    }));
+}
+
 /** POST /api/v1/reception/workspace/orders — pricing in response is authoritative */
 export async function createReceptionOrder(
   ctx: Ctx,
@@ -382,6 +407,7 @@ export async function createReceptionOrder(
     requested_date?: string;
     requested_time_window?: string;
     clinic_name?: string;
+    referring_organization_id?: string;
     priority?: string;
     collection_note?: string;
     latitude?: string;
@@ -412,6 +438,7 @@ export async function createReceptionOrder(
           requested_date: payload.requested_date,
           requested_time_window: payload.requested_time_window,
           clinic_name: payload.clinic_name,
+          referring_organization_id: payload.referring_organization_id,
           priority: payload.priority,
           collection_note: payload.collection_note,
           latitude: payload.latitude,
