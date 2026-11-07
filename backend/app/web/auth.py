@@ -85,22 +85,17 @@ def demo_login_page():
         return redirect("/login")
 
     role = (request.args.get("role") or "ADMIN").upper()
-    email = DEMO_ROLE_HINTS.get(role, DEMO_ROLE_HINTS["ADMIN"])
+    if role not in DEMO_ROLE_HINTS:
+        return redirect("/login")
+    email = DEMO_ROLE_HINTS[role]
 
     user = User.query.filter_by(email=email).first()
-    if not user:
-        user = User.query.filter(User.role == role).first()
-    if not user and role == "ADMIN":
-        user = User.query.filter(User.role.in_(("ADMIN", "SUPER_ADMIN"))).first()
 
     if user and user.is_active:
         establish_session(user_id=user.id, role=user.role, email=user.email)
         attach_patient_to_session(user)
     else:
-        session["user_id"] = f"demo-{role.lower()}"
-        session["role"] = role
-        session["email"] = email
-        session["demo_mode"] = True
+        return redirect("/login")
 
     return redirect(demo_role_dashboard(role))
 
