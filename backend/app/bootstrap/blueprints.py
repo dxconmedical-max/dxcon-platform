@@ -160,6 +160,7 @@ from app.web.companies import companies_web_bp
 from app.web.marketplace import marketplace_web_bp
 from app.core.web_auth_gate import init_web_auth_gate
 from app.core.api_extra_gate import init_api_extra_gate
+from app.api.clinic_results.routes import clinic_results_bp
 from app.web.partners import partners_web_bp
 from app.web.scheduling import scheduling_web_bp
 from app.web.order_lifecycle import order_lifecycle_web_bp
@@ -371,6 +372,7 @@ def register_blueprints(app):
     app.register_blueprint(marketplace_web_bp)
     init_web_auth_gate(app)
     init_api_extra_gate(app)
+    app.register_blueprint(clinic_results_bp)
     app.register_blueprint(partners_web_bp)
     app.register_blueprint(scheduling_web_bp)
     app.register_blueprint(order_lifecycle_web_bp)
