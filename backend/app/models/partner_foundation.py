@@ -29,6 +29,7 @@ ORG_ROLES: tuple[str, ...] = (
     "RECEPTION",
     "COLLECTOR",
     "FINANCE",
+    "LAB",
     "VIEWER",
 )
 

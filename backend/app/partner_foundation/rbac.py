@@ -29,6 +29,9 @@ ORG_ROLE_PERMISSIONS: dict[str, set[str]] = {
     "FINANCE": {
         "org.view", "contract.view", "price.view", "data.view", "data.export",
     },
+    "LAB": {
+        "org.view", "data.view", "data.create", "data.update",
+    },
     "VIEWER": {
         "org.view", "data.view",
     },
