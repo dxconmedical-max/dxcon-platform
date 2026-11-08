@@ -22,7 +22,9 @@ LAB_PATIENT_REPORT_ROLES = frozenset(
         "LAB",
         "LAB_TECHNICIAN",
         "DOCTOR",
-        "PATIENT",
+        # PATIENT is intentionally absent: there is no link yet between a patient login and a
+        # patient record, so any patient account could read any order. Re-add together with an
+        # ownership check once accounts are linked.
     }
 )
 LAB_ADMIN_ROLES = frozenset({"SUPER_ADMIN", "SYSTEM_ADMIN"})
