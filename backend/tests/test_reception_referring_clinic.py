@@ -149,6 +149,19 @@ class ReferringClinicTests(unittest.TestCase):
             self.assertIsNotNone(collection)
             self.assertEqual(collection.partner_id, self.orgs["INT"])
 
+    def test_cors_preflight_for_the_lookup_is_not_blocked(self):
+        r = self.app.test_client().options(
+            LOOKUP,
+            headers={
+                "Origin": "https://dxcon.com.vn",
+                "Access-Control-Request-Method": "GET",
+                "Access-Control-Request-Headers": "authorization,x-organization-id",
+            },
+        )
+        self.assertIn(r.status_code, (200, 204), r.get_data(as_text=True)[:300])
+        # Real requests still need a login.
+        self.assertEqual(self.app.test_client().get(LOOKUP).status_code, 401)
+
     def test_bad_referring_clinic_is_rejected_and_creates_nothing(self):
         for key, referring, expected in (
             ("staff", str(uuid.uuid4()), 404),
