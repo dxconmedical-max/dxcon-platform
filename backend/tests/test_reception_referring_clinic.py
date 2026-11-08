@@ -149,6 +149,34 @@ class ReferringClinicTests(unittest.TestCase):
             self.assertIsNotNone(collection)
             self.assertEqual(collection.partner_id, self.orgs["INT"])
 
+    def test_report_views_are_logged_with_who_and_which_clinic(self):
+        from app.business_engine.statuses import RESULT_RELEASED
+        from app.extensions.db import db
+        from app.models.audit_log import AuditLog
+        from app.models.biz_order import BizResult
+
+        code = self._patient("AUDIT")
+        r = self._post_order(self._client("staff"), code, referring_organization_id=self.orgs["A"])
+        self.assertEqual(r.status_code, 201, r.get_data(as_text=True)[:400])
+        with self.app.app_context():
+            order = self._order(code)
+            order_code = order.order_code
+            db.session.add(BizResult(result_code=f"RS-{self.tag}-AUD", order_id=order.id, status=RESULT_RELEASED,
+                                     patient_visible=True, released_at=datetime.utcnow(), html_content="<p>aud</p>"))
+            db.session.commit()
+        viewer = self._client("viewerA")
+        self.assertEqual(viewer.get(f"{LOOKUP}/{order_code}").status_code, 200)
+        with self.app.app_context():
+            rows = AuditLog.query.filter_by(action="CLINIC_REPORT_VIEW").all()
+            mine = [x for x in rows if x.object_id == f"{order_code}|org={self.orgs['A']}"]
+            self.assertEqual(len(mine), 1)
+            self.assertEqual(mine[0].user_email.lower(), self.users["viewerA"][1])
+        # A clinic that cannot see the report leaves no "view" entry.
+        self.assertEqual(self._client("viewerB").get(f"{LOOKUP}/{order_code}").status_code, 404)
+        with self.app.app_context():
+            rows = AuditLog.query.filter_by(action="CLINIC_REPORT_VIEW").all()
+            self.assertEqual(len([x for x in rows if x.object_id.startswith(order_code)]), 1)
+
     def test_cors_preflight_for_the_lookup_is_not_blocked(self):
         r = self.app.test_client().options(
             LOOKUP,
