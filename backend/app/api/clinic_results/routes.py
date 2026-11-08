@@ -5,7 +5,12 @@ from __future__ import annotations
 from flask import Blueprint, request
 
 from app.business_engine.statuses import RESULT_RELEASED
-from app.core.authenticated_identity import AuthenticatedIdentity, bind_authenticated_identity
+from app.core.audit import write_audit
+from app.core.authenticated_identity import (
+    AuthenticatedIdentity,
+    authenticated_actor_email,
+    bind_authenticated_identity,
+)
 from app.core.errors import build_error_response
 from app.core.tenant_authorization import AuthorizedTenant, resolve_authorized_tenant
 from app.extensions.db import db
@@ -55,6 +60,18 @@ def _released(org_id: str):
     )
 
 
+def _audit_access(action: str, org_id: str, ref: str) -> None:
+    """Record who looked at clinic results. Raises on failure so nothing is shown without a log entry."""
+    write_audit(
+        action,
+        "ClinicReport",
+        f"{ref}|org={org_id}",
+        user_email=authenticated_actor_email(),
+        ip_address=(request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or request.remote_addr or "")[:100],
+    )
+    db.session.commit()
+
+
 def _not_found():
     return build_error_response("NOT_FOUND", "Report not found", 404)
 
@@ -79,6 +96,7 @@ def list_reports():
         }
         for order, result in rows
     ]
+    _audit_access("CLINIC_REPORT_LIST", org_id, f"page={page}")
     return {"success": True, "data": data, "pagination": {"page": page, "per_page": limit, "total": total}}, 200
 
 
@@ -97,6 +115,7 @@ def get_report(order_code: str):
     except LabWorkspaceError:
         return _not_found()
     order, result = row
+    _audit_access("CLINIC_REPORT_VIEW", org_id, order.order_code)
     payload = {
         "success": True,
         "data": {
