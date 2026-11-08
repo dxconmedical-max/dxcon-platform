@@ -5,14 +5,25 @@ from __future__ import annotations
 from flask import Blueprint, request
 
 from app.business_engine.statuses import RESULT_RELEASED
-from app.core.authenticated_identity import blueprint_require_authenticated_user
+from app.core.authenticated_identity import AuthenticatedIdentity, bind_authenticated_identity
 from app.core.errors import build_error_response
 from app.core.tenant_authorization import AuthorizedTenant, resolve_authorized_tenant
 from app.extensions.db import db
 from app.models.biz_order import BizOrder, BizResult
 
 clinic_results_bp = Blueprint("clinic_results", __name__, url_prefix="/api/v1/clinic-results")
-blueprint_require_authenticated_user(clinic_results_bp)
+
+
+@clinic_results_bp.before_request
+def _require_authenticated_user():
+    # CORS preflight (OPTIONS) never carries credentials; letting it through is what
+    # allows the browser to send the real request. All other methods require a login.
+    if request.method == "OPTIONS":
+        return None
+    result = bind_authenticated_identity()
+    if not isinstance(result, AuthenticatedIdentity):
+        return result
+    return None
 
 
 def _org():
