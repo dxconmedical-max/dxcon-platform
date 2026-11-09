@@ -16,6 +16,7 @@ import {
 import { normalizeApiError } from "@/lib/errors";
 
 import { SectionHeader } from "../_components/ui";
+import { ConsentPanel } from "./ConsentPanel";
 import {
   CatalogSelectStep,
   CollectionRequestStep,
@@ -176,6 +177,15 @@ function ReceptionMilestone1Panel() {
             setPatient(selected);
             setStep(1);
           }}
+        />
+      ) : null}
+
+      {!reopening && (step === 1 || step === 3) && patient ? (
+        <ConsentPanel
+          key={patient.patientCode}
+          accessToken={accessToken}
+          organizationId={activeOrganizationId}
+          patientCode={patient.patientCode}
         />
       ) : null}
 
