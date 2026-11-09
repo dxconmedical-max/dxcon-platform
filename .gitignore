@@ -60,3 +60,4 @@ generated_reports/
 backend/generated_reports/
 backend/generated_reports/JOB-*.*
 backend/generated_reports/DxCon_Report_*.pdf
+backend/uploads/receipts/

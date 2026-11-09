@@ -7,6 +7,13 @@ from flask import Blueprint, request, session
 from app.business_engine.service import BusinessEngineError
 from app.extensions.db import db
 from app.reception_workspace.auth import reception_api_read, reception_api_write
+from app.reception_workspace.consent import (
+    ConsentError,
+    consent_gate_enabled,
+    current_consents,
+    has_required_consent,
+    record_consents,
+)
 from app.core.patient_scope import resolve_patient_scope
 from app.reception_workspace.service import (
     ReceptionWorkspaceError,
@@ -165,6 +172,35 @@ def patient_profile(patient_code: str):
         return {"success": False, "error": str(exc)}, 404
 
 
+def _client_ip() -> str:
+    from flask import request as _req
+
+    return (_req.headers.get("X-Forwarded-For", "").split(",")[0].strip() or _req.remote_addr or "")[:100]
+
+
+@reception_workspace_bp.route("/patients/<patient_code>/consents", methods=["GET"])
+@reception_api_read
+def patient_consents_get(patient_code: str):
+    try:
+        return {"success": True, "data": current_consents(patient_code)}, 200
+    except ConsentError as exc:
+        return {"success": False, "error": str(exc)}, 404
+
+
+@reception_workspace_bp.route("/patients/<patient_code>/consents", methods=["POST"])
+@reception_api_write
+def patient_consents_record(patient_code: str):
+    payload = request.get_json(silent=True) or {}
+    try:
+        data = record_consents(patient_code, payload, actor=_actor(), ip_address=_client_ip())
+        db.session.commit()
+        return {"success": True, "data": data}, 201
+    except ConsentError as exc:
+        db.session.rollback()
+        status = 404 if str(exc) == "Patient not found" else 400
+        return {"success": False, "error": str(exc)}, status
+
+
 @reception_workspace_bp.route("/tests", methods=["GET"])
 @reception_api_read
 def tests_search():
@@ -199,6 +235,12 @@ def orders_create():
         # Non-global users may only stamp their authorized organization.
         if not tenant.is_global_scope:
             organization_id = tenant.organization_id
+        if consent_gate_enabled() and not has_required_consent(payload.get("patient_code", "")):
+            return {
+                "success": False,
+                "code": "consent_required",
+                "error": "Patient consent (LAB_TEST) must be recorded before creating an order.",
+            }, 409
         # The collection job belongs to the organization doing the work (DxCon),
         # even when the order is stamped with the referring clinic.
         collection_organization_id = organization_id
