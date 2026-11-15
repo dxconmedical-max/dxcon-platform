@@ -47,7 +47,7 @@ describe("ConsentPanel", () => {
       ...none,
       consents: {
         ...none.consents,
-        LAB_TEST: { granted: true, status: "GRANTED", version: "draft-2026-11", recorded_at: null },
+        LAB_TEST: { granted: true, status: "GRANTED", version: "v1-2026-11", recorded_at: null },
       },
     });
     const user = userEvent.setup();

@@ -18,7 +18,7 @@ const LABELS: Record<ConsentType, string> = {
   PARTNER_LAB: "Partner laboratories — Phòng xét nghiệm đối tác",
   CLINIC_SHARE: "Share results with referring clinic — Chia sẻ kết quả với phòng khám",
   CONTACT: "Contact by phone or SMS — Liên hệ",
-  OVERSEAS_STORAGE: "Storage and processing abroad (Singapore) — Lưu trữ ở nước ngoài",
+  OVERSEAS_STORAGE: "Data storage and processing — Lưu trữ và xử lý dữ liệu",
 };
 
 type Props = {
