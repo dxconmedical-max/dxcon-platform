@@ -828,7 +828,7 @@ export function OrderConfirmationStep({
     <div className="space-y-5">
       <SectionHeader
         title="Order confirmation"
-        description="Backend-issued order number and authoritative pricing. Payment is out of scope for Milestone 1."
+        description="Backend-issued order number and authoritative pricing. Collect payment below, then hand the sample over to the laboratory."
         actions={
           <Button size="sm" variant="outline" disabled={loading} onClick={() => void refresh()}>
             {loading ? "Refreshing…" : "Refresh"}
