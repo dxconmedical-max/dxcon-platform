@@ -24,7 +24,7 @@ from app.reception_workspace.auth import reception_api_read, reception_api_write
 
 booking_requests_bp = Blueprint("booking_requests", __name__, url_prefix="/api/v1")
 
-BOOKING_CONSENT_VERSION = "draft-2026-11"  # replace with the lawyer-approved version
+BOOKING_CONSENT_VERSION = "v1-2026-11"  # lawyer-approved consent text; bump when the text changes
 SLOTS = frozenset({"MORNING", "AFTERNOON", "ANYTIME"})
 STATUSES = frozenset({"NEW", "CONTACTED", "SCHEDULED", "DONE", "CANCELLED", "SPAM"})
 PER_IP_PER_HOUR = 5

@@ -26,7 +26,7 @@ OVERSEAS_STORAGE = "OVERSEAS_STORAGE"
 CONSENT_TYPES = frozenset({LAB_TEST, PARTNER_LAB, CLINIC_SHARE, CONTACT, OVERSEAS_STORAGE})
 REQUIRED_CONSENT = LAB_TEST
 METHODS = frozenset({"PAPER", "ELECTRONIC"})
-DEFAULT_VERSION = "draft-2026-11"  # column is VARCHAR(20); set the real version once the lawyer signs off
+DEFAULT_VERSION = "v1-2026-11"  # lawyer-approved consent text; column is VARCHAR(20). Bump when the text changes
 
 
 class ConsentError(ValueError):
