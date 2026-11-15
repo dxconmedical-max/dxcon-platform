@@ -52,6 +52,7 @@ function ReceptionMilestone1Panel() {
   const [orderRef, setOrderRef] = useState<string | null>(null);
   const [pricing, setPricing] = useState<ReceptionOrderPricing | null>(null);
   const [order, setOrder] = useState<ReceptionOrderCreate["order"] | null>(null);
+  const [confirmationTick, setConfirmationTick] = useState(0);
   const [reopenError, setReopenError] = useState<string | null>(null);
   const [reopening, setReopening] = useState(Boolean(orderParam));
 
@@ -245,6 +246,7 @@ function ReceptionMilestone1Panel() {
           pricing={pricing}
           order={order}
           onCreateAnother={reset}
+          refreshSignal={confirmationTick}
         />
       ) : null}
 
@@ -257,6 +259,7 @@ function ReceptionMilestone1Panel() {
           pricing={pricing}
           order={order}
           onReset={reset}
+          onPaymentRecorded={() => setConfirmationTick((n) => n + 1)}
         />
       ) : null}
     </div>

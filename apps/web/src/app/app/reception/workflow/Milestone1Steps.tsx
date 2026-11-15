@@ -809,6 +809,7 @@ export function OrderConfirmationStep({
   pricing,
   order,
   onCreateAnother,
+  refreshSignal = 0,
 }: {
   accessToken: string;
   organizationId?: string | null;
@@ -817,6 +818,8 @@ export function OrderConfirmationStep({
   pricing: ReceptionOrderPricing;
   order: ReceptionOrderCreate["order"];
   onCreateAnother: () => void;
+  /** Bump to re-fetch the order (e.g. after a payment is recorded below). */
+  refreshSignal?: number;
 }) {
   const [detail, setDetail] = useState(order);
   const [authoritative, setAuthoritative] = useState(pricing);
@@ -847,7 +850,7 @@ export function OrderConfirmationStep({
     }, 0);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderRef, accessToken, organizationId]);
+  }, [orderRef, accessToken, organizationId, refreshSignal]);
 
   const status = String(detail.status ?? order.status ?? "—");
 

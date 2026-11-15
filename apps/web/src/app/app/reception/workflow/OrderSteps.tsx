@@ -850,6 +850,7 @@ export function PaymentStep({
   order,
   onReset,
   cashierLabel,
+  onPaymentRecorded,
 }: {
   accessToken: string;
   organizationId?: string | null;
@@ -859,6 +860,7 @@ export function PaymentStep({
   order: ReceptionOrderCreate["order"];
   onReset: () => void;
   cashierLabel?: string | null;
+  onPaymentRecorded?: () => void;
 }) {
   const [authoritative, setAuthoritative] = useState(pricing);
   const [detail, setDetail] = useState(order);
@@ -975,6 +977,7 @@ export function PaymentStep({
         setAmountInput(String(result.payment_summary.outstanding_amount));
       }
       await refresh();
+      onPaymentRecorded?.();
     } catch (err) {
       setError(normalizeApiError(err));
     } finally {
