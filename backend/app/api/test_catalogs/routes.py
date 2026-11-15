@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from sqlalchemy.exc import IntegrityError
 
 from app.core.authenticated_identity import blueprint_require_authenticated_user
+from app.core.authz import roles_required
 from app.extensions.db import db
 from app.models.test_catalog import TestCatalog
 
@@ -11,6 +12,9 @@ test_catalogs_bp = Blueprint(
     url_prefix="/api/v1/test-catalogs"
 )
 blueprint_require_authenticated_user(test_catalogs_bp)
+
+# Only administrators may create catalog entries (reading stays open to signed-in users).
+CATALOG_WRITE_ROLES = ("SUPER_ADMIN", "ADMIN", "SYSTEM_ADMIN")
 
 
 @test_catalogs_bp.route("", methods=["GET"])
@@ -23,6 +27,7 @@ def get_tests():
     }, 200
 
 @test_catalogs_bp.route("", methods=["POST"])
+@roles_required(*CATALOG_WRITE_ROLES)
 def create_test():
     data = request.get_json()
 
