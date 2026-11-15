@@ -27,6 +27,7 @@ import {
   type CollectionRequestDraft,
   type SelectedPatient,
 } from "./Milestone1Steps";
+import { PaymentStep } from "./OrderSteps";
 
 const STEPS = [
   "Patient",
@@ -244,6 +245,18 @@ function ReceptionMilestone1Panel() {
           pricing={pricing}
           order={order}
           onCreateAnother={reset}
+        />
+      ) : null}
+
+      {!reopening && step === 4 && patient && orderRef && pricing && order ? (
+        <PaymentStep
+          accessToken={accessToken}
+          organizationId={activeOrganizationId}
+          patient={patient}
+          orderRef={orderRef}
+          pricing={pricing}
+          order={order}
+          onReset={reset}
         />
       ) : null}
     </div>
