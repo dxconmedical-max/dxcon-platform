@@ -202,6 +202,7 @@ from app.models.notification_preference import NotificationPreference
 from app.models.patient_profile import PatientProfile
 from app.models.patient_preference import PatientPreference
 from app.models.patient_consent import PatientConsent
+from app.models.booking_request import BookingRequest
 from app.models.patient_device import PatientDevice
 from app.models.patient_notification_setting import PatientNotificationSetting
 from app.models.doctor_profile import DoctorProfile
