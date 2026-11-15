@@ -120,11 +120,11 @@ export function CollectionRequestStep({
   const clinicsRequested = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load the referring-clinic list once, the first time the CLINIC mode is chosen.
+  // Load the referring-clinic list once (used by every route, so desk and home orders can be linked to a clinic).
   // State is only set in the promise callbacks (never synchronously in the effect body).
   // Any failure (for example 403 for non-DxCon staff) falls back to typing the name by hand.
   useEffect(() => {
-    if (mode !== "CLINIC_COLLECTION" || !accessToken || clinicsRequested.current) return;
+    if (!accessToken || clinicsRequested.current) return;
     clinicsRequested.current = true;
     listReceptionClinics({ token: accessToken, organizationId, timeoutMs: 15_000 })
       .then((items) => {
@@ -135,7 +135,7 @@ export function CollectionRequestStep({
         setClinics([]);
         setClinicsStatus("failed");
       });
-  }, [mode, accessToken, organizationId]);
+  }, [accessToken, organizationId]);
 
   const showClinicSelect = clinicsStatus === "ready" && clinics.length > 0;
   const showManualClinic = !showClinicSelect || manualClinic;
@@ -203,7 +203,7 @@ export function CollectionRequestStep({
       priority: mode === "AT_RECEPTION" ? undefined : priority,
       clinic_name: mode === "CLINIC_COLLECTION" ? clinicName.trim() : undefined,
       referring_organization_id:
-        mode === "CLINIC_COLLECTION" && referringId && !manualClinic ? referringId : undefined,
+        referringId && (mode !== "CLINIC_COLLECTION" || !manualClinic) ? referringId : undefined,
     });
   }
 
@@ -380,6 +380,33 @@ export function CollectionRequestStep({
               <Label htmlFor="clinic-notes">Notes</Label>
               <Input id="clinic-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
             </div>
+          </div>
+        ) : null}
+
+        {mode !== "CLINIC_COLLECTION" && showClinicSelect ? (
+          <div>
+            <Label htmlFor="referring-clinic">Referring clinic (optional) — Phòng khám giới thiệu</Label>
+            <select
+              id="referring-clinic"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              value={referringId}
+              onChange={(e) => {
+                const picked = clinics.find((c) => c.id === e.target.value);
+                setReferringId(picked ? picked.id : "");
+                setClinicName(picked ? picked.name : "");
+                setManualClinic(false);
+              }}
+            >
+              <option value="">-- Không có / khách tự đến --</option>
+              {clinics.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-slate-500">
+              Chọn nếu khách do phòng khám giới thiệu, để phòng khám xem được kết quả đã phát hành.
+            </p>
           </div>
         ) : null}
 
