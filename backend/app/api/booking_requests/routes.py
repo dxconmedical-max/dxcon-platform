@@ -19,6 +19,7 @@ from flask import Blueprint, request
 from app.api.reception_workspace.routes import _actor, _client_ip
 from app.core.audit import write_audit
 from app.extensions.db import db
+from app.notifications.booking_email import send_booking_confirmation_async
 from app.models.booking_request import BookingRequest
 from app.reception_workspace.auth import reception_api_read, reception_api_write
 
@@ -124,6 +125,14 @@ def public_booking_create():
     db.session.add(row)
     write_audit("PUBLIC_BOOKING_CREATED", "BookingRequest", row.reference, ip_address=ip)
     db.session.commit()
+    # Best-effort confirmation email (background thread; never blocks or fails the booking).
+    send_booking_confirmation_async(
+        to=values.get("email"),
+        reference=row.reference,
+        full_name=values["full_name"],
+        preferred_date=values.get("preferred_date"),
+        preferred_slot=values.get("preferred_slot"),
+    )
     return {"success": True, "data": {"reference": row.reference}}, 201
 
 
