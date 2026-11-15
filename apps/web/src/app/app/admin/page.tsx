@@ -9,6 +9,7 @@ const ACTIONS = [
   { label: "Organizations", href: "/app/admin/organizations", description: "Tenant onboarding and setup." },
   { label: "Customer onboarding", href: "/app/admin/onboarding", description: "Wizard for new customers." },
   { label: "Integrations", href: "/app/admin/integrations", description: "Connectors and webhooks." },
+  { label: "Test catalog import", href: "/app/admin/test-catalog", description: "Upload the test list and prices (CSV), preview, apply." },
   { label: "Operations", href: "/app/operations", description: "Production health and ops dashboard." },
 ];
 
