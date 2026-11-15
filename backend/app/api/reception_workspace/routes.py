@@ -239,7 +239,10 @@ def orders_create():
             return {
                 "success": False,
                 "code": "consent_required",
-                "error": "Patient consent (LAB_TEST) must be recorded before creating an order.",
+                "error": (
+                    "Chưa ghi nhận đồng ý xét nghiệm của bệnh nhân. "
+                    "Hãy tick ô 'Testing (required)' rồi bấm 'Save consent' trước khi tạo đơn."
+                ),
             }, 409
         # The collection job belongs to the organization doing the work (DxCon),
         # even when the order is stamped with the referring clinic.

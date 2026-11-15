@@ -52,6 +52,11 @@ const ACTIONS = [
     description: "Collected → transport → received → sorting → lab → completed.",
   },
   {
+    label: "Booking requests",
+    href: "/app/reception/bookings",
+    description: "Requests from the public /book page: call back, confirm, then create the order.",
+  },
+  {
     label: "Patient search",
     href: "/app/reception/search",
     description: "Search by phone, code, national ID, or name.",
