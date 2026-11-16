@@ -330,11 +330,17 @@ export function PatientStep({
             </div>
             <div>
               <Label htmlFor="gender">Gender</Label>
-              <Input
+              <select
                 id="gender"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
                 value={create.gender}
                 onChange={(event) => setCreate((prev) => ({ ...prev, gender: event.target.value }))}
-              />
+              >
+                <option value="">—</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+                <option value="Khác">Khác</option>
+              </select>
             </div>
             <div>
               <Label htmlFor="dob">Date of birth</Label>
