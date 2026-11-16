@@ -52,6 +52,22 @@ class BusinessEngineTestCase(unittest.TestCase):
         self.assertEqual(detail["status"], ORDER_RELEASED)
         self.assertGreater(BizWorkflowAudit.query.count(), 0)
 
+    def test_order_total_counts_every_test(self):
+        from app.models.biz_order import BizOrderItem
+        from app.models.test_catalog import TestCatalog
+
+        tests = TestCatalog.query.order_by(TestCatalog.code).limit(3).all()
+        self.assertEqual(len(tests), 3)
+        for test, price in zip(tests, (100, 250, 40)):
+            test.price = price
+        db.session.commit()
+        patient = biz.create_patient(full_name="Three Tests", phone="0905555666")
+        order = biz.create_order(patient_code=patient.patient_code, test_catalog_ids=[t.id for t in tests])
+        db.session.commit()
+        self.assertEqual(BizOrderItem.query.filter_by(order_id=order.id).count(), 3)
+        self.assertEqual(order.subtotal, 390)
+        self.assertEqual(order.total_amount, 390)
+
     def test_duplicate_phone_blocked(self):
         biz.create_patient(full_name="A", phone="0909999888")
         db.session.commit()

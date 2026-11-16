@@ -103,7 +103,10 @@ def _get_order(order_ref: str) -> BizOrder:
 
 
 def _recalc_order_totals(order: BizOrder) -> None:
-    subtotal = sum(item.line_total for item in order.items)
+    # Read the lines from the database, not from order.items: that collection is loaded once and
+    # goes stale when lines are added by order_id, which made multi-test orders count only the first test.
+    lines = BizOrderItem.query.filter_by(order_id=order.id).all()
+    subtotal = sum(item.line_total for item in lines)
     order.subtotal = round(subtotal, 2)
     order.total_amount = round(max(subtotal - (order.discount or 0), 0), 2)
 
