@@ -841,6 +841,17 @@ export function OrderCreatedStep(props: {
   return <PaymentStep {...props} />;
 }
 
+/**
+ * Open generated HTML (receipt, labels, requisition) in a new window and print it.
+ * A blob URL is used because window.open("", "_blank", "noopener") returns null,
+ * which left a blank page: the document was never written into it.
+ */
+function openHtmlWindow(html: string, features?: string): void {
+  const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+  window.open(url, "_blank", features ? `noopener,noreferrer,${features}` : "noopener,noreferrer");
+  window.setTimeout(() => URL.revokeObjectURL(url), 120_000);
+}
+
 export function PaymentStep({
   accessToken,
   organizationId,
@@ -1003,10 +1014,7 @@ export function PaymentStep({
 <div class="row"><span>Paid at</span><span>${escapeHtml(paidAt)}</span></div>
 <div class="row"><span>Cashier</span><span>${escapeHtml(cashier)}</span></div>
 <script>window.onload=function(){window.print()}</script></body></html>`;
-    const popup = window.open("", "_blank", "noopener,noreferrer,width=480,height=720");
-    if (!popup) return;
-    popup.document.write(html);
-    popup.document.close();
+    openHtmlWindow(html, "width=480,height=720");
   }
 
   if (showDocuments && isPaid) {
@@ -1294,18 +1302,12 @@ body{font-family:ui-monospace,Menlo,monospace;padding:16px}
 <div>${escapeHtml(barcodes.generated_at || "")}</div></div>
 ${sampleRows}
 <script>window.onload=function(){window.print()}</script></body></html>`;
-    const popup = window.open("", "_blank", "noopener,noreferrer,width=420,height=720");
-    if (!popup) return;
-    popup.document.write(html);
-    popup.document.close();
+    openHtmlWindow(html, "width=420,height=720");
   }
 
   function openRequisition() {
     if (!requisitionHtml) return;
-    const popup = window.open("", "_blank", "noopener,noreferrer");
-    if (!popup) return;
-    popup.document.write(requisitionHtml);
-    popup.document.close();
+    openHtmlWindow(requisitionHtml);
   }
 
   return (
