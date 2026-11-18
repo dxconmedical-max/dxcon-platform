@@ -62,13 +62,17 @@ export function StaffManager() {
     setLoading(true);
     try {
       const [u, o] = await Promise.all([
-        apiRequest<{ users: StaffUser[] }>("/api/v1/security/users", { token, organizationId }),
+        apiRequest<{ users?: StaffUser[]; data?: { users?: StaffUser[] } }>("/api/v1/security/users", {
+          token,
+          organizationId,
+        }),
         apiRequest<{ data: Org[] }>("/api/v1/partner/organizations?per_page=200", {
           token,
           organizationId,
         }),
       ]);
-      setUsers(u.users ?? []);
+      // The API gateway wraps plain JSON in { data: ... }; accept both shapes.
+      setUsers(u.data?.users ?? u.users ?? []);
       const list = (o.data ?? []).filter((x) => (x.status || "").toLowerCase() === "active");
       setOrgs(list);
       setOrgId((prev) => prev || list.find((x) => x.organization_code === "DXCON_INTERNAL")?.id || list[0]?.id || "");
