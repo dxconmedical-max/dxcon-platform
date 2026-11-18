@@ -99,6 +99,13 @@ export async function apiRequest<T>(
     ? await response.json()
     : await response.text();
 
+  if (response.status === 401 && bearer && !path.startsWith("/api/v1/auth/")) {
+    // Token expired or revoked mid-session: tell the app to sign the user out.
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("dxcon:unauthorized"));
+    }
+  }
+
   if (!response.ok) {
     let code: string | undefined;
     if (typeof payload === "object" && payload) {

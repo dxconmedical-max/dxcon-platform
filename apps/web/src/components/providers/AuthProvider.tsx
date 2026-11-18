@@ -69,6 +69,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     void restoreSession();
   }, [isHydrated, bootstrapPhase, restoreSession]);
 
+  // Any protected API call answered 401 → clear the session and send the user
+  // to the login page (useRequireAuth redirects on status "session_expired").
+  useEffect(() => {
+    let handling = false;
+    const onUnauthorized = () => {
+      if (handling) return;
+      const s = useAuthStore.getState();
+      if (s.status !== "authenticated") return;
+      handling = true;
+      void s.logout().finally(() => {
+        useAuthStore.setState({
+          status: "session_expired",
+          bootstrapPhase: "anonymous",
+        });
+        handling = false;
+      });
+    };
+    window.addEventListener("dxcon:unauthorized", onUnauthorized);
+    return () => window.removeEventListener("dxcon:unauthorized", onUnauthorized);
+  }, []);
+
   // Safety net if restore never settles (hung promise, missing owner, etc.).
   useEffect(() => {
     if (!isHydrated) return;
