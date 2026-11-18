@@ -9,6 +9,21 @@ describe("buildNavItems", () => {
     expect(items.some((i) => i.href === "/app")).toBe(true);
   });
 
+  it("shows Administration and Organizations to a super admin", () => {
+    const capabilities: AuthCapabilities = {
+      user: { id: "1", email: "a@x.com", role: "SUPER_ADMIN" },
+      organization: null,
+      membership: null,
+      workspace: "/app",
+      default_workspace: "/app",
+      permissions: ["*"],
+      features: [],
+    } as unknown as AuthCapabilities;
+    const hrefs = buildNavItems(capabilities).map((i) => i.href);
+    expect(hrefs).toContain("/app/admin");
+    expect(hrefs).toContain("/app/admin/organizations");
+  });
+
   it("filters by workspace for non-admin", () => {
     const capabilities: AuthCapabilities = {
       user: { id: "1", email: "d@x.com", role: "DOCTOR" },

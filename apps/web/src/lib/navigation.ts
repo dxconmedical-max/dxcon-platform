@@ -6,6 +6,7 @@ import {
   FlaskConical,
   LayoutDashboard,
   Settings,
+  ShieldCheck,
   Stethoscope,
   Truck,
   UserCircle,
@@ -25,6 +26,20 @@ export type NavItem = {
 
 const ALL_NAV: NavItem[] = [
   { href: "/app", label: "Overview", icon: LayoutDashboard },
+  {
+    href: "/app/admin",
+    label: "Administration",
+    icon: ShieldCheck,
+    permission: "users.read",
+    workspaces: ["/app/admin"],
+  },
+  {
+    href: "/app/admin/organizations",
+    label: "Organizations",
+    icon: Building2,
+    permission: "users.read",
+    workspaces: ["/app/admin"],
+  },
   {
     href: "/app/admin/integrations",
     label: "Integrations",
