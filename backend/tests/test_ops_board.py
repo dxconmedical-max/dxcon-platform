@@ -111,6 +111,46 @@ class OpsBoardTestCase(unittest.TestCase):
         res = self.client.get("/api/v1/ops-board/orders", headers=_headers("ADMIN"))
         self.assertEqual(res.status_code, 403)
 
+    def test_daily_report_excludes_cancelled_and_buckets_by_day(self):
+        _order("ORD-4", "Huy", "cancelled", 999000, datetime.utcnow())
+        db.session.commit()
+        today = (datetime.utcnow() + timedelta(hours=7)).date().isoformat()
+        res = self.client.get(f"/api/v1/ops-board/report?date_from={today}&date_to={today}", headers=self.admin)
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(len(data["days"]), 1)
+        self.assertEqual(data["totals"]["orders"], 2)
+        self.assertEqual(data["totals"]["orders_value"], 150000)
+
+    def test_collections_board_lists_field_requests_with_unassigned_count(self):
+        from app.models.sample_collection import SampleCollection
+
+        order = BizOrder.query.filter_by(order_code="ORD-1").one()
+        db.session.add(
+            SampleCollection(
+                order_id=order.id,
+                collection_mode="HOME_COLLECTION",
+                status="PENDING_ASSIGNMENT",
+                pickup_address="1 Le Loi",
+            )
+        )
+        db.session.add(
+            SampleCollection(order_id=order.id, collection_mode="AT_RECEPTION", status="PENDING")
+        )
+        db.session.commit()
+        res = self.client.get("/api/v1/ops-board/collections", headers=self.admin)
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(data["summary"]["total"], 1)
+        self.assertEqual(data["summary"]["unassigned"], 1)
+        self.assertEqual(data["items"][0]["order_code"], "ORD-1")
+        self.assertFalse(data["items"][0]["collector_online"])
+
+    def test_new_endpoints_deny_doctor(self):
+        for path in ("/collections", "/report"):
+            res = self.client.get(f"/api/v1/ops-board{path}", headers=_headers("DOCTOR"))
+            self.assertEqual(res.status_code, 403)
+
 
 if __name__ == "__main__":
     unittest.main()
