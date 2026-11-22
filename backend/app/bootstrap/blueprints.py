@@ -23,6 +23,7 @@ from app.api.files.routes import files_bp
 from app.api.ai_platform.routes import ai_platform_bp
 from app.api.ai_v2.routes import ai_interpret_v2_bp
 from app.api.security.routes import security_api_bp
+from app.api.live_location.routes import live_location_bp
 from app.api.ops.routes import ops_bp
 from app.web.home import home_web_bp
 from app.web.launch_ui import launch_ui_bp
@@ -497,6 +498,7 @@ def register_blueprints(app):
     app.register_blueprint(home_web_bp)
     app.register_blueprint(ops_bp)
     app.register_blueprint(security_api_bp)
+    app.register_blueprint(live_location_bp)
     app.register_blueprint(ai_interpret_v2_bp)
     app.register_blueprint(audit_center_web_bp)
     app.register_blueprint(admin_security_bp)

@@ -12,6 +12,11 @@ const ACTIONS = [
     description: "Specimens awaiting collection — filter by location, date, status, collector.",
   },
   {
+    label: "Share my location",
+    href: "/app/collector/location",
+    description: "Start a trip so DxCon staff can see where you are on the map.",
+  },
+  {
     label: "Collect & transport",
     href: "/app/collector/workflow",
     description: "Verify patient/order, scan barcode, collect, dispatch, arrive at lab.",
