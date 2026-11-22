@@ -5,7 +5,7 @@ export const metadata = { title: "Share location" };
 
 export default function CollectorLocationPage() {
   return (
-    <AppShell title="Share location" workspacePath="/app/collector/location">
+    <AppShell title="Share location" workspacePath="/app/collector">
       <ShareLocation />
     </AppShell>
   );
