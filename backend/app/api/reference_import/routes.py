@@ -50,7 +50,7 @@ def parse_workbook(raw: bytes):
     wb = openpyxl.load_workbook(io.BytesIO(raw), read_only=True, data_only=True)
     ws = wb[wb.sheetnames[0]]
     rows, warnings = [], []
-    total = text_only = no_range = 0
+    total = text_only = no_range = skipped_conflict = 0
     for idx, r in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
         if not r or not r[0]:
             continue
@@ -68,14 +68,20 @@ def parse_workbook(raw: bytes):
             warnings.append(f"Dòng {idx} ({code}): low > high, bỏ qua.")
             continue
         m = re.match(r"\s*<=?\s*([\d.]+)\s*(?:[^\d.\-].*)?$", text)
+        conflict = None
         if m and high is not None:
             try:
                 if abs(float(m.group(1)) - high) > 1e-9:
-                    warnings.append(f"Dòng {idx} ({code}): chữ ghi '{text}' nhưng cột high = {high}.")
+                    conflict = f"chữ ghi '{text}' nhưng cột high = {high}"
             except ValueError:
                 pass
-        if m and low is not None and not text.startswith("<="):
-            warnings.append(f"Dòng {idx} ({code}): chữ ghi '{text}' nhưng có cột low = {low}.")
+        if conflict is None and m and low is not None and not text.startswith("<="):
+            conflict = f"chữ ghi '{text}' nhưng có cột low = {low}"
+        if conflict:
+            # Ambiguous: leave blank (not imported, never flags) until a human fixes the source row.
+            skipped_conflict += 1
+            warnings.append(f"Dòng {idx} ({code}): bỏ trống vì {conflict}.")
+            continue
         if not r[_COLS["source"]]:
             warnings.append(f"Dòng {idx} ({code}): không có nguồn.")
         sex = str(r[_COLS["sex"]] or "ALL").strip().upper()
@@ -101,6 +107,7 @@ def parse_workbook(raw: bytes):
         "importable": len(rows),
         "text_only_skipped": text_only,
         "no_range_skipped": no_range,
+        "conflict_skipped": skipped_conflict,
         "warnings": warnings[:50],
         "warnings_total": len(warnings),
     }
