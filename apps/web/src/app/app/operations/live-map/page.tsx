@@ -5,7 +5,7 @@ export const metadata = { title: "Live map" };
 
 export default function LiveMapPage() {
   return (
-    <AppShell title="Live map" workspacePath="/app/operations/live-map">
+    <AppShell title="Live map" workspacePath="/app/operations">
       <LiveMap />
     </AppShell>
   );
