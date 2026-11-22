@@ -8,6 +8,27 @@ export type SampleCollectionAuth = {
   partnerId?: string | null;
 };
 
+export type JobInfo = {
+  order_found: boolean;
+  order_code?: string | null;
+  patient_name?: string | null;
+  patient_phone?: string | null;
+  patient_gender?: string | null;
+  patient_dob?: string | null;
+  address?: string | null;
+  tests: Array<{
+    test_code?: string;
+    test_name?: string;
+    quantity?: number;
+    unit_price?: number;
+    line_total?: number;
+  }>;
+  total_amount?: number | null;
+  paid_amount?: number | null;
+  due_amount?: number | null;
+  note?: string | null;
+};
+
 export type SampleCollectionItem = {
   id: string;
   /** Canonical SampleCollection PK; prefer over id when assigning. */
@@ -66,6 +87,7 @@ export type SampleCollectionItem = {
     partner_id?: string;
   } | null;
   order?: Record<string, unknown> | null;
+  job_info?: JobInfo;
   sample_code?: string;
   status_raw?: string;
   [key: string]: unknown;
