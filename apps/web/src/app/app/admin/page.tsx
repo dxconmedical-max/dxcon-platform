@@ -10,6 +10,7 @@ const ACTIONS = [
   { label: "Staff accounts", href: "/app/admin/users", description: "Create and disable staff logins." },
   { label: "Customer onboarding", href: "/app/admin/onboarding", description: "Wizard for new customers." },
   { label: "Integrations", href: "/app/admin/integrations", description: "Connectors and webhooks." },
+  { label: "Reference ranges", href: "/app/admin/reference-ranges", description: "Upload lab reference ranges as a draft, review, then activate." },
   { label: "Test catalog import", href: "/app/admin/test-catalog", description: "Upload the test list and prices (CSV), preview, apply." },
   { label: "Operations", href: "/app/operations", description: "Production health and ops dashboard." },
 ];
