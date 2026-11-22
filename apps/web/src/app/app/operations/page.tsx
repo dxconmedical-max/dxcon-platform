@@ -12,6 +12,12 @@ export default function OperationsPage() {
         <Link className="text-teal-700 underline" href="/app/operations/orders">
           Danh sách đơn &amp; báo cáo
         </Link>
+        <Link className="text-teal-700 underline" href="/app/operations/collections">
+          Lấy mẫu tại nhà &amp; gán người
+        </Link>
+        <Link className="text-teal-700 underline" href="/app/operations/report">
+          Báo cáo doanh thu
+        </Link>
         <Link className="text-teal-700 underline" href="/app/operations/live-map">
           Bản đồ người lấy mẫu
         </Link>

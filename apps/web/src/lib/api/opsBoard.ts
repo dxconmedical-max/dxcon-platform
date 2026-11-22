@@ -45,3 +45,55 @@ export async function fetchBoard(
   );
   return res.data ?? res;
 }
+
+type Ctx = { token: string | null; organizationId: string | null };
+
+export type BoardCollection = {
+  id: string;
+  order_code: string | null;
+  patient_name: string | null;
+  contact_phone: string | null;
+  address: string | null;
+  requested_date: string | null;
+  time_window: string | null;
+  status: string;
+  collector_id: string | null;
+  collector_name: string | null;
+  collector_online: boolean;
+  collector_last_seen: string | null;
+  created_at: string | null;
+};
+
+export type CollectionsResponse = {
+  items: BoardCollection[];
+  summary: { total: number; unassigned: number; by_status: Record<string, number> };
+};
+
+export async function fetchBoardCollections(ctx: Ctx, status = ""): Promise<CollectionsResponse> {
+  const qs = status ? `?status=${encodeURIComponent(status)}` : "";
+  const res = await apiRequest<CollectionsResponse & { data?: CollectionsResponse }>(
+    `/api/v1/ops-board/collections${qs}`,
+    { token: ctx.token, organizationId: ctx.organizationId },
+  );
+  return res.data ?? res;
+}
+
+export type ReportDay = { date: string; orders: number; orders_value: number; collected: number };
+export type ReportResponse = {
+  days: ReportDay[];
+  totals: { orders: number; orders_value: number; collected: number };
+  date_from: string;
+  date_to: string;
+};
+
+export async function fetchReport(ctx: Ctx, dateFrom = "", dateTo = ""): Promise<ReportResponse> {
+  const params = new URLSearchParams();
+  if (dateFrom) params.set("date_from", dateFrom);
+  if (dateTo) params.set("date_to", dateTo);
+  const qs = params.toString() ? `?${params}` : "";
+  const res = await apiRequest<ReportResponse & { data?: ReportResponse }>(
+    `/api/v1/ops-board/report${qs}`,
+    { token: ctx.token, organizationId: ctx.organizationId },
+  );
+  return res.data ?? res;
+}
