@@ -396,7 +396,60 @@ class SampleCollectionWorkflowService:
             else:
                 payload["booking"] = None
                 payload["order"] = None
+        payload["job_info"] = SampleCollectionWorkflowService._job_info(payload)
         return payload
+
+    @staticmethod
+    def _job_info(payload):
+        """Everything a collector (or nurse) needs at the door, in one flat block."""
+        order = payload.get("order") or {}
+        booking = payload.get("booking") or {}
+        info = {
+            "order_found": bool(order),
+            "order_code": order.get("order_code"),
+            "patient_name": order.get("patient_name") or booking.get("patient_name") or payload.get("contact_person"),
+            "patient_phone": booking.get("patient_phone") or payload.get("contact_phone"),
+            "patient_gender": None,
+            "patient_dob": None,
+            "address": payload.get("pickup_address") or booking.get("patient_address"),
+            "tests": [],
+            "total_amount": order.get("total_amount"),
+            "paid_amount": None,
+            "due_amount": None,
+            "note": order.get("note") or payload.get("collection_request_note"),
+        }
+        try:
+            from sqlalchemy import func
+
+            from app.models.biz_order import BizPayment
+            from app.models.patient import Patient
+
+            info["tests"] = [
+                {
+                    "test_code": i.get("test_code"),
+                    "test_name": i.get("test_name"),
+                    "quantity": i.get("quantity"),
+                    "unit_price": i.get("unit_price"),
+                    "line_total": i.get("line_total"),
+                }
+                for i in (order.get("items") or [])
+            ]
+            if order.get("patient_code"):
+                patient = Patient.query.get(order["patient_code"])
+                if patient:
+                    info["patient_gender"] = patient.gender
+                    info["patient_dob"] = patient.date_of_birth
+                    info["patient_phone"] = info["patient_phone"] or patient.phone
+                    info["address"] = info["address"] or patient.address
+            if order.get("id"):
+                paid = db.session.query(func.coalesce(func.sum(BizPayment.amount), 0)).filter(
+                    BizPayment.order_id == order["id"]
+                ).scalar()
+                info["paid_amount"] = float(paid or 0)
+                info["due_amount"] = max(0.0, float(order.get("total_amount") or 0) - float(paid or 0))
+        except Exception:
+            db.session.rollback()
+        return info
 
     @staticmethod
     def list_queue(

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 
+import { JobInfoCard } from "@/components/pilot/JobInfoCard";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
@@ -337,7 +338,7 @@ function CollectorWorkflowPanel() {
                   selectedId === item.id ? "bg-slate-900 text-white" : "hover:bg-slate-50"
                 }`}
               >
-                <div className="font-medium">{item.booking?.patient_name || "Patient"}</div>
+                <div className="font-medium">{item.job_info?.patient_name || item.booking?.patient_name || "Patient"}</div>
                 <div className={selectedId === item.id ? "text-slate-300" : "text-slate-500"}>
                   {item.status}
                 </div>
@@ -351,7 +352,7 @@ function CollectorWorkflowPanel() {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <h3 className="text-base font-semibold text-slate-900">
-                      {detail.booking?.patient_name || "Specimen"}
+                      {detail.job_info?.patient_name || detail.booking?.patient_name || "Specimen"}
                     </h3>
                     <p className="text-sm text-slate-600">
                       {detail.booking?.booking_code} · expected{" "}
@@ -360,6 +361,8 @@ function CollectorWorkflowPanel() {
                   </div>
                   <StatusPill status={detail.status} />
                 </div>
+
+                <JobInfoCard info={detail.job_info} />
 
                 {step === 0 ? (
                   <div className="grid gap-3 sm:grid-cols-2">

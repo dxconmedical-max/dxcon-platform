@@ -144,14 +144,36 @@ export default function CollectorQueuePage() {
                   render: (row) => (
                     <div>
                       <div className="font-medium">
-                        {row.booking?.patient_name ||
+                        {row.job_info?.patient_name ||
+                          row.booking?.patient_name ||
                           String((row.order as { patient_name?: string } | null)?.patient_name ?? "—")}
                       </div>
                       <div className="text-xs text-slate-500">
-                        {row.booking?.booking_code || row.sample_code || row.id.slice(0, 8)}
+                        {row.job_info?.patient_phone ? `${row.job_info.patient_phone} · ` : ""}
+                        {row.job_info?.order_code || row.booking?.booking_code || row.sample_code || row.id.slice(0, 8)}
                       </div>
+                      {row.job_info && !row.job_info.order_found ? (
+                        <div className="text-xs text-amber-700">Không tìm thấy đơn</div>
+                      ) : null}
                     </div>
                   ),
+                },
+                {
+                  key: "tests",
+                  label: "Xét nghiệm / tiền",
+                  render: (row) => {
+                    const j = row.job_info;
+                    if (!j || !j.order_found) return "—";
+                    const names = j.tests.map((t) => t.test_name).filter(Boolean);
+                    return (
+                      <div className="max-w-xs text-xs">
+                        <div>{names.length > 3 ? `${names.slice(0, 3).join(", ")} +${names.length - 3}` : names.join(", ") || "—"}</div>
+                        <div className={j.due_amount ? "font-semibold text-red-600" : "text-emerald-700"}>
+                          {j.due_amount ? `Còn thu ${Math.round(j.due_amount).toLocaleString("vi-VN")} ₫` : "Đã thanh toán"}
+                        </div>
+                      </div>
+                    );
+                  },
                 },
                 {
                   key: "mode",
