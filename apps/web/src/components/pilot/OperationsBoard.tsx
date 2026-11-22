@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/Card";
 import { Input, Label } from "@/components/ui/Input";
 import { fetchBoard, type BoardResponse } from "@/lib/api/opsBoard";
+import { createResultLink, type ResultLink } from "@/lib/api/resultLinks";
 import { normalizeApiError } from "@/lib/errors";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -46,6 +47,32 @@ export function OperationsBoard() {
   const [data, setData] = useState<BoardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [link, setLink] = useState<{ code: string; data: ResultLink } | null>(null);
+  const [linkBusy, setLinkBusy] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function makeLink(code: string) {
+    setLinkBusy(code);
+    setError(null);
+    setCopied(false);
+    try {
+      setLink({ code, data: await createResultLink({ token, organizationId }, code) });
+    } catch (err) {
+      setError(normalizeApiError(err));
+    } finally {
+      setLinkBusy(null);
+    }
+  }
+
+  async function copyLink() {
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link.data.url);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }
 
   const load = useCallback(async () => {
     if (!token) return;
@@ -166,19 +193,20 @@ export function OperationsBoard() {
                 <th className="py-2 pr-4">Trạng thái</th>
                 <th className="py-2 pr-4">Nguồn</th>
                 <th className="py-2 pr-4 text-right">Tổng tiền</th>
-                <th className="py-2">Tạo lúc</th>
+                <th className="py-2 pr-4">Tạo lúc</th>
+                <th className="py-2" />
               </tr>
             </thead>
             <tbody>
               {loading && !data ? (
                 <tr>
-                  <td className="py-3 text-slate-500" colSpan={6}>
+                  <td className="py-3 text-slate-500" colSpan={7}>
                     Đang tải…
                   </td>
                 </tr>
               ) : data && data.orders.length === 0 ? (
                 <tr>
-                  <td className="py-3 text-slate-500" colSpan={6}>
+                  <td className="py-3 text-slate-500" colSpan={7}>
                     Không có đơn phù hợp.
                   </td>
                 </tr>
@@ -190,13 +218,50 @@ export function OperationsBoard() {
                     <td className="py-2 pr-4">{o.status}</td>
                     <td className="py-2 pr-4">{o.source_org_name ?? "—"}</td>
                     <td className="py-2 pr-4 text-right">{money(o.total_amount)}</td>
-                    <td className="py-2">{fmtTime(o.created_at)}</td>
+                    <td className="py-2 pr-4">{fmtTime(o.created_at)}</td>
+                    <td className="py-2 text-right">
+                      {o.status === "released" ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={linkBusy === o.order_code}
+                          onClick={() => void makeLink(o.order_code)}
+                        >
+                          Link KQ + QR
+                        </Button>
+                      ) : null}
+                    </td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
         </div>
+        {link ? (
+          <div className="mt-4 rounded-lg border border-teal-300 bg-teal-50 p-4 text-sm print:border-0">
+            <p className="font-medium">Link xem kết quả đơn {link.code}</p>
+            <p className="mt-1 break-all font-mono text-xs">{link.data.url}</p>
+            {link.data.qr_png ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={link.data.qr_png} alt="QR xem kết quả" className="mt-3 h-40 w-40" />
+            ) : null}
+            <p className="mt-2 text-xs text-slate-600">
+              Hết hạn sau {link.data.expires_days} ngày. Ai có link hoặc QR này đều xem được kết quả, nên chỉ đưa cho
+              chính bệnh nhân.
+            </p>
+            <div className="mt-3 flex gap-2 print:hidden">
+              <Button size="sm" onClick={() => void copyLink()}>
+                {copied ? "Đã sao chép" : "Sao chép link"}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => window.print()}>
+                In QR
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setLink(null)}>
+                Đóng
+              </Button>
+            </div>
+          </div>
+        ) : null}
         <div className="mt-4 flex items-center gap-3 text-sm text-slate-600">
           <Button size="sm" variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
             Trước
