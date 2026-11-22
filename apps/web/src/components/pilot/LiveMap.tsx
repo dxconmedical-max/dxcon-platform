@@ -8,39 +8,48 @@ import { normalizeApiError } from "@/lib/errors";
 import { useAuthStore } from "@/stores/authStore";
 
 const POLL_MS = 10000;
-const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
+const LEAFLET_JS = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
+const LEAFLET_CSS = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
 
-type LatLng = { lat: number; lng: number };
-type GMarker = { setPosition: (p: LatLng) => void; setMap: (m: GMap | null) => void };
-type GBounds = { extend: (p: LatLng) => void };
-type GMap = {
-  fitBounds: (b: GBounds, padding?: number) => void;
-  setCenter: (p: LatLng) => void;
-  setZoom: (z: number) => void;
+type LatLng = [number, number];
+type LMap = {
+  setView: (c: LatLng, zoom: number) => LMap;
+  fitBounds: (points: LatLng[], opts?: Record<string, unknown>) => void;
+  remove: () => void;
 };
-type GoogleMaps = {
-  Map: new (el: HTMLElement, opts: Record<string, unknown>) => GMap;
-  Marker: new (opts: Record<string, unknown>) => GMarker;
-  LatLngBounds: new () => GBounds;
+type LMarker = {
+  addTo: (m: LMap) => LMarker;
+  setLatLng: (p: LatLng) => void;
+  remove: () => void;
+  bindTooltip: (text: string) => LMarker;
 };
-type WindowWithGoogle = Window & { google?: { maps?: GoogleMaps } };
+type Leaflet = {
+  map: (el: HTMLElement, opts?: Record<string, unknown>) => LMap;
+  tileLayer: (url: string, opts: Record<string, unknown>) => { addTo: (m: LMap) => void };
+  circleMarker: (p: LatLng, opts: Record<string, unknown>) => LMarker;
+};
+type WindowWithLeaflet = Window & { L?: Leaflet };
 
-let loader: Promise<GoogleMaps> | null = null;
+let loader: Promise<Leaflet> | null = null;
 
-function loadGoogleMaps(): Promise<GoogleMaps> {
-  const w = window as WindowWithGoogle;
-  if (w.google?.maps?.Map) return Promise.resolve(w.google.maps);
+function loadLeaflet(): Promise<Leaflet> {
+  const w = window as WindowWithLeaflet;
+  if (w.L?.map) return Promise.resolve(w.L);
   if (loader) return loader;
-  loader = new Promise<GoogleMaps>((resolve, reject) => {
+  loader = new Promise<Leaflet>((resolve, reject) => {
+    const css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = LEAFLET_CSS;
+    document.head.appendChild(css);
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(MAPS_KEY)}&v=weekly`;
+    script.src = LEAFLET_JS;
     script.async = true;
     script.onload = () => {
-      const maps = (window as WindowWithGoogle).google?.maps;
-      if (maps) resolve(maps);
-      else reject(new Error("Google Maps không tải được."));
+      const lib = (window as WindowWithLeaflet).L;
+      if (lib) resolve(lib);
+      else reject(new Error("Bản đồ không tải được."));
     };
-    script.onerror = () => reject(new Error("Google Maps không tải được."));
+    script.onerror = () => reject(new Error("Bản đồ không tải được."));
     document.head.appendChild(script);
   });
   loader.catch(() => {
@@ -63,9 +72,9 @@ export function LiveMap() {
   const [mapError, setMapError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const mapEl = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<GMap | null>(null);
-  const mapsRef = useRef<GoogleMaps | null>(null);
-  const markers = useRef<Map<string, GMarker>>(new Map());
+  const mapRef = useRef<LMap | null>(null);
+  const libRef = useRef<Leaflet | null>(null);
+  const markers = useRef<Map<string, LMarker>>(new Map());
   const fitted = useRef(false);
 
   useEffect(() => {
@@ -91,52 +100,62 @@ export function LiveMap() {
   }, [token, organizationId]);
 
   useEffect(() => {
-    if (!MAPS_KEY || !mapEl.current) return;
+    if (!mapEl.current) return;
     let cancelled = false;
-    loadGoogleMaps()
-      .then((maps) => {
+    loadLeaflet()
+      .then((lib) => {
         if (cancelled || !mapEl.current || mapRef.current) return;
-        mapsRef.current = maps;
-        mapRef.current = new maps.Map(mapEl.current, {
-          center: { lat: 10.7769, lng: 106.7009 },
-          zoom: 11,
-          mapTypeControl: false,
-          streetViewControl: false,
-        });
+        libRef.current = lib;
+        const map = lib.map(mapEl.current).setView([10.7769, 106.7009], 11);
+        lib
+          .tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: "© OpenStreetMap contributors",
+          })
+          .addTo(map);
+        mapRef.current = map;
       })
       .catch((err: unknown) => setMapError(err instanceof Error ? err.message : "Lỗi bản đồ."));
     return () => {
       cancelled = true;
+      mapRef.current?.remove();
+      mapRef.current = null;
+      markers.current.clear();
+      fitted.current = false;
     };
   }, []);
 
   useEffect(() => {
-    const maps = mapsRef.current;
+    const lib = libRef.current;
     const map = mapRef.current;
-    if (!maps || !map) return;
+    if (!lib || !map) return;
     const seen = new Set<string>();
-    const bounds = new maps.LatLngBounds();
+    const points: LatLng[] = [];
     for (const c of items) {
-      const pos = { lat: c.latitude, lng: c.longitude };
+      const pos: LatLng = [c.latitude, c.longitude];
       seen.add(c.user_id);
-      bounds.extend(pos);
+      points.push(pos);
       const existing = markers.current.get(c.user_id);
-      if (existing) existing.setPosition(pos);
-      else markers.current.set(c.user_id, new maps.Marker({ position: pos, map, title: c.email }));
+      if (existing) existing.setLatLng(pos);
+      else {
+        markers.current.set(
+          c.user_id,
+          lib
+            .circleMarker(pos, { radius: 9, color: "#0f766e", weight: 3, fillColor: "#14b8a6", fillOpacity: 0.9 })
+            .bindTooltip(c.email)
+            .addTo(map),
+        );
+      }
     }
     for (const [id, marker] of markers.current) {
       if (!seen.has(id)) {
-        marker.setMap(null);
+        marker.remove();
         markers.current.delete(id);
       }
     }
-    if (items.length > 0 && !fitted.current) {
-      if (items.length === 1) {
-        map.setCenter({ lat: items[0].latitude, lng: items[0].longitude });
-        map.setZoom(15);
-      } else {
-        map.fitBounds(bounds, 60);
-      }
+    if (points.length > 0 && !fitted.current) {
+      if (points.length === 1) map.setView(points[0], 15);
+      else map.fitBounds(points, { padding: [60, 60] });
       fitted.current = true;
     }
   }, [items, mapError, now]);
@@ -148,17 +167,10 @@ export function LiveMap() {
         <CardDescription>
           Cập nhật mỗi 10 giây. Chỉ hiện người đang bấm Bắt đầu chuyến đi; vị trí tự biến mất sau 2 phút không gửi.
         </CardDescription>
-        {MAPS_KEY ? (
-          <div
-            ref={mapEl}
-            className="mt-4 h-[420px] w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-100"
-          />
-        ) : (
-          <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-slate-800">
-            Chưa cấu hình khóa Google Maps nên chưa hiện bản đồ. Danh sách bên dưới vẫn dùng được, bấm &quot;Mở trên
-            Google Maps&quot; để xem từng vị trí.
-          </p>
-        )}
+        <div
+          ref={mapEl}
+          className="mt-4 h-[420px] w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-100"
+        />
         {mapError ? <p className="mt-2 text-sm text-red-600">{mapError}</p> : null}
         {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
       </Card>
