@@ -143,7 +143,7 @@ function LabWorkflowPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, orderParam]);
 
-  async function run(action: () => Promise<unknown>, okMsg: string) {
+  async function run(action: () => Promise<unknown>, okMsg: string, nextStep?: number) {
     if (!selectedOrder) return;
     setBusy(true);
     setError(null);
@@ -153,6 +153,7 @@ function LabWorkflowPanel() {
       setMessage(okMsg);
       await refreshDetail(selectedOrder);
       await load();
+      if (nextStep !== undefined) setStep(nextStep);
     } catch (err) {
       setError(normalizeApiError(err));
     } finally {
@@ -430,7 +431,7 @@ function LabWorkflowPanel() {
                     variant="outline"
                     disabled={!canWrite || busy || !selectedOrder || detail?.locked}
                     onClick={() =>
-                      void run(() => passQc(auth, selectedOrder!), "QC passed.")
+                      void run(() => passQc(auth, selectedOrder!), "QC passed. Tiếp theo: Technical validate.", 4)
                     }
                   >
                     QC pass
