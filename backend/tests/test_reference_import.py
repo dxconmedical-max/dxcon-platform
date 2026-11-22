@@ -55,6 +55,7 @@ class ReferenceImportTestCase(unittest.TestCase):
                 ["A1", "Glucose", "GLU", "g", "m", "c", "Blood", "mmol/L", "ALL", 18, None, 3.9, 5.6, None, "src"],
                 ["A2", "HBsAg", "HBsAg", "g", "m", "c", "Blood", None, "ALL", None, None, None, None, "Âm tính", "src"],
                 ["A3", "Bad", "B", "g", "m", "c", "Blood", "u", "ALL", None, None, 9, 1, None, "src"],
+                ["A4", "Cobalt", "Co", "g", "m", "c", "Blood", "ug/L", "ALL", None, None, 0.1, 0.4, "< 1.0 µg/L", "src"],
             ]
         )
 
@@ -70,6 +71,7 @@ class ReferenceImportTestCase(unittest.TestCase):
         data = self._post().get_json()["report"]
         self.assertEqual(data["importable"], 1)
         self.assertEqual(data["text_only_skipped"], 1)
+        self.assertEqual(data["conflict_skipped"], 1)
         self.assertFalse(data["applied"])
         self.assertEqual(ReferenceRange.query.count(), 0)
 

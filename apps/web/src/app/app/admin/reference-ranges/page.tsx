@@ -82,6 +82,7 @@ export default function ReferenceRangesImportPage() {
             <p>Nạp được (có khoảng số): {report.importable}</p>
             <p>Bỏ qua vì chỉ có chữ (định tính): {report.text_only_skipped}</p>
             <p>Bỏ qua vì không có khoảng: {report.no_range_skipped}</p>
+            <p>Bỏ trống vì số và chữ mâu thuẫn: {report.conflict_skipped ?? 0}</p>
             <p>Hiện có trong hệ thống: {Object.entries(report.counts).map(([k, v]) => `${k} ${v}`).join(", ") || "chưa có"}</p>
             {report.warnings_total > 0 ? (
               <details className="mt-2">

@@ -7,6 +7,7 @@ export type ImportReport = {
   importable: number;
   text_only_skipped: number;
   no_range_skipped: number;
+  conflict_skipped?: number;
   warnings: string[];
   warnings_total: number;
   applied: boolean;
