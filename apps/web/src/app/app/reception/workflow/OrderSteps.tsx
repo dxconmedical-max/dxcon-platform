@@ -1,5 +1,6 @@
 "use client";
 
+import { MomoPanel } from "@/components/pilot/MomoPanel";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
@@ -1139,6 +1140,14 @@ export function PaymentStep({
           <Button disabled={paying || loading} onClick={() => void submitPayment()}>
             {paying ? "Recording payment…" : "Collect payment"}
           </Button>
+          <MomoPanel
+            orderRef={orderRef}
+            ctx={{ token: accessToken, organizationId }}
+            onPaid={() => {
+              void refresh();
+              onPaymentRecorded?.();
+            }}
+          />
         </Card>
       ) : (
         <Card className="space-y-4">
