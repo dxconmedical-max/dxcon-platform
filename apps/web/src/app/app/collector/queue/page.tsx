@@ -106,7 +106,7 @@ export default function CollectorQueuePage() {
             <span className="mb-1 block text-slate-600">Date</span>
             <input
               type="date"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              className="block h-10 w-full min-w-0 max-w-full appearance-none rounded-lg border border-slate-300 px-3 py-2"
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
