@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { normalizeApiError } from "@/lib/errors";
 import { apiRequest } from "@/services/api";
 
-type Ctx = { token: string | null; organizationId: string | null };
+type Ctx = { token?: string | null; organizationId?: string | null };
 
 type MomoCreate = { pay_url?: string | null; qr_png?: string | null; amount: number };
 
