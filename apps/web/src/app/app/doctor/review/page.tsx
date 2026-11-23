@@ -9,7 +9,9 @@ import { Input, Label } from "@/components/ui/Input";
 import { useAuth } from "@/hooks/useAuth";
 import { normalizeApiError } from "@/lib/errors";
 import {
+  fetchAiNotes,
   fetchMedicalQueue,
+  type AiNotes,
   medicalReject,
   medicalReopen,
   medicalValidate,
@@ -32,6 +34,20 @@ export default function DoctorMedicalValidationPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
+  const [aiFor, setAiFor] = useState<string | null>(null);
+  const [aiNotes, setAiNotes] = useState<AiNotes | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  async function showAi(orderCode: string) {
+    setAiFor(orderCode);
+    setAiNotes(null);
+    setAiError(null);
+    try {
+      setAiNotes(await fetchAiNotes(auth, orderCode));
+    } catch (err) {
+      setAiError(normalizeApiError(err));
+    }
+  }
 
   const load = useCallback(async () => {
     if (!accessToken) {
@@ -146,6 +162,9 @@ export default function DoctorMedicalValidationPage() {
                     >
                       Reopen
                     </Button>
+                    <Button size="sm" variant="outline" onClick={() => void showAi(row.order_code)}>
+                      Gợi ý AI
+                    </Button>
                     <Link
                       href={`/app/lab/workflow?order=${encodeURIComponent(row.order_code)}`}
                       className="self-center text-xs text-sky-700 hover:underline"
@@ -158,6 +177,53 @@ export default function DoctorMedicalValidationPage() {
             ]}
           />
         </DataState>
+        {aiFor ? (
+          <section className="space-y-3 rounded-xl border border-violet-200 bg-violet-50 p-4 text-sm">
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-violet-900">Gợi ý AI cho đơn {aiFor} (chỉ để tham khảo)</h2>
+              <button className="text-xs text-violet-700 underline" onClick={() => setAiFor(null)}>
+                Đóng
+              </button>
+            </div>
+            {aiError ? <p className="text-red-700">{aiError}</p> : null}
+            {!aiNotes && !aiError ? <p>Đang tạo gợi ý…</p> : null}
+            {aiNotes ? (
+              <>
+                <p>{aiNotes.summary}</p>
+                {aiNotes.considerations.length > 0 ? (
+                  <div>
+                    <p className="font-medium">Cần cân nhắc</p>
+                    <ul className="list-disc pl-5">
+                      {aiNotes.considerations.map((c, i) => (
+                        <li key={i}>
+                          <strong>{c.test_name}</strong>: {c.consideration}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {aiNotes.suggested_tests.length > 0 ? (
+                  <div>
+                    <p className="font-medium">Xét nghiệm có thể cần làm tiếp</p>
+                    <ul className="list-disc pl-5">
+                      {aiNotes.suggested_tests.map((t, i) => (
+                        <li key={i}>
+                          {t.test} <span className="text-violet-700">(do {t.because})</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {aiNotes.no_rule_for.length > 0 ? (
+                  <p className="text-xs text-slate-600">
+                    Chưa có quy tắc gợi ý cho: {aiNotes.no_rule_for.join(", ")}.
+                  </p>
+                ) : null}
+                <p className="text-xs italic text-slate-700">{aiNotes.disclaimer}</p>
+              </>
+            ) : null}
+          </section>
+        ) : null}
       </div>
     </AppShell>
   );
