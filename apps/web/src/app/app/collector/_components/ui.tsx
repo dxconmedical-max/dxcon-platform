@@ -39,7 +39,7 @@ export function DataState({
   children: React.ReactNode;
 }) {
   if (loading) {
-    return <p className="text-sm text-slate-500">Loading…</p>;
+    return <p className="text-sm text-slate-500">Đang tải…</p>;
   }
   if (error) {
     return (
@@ -47,7 +47,7 @@ export function DataState({
         <p>{error}</p>
         {onRetry ? (
           <Button className="mt-3" size="sm" variant="outline" onClick={onRetry}>
-            Retry
+            Thử lại
           </Button>
         ) : null}
       </div>
@@ -56,7 +56,7 @@ export function DataState({
   if (empty) {
     return (
       <p className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500">
-        {emptyLabel ?? "Nothing to show."}
+        {emptyLabel ?? "Không có dữ liệu."}
       </p>
     );
   }
@@ -105,8 +105,26 @@ export function SimpleTable<T>({
   );
 }
 
+export const STATUS_VI: Record<string, string> = {
+  REQUESTED: "Mới yêu cầu",
+  ASSIGNED: "Đã phân công",
+  VERIFIED: "Đã xác minh",
+  COLLECTED: "Đã lấy mẫu",
+  IN_TRANSIT: "Đang vận chuyển",
+  ARRIVED_AT_LAB: "Đã đến phòng xét nghiệm",
+  RECEIVED: "Phòng xét nghiệm đã nhận",
+  REJECTED: "Bị từ chối",
+  RECOLLECT_REQUIRED: "Cần lấy lại mẫu",
+  CANCELLED: "Đã hủy",
+  COMPLETED: "Hoàn tất",
+  RELEASED: "Đã trả kết quả",
+  delivered: "Đã giao",
+  in_transit: "Đang vận chuyển",
+};
+
 export function StatusPill({ status }: { status: string }) {
   const label = typeof status === "string" && status.trim() ? status : "—";
+  const shown = STATUS_VI[label] ?? STATUS_VI[label.toUpperCase()] ?? label;
   const tone =
     label === "RECEIVED" || label === "delivered"
       ? "bg-emerald-50 text-emerald-800 border-emerald-200"
@@ -117,7 +135,7 @@ export function StatusPill({ status }: { status: string }) {
           : "bg-slate-50 text-slate-700 border-slate-200";
   return (
     <span className={cn("inline-flex rounded-md border px-2 py-0.5 text-xs font-medium", tone)}>
-      {label}
+      {shown}
     </span>
   );
 }

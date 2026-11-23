@@ -11,7 +11,7 @@ const LABELS: Record<string, string> = {
   doctor: "Doctor",
   patient: "Patient",
   lab: "Laboratory",
-  collector: "Collector",
+  collector: "Thu mẫu",
   clinic: "Clinic",
 };
 

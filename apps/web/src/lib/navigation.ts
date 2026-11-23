@@ -99,7 +99,7 @@ const ALL_NAV: NavItem[] = [
   },
   {
     href: "/app/collector",
-    label: "Collector",
+    label: "Thu mẫu",
     icon: Truck,
     permission: "collections.read",
     workspaces: ["/app/collector"],

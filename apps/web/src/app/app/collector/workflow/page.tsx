@@ -24,7 +24,16 @@ import { normalizeApiError } from "@/lib/errors";
 
 import { DataState, SectionHeader, StatusPill } from "../_components/ui";
 
-const STEPS = ["Verify", "Collect", "Transport", "Lab arrival"] as const;
+const STEPS = ["Xác minh", "Lấy mẫu", "Vận chuyển", "Đến phòng XN"] as const;
+
+const REJECT_VI: Record<string, string> = {
+  insufficient_volume: "Không đủ thể tích mẫu",
+  wrong_tube: "Sai loại ống",
+  hemolyzed: "Mẫu bị vỡ hồng cầu (tán huyết)",
+  contaminated: "Mẫu bị nhiễm bẩn",
+  mismatched_identifier: "Sai/lệch mã định danh",
+  rejected: "Từ chối (lý do khác)",
+};
 
 function CollectorWorkflowPanel() {
   const { accessToken, activeOrganizationId, can, role } = useAuth();
@@ -152,7 +161,7 @@ function CollectorWorkflowPanel() {
         booking_code: bookingCode || undefined,
         scanned_barcode: scannedBarcode || undefined,
       });
-      setMessage("Patient and order verified.");
+      setMessage("Đã xác minh bệnh nhân và đơn.");
       setStep(1);
       await refreshDetail(selectedId);
     } catch (err) {
@@ -180,7 +189,7 @@ function CollectorWorkflowPanel() {
       });
       const code = String(result.sample_tracking?.sample_code ?? "");
       if (code) setSpecimenId(code);
-      setMessage(`Specimen collected${code ? `: ${code}` : ""}.`);
+      setMessage(`Đã lấy mẫu${code ? `: ${code}` : ""}.`);
       setStep(2);
       await refreshDetail(selectedId);
     } catch (err) {
@@ -204,7 +213,7 @@ function CollectorWorkflowPanel() {
       setMessage(
         result.recollect
           ? `Rejected. Recollect queued: ${result.recollect.id.slice(0, 8)}…`
-          : "Specimen rejected.",
+          : "Đã từ chối mẫu.",
       );
       if (result.recollect?.id) {
         setSelectedId(result.recollect.id);
@@ -251,7 +260,7 @@ function CollectorWorkflowPanel() {
         note: "Collector handoff recorded",
       });
       await refreshDetail(selectedId);
-      setMessage("Dispatched and handoff recorded.");
+      setMessage("Đã ghi nhận bàn giao và xuất phát.");
       setStep(3);
     } catch (err) {
       setError(normalizeApiError(err));
@@ -282,7 +291,7 @@ function CollectorWorkflowPanel() {
           });
       const sid = result.synthetic_specimen_id || String(result.sample_tracking?.sample_code ?? "");
       if (sid) setSpecimenId(sid);
-      setMessage(`Arrived at laboratory${sid ? ` — specimen ${sid}` : ""}.`);
+      setMessage(`Đã đến phòng xét nghiệm${sid ? ` — mẫu ${sid}` : ""}.`);
       await refreshDetail(selectedId);
     } catch (err) {
       setError(normalizeApiError(err));
@@ -294,11 +303,11 @@ function CollectorWorkflowPanel() {
   return (
     <div className="space-y-6">
       <SectionHeader
-        title="Collect & transport"
-        description="Verify → scan barcode → collect → dispatch/handoff → laboratory arrival."
+        title="Lấy mẫu & vận chuyển"
+        description="Xác minh → quét mã vạch → lấy mẫu → bàn giao/vận chuyển → đến phòng xét nghiệm."
         actions={
           <Link href="/app/collector/queue" className="text-sm font-medium text-sky-700 hover:underline">
-            Back to queue
+            Quay lại hàng đợi
           </Link>
         }
       />
@@ -325,10 +334,10 @@ function CollectorWorkflowPanel() {
         </p>
       ) : null}
 
-      <DataState loading={loading} error={error} empty={!loading && !detail} emptyLabel="No field collection jobs in queue.">
+      <DataState loading={loading} error={error} empty={!loading && !detail} emptyLabel="Không có ca lấy mẫu nào trong hàng đợi.">
         <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
           <aside className="space-y-2 rounded-xl border border-slate-200 bg-white p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Queue</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Hàng đợi</p>
             {queue.map((item) => (
               <button
                 key={item.id}
@@ -338,7 +347,7 @@ function CollectorWorkflowPanel() {
                   selectedId === item.id ? "bg-slate-900 text-white" : "hover:bg-slate-50"
                 }`}
               >
-                <div className="font-medium">{item.job_info?.patient_name || item.booking?.patient_name || "Patient"}</div>
+                <div className="font-medium">{item.job_info?.patient_name || item.booking?.patient_name || "Bệnh nhân"}</div>
                 <div className={selectedId === item.id ? "text-slate-300" : "text-slate-500"}>
                   {item.status}
                 </div>
@@ -367,7 +376,7 @@ function CollectorWorkflowPanel() {
                 {step === 0 ? (
                   <div className="grid gap-3 sm:grid-cols-2">
                     <label className="block text-sm">
-                      <span className="mb-1 block text-slate-600">Patient name</span>
+                      <span className="mb-1 block text-slate-600">Tên bệnh nhân</span>
                       <input
                         className="w-full rounded-lg border border-slate-300 px-3 py-2"
                         value={patientName}
@@ -375,7 +384,7 @@ function CollectorWorkflowPanel() {
                       />
                     </label>
                     <label className="block text-sm">
-                      <span className="mb-1 block text-slate-600">Booking / order code</span>
+                      <span className="mb-1 block text-slate-600">Mã đặt lịch / mã đơn</span>
                       <input
                         className="w-full rounded-lg border border-slate-300 px-3 py-2"
                         value={bookingCode}
@@ -383,17 +392,17 @@ function CollectorWorkflowPanel() {
                       />
                     </label>
                     <label className="block text-sm sm:col-span-2">
-                      <span className="mb-1 block text-slate-600">Scan barcode / QR</span>
+                      <span className="mb-1 block text-slate-600">Quét mã vạch / QR</span>
                       <input
                         className="w-full rounded-lg border border-slate-300 px-3 py-2 font-mono"
                         value={scannedBarcode}
                         onChange={(e) => setScannedBarcode(e.target.value)}
-                        placeholder="Scan or type barcode"
+                        placeholder="Quét hoặc nhập mã vạch"
                       />
                     </label>
                     <div className="sm:col-span-2">
                       <Button disabled={!canWrite || busy} onClick={() => void onVerify()}>
-                        Verify patient & order
+                        Xác minh bệnh nhân & đơn
                       </Button>
                     </div>
                   </div>
@@ -402,20 +411,20 @@ function CollectorWorkflowPanel() {
                 {step === 1 ? (
                   <div className="grid gap-3 sm:grid-cols-2">
                     <label className="block text-sm">
-                      <span className="mb-1 block text-slate-600">Specimen type</span>
+                      <span className="mb-1 block text-slate-600">Loại mẫu</span>
                       <select
                         className="w-full rounded-lg border border-slate-300 px-3 py-2"
                         value={specimenType}
                         onChange={(e) => setSpecimenType(e.target.value)}
                       >
-                        <option value="BLOOD">Blood</option>
-                        <option value="URINE">Urine</option>
-                        <option value="SWAB">Swab</option>
-                        <option value="OTHER">Other</option>
+                        <option value="BLOOD">Máu</option>
+                        <option value="URINE">Nước tiểu</option>
+                        <option value="SWAB">Dịch quệt (swab)</option>
+                        <option value="OTHER">Khác</option>
                       </select>
                     </label>
                     <label className="block text-sm">
-                      <span className="mb-1 block text-slate-600">Collection location</span>
+                      <span className="mb-1 block text-slate-600">Nơi lấy mẫu</span>
                       <input
                         className="w-full rounded-lg border border-slate-300 px-3 py-2"
                         value={location}
@@ -423,7 +432,7 @@ function CollectorWorkflowPanel() {
                       />
                     </label>
                     <label className="block text-sm sm:col-span-2">
-                      <span className="mb-1 block text-slate-600">Barcode (required)</span>
+                      <span className="mb-1 block text-slate-600">Mã vạch (bắt buộc)</span>
                       <input
                         className="w-full rounded-lg border border-slate-300 px-3 py-2 font-mono"
                         value={scannedBarcode}
@@ -431,7 +440,7 @@ function CollectorWorkflowPanel() {
                       />
                     </label>
                     <label className="block text-sm sm:col-span-2">
-                      <span className="mb-1 block text-slate-600">Notes (optional)</span>
+                      <span className="mb-1 block text-slate-600">Ghi chú (không bắt buộc)</span>
                       <textarea
                         className="w-full rounded-lg border border-slate-300 px-3 py-2"
                         rows={2}
@@ -441,11 +450,11 @@ function CollectorWorkflowPanel() {
                     </label>
                     <div className="flex flex-wrap gap-2 sm:col-span-2">
                       <Button disabled={!canWrite || busy} onClick={() => void onCollect()}>
-                        Record collection
+                        Ghi nhận đã lấy mẫu
                       </Button>
                     </div>
                     <div className="rounded-lg border border-rose-100 bg-rose-50/60 p-3 sm:col-span-2">
-                      <p className="mb-2 text-sm font-medium text-rose-800">Quality exception</p>
+                      <p className="mb-2 text-sm font-medium text-rose-800">Mẫu không đạt chất lượng</p>
                       <div className="grid gap-2 sm:grid-cols-2">
                         <select
                           className="rounded-lg border border-rose-200 px-3 py-2 text-sm"
@@ -454,13 +463,13 @@ function CollectorWorkflowPanel() {
                         >
                           {QUALITY_REJECTION_OPTIONS.map((opt) => (
                             <option key={opt.value} value={opt.value}>
-                              {opt.label}
+                              {REJECT_VI[opt.value] ?? opt.label}
                             </option>
                           ))}
                         </select>
                         <input
                           className="rounded-lg border border-rose-200 px-3 py-2 text-sm"
-                          placeholder="Rejection reason"
+                          placeholder="Lý do từ chối"
                           value={rejectReason}
                           onChange={(e) => setRejectReason(e.target.value)}
                         />
@@ -472,7 +481,7 @@ function CollectorWorkflowPanel() {
                         disabled={!canWrite || busy}
                         onClick={() => void onReject()}
                       >
-                        Reject & request recollect
+                        Từ chối & yêu cầu lấy lại
                       </Button>
                     </div>
                   </div>
@@ -481,7 +490,7 @@ function CollectorWorkflowPanel() {
                 {step === 2 ? (
                   <div className="grid gap-3 sm:grid-cols-3">
                     <label className="block text-sm">
-                      <span className="mb-1 block text-slate-600">Temperature °C</span>
+                      <span className="mb-1 block text-slate-600">Nhiệt độ °C</span>
                       <input
                         className="w-full rounded-lg border border-slate-300 px-3 py-2"
                         value={temperature}
@@ -489,7 +498,7 @@ function CollectorWorkflowPanel() {
                       />
                     </label>
                     <label className="block text-sm">
-                      <span className="mb-1 block text-slate-600">Distance km</span>
+                      <span className="mb-1 block text-slate-600">Quãng đường (km)</span>
                       <input
                         className="w-full rounded-lg border border-slate-300 px-3 py-2"
                         value={distance}
@@ -497,7 +506,7 @@ function CollectorWorkflowPanel() {
                       />
                     </label>
                     <label className="block text-sm">
-                      <span className="mb-1 block text-slate-600">ETA minutes</span>
+                      <span className="mb-1 block text-slate-600">Thời gian dự kiến (phút)</span>
                       <input
                         className="w-full rounded-lg border border-slate-300 px-3 py-2"
                         value={eta}
@@ -506,24 +515,24 @@ function CollectorWorkflowPanel() {
                     </label>
                     <div className="sm:col-span-3">
                       <Button disabled={!canWrite || busy} onClick={() => void onDispatch()}>
-                        Dispatch & handoff
+                        Xuất phát & bàn giao
                       </Button>
                     </div>
                     <dl className="grid gap-2 text-sm text-slate-600 sm:col-span-3 sm:grid-cols-2">
                       <div>
-                        <dt className="font-medium text-slate-800">Picked up</dt>
+                        <dt className="font-medium text-slate-800">Đã lấy</dt>
                         <dd>{detail.picked_up_at || "—"}</dd>
                       </div>
                       <div>
-                        <dt className="font-medium text-slate-800">Dispatched</dt>
+                        <dt className="font-medium text-slate-800">Đã xuất phát</dt>
                         <dd>{detail.dispatched_at || "—"}</dd>
                       </div>
                       <div>
-                        <dt className="font-medium text-slate-800">Handoff</dt>
+                        <dt className="font-medium text-slate-800">Bàn giao</dt>
                         <dd>{detail.handoff_at || "—"}</dd>
                       </div>
                       <div>
-                        <dt className="font-medium text-slate-800">Vehicle / driver</dt>
+                        <dt className="font-medium text-slate-800">Xe / tài xế</dt>
                         <dd>
                           {detail.vehicle_id || "—"} / {detail.driver_id || detail.collector_id || "—"}
                         </dd>
@@ -539,7 +548,7 @@ function CollectorWorkflowPanel() {
                       accession/testing is out of scope for Sample Collection.
                     </p>
                     <Button disabled={!canWrite || busy || detail.status === "RECEIVED"} onClick={() => void onLabArrive()}>
-                      {detail.status === "RECEIVED" ? "Already at laboratory" : "Mark arrived at laboratory"}
+                      {detail.status === "RECEIVED" ? "Đã ở phòng xét nghiệm" : "Xác nhận đã đến phòng xét nghiệm"}
                     </Button>
                     {detail.arrived_at_lab ? (
                       <p className="text-sm text-emerald-700">Arrived: {detail.arrived_at_lab}</p>
@@ -557,8 +566,8 @@ function CollectorWorkflowPanel() {
 
 export default function CollectorWorkflowPage() {
   return (
-    <AppShell title="Collect & transport" workspacePath="/app/collector">
-      <Suspense fallback={<p className="text-sm text-slate-500">Loading workflow…</p>}>
+    <AppShell title="Lấy mẫu & vận chuyển" workspacePath="/app/collector">
+      <Suspense fallback={<p className="text-sm text-slate-500">Đang tải quy trình…</p>}>
         <CollectorWorkflowPanel />
       </Suspense>
     </AppShell>

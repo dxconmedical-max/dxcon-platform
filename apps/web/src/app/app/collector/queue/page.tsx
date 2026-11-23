@@ -62,48 +62,48 @@ export default function CollectorQueuePage() {
   }, [load]);
 
   return (
-    <AppShell title="Collection queue" workspacePath="/app/collector">
+    <AppShell title="Hàng đợi lấy mẫu" workspacePath="/app/collector">
       <div className="space-y-6">
         <SectionHeader
-          title="Field collection jobs"
-          description="HOME_COLLECTION field jobs only. CLINIC pickup requests are on Reception → Field Collection Requests. Desk AT_RECEPTION work is on Reception → Desk collections."
+          title="Việc lấy mẫu tại nhà"
+          description="Chỉ hiện các ca lấy mẫu tại nhà. Yêu cầu từ phòng khám nằm ở Lễ tân → Yêu cầu lấy mẫu ngoài. Ca lấy mẫu tại quầy nằm ở Lễ tân → Lấy mẫu tại quầy."
           actions={
             <Button size="sm" variant="outline" onClick={() => void load()}>
-              Refresh
+              Làm mới
             </Button>
           }
         />
 
         <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4">
           <label className="block min-w-0 text-sm">
-            <span className="mb-1 block text-slate-600">Status</span>
+            <span className="mb-1 block text-slate-600">Trạng thái</span>
             <select
               className="w-full rounded-lg border border-slate-300 px-3 py-2"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
             >
-              <option value="">Awaiting (default)</option>
-              <option value="REQUESTED">REQUESTED</option>
-              <option value="ASSIGNED">ASSIGNED</option>
-              <option value="VERIFIED">VERIFIED</option>
-              <option value="COLLECTED">COLLECTED</option>
-              <option value="IN_TRANSIT">IN_TRANSIT</option>
-              <option value="ARRIVED_AT_LAB">ARRIVED_AT_LAB</option>
-              <option value="REJECTED">REJECTED</option>
-              <option value="RECOLLECT_REQUIRED">RECOLLECT_REQUIRED</option>
+              <option value="">Đang chờ (mặc định)</option>
+              <option value="REQUESTED">Mới yêu cầu</option>
+              <option value="ASSIGNED">Đã phân công</option>
+              <option value="VERIFIED">Đã xác minh</option>
+              <option value="COLLECTED">Đã lấy mẫu</option>
+              <option value="IN_TRANSIT">Đang vận chuyển</option>
+              <option value="ARRIVED_AT_LAB">Đã đến phòng xét nghiệm</option>
+              <option value="REJECTED">Bị từ chối</option>
+              <option value="RECOLLECT_REQUIRED">Cần lấy lại mẫu</option>
             </select>
           </label>
           <label className="block min-w-0 text-sm">
-            <span className="mb-1 block text-slate-600">Location</span>
+            <span className="mb-1 block text-slate-600">Khu vực</span>
             <input
               className="w-full rounded-lg border border-slate-300 px-3 py-2"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="City or address"
+              placeholder="Thành phố hoặc địa chỉ"
             />
           </label>
           <label className="block min-w-0 text-sm">
-            <span className="mb-1 block text-slate-600">Date</span>
+            <span className="mb-1 block text-slate-600">Ngày</span>
             <div className="w-full max-w-full overflow-hidden rounded-lg">
               <input
                 type="date"
@@ -115,26 +115,26 @@ export default function CollectorQueuePage() {
             </div>
           </label>
           <label className="block min-w-0 text-sm">
-            <span className="mb-1 block text-slate-600">Collector ID</span>
+            <span className="mb-1 block text-slate-600">Mã nhân viên lấy mẫu</span>
             <input
               className="w-full rounded-lg border border-slate-300 px-3 py-2"
               value={collector}
               onChange={(e) => setCollector(e.target.value)}
-              placeholder="Optional"
+              placeholder="Không bắt buộc"
             />
           </label>
         </div>
 
         {!canRead ? (
           <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-            You do not have permission to view the collection queue.
+            Bạn không có quyền xem hàng đợi lấy mẫu.
           </p>
         ) : (
           <DataState
             loading={loading}
             error={error}
             empty={!loading && items.length === 0}
-            emptyLabel="No field specimens match these filters."
+            emptyLabel="Không có ca lấy mẫu nào khớp bộ lọc."
             onRetry={() => void load()}
           >
             <SimpleTable
@@ -143,7 +143,7 @@ export default function CollectorQueuePage() {
               columns={[
                 {
                   key: "patient",
-                  label: "Patient / order",
+                  label: "Bệnh nhân / đơn",
                   render: (row) => (
                     <div>
                       <div className="font-medium">
@@ -180,12 +180,12 @@ export default function CollectorQueuePage() {
                 },
                 {
                   key: "mode",
-                  label: "Mode",
+                  label: "Hình thức",
                   render: (row) => String(row.collection_mode || "—"),
                 },
                 {
                   key: "location",
-                  label: "Pickup",
+                  label: "Địa chỉ lấy mẫu",
                   render: (row) =>
                     row.pickup_address ||
                     row.collection_location ||
@@ -195,18 +195,18 @@ export default function CollectorQueuePage() {
                 },
                 {
                   key: "schedule",
-                  label: "Schedule",
+                  label: "Lịch hẹn",
                   render: (row) =>
                     [row.requested_date, row.requested_time_window].filter(Boolean).join(" ") || "—",
                 },
                 {
                   key: "collector",
-                  label: "Assignment",
-                  render: (row) => row.collector_name || row.collector_id || "Unassigned",
+                  label: "Phân công",
+                  render: (row) => row.collector_name || row.collector_id || "Chưa phân công",
                 },
                 {
                   key: "status",
-                  label: "Status",
+                  label: "Trạng thái",
                   render: (row) => <StatusPill status={row.status} />,
                 },
                 {
@@ -219,14 +219,14 @@ export default function CollectorQueuePage() {
                         String(row.status || "").toUpperCase(),
                       );
                     if (terminal) {
-                      return <span className="text-xs text-slate-400">Closed</span>;
+                      return <span className="text-xs text-slate-400">Đã đóng</span>;
                     }
                     return (
                       <Link
                         href={`/app/collector/workflow?id=${encodeURIComponent(row.id)}`}
                         className="text-sm font-medium text-sky-700 hover:underline"
                       >
-                        Open
+                        Mở
                       </Link>
                     );
                   },

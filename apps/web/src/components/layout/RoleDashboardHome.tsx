@@ -47,6 +47,13 @@ export function RoleDashboardHome({
     [accessToken, activeOrganizationId, user],
   );
 
+  const vi = role === "collector";
+  const CARD_VI: Record<string, string> = {
+    "Awaiting collection": "Chờ lấy mẫu",
+    "In transit": "Đang vận chuyển",
+    "Arrived at lab": "Đã đến phòng XN",
+    "Rejected / alerts": "Từ chối / cảnh báo",
+  };
   const [cards, setCards] = useState<RoleDashboardCard[]>(fallbackCards);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -83,9 +90,9 @@ export function RoleDashboardHome({
     <div className="space-y-6">
       <section className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-teal-50/40 p-6 lg:p-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Badge tone="info">Production workspace</Badge>
+          <Badge tone="info">{vi ? "Hệ thống chính thức" : "Production workspace"}</Badge>
           <Button size="sm" variant="outline" onClick={() => void load()} disabled={loading}>
-            Refresh
+            {vi ? "Làm mới" : "Refresh"}
           </Button>
         </div>
         <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900 lg:text-3xl">
@@ -93,7 +100,7 @@ export function RoleDashboardHome({
         </h2>
         <p className="mt-2 max-w-2xl text-slate-600">{subtitle}</p>
         {generatedAt ? (
-          <p className="mt-2 text-xs text-slate-400">Updated {generatedAt}</p>
+          <p className="mt-2 text-xs text-slate-400">{vi ? "Cập nhật" : "Updated"} {generatedAt}</p>
         ) : null}
       </section>
 
@@ -122,7 +129,7 @@ export function RoleDashboardHome({
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
           <Card key={card.label}>
-            <p className="text-sm text-slate-500">{card.label}</p>
+            <p className="text-sm text-slate-500">{vi ? (CARD_VI[card.label] ?? card.label) : card.label}</p>
             <p className="mt-2 text-2xl font-semibold text-slate-900">
               {loading ? "…" : card.value}
             </p>
@@ -132,7 +139,7 @@ export function RoleDashboardHome({
       </section>
 
       <section>
-        <h3 className="mb-4 text-lg font-semibold text-slate-900">Key actions</h3>
+        <h3 className="mb-4 text-lg font-semibold text-slate-900">{vi ? "Thao tác chính" : "Key actions"}</h3>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {actions.map((action) => (
             <Card key={action.label} className="flex flex-col justify-between">
@@ -154,7 +161,7 @@ export function RoleDashboardHome({
                   href={action.href}
                   className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-teal-700 hover:text-teal-800"
                 >
-                  Open module
+                  {vi ? "Mở" : "Open module"}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               )}
