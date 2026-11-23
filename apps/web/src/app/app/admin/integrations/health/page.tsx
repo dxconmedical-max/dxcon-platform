@@ -1,5 +1,7 @@
-import { IntegrationHub } from "@/components/integration/IntegrationHub";
-export const metadata = { title: "Integration Health" };
+import { IntegrationDataView } from "@/components/integration/IntegrationDataView";
+
+export const metadata = { title: "Health" };
+
 export default function Page() {
-  return <IntegrationHub title="Integration Health" subtitle="Active connectors, success rate, retries and dead-letter counts." />;
+  return <IntegrationDataView title="Health" description="Tình trạng các kết nối." endpoint={"/api/v1/integration-hub/health"} />;
 }

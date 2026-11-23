@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/hooks/useAuth";
-import { activateReferenceRanges, fileToBase64, importReferenceFile, type ImportReport } from "@/lib/api/referenceImport";
+import { activateReferenceRanges, fetchReferenceCounts, fileToBase64, importReferenceFile, type ImportReport } from "@/lib/api/referenceImport";
 import { normalizeApiError } from "@/lib/errors";
 
 export default function ReferenceRangesImportPage() {
@@ -19,6 +19,20 @@ export default function ReferenceRangesImportPage() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [counts, setCounts] = useState<Record<string, number> | null>(null);
+
+  const refreshCounts = useCallback(async () => {
+    if (!accessToken) return;
+    try {
+      setCounts(await fetchReferenceCounts({ token: accessToken, organizationId: activeOrganizationId }));
+    } catch {
+      /* counts are informational */
+    }
+  }, [accessToken, activeOrganizationId]);
+
+  useEffect(() => {
+    void refreshCounts();
+  }, [refreshCounts]);
 
   async function run(apply: boolean) {
     setBusy(true);
@@ -26,6 +40,7 @@ export default function ReferenceRangesImportPage() {
     setNotice(null);
     try {
       setReport(await importReferenceFile(ctx, b64, apply));
+      await refreshCounts();
       if (apply) setNotice("Đã nạp ở trạng thái NHÁP. Chưa dùng để đánh cờ kết quả.");
     } catch (err) {
       setError(normalizeApiError(err));
@@ -41,6 +56,7 @@ export default function ReferenceRangesImportPage() {
       const r = await activateReferenceRanges(ctx, phrase);
       setNotice(`Đã kích hoạt ${r.activated} dòng (thay thế ${r.superseded} dòng cũ).`);
       setPhrase("");
+      setCounts(r.counts);
     } catch (err) {
       setError(normalizeApiError(err));
     } finally {
@@ -66,6 +82,16 @@ export default function ReferenceRangesImportPage() {
             setB64(await fileToBase64(f));
           }}
         />
+        <p className="rounded-lg bg-slate-50 px-3 py-2">
+          Hiện có trong hệ thống:{" "}
+          <b>
+            {counts
+              ? Object.entries(counts)
+                  .map(([k, v]) => `${k === "ACTIVE" ? "Đang dùng" : k === "DRAFT" ? "Nháp" : k === "INACTIVE" ? "Ngưng dùng" : k} ${v}`)
+                  .join(" · ") || "chưa có"
+              : "…"}
+          </b>
+        </p>
         <div className="flex gap-2">
           <Button variant="outline" disabled={!b64 || busy} onClick={() => void run(false)}>
             1. Xem trước {fileName ? `(${fileName})` : ""}
@@ -83,7 +109,6 @@ export default function ReferenceRangesImportPage() {
             <p>Bỏ qua vì chỉ có chữ (định tính): {report.text_only_skipped}</p>
             <p>Bỏ qua vì không có khoảng: {report.no_range_skipped}</p>
             <p>Bỏ trống vì số và chữ mâu thuẫn: {report.conflict_skipped ?? 0}</p>
-            <p>Hiện có trong hệ thống: {Object.entries(report.counts).map(([k, v]) => `${k} ${v}`).join(", ") || "chưa có"}</p>
             {report.warnings_total > 0 ? (
               <details className="mt-2">
                 <summary className="cursor-pointer text-amber-700">{report.warnings_total} dòng cần kiểm tra lại</summary>
