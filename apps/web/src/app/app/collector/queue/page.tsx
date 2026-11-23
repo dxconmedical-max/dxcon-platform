@@ -74,8 +74,8 @@ export default function CollectorQueuePage() {
           }
         />
 
-        <div className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4">
-          <label className="block text-sm">
+        <div className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4">
+          <label className="block min-w-0 text-sm">
             <span className="mb-1 block text-slate-600">Status</span>
             <select
               className="w-full rounded-lg border border-slate-300 px-3 py-2"
@@ -93,7 +93,7 @@ export default function CollectorQueuePage() {
               <option value="RECOLLECT_REQUIRED">RECOLLECT_REQUIRED</option>
             </select>
           </label>
-          <label className="block text-sm">
+          <label className="block min-w-0 text-sm">
             <span className="mb-1 block text-slate-600">Location</span>
             <input
               className="w-full rounded-lg border border-slate-300 px-3 py-2"
@@ -102,7 +102,7 @@ export default function CollectorQueuePage() {
               placeholder="City or address"
             />
           </label>
-          <label className="block text-sm">
+          <label className="block min-w-0 text-sm">
             <span className="mb-1 block text-slate-600">Date</span>
             <input
               type="date"
@@ -111,7 +111,7 @@ export default function CollectorQueuePage() {
               onChange={(e) => setDate(e.target.value)}
             />
           </label>
-          <label className="block text-sm">
+          <label className="block min-w-0 text-sm">
             <span className="mb-1 block text-slate-600">Collector ID</span>
             <input
               className="w-full rounded-lg border border-slate-300 px-3 py-2"
