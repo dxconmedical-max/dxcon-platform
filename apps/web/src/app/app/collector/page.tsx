@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { RoleDashboardHome } from "@/components/layout/RoleDashboardHome";
+import { InstallAppCard } from "@/components/pilot/InstallAppCard";
 
 const ACTIONS = [
   {
@@ -36,6 +37,9 @@ export default function CollectorPage() {
 
   return (
     <AppShell title="Collector" workspacePath="/app/collector">
+      <div className="mb-4">
+        <InstallAppCard />
+      </div>
       <RoleDashboardHome
         title="Sample Collection workspace"
         subtitle="Queue, verify identifiers, collect specimens, and track transport to laboratory arrival."

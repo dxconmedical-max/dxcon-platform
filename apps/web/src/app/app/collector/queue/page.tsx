@@ -104,12 +104,15 @@ export default function CollectorQueuePage() {
           </label>
           <label className="block min-w-0 text-sm">
             <span className="mb-1 block text-slate-600">Date</span>
-            <input
-              type="date"
-              className="block h-10 w-full min-w-0 max-w-full appearance-none rounded-lg border border-slate-300 px-3 py-2"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
+            <div className="w-full max-w-full overflow-hidden rounded-lg">
+              <input
+                type="date"
+                className="block h-10 w-full min-w-0 max-w-full appearance-none rounded-lg border border-slate-300 px-3 py-2"
+                style={{ minWidth: 0, width: "100%", maxWidth: "100%", boxSizing: "border-box" }}
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+            </div>
           </label>
           <label className="block min-w-0 text-sm">
             <span className="mb-1 block text-slate-600">Collector ID</span>
