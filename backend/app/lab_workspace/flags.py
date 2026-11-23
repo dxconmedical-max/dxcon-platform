@@ -31,7 +31,7 @@ def calculate_abnormal_flag(
     if high is None and critical_high is not None:
         high = critical_high
 
-    if low is None or high is None:
+    if low is None and high is None:
         warnings.append("Reference range missing or invalid; flag set to normal")
         return "normal", warnings
 
@@ -39,9 +39,9 @@ def calculate_abnormal_flag(
         return "critical_low", warnings
     if critical_high is not None and numeric >= critical_high:
         return "critical_high", warnings
-    if numeric < low:
+    if low is not None and numeric < low:
         return "low", warnings
-    if numeric > high:
+    if high is not None and numeric > high:
         return "high", warnings
     return "normal", warnings
 
@@ -57,9 +57,21 @@ def _parse_numeric(value: str) -> float | None:
 
 
 def _parse_range(reference_range: str | None) -> tuple[float | None, float | None]:
+    """Parse 'a-b', '<x', '<=x', '>x', '>=x' (also ≤ ≥ and en dash)."""
     if not reference_range:
         return None, None
-    ref = reference_range.strip().replace("–", "-")
+    ref = reference_range.strip().replace("–", "-").replace("≤", "<=").replace("≥", ">=")
+    try:
+        if ref.startswith("<="):
+            return None, float(ref[2:].strip().split()[0])
+        if ref.startswith("<"):
+            return None, float(ref[1:].strip().split()[0])
+        if ref.startswith(">="):
+            return float(ref[2:].strip().split()[0]), None
+        if ref.startswith(">"):
+            return float(ref[1:].strip().split()[0]), None
+    except (ValueError, IndexError):
+        return None, None
     if "-" not in ref:
         return None, None
     parts = ref.split("-", 1)

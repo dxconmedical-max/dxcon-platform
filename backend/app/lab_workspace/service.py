@@ -24,6 +24,7 @@ from app.business_engine.statuses import (
 from app.extensions.db import db
 from app.lab_workspace.audit import write_lab_audit
 from app.lab_workspace.flags import calculate_abnormal_flag
+from app.lab_workspace.reference_fill import resolve_reference
 from app.lab_workspace.security import (
     CONDITION_STATUSES,
     LAB_STATUS_EXCEPTIONS,
@@ -455,6 +456,16 @@ def enter_result_manual(
             raise LabWorkspaceError("Duplicate result; enable revision_mode to overwrite")
 
     ref = reference_range or ""
+    auto_notes: list[str] = []
+    if not ref or not unit:
+        filled = resolve_reference(test_code, getattr(order, "patient_code", None))
+        if filled:
+            if not ref:
+                ref = filled[0]
+                auto_notes.append("Reference range auto-filled from DxCon ranges")
+            if not unit and filled[1]:
+                unit = filled[1]
+                auto_notes.append("Unit auto-filled from DxCon ranges")
     flag, warnings = calculate_abnormal_flag(
         result_value,
         reference_range=ref,
@@ -462,6 +473,7 @@ def enter_result_manual(
         critical_low=critical_low,
         critical_high=critical_high,
     )
+    warnings.extend(auto_notes)
     if not unit:
         warnings.append("Unit not provided")
 

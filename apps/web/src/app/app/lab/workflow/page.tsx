@@ -396,8 +396,8 @@ function LabWorkflowPanel() {
               <div className="space-y-3">
                 <Field label="Test code" value={testCode} onChange={setTestCode} />
                 <Field label="Result value" value={resultValue} onChange={setResultValue} />
-                <Field label="Unit" value={unit} onChange={setUnit} />
-                <Field label="Reference range" value={referenceRange} onChange={setReferenceRange} />
+                <Field label="Unit (để trống = tự điền)" value={unit} onChange={setUnit} />
+                <Field label="Reference range (để trống = tự điền theo khoảng DxCon)" value={referenceRange} onChange={setReferenceRange} />
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Field label="Critical low" value={criticalLow} onChange={setCriticalLow} />
                   <Field label="Critical high" value={criticalHigh} onChange={setCriticalHigh} />
