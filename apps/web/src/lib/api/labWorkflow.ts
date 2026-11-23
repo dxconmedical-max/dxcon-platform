@@ -366,3 +366,21 @@ export async function fetchReleasedReportHtml(auth: LabAuth, order_code: string)
     ),
   );
 }
+
+export type AiNotes = {
+  summary: string;
+  abnormal: { test_name: string; result_value: string; unit?: string; reference_range?: string; flag: string }[];
+  considerations: { test_name: string; direction: string; consideration: string }[];
+  suggested_tests: { test: string; because: string }[];
+  no_rule_for: string[];
+  disclaimer: string;
+};
+
+export async function fetchAiNotes(auth: LabAuth, order_code: string): Promise<AiNotes> {
+  const body = await apiRequest<{ success?: boolean; data?: AiNotes; error?: string }>(
+    `/api/v1/lab/workspace/medical-validation/${encodeURIComponent(order_code)}/ai-notes`,
+    opts(auth),
+  );
+  if (!body.data) throw new Error(body.error || "Không lấy được ghi chú AI");
+  return body.data;
+}

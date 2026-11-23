@@ -417,6 +417,29 @@ def medical_validation_queue():
     return {"success": True, "data": {"items": list_pending_medical_review()}}, 200
 
 
+@lab_workspace_bp.route("/medical-validation/<order_code>/ai-notes", methods=["GET"])
+@lab_api_medical
+def medical_validation_ai_notes(order_code: str):
+    """Advisory summary + suggested follow-up tests (reference only, doctor must review)."""
+    from app.clinical_ai.next_steps import build_next_steps
+    from app.models.biz_order import BizOrder, BizResult
+
+    order = BizOrder.query.filter_by(order_code=order_code).first()
+    if order is None:
+        return {"success": False, "error": "Order not found"}, 404
+    result = BizResult.query.filter_by(order_id=order.id).first()
+    if result is None or not result.items:
+        return {"success": False, "error": "No result items for this order"}, 404
+    items = [
+        {
+            "test_code": i.test_code, "test_name": i.test_name, "result_value": i.result_value,
+            "unit": i.unit, "reference_range": i.reference_range, "flag": i.flag,
+        }
+        for i in result.items
+    ]
+    return {"success": True, "data": {"order_code": order_code, **build_next_steps(items)}}, 200
+
+
 @lab_workspace_bp.route("/release", methods=["POST"])
 @lab_api_release
 def release_result_route():
