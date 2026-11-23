@@ -26,6 +26,7 @@ from app.api.security.routes import security_api_bp
 from app.api.live_location.routes import live_location_bp
 from app.api.ops_board.routes import ops_board_bp
 from app.api.reference_import.routes import reference_import_bp
+from app.api.momo_payments.routes import momo_payments_bp
 from app.api.result_links.routes import result_links_bp
 from app.api.ops.routes import ops_bp
 from app.web.home import home_web_bp
@@ -504,6 +505,7 @@ def register_blueprints(app):
     app.register_blueprint(live_location_bp)
     app.register_blueprint(ops_board_bp)
     app.register_blueprint(reference_import_bp)
+    app.register_blueprint(momo_payments_bp)
     app.register_blueprint(result_links_bp)
     app.register_blueprint(ai_interpret_v2_bp)
     app.register_blueprint(audit_center_web_bp)
