@@ -69,9 +69,9 @@ function LabWorkflowPanel() {
   const [testCode, setTestCode] = useState("");
   const [resultValue, setResultValue] = useState("");
   const [unit, setUnit] = useState("");
-  const [referenceRange, setReferenceRange] = useState("3.5-5.5");
-  const [criticalLow, setCriticalLow] = useState("2");
-  const [criticalHigh, setCriticalHigh] = useState("8");
+  const [referenceRange, setReferenceRange] = useState("");
+  const [criticalLow, setCriticalLow] = useState("");
+  const [criticalHigh, setCriticalHigh] = useState("");
   const [doctorNote, setDoctorNote] = useState("");
 
   const refreshDetail = useCallback(

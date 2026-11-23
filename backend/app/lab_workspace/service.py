@@ -460,7 +460,7 @@ def enter_result_manual(
     if not ref or not unit:
         filled = resolve_reference(test_code, getattr(order, "patient_code", None))
         if filled:
-            if not ref:
+            if not ref and filled[0]:
                 ref = filled[0]
                 auto_notes.append("Reference range auto-filled from DxCon ranges")
             if not unit and filled[1]:

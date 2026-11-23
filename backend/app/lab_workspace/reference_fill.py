@@ -4,6 +4,7 @@ from __future__ import annotations
 from datetime import date, datetime
 
 from app.models.patient import Patient
+from app.models.reference_range import ReferenceRange
 from app.services.interpretation_engine_service import ReferenceRangeService
 
 
@@ -41,25 +42,38 @@ def format_range(low: float | None, high: float | None) -> str:
     return ""
 
 
-def resolve_reference(test_code: str, patient_code: str | None) -> tuple[str, str | None] | None:
-    """Return (range_text, unit) or None when no safe match exists.
+def _unit_for(test_code: str) -> str | None:
+    """Unit does not depend on age or sex: any ACTIVE row for the test is enough."""
+    row = (
+        ReferenceRange.query.filter(
+            ReferenceRange.test_code == test_code,
+            ReferenceRange.status == "ACTIVE",
+            ReferenceRange.unit.isnot(None),
+            ReferenceRange.unit != "",
+        )
+        .order_by(ReferenceRange.id.asc())
+        .first()
+    )
+    return row.unit if row else None
 
-    Needs a known age. A sex-specific row is used only when the sex matches;
-    otherwise only rows for ALL are accepted.
+
+def resolve_reference(test_code: str, patient_code: str | None) -> tuple[str | None, str | None] | None:
+    """Return (range_text, unit); either part may be None. None when nothing is known.
+
+    The range needs a known age. A sex-specific row is used only when the sex
+    matches; otherwise only rows for ALL are accepted. The unit is filled from
+    any ACTIVE row of the test.
     """
+    unit = _unit_for(test_code)
+    text = None
     patient = Patient.query.get(patient_code) if patient_code else None
-    if patient is None:
+    age = _age_years(patient.date_of_birth) if patient is not None else None
+    if patient is not None and age is not None:
+        sex = _sex(patient.gender)
+        row = ReferenceRangeService.resolve(test_code, age=age, sex=sex)
+        if row is not None and row.sex in ("ALL", sex):
+            text = format_range(row.low_value, row.high_value) or None
+            unit = row.unit or unit
+    if text is None and unit is None:
         return None
-    age = _age_years(patient.date_of_birth)
-    if age is None:
-        return None
-    sex = _sex(patient.gender)
-    row = ReferenceRangeService.resolve(test_code, age=age, sex=sex)
-    if row is None:
-        return None
-    if row.sex not in ("ALL", sex):
-        return None
-    text = format_range(row.low_value, row.high_value)
-    if not text:
-        return None
-    return text, row.unit
+    return text, unit
