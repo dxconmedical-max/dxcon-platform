@@ -867,12 +867,18 @@ def _approver_block_html(result) -> str:
 def render_report_html(result: BizResult, order: BizOrder) -> str:
     from html import escape as _e
 
+    td = "style='padding:6px 12px;border-bottom:1px solid #ddd;text-align:left'"
+    th = "style='padding:6px 12px;border-bottom:2px solid #333;text-align:left'"
     rows = []
     for item in result.items:
+        abnormal = str(item.flag or "").lower() not in ("", "normal")
+        flag_style = " style='padding:6px 12px;border-bottom:1px solid #ddd;font-weight:bold;color:#b00020'" if abnormal else f" {td}"
         rows.append(
-            f"<tr><td>{_e(str(item.test_name))}</td>"
-            f"<td>{_e(str(item.result_value))} {_e(str(item.unit or ''))}</td>"
-            f"<td>{_e(str(item.reference_range or '—'))}</td><td>{_e(str(item.flag))}</td></tr>"
+            f"<tr><td {td}>{_e(str(item.test_name))}</td>"
+            f"<td {td}><strong>{_e(str(item.result_value))}</strong></td>"
+            f"<td {td}>{_e(str(item.unit or ''))}</td>"
+            f"<td {td}>{_e(str(item.reference_range or '—'))}</td>"
+            f"<td{flag_style}>{_e(str(item.flag))}</td></tr>"
         )
     return (
         "<!doctype html><html><head><meta charset=\"utf-8\">"
@@ -880,7 +886,8 @@ def render_report_html(result: BizResult, order: BizOrder) -> str:
         f"<body>{_logo_header_html()}<h1>DxCon Diagnostic Report</h1>"
         f"<p>Order: {_e(str(order.order_code))} · Patient: {_e(str(order.patient_name))}</p>"
         f"<p>Released: {_e(_vn(result.released_at))}</p>"
-        "<table border='1' cellpadding='6'><tr><th>Test</th><th>Result</th><th>Reference</th><th>Flag</th></tr>"
+        "<table style='border-collapse:collapse;width:100%'>"
+        f"<tr><th {th}>Test</th><th {th}>Result</th><th {th}>Unit</th><th {th}>Reference</th><th {th}>Flag</th></tr>"
         f"{''.join(rows)}</table>"
         f"<p><em>Clinician note: {_e(str(result.doctor_note or '—'))}</em></p>"
         f"{_approver_block_html(result)}</body></html>"
