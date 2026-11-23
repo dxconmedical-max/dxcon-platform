@@ -38,11 +38,12 @@ class ReferenceFillTestCase(unittest.TestCase):
         self.assertEqual(resolve_reference("T1", "PM"), ("1-5", "u"))
         self.assertEqual(resolve_reference("T2", "PM"), ("<10", "mg"))
 
-    def test_never_guesses(self):
-        self.assertIsNone(resolve_reference("T1", "PX"))  # sex unknown, row is male-only
-        self.assertIsNone(resolve_reference("T1", "PN"))  # age unknown
-        self.assertIsNone(resolve_reference("T3", "PM"))  # draft not used
-        self.assertIsNone(resolve_reference("T1", None))
+    def test_never_guesses_range_but_unit_is_age_free(self):
+        self.assertEqual(resolve_reference("T1", "PX"), (None, "u"))  # sex unknown, row is male-only
+        self.assertEqual(resolve_reference("T1", "PN"), (None, "u"))  # age unknown
+        self.assertEqual(resolve_reference("T1", None), (None, "u"))
+        self.assertIsNone(resolve_reference("T3", "PM"))  # draft not used at all
+        self.assertIsNone(resolve_reference("NOPE", "PM"))
 
     def test_one_sided_ranges_flag(self):
         self.assertEqual(calculate_abnormal_flag("12", reference_range="<10")[0], "high")
