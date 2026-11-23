@@ -1005,7 +1005,7 @@ export async function fetchReceptionBarcodeLabels(
 export async function previewReceptionBarcodeLabels(
   ctx: Ctx,
   orderRef: string,
-  opts?: { types?: string[]; format?: "standard" | "thermal" },
+  opts?: { types?: string[]; format?: "standard" | "thermal" | "tube50" | "tube45" },
 ) {
   const params = new URLSearchParams();
   if (opts?.types?.length) params.set("types", opts.types.join(","));
@@ -1033,7 +1033,7 @@ export async function printReceptionBarcodeLabels(
   orderRef: string,
   payload?: {
     types?: string[];
-    format?: "standard" | "thermal";
+    format?: "standard" | "thermal" | "tube50" | "tube45";
     printer?: "browser" | "thermal";
   },
 ) {

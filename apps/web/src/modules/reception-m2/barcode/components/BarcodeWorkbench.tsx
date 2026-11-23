@@ -35,7 +35,7 @@ export function BarcodeWorkbench({ initialOrderRef = "" }: { initialOrderRef?: s
 
   const [orderRef, setOrderRef] = useState(initialOrderRef);
   const [selected, setSelected] = useState<string[]>(["order", "sample", "collection"]);
-  const [format, setFormat] = useState<"standard" | "thermal">("standard");
+  const [format, setFormat] = useState<"standard" | "thermal" | "tube50" | "tube45">("standard");
   const [printer, setPrinter] = useState<"browser" | "thermal">("browser");
   const [labels, setLabels] = useState<Record<string, unknown>[]>([]);
   const [html, setHtml] = useState("");
@@ -127,10 +127,12 @@ export function BarcodeWorkbench({ initialOrderRef = "" }: { initialOrderRef?: s
           <select
             className="rounded border px-2 py-1"
             value={format}
-            onChange={(e) => setFormat(e.target.value as "standard" | "thermal")}
+            onChange={(e) => setFormat(e.target.value as "standard" | "thermal" | "tube50" | "tube45")}
           >
             <option value="standard">Standard label</option>
             <option value="thermal">Thermal label 80mm</option>
+            <option value="tube50">Nhãn ống 50×25 mm (Code 128)</option>
+            <option value="tube45">Nhãn ống 45×25 mm (Code 128)</option>
           </select>
         </label>
         <label>

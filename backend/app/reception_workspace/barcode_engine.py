@@ -133,6 +133,83 @@ def build_labels(order_ref: str, *, types: list[str] | None = None) -> dict[str,
     }
 
 
+
+# --- Code 128 (subset B) encoder -> inline SVG, no external dependency -------
+_C128 = [
+"212222","222122","222221","121223","121322","131222","122213","122312","132212","221213",
+"221312","231212","112232","122132","122231","113222","123122","123221","223211","221132",
+"221231","213212","223112","312131","311222","321122","321221","312212","322112","322211",
+"212123","212321","232121","111323","131123","131321","112313","132113","132311","211313",
+"231113","231311","112133","112331","132131","113123","113321","133121","313121","211331",
+"231131","213113","213311","213131","311123","311321","331121","312113","312311","332111",
+"314111","221411","431111","111224","111422","121124","121421","141122","141221","112214",
+"112412","122114","122411","142112","142211","241211","221114","413111","241112","134111",
+"111242","121142","121241","114212","124112","124211","411212","421112","421211","212141",
+"214121","412121","111143","111341","131141","114113","114311","411113","411311","113141",
+"114131","311141","411131","211412","211214","211232","2331112",
+]
+
+
+def code128_svg(value: str, *, height_mm: float = 12.0, width_mm: float = 46.0) -> str:
+    """Code 128-B barcode as SVG, stretched to ``width_mm`` (bars run across the label)."""
+    text = "".join(ch for ch in str(value) if 32 <= ord(ch) < 127)
+    if not text:
+        return ""
+    codes = [104] + [ord(ch) - 32 for ch in text]
+    checksum = (104 + sum((i + 1) * c for i, c in enumerate(codes[1:]))) % 103
+    codes += [checksum, 106]
+    pattern = "".join(_C128[c] for c in codes)
+    total = sum(int(d) for d in pattern)
+    x = 0
+    rects = []
+    for i, d in enumerate(pattern):
+        w = int(d)
+        if i % 2 == 0:
+            rects.append(f"<rect x='{x}' y='0' width='{w}' height='10'/>")
+        x += w
+    return (
+        f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 {total} 10' "
+        f"preserveAspectRatio='none' width='{width_mm}mm' height='{height_mm}mm' "
+        f"shape-rendering='crispEdges' fill='#000'>{''.join(rects)}</svg>"
+    )
+
+
+TUBE_SIZES = {"tube50": ("50mm", "25mm", 44.0), "tube45": ("45mm", "25mm", 39.0)}
+
+
+def render_tube_label_html(labels: list[dict[str, Any]], *, size: str = "tube50") -> str:
+    width, height, bar_w = TUBE_SIZES.get(size, TUBE_SIZES["tube50"])
+    cards = []
+    for label in labels:
+        code = label.get("code")
+        if not code:
+            continue
+        sample = label.get("sample") or {}
+        lines = label.get("lines") or []
+        name_line = _esc(lines[0]) if lines else ""
+        type_line = _esc(sample.get("sample_type") or label.get("title") or "")
+        cards.append(
+            "<div class='label'>"
+            f"<div class='bar'>{code128_svg(str(code), height_mm=11.0, width_mm=bar_w)}</div>"
+            f"<div class='human'>{_esc(code)}</div>"
+            f"<div class='meta'>{name_line}</div>"
+            f"<div class='meta'>{type_line}</div>"
+            "</div>"
+        )
+    return f"""<!doctype html>
+<html><head><meta charset="utf-8"/><title>DxCon Tube Labels</title>
+<style>
+@page {{ size: {width} {height}; margin: 0; }}
+body {{ font-family: Arial, Helvetica, sans-serif; margin: 0; }}
+.label {{ width: {width}; height: {height}; padding: 1.5mm 2.5mm; box-sizing: border-box; overflow: hidden; page-break-after: always; }}
+.bar {{ line-height: 0; }}
+.human {{ font-size: 8pt; font-weight: 700; text-align: center; letter-spacing: .08em; margin-top: .5mm; }}
+.meta {{ font-size: 6.5pt; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+</style></head><body>
+{''.join(cards)}
+</body></html>"""
+
+
 def render_label_html(labels: list[dict[str, Any]], *, thermal: bool = False) -> str:
     width = "80mm" if thermal else "50mm"
     height = "40mm" if thermal else "30mm"
@@ -185,10 +262,15 @@ def preview_labels(
     bundle = build_labels(order_ref, types=types)
     printable = [lab for lab in bundle["labels"] if lab.get("code")]
     thermal = format == "thermal"
+    tube = format in TUBE_SIZES
     return {
         **bundle,
-        "format": "thermal" if thermal else "standard",
-        "html": render_label_html(printable or bundle["labels"], thermal=thermal),
+        "format": format if tube else ("thermal" if thermal else "standard"),
+        "html": (
+            render_tube_label_html(printable, size=format)
+            if tube
+            else render_label_html(printable or bundle["labels"], thermal=thermal)
+        ),
         "thermal_text": render_thermal_text(printable or bundle["labels"]),
         "printable_count": len(printable),
     }
@@ -207,8 +289,13 @@ def print_labels(
     if not printable:
         raise ReceptionWorkspaceError("No printable barcodes available for selected types")
 
-    thermal = format == "thermal" or printer == "thermal"
-    html = render_label_html(printable, thermal=thermal)
+    tube = format in TUBE_SIZES
+    thermal = (format == "thermal" or printer == "thermal") and not tube
+    html = (
+        render_tube_label_html(printable, size=format)
+        if tube
+        else render_label_html(printable, thermal=thermal)
+    )
     thermal_text = render_thermal_text(printable)
     try:
         adapter = get_printer("thermal" if thermal else printer)
@@ -222,7 +309,7 @@ def print_labels(
         thermal_text=thermal_text,
         meta={
             "order_code": bundle.get("order_code"),
-            "format": "thermal" if thermal else "standard",
+            "format": format if tube else ("thermal" if thermal else "standard"),
             "types": sorted({lab["type"] for lab in printable}),
         },
     )
@@ -236,7 +323,7 @@ def print_labels(
         "order_code": bundle.get("order_code"),
         "job": job.to_dict(),
         "labels": printable,
-        "format": "thermal" if thermal else "standard",
+        "format": format if tube else ("thermal" if thermal else "standard"),
         "printers": list_printers(),
     }
 
