@@ -7,6 +7,7 @@ ACCOUNTING = "ACCOUNTING"
 PATIENT = "PATIENT"
 
 RECEPTION = "RECEPTION"
+CLINIC_ADMIN = "CLINIC_ADMIN"  # clinic-side account that submits order slips for its own clinic
 
 ALL_ROLES = [
     SUPER_ADMIN,
@@ -17,4 +18,5 @@ ALL_ROLES = [
     ACCOUNTING,
     PATIENT,
     RECEPTION,
+    CLINIC_ADMIN,
 ]
