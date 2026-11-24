@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS clinic_order_requests (
     requested_by VARCHAR(120),
     patient_name VARCHAR(120) NOT NULL,
     birth_year INTEGER NOT NULL,
+    birth_date VARCHAR(10),
     tests_json TEXT NOT NULL,
     tube_count INTEGER NOT NULL DEFAULT 1,
     status VARCHAR(20) NOT NULL DEFAULT 'NEW',

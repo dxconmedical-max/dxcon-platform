@@ -7,6 +7,16 @@ import { RoleDashboardHome } from "@/components/layout/RoleDashboardHome";
 
 const ACTIONS = [
   {
+    label: "Làm thêm xét nghiệm",
+    href: "/app/reception/addons",
+    description: "Thêm xét nghiệm trên ống mẫu đã thu (trong thời hạn cho phép).",
+  },
+  {
+    label: "Xét nghiệm gửi ngoài",
+    href: "/app/reception/sendout",
+    description: "Nhắc nhập kết quả xét nghiệm gửi nước ngoài theo ngày trả dự kiến.",
+  },
+  {
     label: "Phiếu từ phòng khám",
     href: "/app/reception/clinic-requests",
     description: "Duyệt phiếu chỉ định do phòng khám gửi và tạo đơn 1 click.",

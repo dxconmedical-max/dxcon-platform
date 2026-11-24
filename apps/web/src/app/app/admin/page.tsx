@@ -10,6 +10,7 @@ const ACTIONS = [
   { label: "Staff accounts", href: "/app/admin/users", description: "Create and disable staff logins." },
   { label: "Customer onboarding", href: "/app/admin/onboarding", description: "Wizard for new customers." },
   { label: "Clinic self-ordering", href: "/app/admin/clinic-settings", description: "Bật hoặc tắt quyền tự chỉ định cho từng phòng khám." },
+  { label: "Gửi ngoài & thời hạn làm thêm", href: "/app/admin/test-flags", description: "Đánh dấu xét nghiệm gửi ngoài, số ngày trả dự kiến, thời hạn làm thêm." },
   { label: "Demo requests", href: "/app/admin/demo-requests", description: "Yêu cầu demo gửi từ website: liên hệ lại và đổi trạng thái." },
   { label: "Integrations", href: "/app/admin/integrations", description: "Connectors and webhooks." },
   { label: "Reference ranges", href: "/app/admin/reference-ranges", description: "Upload lab reference ranges as a draft, review, then activate." },
