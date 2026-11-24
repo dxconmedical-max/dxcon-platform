@@ -72,12 +72,12 @@ def render_production_landing() -> str:
       <section class="launch-marketing-section" id="book-demo">
         <h2>Book demo</h2>
         <p class="launch-hero-lead">See DxCon with your laboratory or clinic workflow in a guided pilot session.</p>
-        <a class="launch-cta launch-cta-primary" href="mailto:sales@dxcon.com.vn?subject=DxCon%20Demo%20Request">Request a demo</a>
+        <a class="launch-cta launch-cta-primary" href="mailto:admin@dxcon.com.vn?subject=DxCon%20Demo%20Request">Request a demo</a>
       </section>
 
       <section class="launch-marketing-section" id="contact">
         <h2>Contact</h2>
-        <p class="launch-hero-lead">Sales: <a href="mailto:sales@dxcon.com.vn">sales@dxcon.com.vn</a> · Support: <a href="mailto:support@dxcon.com.vn">support@dxcon.com.vn</a></p>
+        <p class="launch-hero-lead">Contact: <a href="mailto:admin@dxcon.com.vn">admin@dxcon.com.vn</a></p>
         <p class="launch-hint">Public site: {html.escape(public_site_url())} · App: {html.escape(web_app_url())}</p>
       </section>
 

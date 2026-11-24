@@ -1,8 +1,7 @@
 import { Mail, MapPin, Phone } from "lucide-react";
 
-import { Button } from "@/components/ui/Button";
+import { DemoForm } from "./DemoForm";
 import { LANDING, type Lang } from "@/lib/landing/i18n";
-import { Input, Label } from "@/components/ui/Input";
 
 export function ContactSection({ lang }: { lang: Lang }) {
   const t = LANDING[lang].contact;
@@ -22,8 +21,8 @@ export function ContactSection({ lang }: { lang: Lang }) {
           <div className="mt-8 space-y-4 text-sm text-slate-600">
             <p className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-teal-600" />
-              <a href="mailto:support@dxcon.com.vn" className="hover:text-teal-700">
-                support@dxcon.com.vn
+              <a href="mailto:admin@dxcon.com.vn" className="hover:text-teal-700">
+                admin@dxcon.com.vn
               </a>
             </p>
             <p className="flex items-center gap-2">
@@ -38,35 +37,7 @@ export function ContactSection({ lang }: { lang: Lang }) {
             </p>
           </div>
         </div>
-        <form className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="name">{t.name}</Label>
-              <Input id="name" name="name" placeholder={t.namePh} />
-            </div>
-            <div>
-              <Label htmlFor="organization">{t.org}</Label>
-              <Input id="organization" name="organization" placeholder={t.orgPh} />
-            </div>
-          </div>
-          <div className="mt-4">
-            <Label htmlFor="email">{t.email}</Label>
-            <Input id="email" name="email" type="email" placeholder="you@company.com" />
-          </div>
-          <div className="mt-4">
-            <Label htmlFor="message">{t.message}</Label>
-            <textarea
-              id="message"
-              name="message"
-              rows={4}
-              placeholder={t.messagePh}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
-            />
-          </div>
-          <Button type="button" className="mt-6 w-full">
-            {t.send}
-          </Button>
-        </form>
+        <DemoForm lang={lang} />
       </div>
     </section>
   );
