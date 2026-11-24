@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { MapPin, Package, Smartphone } from "lucide-react";
 
 import { LANDING, type Lang } from "@/lib/landing/i18n";
@@ -15,6 +16,12 @@ export function HomeCollectionSection({ lang }: { lang: Lang }) {
           </p>
           <h2 className="mt-2 text-3xl font-semibold text-slate-900">{t.title}</h2>
           <p className="mt-4 text-slate-600">{t.text}</p>
+          <Link
+            href="/book"
+            className="mt-6 inline-flex items-center rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-teal-700"
+          >
+            {t.cta}
+          </Link>
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
           {t.items.map((label, i) => {

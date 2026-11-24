@@ -28,6 +28,11 @@ export function HeroSection({ lang }: { lang: Lang }) {
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
+            <Link href="/book">
+              <Button size="lg" variant="outline" className="border-teal-500 text-teal-200 hover:border-teal-300">
+                {t.book}
+              </Button>
+            </Link>
             <a href="#contact">
               <Button size="lg" variant="outline" className="border-slate-600 text-white hover:border-teal-400">
                 {t.sales}
