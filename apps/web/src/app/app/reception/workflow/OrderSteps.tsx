@@ -65,11 +65,14 @@ export function PatientStep({
   preservedQuery,
   onSelect,
   onQueryChange,
+  prefill,
 }: {
   accessToken: string;
   organizationId?: string | null;
   initialQuery?: string;
   preservedQuery?: string;
+  /** Pre-fills the new-patient form (e.g. from a website booking request). */
+  prefill?: { full_name?: string; phone?: string; address?: string; email?: string };
   onSelect: (patient: SelectedPatient) => void;
   onQueryChange?: (query: string) => void;
 }) {
@@ -79,13 +82,13 @@ export function PatientStep({
   const [searched, setSearched] = useState(Boolean((preservedQuery ?? initialQuery)?.trim()));
   const [error, setError] = useState<string | null>(null);
   const [create, setCreate] = useState({
-    full_name: "",
-    phone: "",
+    full_name: prefill?.full_name ?? "",
+    phone: prefill?.phone ?? "",
     national_id: "",
     gender: "",
     date_of_birth: "",
-    email: "",
-    address: "",
+    email: prefill?.email ?? "",
+    address: prefill?.address ?? "",
     patient_code: "",
   });
   const [creating, setCreating] = useState(false);
