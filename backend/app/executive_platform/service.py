@@ -81,14 +81,40 @@ def executive_dashboard() -> dict[str, Any]:
             "top_tests": _top_tests(),
             "top_clinics": _top_partners("clinic"),
             "top_doctors": [{"name": d.full_name, "id": d.doctor_id} for d in DoctorProfile.query.limit(5).all()],
-            "collection_performance": {"on_time_pct": 96.5, "placeholder": False},
-            "laboratory_performance": {"tat_hours_avg": 4.2, "placeholder": False},
+            "collection_performance": {"on_time_pct": None, "measured": False},
+            "laboratory_performance": _lab_performance(),
         },
         "kpi_cards": [
             {"label": "Revenue MTD", "value": float(revenue_month), "unit": "VND"},
             {"label": "Orders MTD", "value": orders_month},
             {"label": "Pending Reports", "value": ClinicalReport.query.filter_by(report_status="pending_review").count()},
         ],
+    }
+
+
+def _lab_performance(days: int = 30) -> dict:
+    """Average hours from order creation to released result, over released results of the last N days."""
+    from app.models.biz_order import BizResult
+
+    since = _utcnow() - timedelta(days=days)
+    rows = (
+        db.session.query(BizOrder.created_at, BizResult.released_at)
+        .join(BizResult, BizResult.order_id == BizOrder.id)
+        .filter(BizResult.released_at.isnot(None), BizResult.released_at >= since)
+        .all()
+    )
+    hours = [
+        (released - created).total_seconds() / 3600.0
+        for created, released in rows
+        if created and released and released >= created
+    ]
+    if not hours:
+        return {"tat_hours_avg": None, "sample_size": 0, "window_days": days, "measured": True}
+    return {
+        "tat_hours_avg": round(sum(hours) / len(hours), 1),
+        "sample_size": len(hours),
+        "window_days": days,
+        "measured": True,
     }
 
 
@@ -423,4 +449,85 @@ def release_1_complete() -> dict:
         },
         "health": mon.get("system_health"),
         "generated_at": _utcnow().isoformat(),
+    }
+
+
+def _parse_day(value: str | None, default: datetime) -> datetime:
+    if not value:
+        return default
+    try:
+        return datetime.fromisoformat(str(value)[:10])
+    except ValueError:
+        raise ExecutivePlatformError("Ngày không hợp lệ. Dùng định dạng YYYY-MM-DD.")
+
+
+def report_summary(date_from: str | None = None, date_to: str | None = None) -> dict[str, Any]:
+    """Orders, revenue and top tests for a date range (inclusive). Defaults to the last 30 days."""
+    today = _today_start()
+    start = _parse_day(date_from, today - timedelta(days=29))
+    end_day = _parse_day(date_to, today)
+    if end_day < start:
+        raise ExecutivePlatformError("Ngày kết thúc phải sau ngày bắt đầu.")
+    if (end_day - start).days > 366:
+        raise ExecutivePlatformError("Khoảng thời gian tối đa là 366 ngày.")
+    end = end_day + timedelta(days=1)
+
+    from app.models.biz_order import BizOrderItem
+
+    orders = BizOrder.query.filter(BizOrder.created_at >= start, BizOrder.created_at < end)
+    by_status = (
+        db.session.query(BizOrder.status, func.count(BizOrder.id))
+        .filter(BizOrder.created_at >= start, BizOrder.created_at < end)
+        .group_by(BizOrder.status)
+        .all()
+    )
+    by_source = (
+        db.session.query(BizOrder.source_type, func.count(BizOrder.id))
+        .filter(BizOrder.created_at >= start, BizOrder.created_at < end)
+        .group_by(BizOrder.source_type)
+        .all()
+    )
+    revenue = (
+        db.session.query(func.coalesce(func.sum(BizPayment.amount), 0))
+        .filter(BizPayment.paid_at >= start, BizPayment.paid_at < end)
+        .scalar()
+        or 0
+    )
+    days = []
+    cursor = start
+    while cursor < end:
+        nxt = cursor + timedelta(days=1)
+        days.append(
+            {
+                "date": cursor.date().isoformat(),
+                "orders": BizOrder.query.filter(BizOrder.created_at >= cursor, BizOrder.created_at < nxt).count(),
+                "revenue": float(
+                    db.session.query(func.coalesce(func.sum(BizPayment.amount), 0))
+                    .filter(BizPayment.paid_at >= cursor, BizPayment.paid_at < nxt)
+                    .scalar()
+                    or 0
+                ),
+            }
+        )
+        cursor = nxt
+    top_tests = (
+        db.session.query(BizOrderItem.test_name, func.sum(BizOrderItem.quantity), func.sum(BizOrderItem.line_total))
+        .join(BizOrder, BizOrder.id == BizOrderItem.order_id)
+        .filter(BizOrder.created_at >= start, BizOrder.created_at < end)
+        .group_by(BizOrderItem.test_name)
+        .order_by(func.sum(BizOrderItem.quantity).desc())
+        .limit(10)
+        .all()
+    )
+    return {
+        "period_start": start.date().isoformat(),
+        "period_end": end_day.date().isoformat(),
+        "orders_total": orders.count(),
+        "revenue_total": float(revenue),
+        "orders_by_status": [{"status": s or "unknown", "count": c} for s, c in by_status],
+        "orders_by_source": [{"source": s or "direct", "count": c} for s, c in by_source],
+        "daily": days,
+        "top_tests": [
+            {"test_name": n or "Unknown", "quantity": int(q or 0), "revenue": float(t or 0)} for n, q, t in top_tests
+        ],
     }

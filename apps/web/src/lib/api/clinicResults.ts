@@ -42,3 +42,29 @@ export async function getClinicReport(
   );
   return response.data;
 }
+
+export type ClinicOrderSummary = {
+  order_code: string;
+  patient_code: string;
+  patient_name: string;
+  created_at: string | null;
+  progress: "released" | "in_progress";
+};
+
+export type ClinicOrderCounts = { total: number; today: number; released: number; in_progress: number };
+
+export async function listClinicOrders(
+  ctx: Ctx,
+  page = 1,
+  limit = 50,
+): Promise<{ items: ClinicOrderSummary[]; summary: ClinicOrderCounts }> {
+  const response = await apiRequest<{
+    success: boolean;
+    data: ClinicOrderSummary[];
+    summary: ClinicOrderCounts;
+  }>(`/api/v1/clinic-results/orders?page=${page}&limit=${limit}`, opts(ctx));
+  return {
+    items: response.data ?? [],
+    summary: response.summary ?? { total: 0, today: 0, released: 0, in_progress: 0 },
+  };
+}

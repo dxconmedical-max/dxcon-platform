@@ -22,6 +22,7 @@ from app.executive_platform.service import (
     pilot_ready_report,
     pilot_wizard,
     release_1_complete,
+    report_summary,
     security_report,
     verify_checklist_item,
 )
@@ -40,6 +41,16 @@ def _actor() -> str | None:
 @executive_api_read
 def api_dashboard():
     return {"success": True, "data": executive_dashboard()}, 200
+
+
+@executive_platform_bp.route("/report/summary", methods=["GET"])
+@executive_api_read
+def api_report_summary():
+    try:
+        data = report_summary(request.args.get("date_from"), request.args.get("date_to"))
+    except ExecutivePlatformError as exc:
+        return {"success": False, "error": str(exc)}, 400
+    return {"success": True, "data": data}, 200
 
 
 @executive_platform_bp.route("/crm", methods=["GET"])
