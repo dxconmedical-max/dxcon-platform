@@ -18,10 +18,12 @@ from app.core.audit import write_audit
 from app.extensions.db import db
 from app.models.demo_request import DemoRequest
 from app.notifications.demo_email import send_demo_notification_async
-from app.reception_workspace.auth import reception_api_read
+from app.api.reception_workspace.routes import _actor
+from app.reception_workspace.auth import reception_api_read, reception_api_write
 
 demo_requests_bp = Blueprint("demo_requests", __name__, url_prefix="/api/v1")
 
+STATUSES = frozenset({"NEW", "CONTACTED", "DONE", "SPAM"})
 PER_IP_PER_HOUR = 5
 GLOBAL_PER_DAY = 200
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
@@ -94,5 +96,31 @@ def public_demo_create():
 @demo_requests_bp.route("/reception/workspace/demo-requests", methods=["GET"])
 @reception_api_read
 def demo_requests_list():
-    rows = DemoRequest.query.order_by(DemoRequest.created_at.desc()).limit(200).all()
-    return {"success": True, "data": {"items": [r.to_dict() for r in rows]}}, 200
+    status = str(request.args.get("status") or "").upper()
+    query = DemoRequest.query
+    if status:
+        if status not in STATUSES:
+            return {"success": False, "error": "Invalid status"}, 400
+        query = query.filter(DemoRequest.status == status)
+    rows = query.order_by(DemoRequest.created_at.desc()).limit(200).all()
+    new_count = DemoRequest.query.filter(DemoRequest.status == "NEW").count()
+    return {"success": True, "data": {"items": [r.to_dict() for r in rows], "new_count": new_count}}, 200
+
+
+@demo_requests_bp.route("/reception/workspace/demo-requests/<request_id>/status", methods=["POST"])
+@reception_api_write
+def demo_request_set_status(request_id: str):
+    payload = request.get_json(silent=True) or {}
+    status = str(payload.get("status") or "").upper()
+    if status not in STATUSES:
+        return {"success": False, "error": "Invalid status"}, 400
+    row = db.session.get(DemoRequest, request_id)
+    if row is None:
+        return {"success": False, "error": "Demo request not found"}, 404
+    actor = _actor()
+    row.status = status
+    row.handled_by = (actor or "")[:120] or None
+    row.handled_at = datetime.utcnow()
+    write_audit("PUBLIC_DEMO_REQUEST_STATUS", "DemoRequest", row.reference, user_email=actor or "SYSTEM", ip_address=_client_ip())
+    db.session.commit()
+    return {"success": True, "data": row.to_dict()}, 200
