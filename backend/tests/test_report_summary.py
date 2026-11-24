@@ -31,6 +31,15 @@ class ReportSummaryTests(unittest.TestCase):
         self.assertEqual(len(data["daily"]), 30)
         self.assertEqual(data["top_tests"], [])
 
+    def test_empty_database_collection_and_lab_tat(self):
+        from app.executive_platform.service import report_summary
+
+        with self.app.app_context():
+            data = report_summary()
+        self.assertEqual(data["collection"]["total"], 0)
+        self.assertIsNone(data["collection"]["rate_pct"])
+        self.assertEqual(data["lab_tat"], [])
+
     def test_bad_ranges_are_rejected(self):
         from app.executive_platform.service import ExecutivePlatformError, report_summary
 
@@ -49,7 +58,8 @@ class ReportSummaryTests(unittest.TestCase):
             data = executive_dashboard()
         lab = data["charts"]["laboratory_performance"]
         self.assertIsNone(lab["tat_hours_avg"])
-        self.assertIsNone(data["charts"]["collection_performance"]["on_time_pct"])
+        self.assertIsNone(data["charts"]["collection_performance"]["rate_pct"])
+        self.assertEqual(data["charts"]["lab_tat"], [])
 
     def test_endpoints_require_login(self):
         client = self.app.test_client()

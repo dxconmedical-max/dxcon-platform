@@ -35,5 +35,7 @@ class DemoRequest(db.Model):
             "message": self.message,
             "lang": self.lang,
             "status": self.status,
+            "handled_by": self.handled_by,
+            "handled_at": self.handled_at.isoformat() if self.handled_at else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

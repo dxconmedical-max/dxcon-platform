@@ -4,6 +4,23 @@ type Ctx = { token: string; organizationId?: string | null };
 
 export type DailyPoint = { date: string; orders?: number; revenue?: number; patients?: number };
 
+export type CollectionRate = {
+  total: number;
+  collected: number;
+  failed: number;
+  open: number;
+  rate_pct: number | null;
+  by_collector: { collector: string; total: number; collected: number; failed: number; rate_pct: number | null }[];
+};
+
+export type LabTat = {
+  laboratory: string;
+  orders: number;
+  processing_hours_avg: number | null;
+  end_to_end_hours_avg: number | null;
+  end_to_end_sample: number;
+};
+
 export type ExecutiveDashboard = {
   widgets: {
     revenue_today: number;
@@ -19,6 +36,8 @@ export type ExecutiveDashboard = {
     revenue_trend: DailyPoint[];
     order_trend: DailyPoint[];
     top_tests: { test_name: string; count: number }[];
+    collection_performance: CollectionRate;
+    lab_tat: LabTat[];
     laboratory_performance: {
       tat_hours_avg: number | null;
       sample_size?: number;
@@ -36,6 +55,8 @@ export type ReportSummary = {
   orders_by_status: { status: string; count: number }[];
   orders_by_source: { source: string; count: number }[];
   daily: { date: string; orders: number; revenue: number }[];
+  collection: CollectionRate;
+  lab_tat: LabTat[];
   top_tests: { test_name: string; quantity: number; revenue: number }[];
 };
 

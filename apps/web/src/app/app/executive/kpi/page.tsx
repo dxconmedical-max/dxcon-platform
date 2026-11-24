@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { CollectionPanel, LabTatPanel } from "@/components/charts/CollectionAndLabPanels";
 import { MiniBars } from "@/components/charts/MiniBars";
 import { AppShell } from "@/components/layout/AppShell";
 import { useAuth } from "@/hooks/useAuth";
@@ -84,6 +85,11 @@ export default function ExecutiveKpiPage() {
                 points={data.charts.revenue_trend.map((p) => ({ label: shortDate(p.date), value: p.revenue ?? 0 }))}
               />
             </section>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <LabTatPanel data={data.charts.lab_tat} />
+              <CollectionPanel data={data.charts.collection_performance} />
+            </div>
+            <p className="text-xs text-slate-500">TAT từng lab và tỷ lệ lấy mẫu tính trong 30 ngày gần nhất.</p>
             <section className="rounded-xl border border-slate-200 bg-white p-4">
               <h2 className="mb-3 text-sm font-semibold">Xét nghiệm được chỉ định nhiều nhất</h2>
               {data.charts.top_tests.length === 0 ? (
