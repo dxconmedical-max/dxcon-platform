@@ -114,10 +114,10 @@ def receivables_overview():
     data = []
     for c in clinics:
         s = _summary(c.id)
-        if not (s["billed"] or s["paid"] or s["unbilled_orders"]):
-            continue
-        data.append({"organization_id": c.id, "organization_name": c.organization_name, **s})
-    data.sort(key=lambda r: -r["outstanding"])
+        active = bool(s["billed"] or s["paid"] or s["unbilled_orders"])
+        data.append({"organization_id": c.id, "organization_name": c.organization_name, "has_activity": active, **s})
+    # Every clinic is listed (a new clinic needs its contract and prices before its first order).
+    data.sort(key=lambda r: (-r["outstanding"], -r["unbilled_amount"], r["organization_name"] or ""))
     return {
         "success": True,
         "data": {

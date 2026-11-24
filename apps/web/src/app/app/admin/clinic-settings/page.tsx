@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import Link from "next/link";
+
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
@@ -67,9 +69,17 @@ export default function ClinicSettingsPage() {
                 <p className="font-medium">{c.name}</p>
                 <p className="text-slate-500">{c.code} · {c.enabled ? "Đang bật" : "Đang tắt"}</p>
               </div>
-              <Button size="sm" variant={c.enabled ? "outline" : "primary"} disabled={busyId === c.id} onClick={() => void toggle(c)}>
-                {c.enabled ? "Tắt" : "Bật"}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/app/admin/clinic-billing?clinic=${encodeURIComponent(c.id)}`}
+                  className="text-sm font-medium text-teal-700 underline"
+                >
+                  Hợp đồng & giá
+                </Link>
+                <Button size="sm" variant={c.enabled ? "outline" : "primary"} disabled={busyId === c.id} onClick={() => void toggle(c)}>
+                  {c.enabled ? "Tắt" : "Bật"}
+                </Button>
+              </div>
             </li>
           ))}
         </ul>

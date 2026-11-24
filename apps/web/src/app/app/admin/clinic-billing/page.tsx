@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
@@ -128,6 +128,19 @@ export default function ClinicBillingPage() {
     return () => clearTimeout(timer);
   }, [loadList]);
 
+  // Deep link from the clinic list: /app/admin/clinic-billing?clinic=<id>
+  const deepLinked = useRef(false);
+  useEffect(() => {
+    if (!accessToken || deepLinked.current) return;
+    const id = new URLSearchParams(window.location.search).get("clinic");
+    deepLinked.current = true;
+    if (id) {
+      const timer = setTimeout(() => void openClinic(id), 0);
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken]);
+
   async function openClinic(id: string) {
     setOrgId(id);
     setTab("overview");
@@ -175,7 +188,7 @@ export default function ClinicBillingPage() {
                 <p className="text-lg font-semibold">{formatVnd(totals.unbilled)}</p>
               </div>
             </div>
-            {rows.length === 0 ? <p className="text-sm text-slate-500">Chưa có phòng khám nào phát sinh đơn hàng.</p> : null}
+            {rows.length === 0 ? <p className="text-sm text-slate-500">Chưa có phòng khám nào trong hệ thống.</p> : null}
             <ul className="space-y-2">
               {rows.map((r) => (
                 <li key={r.organization_id} className="rounded-xl border border-slate-200 bg-white p-3">
@@ -184,7 +197,9 @@ export default function ClinicBillingPage() {
                     <Button size="sm" onClick={() => void openClinic(r.organization_id)}>Mở</Button>
                   </div>
                   <p className="text-sm text-slate-600">
-                    Phải thu {formatVnd(r.outstanding)} · chưa kết toán {formatVnd(r.unbilled_amount)} ({r.unbilled_orders} đơn)
+                    {r.has_activity
+                      ? `Phải thu ${formatVnd(r.outstanding)} · chưa kết toán ${formatVnd(r.unbilled_amount)} (${r.unbilled_orders} đơn)`
+                      : "Chưa có đơn nào. Anh vẫn có thể đính kèm hợp đồng và đặt giá riêng trước."}
                   </p>
                   {r.aging.d1_30 + r.aging.d31_60 + r.aging.d60_plus > 0 ? (
                     <p className="text-xs text-red-700">
@@ -195,7 +210,7 @@ export default function ClinicBillingPage() {
               ))}
             </ul>
             <p className="text-xs text-slate-500">
-              Phòng khám chưa có đơn nào sẽ chưa hiện ở đây. Anh vào phòng khám bằng cách tạo đơn hoặc duyệt phiếu trước.
+              Mở từng phòng khám để đính kèm hợp đồng, đặt giá riêng, chốt kết toán và theo dõi công nợ.
             </p>
           </div>
         ) : !data ? (
