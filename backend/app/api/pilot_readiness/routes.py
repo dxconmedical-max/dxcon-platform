@@ -130,6 +130,15 @@ def api_onboarding_organization(session_code: str):
 
 @pilot_readiness_bp.route("/partner-registration", methods=["POST"])
 def api_partner_register():
+    from datetime import datetime, timedelta
+
+    from app.pilot_readiness.models import PartnerRegistration
+
+    # Anonymous form: cap the volume so it cannot be used to flood the admin review queue.
+    if PartnerRegistration.query.filter(
+        PartnerRegistration.created_at >= datetime.utcnow() - timedelta(days=1)
+    ).count() >= 100:
+        return {"success": False, "error": "Hệ thống đang nhận quá nhiều đăng ký. Vui lòng thử lại sau."}, 429
     try:
         data = register_partner(request.get_json(silent=True) or {})
         db.session.commit()

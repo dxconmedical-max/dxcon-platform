@@ -79,3 +79,9 @@ class PilotReadinessTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_partner_registration_post_is_public_in_auth_gate():
+    from app.core.api_auth_gate import PUBLIC_POST_EXACT
+
+    assert "/api/v1/pilot-readiness/partner-registration" in PUBLIC_POST_EXACT
