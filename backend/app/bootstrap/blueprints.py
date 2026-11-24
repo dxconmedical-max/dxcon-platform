@@ -14,6 +14,7 @@ from app.api.partner_foundation.routes import partner_foundation_bp
 from app.api.reception_workspace.routes import reception_workspace_bp
 from app.api.booking_requests.routes import booking_requests_bp
 from app.api.demo_requests.routes import demo_requests_bp
+from app.api.clinic_orders.routes import clinic_orders_bp, clinic_requests_staff_bp
 from app.api.admin_test_catalog.routes import admin_test_catalog_bp
 from app.api.lab_workspace.routes import lab_workspace_bp
 from app.api.role_dashboards.routes import role_dashboards_bp
@@ -493,6 +494,8 @@ def register_blueprints(app):
     app.register_blueprint(reception_workspace_bp)
     app.register_blueprint(booking_requests_bp)
     app.register_blueprint(demo_requests_bp)
+    app.register_blueprint(clinic_orders_bp)
+    app.register_blueprint(clinic_requests_staff_bp)
     app.register_blueprint(admin_test_catalog_bp)
     app.register_blueprint(lab_workspace_web_bp)
     app.register_blueprint(lab_workspace_bp)

@@ -204,6 +204,7 @@ from app.models.patient_preference import PatientPreference
 from app.models.patient_consent import PatientConsent
 from app.models.booking_request import BookingRequest
 from app.models.demo_request import DemoRequest
+from app.models.clinic_order_request import ClinicOrderRequest, ClinicOrderSetting
 from app.models.patient_device import PatientDevice
 from app.models.patient_notification_setting import PatientNotificationSetting
 from app.models.doctor_profile import DoctorProfile

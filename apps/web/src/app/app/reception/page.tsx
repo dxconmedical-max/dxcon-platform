@@ -7,6 +7,11 @@ import { RoleDashboardHome } from "@/components/layout/RoleDashboardHome";
 
 const ACTIONS = [
   {
+    label: "Phiếu từ phòng khám",
+    href: "/app/reception/clinic-requests",
+    description: "Duyệt phiếu chỉ định do phòng khám gửi và tạo đơn 1 click.",
+  },
+  {
     label: "Create laboratory order",
     href: "/app/reception/workflow",
     description: "Patient → tests → collection method → create order.",

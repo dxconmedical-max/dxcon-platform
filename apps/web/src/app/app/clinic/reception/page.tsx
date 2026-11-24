@@ -89,6 +89,9 @@ export default function ClinicReceptionDeskPage() {
             </li>
           ))}
         </ul>
+        <Link href="/app/clinic/new-request" className="mr-4 inline-block text-sm text-teal-700 underline">
+          Gửi phiếu chỉ định mới →
+        </Link>
         <Link href="/app/clinic-results" className="inline-block text-sm text-teal-700 underline">
           Xem kết quả đã trả →
         </Link>

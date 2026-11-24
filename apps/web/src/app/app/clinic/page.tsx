@@ -16,6 +16,7 @@ export default function ClinicPage() {
           { label: "Referrals", value: "—" },
         ]}
         actions={[
+          { label: "Gửi phiếu chỉ định", href: "/app/clinic/new-request", description: "Nhập họ tên, năm sinh, xét nghiệm, số ống mẫu." },
           { label: "Reception desk", href: "/app/clinic/reception", description: "Theo dõi đơn xét nghiệm của phòng khám." },
         ]}
       />
