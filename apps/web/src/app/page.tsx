@@ -1,27 +1,14 @@
-import { LandingNav } from "@/components/landing/LandingNav";
-import { HeroSection } from "@/components/landing/HeroSection";
-import { ServicesSection } from "@/components/landing/ServicesSection";
-import { AiSection } from "@/components/landing/AiSection";
-import { HomeCollectionSection } from "@/components/landing/HomeCollectionSection";
-import { PartnerSection } from "@/components/landing/PartnerSection";
-import { PricingSection } from "@/components/landing/PricingSection";
-import { ContactSection } from "@/components/landing/ContactSection";
-import { LandingFooter } from "@/components/landing/LandingFooter";
+import type { Metadata } from "next";
+
+import { LandingPage } from "@/components/landing/LandingPage";
+
+export const metadata: Metadata = {
+  title: { absolute: "DxCon — Nền tảng xét nghiệm y khoa kết nối" },
+  description:
+    "DxCon kết nối phòng xét nghiệm, phòng khám, bác sĩ và bệnh nhân với quy trình xét nghiệm an toàn.",
+  alternates: { canonical: "/vi", languages: { vi: "/vi", en: "/en" } },
+};
 
 export default function HomePage() {
-  return (
-    <div className="min-h-screen bg-slate-950">
-      <LandingNav />
-      <main>
-        <HeroSection />
-        <ServicesSection />
-        <AiSection />
-        <HomeCollectionSection />
-        <PartnerSection />
-        <PricingSection />
-        <ContactSection />
-      </main>
-      <LandingFooter />
-    </div>
-  );
+  return <LandingPage lang="vi" />;
 }

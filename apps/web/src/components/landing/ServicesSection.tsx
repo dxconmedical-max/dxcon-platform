@@ -1,53 +1,28 @@
 import { Building2, FlaskConical, Stethoscope, Truck, Users } from "lucide-react";
 
+import { LANDING, type Lang } from "@/lib/landing/i18n";
 import { Card, CardDescription, CardTitle } from "@/components/ui/Card";
 
-const SERVICES = [
-  {
-    icon: FlaskConical,
-    title: "Laboratory operations",
-    description:
-      "Worklists, result verification, QC workflows, and partner integrations in one hub.",
-  },
-  {
-    icon: Building2,
-    title: "Clinic management",
-    description:
-      "Reception, scheduling, billing, and patient communication for multi-site clinics.",
-  },
-  {
-    icon: Stethoscope,
-    title: "Doctor workspace",
-    description:
-      "Review results, collaborate with labs, and manage patient care pathways.",
-  },
-  {
-    icon: Users,
-    title: "Patient portal",
-    description:
-      "Secure access to results, appointments, and home collection requests.",
-  },
-  {
-    icon: Truck,
-    title: "Home collection",
-    description:
-      "Route optimization, collector mobile tools, and real-time sample tracking.",
-  },
-];
+const ICONS = [FlaskConical, Building2, Stethoscope, Users, Truck];
 
-export function ServicesSection() {
+export function ServicesSection({ lang }: { lang: Lang }) {
+  const t = LANDING[lang].services;
+  const SERVICES = t.items.map(([title, description], i) => ({
+    icon: ICONS[i],
+    title,
+    description,
+  }));
   return (
     <section id="services" className="bg-white px-4 py-20 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">
-          Product overview
+          {t.eyebrow}
         </p>
         <h2 className="mt-2 text-3xl font-semibold text-slate-900 lg:text-4xl">
-          One platform for the full diagnostics journey
+          {t.title}
         </h2>
         <p className="mt-4 max-w-2xl text-slate-600">
-          From order intake to verified results, DxCon connects every stakeholder
-          with role-based workspaces and real-time visibility.
+          {t.text}
         </p>
         <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {SERVICES.map((service) => {
