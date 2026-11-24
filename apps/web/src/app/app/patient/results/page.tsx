@@ -61,26 +61,26 @@ function PatientResultsPanel() {
   return (
     <div className="space-y-5">
       <SectionHeader
-        title="My released results"
-        description="Download released laboratory reports. Email-ready notifications are issued at release."
+        title="Kết quả đã trả của tôi"
+        description="Tải các báo cáo xét nghiệm đã trả. Thông báo email được gửi khi kết quả được phát hành."
         actions={
           <Link href="/app/patient" className="text-sm text-sky-700 hover:underline">
-            Patient home
+            Trang bệnh nhân
           </Link>
         }
       />
       <div className="flex flex-wrap gap-2">
         <input
           className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          placeholder="Order code"
+          placeholder="Mã đơn"
           value={orderCode}
           onChange={(e) => setOrderCode(e.target.value)}
         />
         <Button disabled={loading || !orderCode.trim()} onClick={() => void load()}>
-          {loading ? "Loading…" : "Open report"}
+          {loading ? "Đang tải…" : "Mở báo cáo"}
         </Button>
         <Button variant="outline" disabled={!html} onClick={download}>
-          Download HTML/PDF
+          Tải HTML/PDF
         </Button>
       </div>
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
@@ -102,8 +102,8 @@ function PatientResultsPanel() {
 
 export default function PatientResultsPage() {
   return (
-    <AppShell title="Patient results" workspacePath="/app/patient">
-      <Suspense fallback={<p className="text-sm text-slate-500">Loading…</p>}>
+    <AppShell title="Kết quả bệnh nhân" workspacePath="/app/patient">
+      <Suspense fallback={<p className="text-sm text-slate-500">Đang tải…</p>}>
         <PatientResultsPanel />
       </Suspense>
     </AppShell>

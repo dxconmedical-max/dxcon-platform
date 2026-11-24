@@ -257,7 +257,7 @@ function CollectorWorkflowPanel() {
       }
       await handoffCollection(auth, selectedId, {
         temperature_c: temperature ? Number(temperature) : undefined,
-        note: "Collector handoff recorded",
+        note: "Đã ghi nhận bàn giao của nhân viên thu mẫu",
       });
       await refreshDetail(selectedId);
       setMessage("Đã ghi nhận bàn giao và xuất phát.");
@@ -281,13 +281,13 @@ function CollectorWorkflowPanel() {
             detail.marketplace_booking_id,
             {
               temperature_c: temperature ? Number(temperature) : undefined,
-              note: "Arrived at laboratory",
+              note: "Đã đến phòng xét nghiệm",
             },
             { by: "booking" },
           )
         : await arriveAtLab(auth, selectedId, {
             temperature_c: temperature ? Number(temperature) : undefined,
-            note: "Arrived at laboratory",
+            note: "Đã đến phòng xét nghiệm",
           });
       const sid = result.synthetic_specimen_id || String(result.sample_tracking?.sample_code ?? "");
       if (sid) setSpecimenId(sid);
@@ -544,7 +544,7 @@ function CollectorWorkflowPanel() {
                 {step === 3 ? (
                   <div className="space-y-3">
                     <p className="text-sm text-slate-600">
-                      Confirm specimen arrival at the laboratory. This stops at lab arrival — laboratory
+                      Xác nhận mẫu đã đến phòng xét nghiệm. Bước này dừng ở lúc mẫu đến — phòng xét nghiệm
                       accession/testing is out of scope for Sample Collection.
                     </p>
                     <Button disabled={!canWrite || busy || detail.status === "RECEIVED"} onClick={() => void onLabArrive()}>

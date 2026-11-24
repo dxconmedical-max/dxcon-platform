@@ -86,7 +86,7 @@ function SearchPanel() {
   if (!canRead) {
     return (
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-        Reception read permission is required for patient search.
+        Cần quyền xem của tiếp nhận để tìm bệnh nhân.
       </div>
     );
   }
@@ -94,17 +94,17 @@ function SearchPanel() {
   return (
     <div className="space-y-5">
       <SectionHeader
-        title="Patient search"
-        description="Search production patients by phone, patient code, national ID, or full name."
+        title="Tìm bệnh nhân"
+        description="Tìm bệnh nhân theo số điện thoại, mã bệnh nhân, CCCD hoặc họ tên."
         actions={
           <>
             <Link href={`/app/reception/register${query.trim() ? `?q=${encodeURIComponent(query.trim())}` : ""}`}>
               <Button size="sm" variant="outline">
-                Register
+                Đăng ký
               </Button>
             </Link>
             <Link href="/app/reception/workflow">
-              <Button size="sm">Create order</Button>
+              <Button size="sm">Tạo đơn</Button>
             </Link>
           </>
         }
@@ -112,8 +112,8 @@ function SearchPanel() {
       <Input
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        placeholder="Phone, patient code, national ID, or name"
-        aria-label="Patient search"
+        placeholder="Số điện thoại, mã bệnh nhân, CCCD hoặc tên"
+        aria-label="Tìm bệnh nhân"
       />
 
       {searched ? (
@@ -121,17 +121,17 @@ function SearchPanel() {
           loading={loading}
           error={error}
           empty={!loading && patients.length === 0}
-          emptyLabel="No patients found."
+          emptyLabel="Không tìm thấy bệnh nhân."
           onRetry={() => void runSearch(query)}
         >
           <SimpleTable<ReceptionPatient>
             rows={patients}
             rowKey={(row) => row.patient_code}
             columns={[
-              { key: "code", label: "Code", render: (row) => row.patient_code },
-              { key: "name", label: "Name", render: (row) => row.full_name },
-              { key: "phone", label: "Phone", render: (row) => row.phone ?? "—" },
-              { key: "nid", label: "National ID", render: (row) => row.national_id ?? "—" },
+              { key: "code", label: "Mã", render: (row) => row.patient_code },
+              { key: "name", label: "Tên", render: (row) => row.full_name },
+              { key: "phone", label: "Điện thoại", render: (row) => row.phone ?? "—" },
+              { key: "nid", label: "CCCD/CMND", render: (row) => row.national_id ?? "—" },
               {
                 key: "action",
                 label: "",
@@ -140,7 +140,7 @@ function SearchPanel() {
                     href={`/app/reception/workflow?patient=${encodeURIComponent(row.patient_code)}`}
                   >
                     <Button size="sm" variant="outline">
-                      Order
+                      Đơn
                     </Button>
                   </Link>
                 ),
@@ -150,7 +150,7 @@ function SearchPanel() {
         </DataState>
       ) : (
         <p className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500">
-          Start typing to search. Query is preserved in the URL when you open Register.
+          Nhập để tìm kiếm. Nội dung tìm sẽ được giữ lại khi mở trang đăng ký.
         </p>
       )}
     </div>
@@ -159,8 +159,8 @@ function SearchPanel() {
 
 export default function ReceptionSearchPage() {
   return (
-    <AppShell title="Patient search" workspacePath="/app/reception">
-      <Suspense fallback={<p className="text-sm text-slate-500">Loading…</p>}>
+    <AppShell title="Tìm bệnh nhân" workspacePath="/app/reception">
+      <Suspense fallback={<p className="text-sm text-slate-500">Đang tải…</p>}>
         <SearchPanel />
       </Suspense>
     </AppShell>

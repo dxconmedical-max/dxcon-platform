@@ -125,7 +125,7 @@ export default function ReferenceRangesImportPage() {
           <p className="font-medium">3. Kích hoạt (chỉ SUPER_ADMIN)</p>
           <p className="mt-1 text-xs text-slate-600">Gõ đúng cụm: TOI XAC NHAN</p>
           <div className="mt-2 flex gap-2">
-            <Input value={phrase} onChange={(e) => setPhrase(e.target.value)} placeholder="TOI XAC NHAN" />
+            <Input value={phrase} onChange={(e) => setPhrase(e.target.value)} placeholder="TÔI XÁC NHẬN" />
             <Button variant="secondary" disabled={busy || phrase.trim().toUpperCase() !== "TOI XAC NHAN"} onClick={() => void activate()}>
               Kích hoạt
             </Button>

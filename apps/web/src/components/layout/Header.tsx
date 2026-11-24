@@ -28,7 +28,7 @@ export function Header({ title }: { title: string }) {
             <button
               type="button"
               className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
-              aria-label="Open menu"
+              aria-label="Mở menu"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -51,7 +51,7 @@ export function Header({ title }: { title: string }) {
                   router.push(path),
                 );
               }}
-              aria-label="Switch organization"
+              aria-label="Đổi tổ chức"
             >
               {memberships.map((m) => (
                 <option key={m.organization_id} value={m.organization_id}>
@@ -76,7 +76,7 @@ export function Header({ title }: { title: string }) {
           <button
             type="button"
             className="relative rounded-lg p-2 text-slate-500 hover:bg-slate-100"
-            aria-label="Notifications"
+            aria-label="Thông báo"
           >
             <Bell className="h-5 w-5" />
           </button>

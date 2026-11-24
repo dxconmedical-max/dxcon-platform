@@ -169,17 +169,17 @@ function LabWorkflowPanel() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       <SectionHeader
-        title="Laboratory workflow"
-        description="Receive → accession → process → results → technical & medical validation."
+        title="Quy trình xét nghiệm"
+        description="Nhận mẫu → cấp mã số → xử lý → kết quả → duyệt kỹ thuật và duyệt chuyên môn."
         actions={
           <>
             <Link href="/app/lab/queue">
               <Button size="sm" variant="outline">
-                Queue
+                Hàng đợi
               </Button>
             </Link>
             <Button size="sm" variant="outline" onClick={() => void load()} disabled={busy}>
-              Refresh
+              Làm mới
             </Button>
           </>
         }
@@ -214,12 +214,12 @@ function LabWorkflowPanel() {
         loading={loading}
         error={error}
         empty={!detail && !queue.length}
-        emptyLabel="No laboratory work items. Complete Sample Collection handoff first."
+        emptyLabel="Chưa có việc nào ở phòng xét nghiệm. Hãy hoàn tất bàn giao thu mẫu trước."
         onRetry={() => void load()}
       >
         <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
           <aside className="space-y-2">
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Orders</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Đơn</p>
             {queue.map((row) => (
               <button
                 key={row.order_code}
@@ -250,9 +250,9 @@ function LabWorkflowPanel() {
 
             {step === 0 ? (
               <div className="space-y-3">
-                <Field label="Sample code" value={sampleCode} onChange={setSampleCode} />
-                <Field label="Barcode" value={barcode} onChange={setBarcode} />
-                <Field label="Patient code" value={patientCode} onChange={setPatientCode} />
+                <Field label="Mã mẫu" value={sampleCode} onChange={setSampleCode} />
+                <Field label="Mã vạch" value={barcode} onChange={setBarcode} />
+                <Field label="Mã bệnh nhân" value={patientCode} onChange={setPatientCode} />
                 <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
@@ -266,11 +266,11 @@ function LabWorkflowPanel() {
                             barcode_value: barcode || undefined,
                             patient_code: patientCode || undefined,
                           }),
-                        "Identifiers verified.",
+                        "Đã xác minh định danh.",
                       )
                     }
                   >
-                    Verify identifiers
+                    Xác minh định danh
                   </Button>
                   <Button
                     size="sm"
@@ -285,15 +285,15 @@ function LabWorkflowPanel() {
                             patient_code: patientCode || undefined,
                             condition_status: "acceptable",
                           }),
-                        "Specimen received.",
+                        "Đã nhận mẫu.",
                       )
                     }
                   >
-                    Accept & receive
+                    Chấp nhận và nhận mẫu
                   </Button>
                 </div>
                 <div className="rounded-lg border border-rose-100 bg-rose-50/50 p-3">
-                  <p className="mb-2 text-sm font-medium text-rose-900">Reject specimen</p>
+                  <p className="mb-2 text-sm font-medium text-rose-900">Từ chối mẫu</p>
                   <select
                     className="mb-2 w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
                     value={rejectReason}
@@ -308,7 +308,7 @@ function LabWorkflowPanel() {
                   <textarea
                     className="mb-2 w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
                     rows={2}
-                    placeholder="Notes"
+                    placeholder="Ghi chú"
                     value={rejectNote}
                     onChange={(e) => setRejectNote(e.target.value)}
                   />
@@ -325,11 +325,11 @@ function LabWorkflowPanel() {
                             rejection_reason: rejectReason,
                             note: rejectNote || rejectReason,
                           }),
-                        "Specimen rejected.",
+                        "Đã từ chối mẫu.",
                       )
                     }
                   >
-                    Reject
+                    Từ chối
                   </Button>
                 </div>
               </div>
@@ -338,7 +338,7 @@ function LabWorkflowPanel() {
             {step === 1 ? (
               <div className="space-y-3">
                 <p className="text-sm text-slate-600">
-                  Generate synthetic accession ID in format ACC-YYYYMMDD-000001.
+                  Tạo mã số mẫu theo định dạng ACC-YYYYMMDD-000001.
                 </p>
                 <Button
                   size="sm"
@@ -350,16 +350,16 @@ function LabWorkflowPanel() {
                     )
                   }
                 >
-                  Create accession
+                  Cấp mã số mẫu
                 </Button>
               </div>
             ) : null}
 
             {step === 2 ? (
               <div className="space-y-3">
-                <Field label="Bench" value={benchId} onChange={setBenchId} />
-                <Field label="Instrument" value={instrumentId} onChange={setInstrumentId} />
-                <Field label="Technician" value={technician} onChange={setTechnician} />
+                <Field label="Bàn xét nghiệm" value={benchId} onChange={setBenchId} />
+                <Field label="Máy xét nghiệm" value={instrumentId} onChange={setInstrumentId} />
+                <Field label="Kỹ thuật viên" value={technician} onChange={setTechnician} />
                 <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
@@ -377,16 +377,16 @@ function LabWorkflowPanel() {
                       )
                     }
                   >
-                    Assign
+                    Phân công
                   </Button>
                   <Button
                     size="sm"
                     disabled={!canWrite || busy || !selectedOrder}
                     onClick={() =>
-                      void run(() => startProcessing(auth, selectedOrder!), "Processing started.")
+                      void run(() => startProcessing(auth, selectedOrder!), "Đã bắt đầu xử lý.")
                     }
                   >
-                    Start processing
+                    Bắt đầu xử lý
                   </Button>
                 </div>
               </div>
@@ -394,13 +394,13 @@ function LabWorkflowPanel() {
 
             {step === 3 ? (
               <div className="space-y-3">
-                <Field label="Test code" value={testCode} onChange={setTestCode} />
-                <Field label="Result value" value={resultValue} onChange={setResultValue} />
+                <Field label="Mã xét nghiệm" value={testCode} onChange={setTestCode} />
+                <Field label="Giá trị kết quả" value={resultValue} onChange={setResultValue} />
                 <Field label="Unit (để trống = tự điền)" value={unit} onChange={setUnit} />
                 <Field label="Reference range (để trống = tự điền theo khoảng DxCon)" value={referenceRange} onChange={setReferenceRange} />
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <Field label="Critical low" value={criticalLow} onChange={setCriticalLow} />
-                  <Field label="Critical high" value={criticalHigh} onChange={setCriticalHigh} />
+                  <Field label="Nguy kịch thấp" value={criticalLow} onChange={setCriticalLow} />
+                  <Field label="Nguy kịch cao" value={criticalHigh} onChange={setCriticalHigh} />
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Button
@@ -420,11 +420,11 @@ function LabWorkflowPanel() {
                             instrument: instrumentId,
                             technician: technician || undefined,
                           }),
-                        "Result entered.",
+                        "Đã nhập kết quả.",
                       )
                     }
                   >
-                    Enter result
+                    Nhập kết quả
                   </Button>
                   <Button
                     size="sm"
@@ -434,7 +434,7 @@ function LabWorkflowPanel() {
                       void run(() => passQc(auth, selectedOrder!), "QC passed. Tiếp theo: Technical validate.", 4)
                     }
                   >
-                    QC pass
+                    QC đạt
                   </Button>
                 </div>
               </div>
@@ -443,23 +443,23 @@ function LabWorkflowPanel() {
             {step === 4 ? (
               <div className="space-y-3">
                 <p className="text-sm text-slate-600">
-                  Technical validation locks results. Medical validation is doctor sign-off.
+                  Duyệt kỹ thuật sẽ khóa kết quả. Duyệt chuyên môn là bác sĩ ký xác nhận.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
                     disabled={!canTechValidate || busy || !selectedOrder}
                     onClick={() =>
-                      void run(() => technicalValidate(auth, selectedOrder!), "Technical validation complete.")
+                      void run(() => technicalValidate(auth, selectedOrder!), "Đã duyệt kỹ thuật.")
                     }
                   >
-                    Technical validate
+                    Duyệt kỹ thuật
                   </Button>
                 </div>
                 <textarea
                   className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
                   rows={2}
-                  placeholder="Doctor note"
+                  placeholder="Ghi chú của bác sĩ"
                   value={doctorNote}
                   onChange={(e) => setDoctorNote(e.target.value)}
                 />
@@ -469,11 +469,11 @@ function LabWorkflowPanel() {
                   onClick={() =>
                     void run(
                       () => medicalValidate(auth, selectedOrder!, doctorNote || undefined),
-                      "Medical validation complete.",
+                      "Đã duyệt chuyên môn.",
                     )
                   }
                 >
-                  Medical validate
+                  Duyệt chuyên môn
                 </Button>
                 <div className="flex flex-wrap gap-2">
                   <Button
@@ -483,11 +483,11 @@ function LabWorkflowPanel() {
                     onClick={() =>
                       void run(
                         () => medicalReject(auth, selectedOrder!, doctorNote || undefined),
-                        "Medical rejection recorded.",
+                        "Đã ghi nhận từ chối chuyên môn.",
                       )
                     }
                   >
-                    Medical reject
+                    Từ chối chuyên môn
                   </Button>
                   <Button
                     size="sm"
@@ -496,26 +496,26 @@ function LabWorkflowPanel() {
                     onClick={() =>
                       void run(
                         () => medicalReopen(auth, selectedOrder!, doctorNote || undefined),
-                        "Medical validation reopened.",
+                        "Đã mở lại duyệt chuyên môn.",
                       )
                     }
                   >
-                    Reopen
+                    Mở lại
                   </Button>
                   <Button
                     size="sm"
                     disabled={!canMedical || busy || !selectedOrder}
                     onClick={() =>
-                      void run(() => releaseLabResult(auth, selectedOrder!), "Result released.")
+                      void run(() => releaseLabResult(auth, selectedOrder!), "Đã trả kết quả.")
                     }
                   >
-                    Release result
+                    Trả kết quả
                   </Button>
                   <Link
                     href="/app/lab/release"
                     className="self-center text-sm text-sky-700 hover:underline"
                   >
-                    Release board
+                    Bảng trả kết quả
                   </Link>
                 </div>
               </div>
@@ -523,7 +523,7 @@ function LabWorkflowPanel() {
 
             {detail?.result ? (
               <div className="rounded-lg border border-slate-100 bg-slate-50 p-3 text-sm text-slate-700">
-                <p className="font-medium text-slate-900">Current result</p>
+                <p className="font-medium text-slate-900">Kết quả hiện tại</p>
                 <pre className="mt-2 overflow-x-auto text-xs">
                   {JSON.stringify(detail.result, null, 2)}
                 </pre>
@@ -559,8 +559,8 @@ function Field({
 
 export default function LabWorkflowPage() {
   return (
-    <AppShell title="Lab workflow" workspacePath="/app/lab">
-      <Suspense fallback={<p className="p-6 text-sm text-slate-500">Loading workflow…</p>}>
+    <AppShell title="Quy trình xét nghiệm" workspacePath="/app/lab">
+      <Suspense fallback={<p className="p-6 text-sm text-slate-500">Đang tải quy trình…</p>}>
         <LabWorkflowPanel />
       </Suspense>
     </AppShell>

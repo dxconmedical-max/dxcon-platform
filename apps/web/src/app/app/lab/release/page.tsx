@@ -93,18 +93,18 @@ export default function LabReleasePage() {
   }
 
   return (
-    <AppShell title="Released results" workspacePath="/app/lab">
+    <AppShell title="Kết quả đã trả" workspacePath="/app/lab">
       <div className="space-y-5">
         <SectionHeader
-          title="Result release"
-          description="Release medically approved results for patient download. Sets email-ready state and HTML/PDF artifact."
+          title="Trả kết quả"
+          description="Phát hành kết quả đã được bác sĩ duyệt để bệnh nhân tải về, đánh dấu sẵn sàng gửi email và tạo file HTML/PDF."
           actions={
             <div className="flex gap-2">
               <Link href="/app/doctor/review" className="self-center text-sm text-sky-700 hover:underline">
-                Medical inbox
+                Hộp chờ bác sĩ
               </Link>
               <Button size="sm" variant="outline" onClick={() => void load()}>
-                Refresh
+                Làm mới
               </Button>
             </div>
           }
@@ -114,28 +114,28 @@ export default function LabReleasePage() {
           loading={loading}
           error={error}
           empty={!loading && items.length === 0}
-          emptyLabel="No approved or released results."
+          emptyLabel="Chưa có kết quả đã duyệt hoặc đã trả."
           onRetry={() => void load()}
         >
           <SimpleTable
             rows={items}
             rowKey={(row) => row.order_code}
             columns={[
-              { key: "order", label: "Order", render: (row) => row.order_code },
+              { key: "order", label: "Đơn", render: (row) => row.order_code },
               {
                 key: "patient",
-                label: "Patient",
+                label: "Bệnh nhân",
                 render: (row) => row.patient_name || "—",
               },
-              { key: "status", label: "Status", render: (row) => row.status || "—" },
+              { key: "status", label: "Trạng thái", render: (row) => row.status || "—" },
               {
                 key: "email",
-                label: "Email ready",
+                label: "Sẵn sàng gửi email",
                 render: (row) => (row.email_ready || row.status === "released" ? "Yes" : "No"),
               },
               {
                 key: "actions",
-                label: "Actions",
+                label: "Thao tác",
                 render: (row) => (
                   <div className="flex flex-wrap gap-2">
                     {row.status !== "released" ? (
@@ -144,7 +144,7 @@ export default function LabReleasePage() {
                         disabled={!canRelease || busy === row.order_code}
                         onClick={() => void onRelease(row.order_code)}
                       >
-                        Release
+                        Trả kết quả
                       </Button>
                     ) : (
                       <>
@@ -162,13 +162,13 @@ export default function LabReleasePage() {
                           disabled={!htmlPreview}
                           onClick={() => onDownload(row.order_code)}
                         >
-                          Download
+                          Tải về
                         </Button>
                         <Link
                           href={`/app/patient/results?order=${encodeURIComponent(row.order_code)}`}
                           className="self-center text-xs text-sky-700 hover:underline"
                         >
-                          Patient view
+                          Bệnh nhân xem
                         </Link>
                       </>
                     )}
@@ -180,7 +180,7 @@ export default function LabReleasePage() {
         </DataState>
         {htmlPreview ? (
           <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="mb-2 text-sm font-medium text-slate-800">Report preview</p>
+            <p className="mb-2 text-sm font-medium text-slate-800">Xem trước báo cáo</p>
             <div
               className="max-h-96 overflow-auto text-sm"
               dangerouslySetInnerHTML={{ __html: htmlPreview }}

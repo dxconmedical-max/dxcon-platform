@@ -1,7 +1,7 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { WorkspaceHome } from "@/components/layout/WorkspaceHome";
 
-export const metadata = { title: "Clinic" };
+export const metadata = { title: "Phòng khám" };
 
 export default function ClinicPage() {
   return (

@@ -1,11 +1,11 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { LiveMap } from "@/components/pilot/LiveMap";
 
-export const metadata = { title: "Live map" };
+export const metadata = { title: "Bản đồ trực tiếp" };
 
 export default function LiveMapPage() {
   return (
-    <AppShell title="Live map" workspacePath="/app/operations">
+    <AppShell title="Bản đồ trực tiếp" workspacePath="/app/operations">
       <LiveMap />
     </AppShell>
   );

@@ -70,7 +70,7 @@ export default function ReceptionBookingsPage() {
   }
 
   return (
-    <AppShell title="Booking requests" workspacePath="/app/reception">
+    <AppShell title="Yêu cầu đặt lịch" workspacePath="/app/reception">
       <div className="space-y-4">
         <div>
           <h1 className="text-xl font-semibold">Yêu cầu đặt lịch từ website</h1>
@@ -91,7 +91,7 @@ export default function ReceptionBookingsPage() {
           ))}
         </div>
         {error ? <p className="text-sm text-red-700">{error}</p> : null}
-        {loading ? <p className="text-sm text-slate-500">Loading…</p> : null}
+        {loading ? <p className="text-sm text-slate-500">Đang tải…</p> : null}
         {!loading && items.length === 0 ? (
           <p className="text-sm text-slate-500">Không có yêu cầu nào ở trạng thái {filter}.</p>
         ) : null}

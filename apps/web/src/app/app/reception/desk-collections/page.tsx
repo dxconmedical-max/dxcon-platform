@@ -134,7 +134,7 @@ export default function ReceptionDeskCollectionsPage() {
           collection_location: "Reception Desk",
         },
       );
-      setMessage("Specimen collected at reception.");
+      setMessage("Đã thu mẫu tại quầy tiếp nhận.");
       await openRow(selectedId);
       await load();
     } catch (err) {
@@ -152,9 +152,9 @@ export default function ReceptionDeskCollectionsPage() {
       await arriveAtLab(
         { token: accessToken, organizationId: activeOrganizationId },
         selectedId,
-        { note: "Reception desk handover to laboratory" },
+        { note: "Bàn tiếp nhận bàn giao cho phòng xét nghiệm" },
       );
-      setMessage("Handed over to laboratory.");
+      setMessage("Đã bàn giao cho phòng xét nghiệm.");
       await openRow(selectedId);
       await load();
     } catch (err) {
@@ -165,14 +165,14 @@ export default function ReceptionDeskCollectionsPage() {
   }
 
   return (
-    <AppShell title="Desk collections" workspacePath="/app/reception">
+    <AppShell title="Thu mẫu tại quầy" workspacePath="/app/reception">
       <div className="space-y-6">
         <SectionHeader
-          title="Reception desk collections"
-          description="AT_RECEPTION only — verify, barcode, collect, and hand over to lab. Not field collector jobs."
+          title="Thu mẫu tại quầy tiếp nhận"
+          description="Chỉ mẫu thu tại quầy — kiểm tra, in mã vạch, thu mẫu và bàn giao cho phòng xét nghiệm. Không gồm việc của nhân viên thu mẫu tại nhà."
           actions={
             <Button size="sm" variant="outline" onClick={() => void load()}>
-              Refresh
+              Làm mới
             </Button>
           }
         />
@@ -182,7 +182,7 @@ export default function ReceptionDeskCollectionsPage() {
           loading={loading}
           error={null}
           empty={!loading && items.length === 0}
-          emptyLabel="No desk collections awaiting work."
+          emptyLabel="Không có mẫu nào đang chờ xử lý tại quầy."
           onRetry={() => void load()}
         >
           <SimpleTable
@@ -191,7 +191,7 @@ export default function ReceptionDeskCollectionsPage() {
             columns={[
               {
                 key: "patient",
-                label: "Patient / order",
+                label: "Bệnh nhân / đơn",
                 render: (row) => (
                   <div>
                     <div className="font-medium">
@@ -205,12 +205,12 @@ export default function ReceptionDeskCollectionsPage() {
               },
               {
                 key: "mode",
-                label: "Mode",
+                label: "Hình thức",
                 render: (row) => String(row.collection_mode || "AT_RECEPTION"),
               },
               {
                 key: "status",
-                label: "Status",
+                label: "Trạng thái",
                 render: (row) => <StatusPill status={row.status} />,
               },
               {
@@ -222,7 +222,7 @@ export default function ReceptionDeskCollectionsPage() {
                     className="text-sm font-medium text-sky-700 hover:underline"
                     onClick={() => void openRow(row.id)}
                   >
-                    Open
+                    Mở
                   </button>
                 ),
               },
@@ -236,7 +236,7 @@ export default function ReceptionDeskCollectionsPage() {
               Desk workflow · {detail.booking?.booking_code || detail.id.slice(0, 8)} · {detail.status}
             </p>
             <label className="block text-sm">
-              <span className="mb-1 block text-slate-600">Barcode</span>
+              <span className="mb-1 block text-slate-600">Mã vạch</span>
               <input
                 className="w-full rounded-lg border border-slate-300 px-3 py-2"
                 value={barcode}
@@ -245,16 +245,16 @@ export default function ReceptionDeskCollectionsPage() {
             </label>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" disabled={busy || !canWrite} onClick={() => void onVerify()}>
-                Verify
+                Xác minh
               </Button>
               <Button size="sm" disabled={busy || !canWrite} onClick={() => void onCollect()}>
-                Collect
+                Thu mẫu
               </Button>
               <Button size="sm" disabled={busy || !canWrite} onClick={() => void onLabHandover()}>
-                Hand over to lab
+                Bàn giao cho phòng xét nghiệm
               </Button>
               <Link href="/app/reception" className="text-sm text-sky-700 hover:underline self-center">
-                Back
+                Quay lại
               </Link>
             </div>
           </div>

@@ -62,8 +62,8 @@ export default function PartnerRegisterPage() {
               value={form.partner_type}
               onChange={(e) => setForm({ ...form, partner_type: e.target.value })}
             >
-              <option value="CLINIC">Clinic</option>
-              <option value="LAB">Laboratory</option>
+              <option value="CLINIC">Phòng khám</option>
+              <option value="LAB">Phòng xét nghiệm</option>
               <option value="HOSPITAL">Hospital</option>
             </select>
           </label>

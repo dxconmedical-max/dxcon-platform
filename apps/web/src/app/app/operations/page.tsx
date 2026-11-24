@@ -3,7 +3,7 @@ import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { PilotReadinessHub } from "@/components/pilot/PilotReadinessHub";
 
-export const metadata = { title: "Operations" };
+export const metadata = { title: "Vận hành" };
 
 export default function OperationsPage() {
   return (

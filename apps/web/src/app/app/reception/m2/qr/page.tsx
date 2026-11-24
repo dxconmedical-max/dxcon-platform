@@ -13,14 +13,14 @@ function QrPageInner() {
 
 export default function ReceptionM2QrPage() {
   return (
-    <AppShell title="Reception · QR" workspacePath="/app/reception">
+    <AppShell title="Tiếp nhận · Mã QR" workspacePath="/app/reception">
       <div className="mx-auto max-w-4xl space-y-2 px-4 pt-4">
-        <h1 className="text-2xl font-semibold">QR codes</h1>
+        <h1 className="text-2xl font-semibold">Mã QR</h1>
         <p className="text-sm text-neutral-600">
-          Payment, VNPay, static, dynamic, sample, and tracking QR with payload verification.
+          QR thanh toán, VNPay, tĩnh, động, mẫu và theo dõi, có kiểm tra nội dung.
         </p>
       </div>
-      <Suspense fallback={<p className="p-4 text-sm">Loading…</p>}>
+      <Suspense fallback={<p className="p-4 text-sm">Đang tải…</p>}>
         <QrPageInner />
       </Suspense>
     </AppShell>

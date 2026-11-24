@@ -72,7 +72,7 @@ export default function FieldCollectionRequestsPage() {
     const collectionId = String(row.sample_collection_id || row.id);
     const collectorId = selectedCollector[row.id] || collectors[0]?.id;
     if (!collectorId) {
-      setError("Select a collector first.");
+      setError("Hãy chọn nhân viên thu mẫu trước.");
       return;
     }
     const collector = collectors.find((c) => c.id === collectorId);
@@ -100,7 +100,7 @@ export default function FieldCollectionRequestsPage() {
     setMessage(null);
     try {
       await unassignCollector(auth, collectionId);
-      setMessage("Assignment released.");
+      setMessage("Đã hủy phân công.");
       await load();
     } catch (err) {
       setError(normalizeApiError(err));
@@ -110,21 +110,21 @@ export default function FieldCollectionRequestsPage() {
   }
 
   return (
-    <AppShell title="Field collection requests" workspacePath="/app/reception">
+    <AppShell title="Yêu cầu thu mẫu tại nhà / phòng khám" workspacePath="/app/reception">
       <div className="space-y-6">
         <SectionHeader
-          title="Field collection requests"
-          description="HOME and CLINIC requests. Assign or reassign collectors; home jobs appear on the Collector Queue."
+          title="Yêu cầu thu mẫu tại nhà / phòng khám"
+          description="Yêu cầu thu mẫu tại nhà và tại phòng khám. Phân công hoặc đổi nhân viên; việc tại nhà sẽ hiện trong hàng đợi của nhân viên thu mẫu."
           actions={
             <div className="flex gap-2">
               <Link
                 href="/app/collector/queue"
                 className="self-center text-sm font-medium text-sky-700 hover:underline"
               >
-                Open collector queue
+                Mở hàng đợi thu mẫu
               </Link>
               <Button size="sm" variant="outline" onClick={() => void load()}>
-                Refresh
+                Làm mới
               </Button>
             </div>
           }
@@ -134,7 +134,7 @@ export default function FieldCollectionRequestsPage() {
           loading={loading}
           error={error}
           empty={!loading && items.length === 0}
-          emptyLabel="No field collection requests."
+          emptyLabel="Không có yêu cầu thu mẫu nào."
           onRetry={() => void load()}
         >
           <SimpleTable
@@ -143,21 +143,21 @@ export default function FieldCollectionRequestsPage() {
             columns={[
               {
                 key: "patient",
-                label: "Patient",
+                label: "Bệnh nhân",
                 render: (row) =>
                   row.booking?.patient_name ||
                   String((row.order as { patient_name?: string } | null)?.patient_name ?? "—"),
               },
               {
                 key: "order",
-                label: "Order",
+                label: "Đơn",
                 render: (row) =>
                   row.booking?.booking_code ||
                   String((row.order as { order_code?: string } | null)?.order_code ?? "—"),
               },
               {
                 key: "address",
-                label: "Address",
+                label: "Địa chỉ",
                 render: (row) =>
                   row.pickup_address ||
                   row.clinic_name ||
@@ -167,22 +167,22 @@ export default function FieldCollectionRequestsPage() {
               },
               {
                 key: "date",
-                label: "Requested date",
+                label: "Ngày yêu cầu",
                 render: (row) => row.requested_date || "—",
               },
               {
                 key: "status",
-                label: "Status",
+                label: "Trạng thái",
                 render: (row) => <StatusPill status={row.status} />,
               },
               {
                 key: "collector",
-                label: "Assigned collector",
+                label: "Nhân viên được phân công",
                 render: (row) => row.collector_name || "—",
               },
               {
                 key: "actions",
-                label: "Actions",
+                label: "Thao tác",
                 render: (row) => (
                   <div className="flex flex-wrap items-center gap-2">
                     <select
@@ -193,7 +193,7 @@ export default function FieldCollectionRequestsPage() {
                       }
                       aria-label={`Collector for ${row.id}`}
                     >
-                      <option value="">Select collector</option>
+                      <option value="">Chọn nhân viên thu mẫu</option>
                       {collectors.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.full_name || c.email}
@@ -214,7 +214,7 @@ export default function FieldCollectionRequestsPage() {
                         disabled={busyId === row.id}
                         onClick={() => void onRelease(row)}
                       >
-                        Release
+                        Trả kết quả
                       </Button>
                     ) : null}
                   </div>

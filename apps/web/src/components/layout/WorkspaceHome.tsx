@@ -31,7 +31,7 @@ export function WorkspaceHome({
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-teal-50/40 p-6 lg:p-8">
-        <Badge tone="info">Production workspace</Badge>
+        <Badge tone="info">Hệ thống chính thức</Badge>
         <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900 lg:text-3xl">
           {title}
         </h2>

@@ -42,7 +42,7 @@ export default function ExecutiveKpiPage() {
   const lab = data?.charts.laboratory_performance;
 
   return (
-    <AppShell title="KPI dashboard" workspacePath="/app/executive">
+    <AppShell title="Bảng KPI" workspacePath="/app/executive">
       <div className="space-y-6">
         <div>
           <h1 className="text-xl font-semibold">Chỉ số điều hành</h1>

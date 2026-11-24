@@ -1,7 +1,7 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { WorkspaceHome } from "@/components/layout/WorkspaceHome";
 
-export const metadata = { title: "Executive" };
+export const metadata = { title: "Điều hành" };
 
 export default function ExecutivePage() {
   return (

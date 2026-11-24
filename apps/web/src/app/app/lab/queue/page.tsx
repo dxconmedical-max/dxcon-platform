@@ -50,18 +50,18 @@ export default function LabQueuePage() {
   }, [load]);
 
   return (
-    <AppShell title="Lab queue" workspacePath="/app/lab">
+    <AppShell title="Hàng đợi xét nghiệm" workspacePath="/app/lab">
       <div className="space-y-6 p-4 md:p-6">
         <SectionHeader
-          title="Laboratory worklist"
-          description="Incoming, accessioned, and in-process specimens."
+          title="Danh sách việc phòng xét nghiệm"
+          description="Mẫu đang đến, đã cấp mã số và đang xử lý."
           actions={
             <>
               <Button size="sm" variant="outline" onClick={() => void load()}>
-                Refresh
+                Làm mới
               </Button>
               <Link href="/app/lab/workflow">
-                <Button size="sm">Open workflow</Button>
+                <Button size="sm">Mở quy trình</Button>
               </Link>
             </>
           }
@@ -73,7 +73,7 @@ export default function LabQueuePage() {
               ["Incoming", dash.kpis.incoming],
               ["Received", dash.kpis.received],
               ["Testing", dash.kpis.testing],
-              ["Pending review", dash.kpis.pending_review],
+              ["Chờ duyệt", dash.kpis.pending_review],
             ].map(([label, value]) => (
               <div key={String(label)} className="rounded-xl border border-slate-200 bg-white p-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">{label}</p>
@@ -83,16 +83,16 @@ export default function LabQueuePage() {
           </div>
         ) : null}
 
-        <DataState loading={loading} error={error} empty={!rows.length} emptyLabel="No lab worklist items." onRetry={() => void load()}>
+        <DataState loading={loading} error={error} empty={!rows.length} emptyLabel="Không có việc nào trong danh sách." onRetry={() => void load()}>
           <div className="overflow-x-auto rounded-xl border border-slate-200">
             <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
-                  <th className="px-3 py-2">Order</th>
-                  <th className="px-3 py-2">Patient</th>
-                  <th className="px-3 py-2">Accession</th>
-                  <th className="px-3 py-2">Test</th>
-                  <th className="px-3 py-2">Status</th>
+                  <th className="px-3 py-2">Đơn</th>
+                  <th className="px-3 py-2">Bệnh nhân</th>
+                  <th className="px-3 py-2">Mã số mẫu</th>
+                  <th className="px-3 py-2">Xét nghiệm</th>
+                  <th className="px-3 py-2">Trạng thái</th>
                   <th className="px-3 py-2" />
                 </tr>
               </thead>
@@ -111,7 +111,7 @@ export default function LabQueuePage() {
                         className="text-sm font-medium text-sky-700 hover:underline"
                         href={`/app/lab/workflow?order=${encodeURIComponent(row.order_code)}`}
                       >
-                        Open
+                        Mở
                       </Link>
                     </td>
                   </tr>

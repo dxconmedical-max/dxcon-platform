@@ -6,11 +6,11 @@ import { ReceptionM2Placeholder } from "@/modules/reception-m2/shared/ReceptionM
 
 export default function ReceptionM2PaymentPage() {
   return (
-    <AppShell title="Reception · Payment" workspacePath="/app/reception">
+    <AppShell title="Tiếp nhận · Thanh toán" workspacePath="/app/reception">
       <ReceptionM2Placeholder
-        title="Payment"
+        title="Thanh toán"
         domain="payment"
-        description="Collect payment against M1 orders. UI logic not implemented in foundation."
+        description="Thu tiền theo đơn đã tạo."
       />
       <div className="mx-auto max-w-2xl">
         <PaymentPanelPlaceholder />

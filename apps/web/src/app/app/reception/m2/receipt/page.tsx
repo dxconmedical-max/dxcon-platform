@@ -18,14 +18,14 @@ function ReceiptPageInner() {
 
 export default function ReceptionM2ReceiptPage() {
   return (
-    <AppShell title="Reception · Receipt" workspacePath="/app/reception">
+    <AppShell title="Tiếp nhận · Biên lai" workspacePath="/app/reception">
       <div className="mx-auto max-w-4xl space-y-2 px-4 pt-4">
-        <h1 className="text-2xl font-semibold">Receipt</h1>
+        <h1 className="text-2xl font-semibold">Biên lai</h1>
         <p className="text-sm text-neutral-600">
-          Preview, print, thermal, PDF, re-print, and cancel cash-desk receipts.
+          Xem trước, in, in nhiệt, PDF, in lại và hủy biên lai thu tiền.
         </p>
       </div>
-      <Suspense fallback={<p className="p-4 text-sm">Loading…</p>}>
+      <Suspense fallback={<p className="p-4 text-sm">Đang tải…</p>}>
         <ReceiptPageInner />
       </Suspense>
     </AppShell>
