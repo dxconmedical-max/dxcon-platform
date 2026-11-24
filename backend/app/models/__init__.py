@@ -206,6 +206,14 @@ from app.models.booking_request import BookingRequest
 from app.models.demo_request import DemoRequest
 from app.models.clinic_order_request import ClinicOrderRequest, ClinicOrderSetting
 from app.models.addon import OrderAddon, SendoutTrack, TestFlag
+from app.models.clinic_billing import (  # noqa: F401
+    ClinicBillingSetting,
+    ClinicContract,
+    ClinicPayment,
+    ClinicPrice,
+    ClinicStatement,
+    ClinicStatementLine,
+)
 from app.models.patient_device import PatientDevice
 from app.models.patient_notification_setting import PatientNotificationSetting
 from app.models.doctor_profile import DoctorProfile
