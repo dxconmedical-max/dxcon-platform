@@ -1,0 +1,152 @@
+export type Lang = "vi" | "en";
+
+export const LANDING = {
+  vi: {
+    nav: { services: "Dịch vụ", ai: "AI", partners: "Đối tác", pricing: "Bảng giá", contact: "Liên hệ", signIn: "Đăng nhập", demo: "Đặt lịch demo" },
+    hero: {
+      badge: "Nền tảng xét nghiệm y khoa",
+      title: "Kết nối phòng xét nghiệm, phòng khám và bệnh nhân trên một nền tảng tin cậy",
+      text: "DxCon hợp nhất đặt xét nghiệm, lấy mẫu tại nhà, vận hành phòng lab và trả kết quả lâm sàng, với bảo mật chuẩn doanh nghiệp và gợi ý hỗ trợ bởi AI.",
+      signIn: "Đăng nhập",
+      sales: "Liên hệ tư vấn",
+      b1: "Kiến trúc sẵn sàng chuẩn HIPAA",
+      b2: "Gợi ý lâm sàng bởi AI",
+      stats: [["Đơn hôm nay", "1,248"], ["TAT trung bình", "4.2h"], ["Đối tác hoạt động", "86"], ["Lấy mẫu tại nhà", "312"]],
+      statsNote: "Số liệu minh họa.",
+    },
+    services: {
+      eyebrow: "Tổng quan sản phẩm",
+      title: "Một nền tảng cho toàn bộ hành trình xét nghiệm",
+      text: "Từ tiếp nhận đơn đến kết quả đã duyệt, DxCon kết nối mọi bên với không gian làm việc theo vai trò và theo dõi theo thời gian thực.",
+      items: [
+        ["Vận hành phòng xét nghiệm", "Danh sách công việc, duyệt kết quả, kiểm soát chất lượng và tích hợp đối tác trong một nơi."],
+        ["Quản lý phòng khám", "Tiếp nhận, đặt lịch, thanh toán và liên lạc với bệnh nhân cho phòng khám nhiều cơ sở."],
+        ["Không gian bác sĩ", "Xem kết quả, phối hợp với phòng lab và quản lý lộ trình chăm sóc bệnh nhân."],
+        ["Cổng bệnh nhân", "Truy cập kết quả, lịch hẹn và yêu cầu lấy mẫu tại nhà một cách an toàn."],
+        ["Lấy mẫu tại nhà", "Tối ưu lộ trình, ứng dụng cho nhân viên lấy mẫu và theo dõi mẫu theo thời gian thực."],
+      ],
+    },
+    ai: {
+      eyebrow: "Trí tuệ nhân tạo",
+      title: "Gợi ý lâm sàng, luôn có bác sĩ giám sát",
+      items: [
+        ["Hỗ trợ diễn giải", "Làm nổi bật giá trị nguy kịch và gợi ý xét nghiệm tiếp theo dựa trên bối cảnh lâm sàng."],
+        ["Phân tích vận hành", "Dự báo nhu cầu, theo dõi thời gian trả kết quả và phát hiện điểm nghẽn giữa các cơ sở."],
+        ["AI có kiểm soát", "Nhật ký kiểm toán, phân quyền theo vai trò và bác sĩ duyệt trước khi trả kết quả cho bệnh nhân."],
+      ],
+    },
+    home: {
+      eyebrow: "Lấy mẫu tại nhà",
+      title: "Vận chuyển từ nhà đến phòng lab, được điều phối chặt chẽ",
+      text: "Điều phối nhân viên lấy mẫu, theo dõi tuân thủ chuỗi lạnh và cập nhật thời gian dự kiến cho bệnh nhân từ lúc đặt lịch đến khi phòng lab nhận mẫu.",
+      items: ["Ứng dụng cho nhân viên lấy mẫu", "Theo dõi lộ trình trực tiếp", "Chuỗi bàn giao mẫu"],
+    },
+    partners: {
+      eyebrow: "Hệ sinh thái đối tác",
+      title: "Dành cho phòng xét nghiệm, bệnh viện và mạng lưới chẩn đoán",
+      items: [
+        ["Phòng xét nghiệm tham chiếu", "Xử lý khối lượng lớn, kết nối thiết bị và cổng đối tác."],
+        ["Hệ thống bệnh viện", "Quản trị đa đơn vị với báo cáo tập trung và cam kết dịch vụ."],
+        ["Mạng lưới phòng khám", "Trải nghiệm bệnh nhân mang thương hiệu riêng, dùng chung danh mục và bảng giá."],
+      ],
+    },
+    pricing: {
+      eyebrow: "Bảng giá",
+      title: "Gói linh hoạt cho mọi giai đoạn",
+      text: "Vui lòng liên hệ để nhận báo giá phù hợp.",
+      cta: "Yêu cầu báo giá",
+      plans: [
+        { name: "Phòng khám", price: "Liên hệ", features: ["Tối đa 5 cơ sở", "Cổng bệnh nhân", "Báo cáo cơ bản"] },
+        { name: "Phòng xét nghiệm", price: "Liên hệ", featured: true, features: ["Tích hợp LIS", "Lấy mẫu tại nhà", "Gợi ý AI"] },
+        { name: "Doanh nghiệp", price: "Liên hệ", features: ["Đa đơn vị", "SLA tùy chỉnh", "Hỗ trợ riêng"] },
+      ],
+    },
+    contact: {
+      eyebrow: "Liên hệ",
+      title: "Đặt lịch demo cùng đội ngũ DxCon",
+      text: "Hãy cho chúng tôi biết về phòng lab hoặc mạng lưới phòng khám của bạn. Chúng tôi sẽ sắp xếp buổi giới thiệu các không gian làm việc và tích hợp của DxCon.",
+      address: "TP. Hồ Chí Minh, Việt Nam",
+      name: "Họ tên", namePh: "Họ tên của bạn",
+      org: "Đơn vị", orgPh: "Phòng khám / Phòng lab",
+      email: "Email công việc",
+      message: "Nội dung", messagePh: "Mô tả nhu cầu của bạn",
+      send: "Gửi yêu cầu",
+    },
+    footer: { tagline: "Chẩn đoán kết nối cho y tế hiện đại.", company: "DxCon Medical" },
+  },
+  en: {
+    nav: { services: "Services", ai: "AI", partners: "Partners", pricing: "Pricing", contact: "Contact", signIn: "Sign in", demo: "Book demo" },
+    hero: {
+      badge: "Healthcare diagnostics platform",
+      title: "Connect labs, clinics, and patients on one trusted platform",
+      text: "DxCon unifies orders, home collection, lab operations, and clinical reporting with enterprise-grade security and AI-assisted insights.",
+      signIn: "Sign in",
+      sales: "Contact sales",
+      b1: "HIPAA-ready architecture",
+      b2: "AI clinical insights",
+      stats: [["Orders today", "1,248"], ["Avg. TAT", "4.2h"], ["Active partners", "86"], ["Home collections", "312"]],
+      statsNote: "Illustrative figures.",
+    },
+    services: {
+      eyebrow: "Product overview",
+      title: "One platform for the full diagnostics journey",
+      text: "From order intake to verified results, DxCon connects every stakeholder with role-based workspaces and real-time visibility.",
+      items: [
+        ["Laboratory operations", "Worklists, result verification, QC workflows, and partner integrations in one hub."],
+        ["Clinic management", "Reception, scheduling, billing, and patient communication for multi-site clinics."],
+        ["Doctor workspace", "Review results, collaborate with labs, and manage patient care pathways."],
+        ["Patient portal", "Secure access to results, appointments, and home collection requests."],
+        ["Home collection", "Route optimization, collector mobile tools, and real-time sample tracking."],
+      ],
+    },
+    ai: {
+      eyebrow: "AI intelligence",
+      title: "Clinical insights with human oversight",
+      items: [
+        ["Interpretation assist", "Highlight critical values and suggest follow-up panels based on clinical context."],
+        ["Operational analytics", "Forecast demand, monitor TAT, and identify bottlenecks across sites."],
+        ["Governed AI", "Audit trails, role-based access, and clinician review before patient release."],
+      ],
+    },
+    home: {
+      eyebrow: "Home collection",
+      title: "Door-to-lab logistics, orchestrated",
+      text: "Dispatch collectors, track cold-chain compliance, and give patients real-time ETA updates from booking to lab receipt.",
+      items: ["Collector mobile app", "Live route tracking", "Chain-of-custody"],
+    },
+    partners: {
+      eyebrow: "Partner ecosystem",
+      title: "Built for labs, hospitals, and diagnostic networks",
+      items: [
+        ["Reference laboratories", "High-volume processing, instrument interfaces, and partner portals."],
+        ["Hospital groups", "Multi-tenant governance with centralized reporting and SLAs."],
+        ["Clinic networks", "White-label patient experiences with shared catalog and pricing."],
+      ],
+    },
+    pricing: {
+      eyebrow: "Pricing",
+      title: "Flexible plans for every stage",
+      text: "Contact our team for a tailored quote.",
+      cta: "Request quote",
+      plans: [
+        { name: "Clinic", price: "Contact us", features: ["Up to 5 sites", "Patient portal", "Basic reporting"] },
+        { name: "Laboratory", price: "Contact us", featured: true, features: ["LIS integrations", "Home collection", "AI insights"] },
+        { name: "Enterprise", price: "Contact us", features: ["Multi-tenant", "Custom SLAs", "Dedicated support"] },
+      ],
+    },
+    contact: {
+      eyebrow: "Contact",
+      title: "Book a demo with our team",
+      text: "Tell us about your lab or clinic network. We will schedule a walkthrough of DxCon workspaces and integrations.",
+      address: "Ho Chi Minh City, Vietnam",
+      name: "Name", namePh: "Your name",
+      org: "Organization", orgPh: "Clinic / Lab",
+      email: "Work email",
+      message: "Message", messagePh: "Tell us about your use case",
+      send: "Send inquiry",
+    },
+    footer: { tagline: "Connected diagnostics for modern healthcare.", company: "DxCon Medical" },
+  },
+} as const;
+
+export type LandingCopy = (typeof LANDING)[Lang];
