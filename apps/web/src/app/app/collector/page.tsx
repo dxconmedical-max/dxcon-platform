@@ -8,41 +8,41 @@ import { InstallAppCard } from "@/components/pilot/InstallAppCard";
 
 const ACTIONS = [
   {
-    label: "Collection queue",
+    label: "Hàng đợi lấy mẫu",
     href: "/app/collector/queue",
-    description: "Specimens awaiting collection — filter by location, date, status, collector.",
+    description: "Các mẫu đang chờ lấy — lọc theo khu vực, ngày, trạng thái, nhân viên.",
   },
   {
-    label: "Share my location",
+    label: "Chia sẻ vị trí của tôi",
     href: "/app/collector/location",
-    description: "Start a trip so DxCon staff can see where you are on the map.",
+    description: "Bắt đầu chuyến đi để nhân viên DxCon xem bạn đang ở đâu trên bản đồ.",
   },
   {
-    label: "Collect & transport",
+    label: "Lấy mẫu & vận chuyển",
     href: "/app/collector/workflow",
-    description: "Verify patient/order, scan barcode, collect, dispatch, arrive at lab.",
+    description: "Xác minh bệnh nhân/đơn, quét mã vạch, lấy mẫu, bàn giao, đến phòng xét nghiệm.",
   },
 ];
 
 export default function CollectorPage() {
   const fallbackCards = useMemo(
     () => [
-      { label: "Awaiting collection", value: "—" },
-      { label: "In transit", value: "—" },
-      { label: "Arrived at lab", value: "—" },
-      { label: "Rejected / alerts", value: "—" },
+      { label: "Chờ lấy mẫu", value: "—" },
+      { label: "Đang vận chuyển", value: "—" },
+      { label: "Đã đến phòng XN", value: "—" },
+      { label: "Từ chối / cảnh báo", value: "—" },
     ],
     [],
   );
 
   return (
-    <AppShell title="Collector" workspacePath="/app/collector">
+    <AppShell title="Nhân viên lấy mẫu" workspacePath="/app/collector">
       <div className="mb-4">
         <InstallAppCard />
       </div>
       <RoleDashboardHome
-        title="Sample Collection workspace"
-        subtitle="Queue, verify identifiers, collect specimens, and track transport to laboratory arrival."
+        title="Không gian làm việc lấy mẫu"
+        subtitle="Xếp hàng, xác minh danh tính, lấy mẫu và theo dõi vận chuyển đến phòng xét nghiệm."
         role="collector"
         fallbackCards={fallbackCards}
         actions={ACTIONS}
