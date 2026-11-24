@@ -6,6 +6,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
 import { useAuth } from "@/hooks/useAuth";
+import { formatBirth, parseBirthInput } from "@/lib/birth";
 import { normalizeApiError } from "@/lib/errors";
 import {
   getClinicOrderStatus,
@@ -81,11 +82,17 @@ export default function ClinicNewRequestPage() {
       setError("Vui lòng chọn ít nhất một xét nghiệm.");
       return;
     }
+    const birth = parseBirthInput(year);
+    if (!birth.value) {
+      setError(birth.error ?? "Ngày sinh chưa đúng.");
+      return;
+    }
     setBusy(true);
     try {
       const slip = await submitClinicSlip(ctx, {
         patient_name: name.trim(),
-        birth_year: Number(year),
+        birth_year: birth.value.year,
+        birth_date: birth.value.date ?? undefined,
         tube_count: Number(tubes),
         test_ids: picked.map((t) => t.id),
       });
@@ -108,7 +115,7 @@ export default function ClinicNewRequestPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-xl font-semibold">Gửi phiếu chỉ định xét nghiệm</h1>
-          <p className="text-sm text-slate-600">Nhập họ tên, năm sinh, xét nghiệm và số ống mẫu. DxCon sẽ duyệt rồi tạo đơn.</p>
+          <p className="text-sm text-slate-600">Nhập họ tên, ngày sinh (hoặc chỉ năm sinh), xét nghiệm và số ống mẫu. Nên nhập đủ ngày sinh để tránh nhầm bệnh nhân. DxCon sẽ duyệt rồi tạo đơn.</p>
         </div>
         {allowed === false ? (
           <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
@@ -125,8 +132,8 @@ export default function ClinicNewRequestPage() {
                 <Input id="pname" required maxLength={120} value={name} onChange={(e) => setName(e.target.value)} />
               </div>
               <div>
-                <Label htmlFor="byear">Năm sinh *</Label>
-                <Input id="byear" type="number" inputMode="numeric" required min={1900} max={new Date().getFullYear()} placeholder="1985" value={year} onChange={(e) => setYear(e.target.value)} />
+                <Label htmlFor="byear">Ngày sinh *</Label>
+                <Input id="byear" required placeholder="dd/mm/yyyy hoặc chỉ năm" value={year} onChange={(e) => setYear(e.target.value)} />
               </div>
             </div>
             <div>
@@ -181,7 +188,7 @@ export default function ClinicNewRequestPage() {
               {slips.map((s) => (
                 <li key={s.id} className="p-3 text-sm">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium">{s.patient_name} · {s.birth_year}</span>
+                    <span className="font-medium">{s.patient_name} · {formatBirth(s.birth_date, s.birth_year)}</span>
                     <span className="text-xs">{STATUS_VI[s.status]}</span>
                   </div>
                   <div className="text-slate-500">

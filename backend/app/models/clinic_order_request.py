@@ -16,6 +16,7 @@ class ClinicOrderRequest(db.Model):
     requested_by = db.Column(db.String(120))
     patient_name = db.Column(db.String(120), nullable=False)
     birth_year = db.Column(db.Integer, nullable=False)
+    birth_date = db.Column(db.String(10))  # YYYY-MM-DD when the clinic knows it; otherwise only birth_year is shown
     tests_json = db.Column(db.Text, nullable=False)  # [{"id","code","name"}]
     tube_count = db.Column(db.Integer, nullable=False, default=1)
     status = db.Column(db.String(20), nullable=False, default="NEW", index=True)  # NEW / APPROVED / REJECTED
@@ -41,6 +42,7 @@ class ClinicOrderRequest(db.Model):
             "requested_by": self.requested_by,
             "patient_name": self.patient_name,
             "birth_year": self.birth_year,
+            "birth_date": self.birth_date,
             "tests": self.tests,
             "tube_count": self.tube_count,
             "status": self.status,

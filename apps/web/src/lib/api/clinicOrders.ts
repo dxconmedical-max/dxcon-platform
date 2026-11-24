@@ -14,6 +14,7 @@ export type ClinicSlip = {
   requested_by: string | null;
   patient_name: string;
   birth_year: number;
+  birth_date: string | null;
   tests: SlipTest[];
   tube_count: number;
   status: SlipStatus;
@@ -25,7 +26,7 @@ export type ClinicSlip = {
 
 export type CatalogTest = { id: string; code: string; name: string; sample_type: string | null };
 
-export type SlipBody = { patient_name: string; birth_year: number; tube_count: number; test_ids: string[] };
+export type SlipBody = { patient_name: string; birth_year: number; birth_date?: string; tube_count: number; test_ids: string[] };
 
 function opts(ctx: Ctx, extra: Record<string, unknown> = {}) {
   return { token: ctx.token, organizationId: ctx.organizationId ?? null, timeoutMs: 30_000, ...extra };

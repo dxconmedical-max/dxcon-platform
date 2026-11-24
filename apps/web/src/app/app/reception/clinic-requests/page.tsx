@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
+import { formatBirth } from "@/lib/birth";
 import { normalizeApiError } from "@/lib/errors";
 import { approveSlip, listStaffSlips, rejectSlip, type ClinicSlip, type SlipStatus } from "@/lib/api/clinicOrders";
 
@@ -79,7 +80,7 @@ export default function ClinicRequestsPage() {
           {items.map((s) => (
             <li key={s.id} className="rounded-xl border border-slate-200 bg-white p-4">
               <p className="font-medium">
-                {s.patient_name} · sinh năm {s.birth_year}
+                {s.patient_name} · sinh {formatBirth(s.birth_date, s.birth_year)}{s.birth_date ? "" : " (chỉ có năm)"}
               </p>
               <p className="text-sm text-slate-700">{s.tests.map((t) => `${t.name} (${t.code})`).join(", ")}</p>
               <p className="text-sm text-slate-600">

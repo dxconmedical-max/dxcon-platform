@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from flask import Blueprint, request
 
@@ -132,6 +132,18 @@ def _validate(payload: dict):
         return None, "Năm sinh chưa đúng."
     if year < MIN_BIRTH_YEAR or year > datetime.utcnow().year:
         return None, "Năm sinh chưa đúng."
+    birth_date = None
+    raw_date = _clean(payload.get("birth_date"), 10)
+    if raw_date:
+        try:
+            parsed = date.fromisoformat(raw_date)
+        except ValueError:
+            return None, "Ngày sinh chưa đúng."
+        if parsed > date.today() or parsed.year < MIN_BIRTH_YEAR:
+            return None, "Ngày sinh chưa đúng."
+        if parsed.year != year:
+            return None, "Năm sinh không khớp với ngày sinh."
+        birth_date = parsed.isoformat()
     try:
         tubes = int(payload.get("tube_count"))
     except (TypeError, ValueError):
@@ -151,6 +163,7 @@ def _validate(payload: dict):
     return {
         "patient_name": name,
         "birth_year": year,
+        "birth_date": birth_date,
         "tube_count": tubes,
         "tests": [{"id": i, "code": by_id[i].code, "name": by_id[i].name} for i in ids],
     }, None
@@ -179,6 +192,7 @@ def clinic_request_create():
         requested_by=(authenticated_actor_email() or "")[:120] or None,
         patient_name=values["patient_name"],
         birth_year=values["birth_year"],
+        birth_date=values["birth_date"],
         tests_json=json.dumps(values["tests"], ensure_ascii=False),
         tube_count=values["tube_count"],
         status="NEW",
@@ -278,7 +292,7 @@ def staff_request_approve(request_id: str):
     try:
         patient = biz.create_patient(
             full_name=row.patient_name,
-            date_of_birth=str(row.birth_year),  # the clinic only supplies the birth year
+            date_of_birth=row.birth_date or str(row.birth_year),  # year only when the clinic did not give a full date
             actor=actor,
             organization_id=clinic.id,
         )

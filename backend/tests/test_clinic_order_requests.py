@@ -50,7 +50,15 @@ class ClinicOrderRequestTests(unittest.TestCase):
             values, error = _validate(good)
             self.assertIsNone(error)
             self.assertEqual(values["tests"][0]["code"], "GLU")
+            values, error = _validate({**good, "birth_date": "1985-03-07"})
+            self.assertIsNone(error)
+            self.assertEqual(values["birth_date"], "1985-03-07")
+            values, _ = _validate(good)
+            self.assertIsNone(values["birth_date"])
             for bad in (
+                {**good, "birth_date": "07/03/1985"},
+                {**good, "birth_date": "1990-03-07"},
+                {**good, "birth_date": "2999-01-01"},
                 {**good, "patient_name": ""},
                 {**good, "birth_year": 1800},
                 {**good, "birth_year": 2999},
