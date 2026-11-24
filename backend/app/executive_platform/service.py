@@ -81,7 +81,8 @@ def executive_dashboard() -> dict[str, Any]:
             "top_tests": _top_tests(),
             "top_clinics": _top_partners("clinic"),
             "top_doctors": [{"name": d.full_name, "id": d.doctor_id} for d in DoctorProfile.query.limit(5).all()],
-            "collection_performance": {"on_time_pct": None, "measured": False},
+            "collection_performance": collection_rate(_utcnow() - timedelta(days=30), _utcnow() + timedelta(days=1)),
+            "lab_tat": lab_tat(_utcnow() - timedelta(days=30), _utcnow() + timedelta(days=1)),
             "laboratory_performance": _lab_performance(),
         },
         "kpi_cards": [
@@ -527,7 +528,98 @@ def report_summary(date_from: str | None = None, date_to: str | None = None) -> 
         "orders_by_status": [{"status": s or "unknown", "count": c} for s, c in by_status],
         "orders_by_source": [{"source": s or "direct", "count": c} for s, c in by_source],
         "daily": days,
+        "collection": collection_rate(start, end),
+        "lab_tat": lab_tat(start, end),
         "top_tests": [
             {"test_name": n or "Unknown", "quantity": int(q or 0), "revenue": float(t or 0)} for n, q, t in top_tests
         ],
     }
+
+
+_COLLECTED_STATES = frozenset(
+    {
+        "COLLECTED", "IN_TRANSIT", "ARRIVED_AT_LAB", "RECEIVED", "ACCESSIONED", "PROCESSING",
+        "RESULTED", "TECHNICALLY_VALIDATED", "MEDICALLY_VALIDATED", "RELEASED",
+    }
+)
+_FAILED_STATES = frozenset({"REJECTED", "RECOLLECT_REQUIRED"})
+
+
+def collection_rate(start: datetime, end: datetime) -> dict[str, Any]:
+    """Sample collections created in [start, end): how many were actually collected.
+
+    Cancelled collections are left out. A collection counts as collected once it reached COLLECTED
+    or any later stage. REJECTED / RECOLLECT_REQUIRED are reported separately as failed.
+    """
+    from app.models.sample_collection import SampleCollection
+    from app.sample_collection_workspace.collection_domain import ST_CANCELLED, normalize_status
+
+    rows = SampleCollection.query.filter(
+        SampleCollection.created_at >= start, SampleCollection.created_at < end
+    ).all()
+    total = collected = failed = 0
+    by_collector: dict[str, dict[str, int]] = {}
+    for row in rows:
+        state = normalize_status(row.status)
+        if state == ST_CANCELLED:
+            continue
+        total += 1
+        ok = state in _COLLECTED_STATES
+        bad = state in _FAILED_STATES
+        collected += 1 if ok else 0
+        failed += 1 if bad else 0
+        name = (row.collector_name or "").strip() or "Chưa giao"
+        bucket = by_collector.setdefault(name, {"total": 0, "collected": 0, "failed": 0})
+        bucket["total"] += 1
+        bucket["collected"] += 1 if ok else 0
+        bucket["failed"] += 1 if bad else 0
+    return {
+        "total": total,
+        "collected": collected,
+        "failed": failed,
+        "open": total - collected - failed,
+        "rate_pct": round(100.0 * collected / total, 1) if total else None,
+        "by_collector": [
+            {"collector": k, **v, "rate_pct": round(100.0 * v["collected"] / v["total"], 1) if v["total"] else None}
+            for k, v in sorted(by_collector.items(), key=lambda kv: -kv[1]["total"])
+        ],
+    }
+
+
+def lab_tat(start: datetime, end: datetime) -> list[dict[str, Any]]:
+    """Per laboratory: processing TAT (lab queue entry -> verified) and end-to-end TAT (order -> released).
+
+    Only orders whose lab queue entry was verified inside [start, end) are counted.
+    """
+    from app.models.biz_order import BizLabQueueItem, BizResult
+
+    rows = (
+        db.session.query(BizLabQueueItem.laboratory_name, BizLabQueueItem.entered_at, BizLabQueueItem.verified_at,
+                         BizOrder.created_at, BizResult.released_at)
+        .join(BizOrder, BizOrder.id == BizLabQueueItem.order_id)
+        .outerjoin(BizResult, BizResult.order_id == BizOrder.id)
+        .filter(BizLabQueueItem.verified_at.isnot(None), BizLabQueueItem.verified_at >= start,
+                BizLabQueueItem.verified_at < end)
+        .all()
+    )
+    labs: dict[str, dict[str, list[float]]] = {}
+    for name, entered, verified, created, released in rows:
+        bucket = labs.setdefault((name or "").strip() or "Chưa rõ phòng lab", {"proc": [], "e2e": []})
+        if entered and verified and verified >= entered:
+            bucket["proc"].append((verified - entered).total_seconds() / 3600.0)
+        if created and released and released >= created:
+            bucket["e2e"].append((released - created).total_seconds() / 3600.0)
+
+    def avg(values: list[float]) -> float | None:
+        return round(sum(values) / len(values), 1) if values else None
+
+    return [
+        {
+            "laboratory": name,
+            "orders": len(b["proc"]),
+            "processing_hours_avg": avg(b["proc"]),
+            "end_to_end_hours_avg": avg(b["e2e"]),
+            "end_to_end_sample": len(b["e2e"]),
+        }
+        for name, b in sorted(labs.items(), key=lambda kv: -len(kv[1]["proc"]))
+    ]
