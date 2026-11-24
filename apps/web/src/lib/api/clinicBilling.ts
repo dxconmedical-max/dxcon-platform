@@ -21,7 +21,7 @@ export type Summary = {
   aging: Aging;
 };
 
-export type ReceivableRow = Summary & { organization_id: string; organization_name: string };
+export type ReceivableRow = Summary & { organization_id: string; organization_name: string; has_activity: boolean };
 
 export type Contract = {
   id: string;
