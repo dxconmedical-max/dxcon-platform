@@ -13,6 +13,7 @@ from app.clinic_billing.logic import (
     due_date_for,
     parse_date,
 )
+from app.clinic_billing.bulk import MAX_UPLOAD_BYTES, apply_bulk, build_template_xlsx, sheet_to_text, template_rows
 from app.core.audit import write_audit
 from app.executive_platform.auth import executive_api_read, executive_api_write
 from app.extensions.db import db
@@ -261,6 +262,62 @@ def set_price(org_id: str, test_id: str):
     write_audit("CLINIC_PRICE_SET", "PartnerOrganization", clinic.organization_code, user_email=_actor() or "SYSTEM", ip_address=_client_ip())
     db.session.commit()
     return {"success": True}, 200
+
+
+def _bulk_response(text: str, org_id: str, clinic, apply: bool):
+    result, msg = apply_bulk(text, org_id, ClinicPrice, "price", (_actor() or "")[:120] or None, apply)
+    if msg:
+        return {"success": False, "error": msg}, 400
+    if apply and result["changed"]:
+        write_audit("CLINIC_PRICE_BULK", "PartnerOrganization", clinic.organization_code, user_email=_actor() or "SYSTEM", ip_address=_client_ip())
+        db.session.commit()
+    result.pop("changed", None)
+    return {"success": True, "data": result}, 200
+
+
+@clinic_billing_bp.route("/<org_id>/prices/bulk", methods=["POST"])
+@executive_api_write
+def set_prices_bulk(org_id: str):
+    """Paste many 'code price' lines at once. apply=false only checks (dry run)."""
+    clinic, err = _clinic_or_error(org_id)
+    if err is not None:
+        return err
+    body = request.get_json(silent=True) or {}
+    return _bulk_response(str(body.get("text") or ""), org_id, clinic, body.get("apply") is True)
+
+
+@clinic_billing_bp.route("/<org_id>/prices/template", methods=["GET"])
+@executive_api_read
+def prices_template(org_id: str):
+    clinic, err = _clinic_or_error(org_id)
+    if err is not None:
+        return err
+    current = {p.test_catalog_id: p.price for p in ClinicPrice.query.filter_by(organization_id=org_id)}
+    data = build_template_xlsx("Giá bán cho phòng khám (điền)", template_rows(current))
+    return Response(
+        data,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="bang-gia-{clinic.organization_code}.xlsx"'},
+    )
+
+
+@clinic_billing_bp.route("/<org_id>/prices/upload", methods=["POST"])
+@executive_api_write
+def prices_upload(org_id: str):
+    clinic, err = _clinic_or_error(org_id)
+    if err is not None:
+        return err
+    f = request.files.get("file")
+    if f is None or not f.filename:
+        return {"success": False, "error": "Chưa chọn file."}, 400
+    data = f.read(MAX_UPLOAD_BYTES + 1)
+    if len(data) > MAX_UPLOAD_BYTES:
+        return {"success": False, "error": "File quá lớn (tối đa 2MB)."}, 413
+    try:
+        text = sheet_to_text(f.filename, data)
+    except Exception:
+        return {"success": False, "error": "Không đọc được file. Hãy dùng file Excel (.xlsx) hoặc CSV theo biểu mẫu."}, 400
+    return _bulk_response(text, org_id, clinic, request.form.get("apply") == "1")
 
 
 # ------------------------------------------------------------- contracts

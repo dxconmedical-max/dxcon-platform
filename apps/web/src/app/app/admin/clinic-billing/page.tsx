@@ -3,12 +3,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { PriceSheetPanel } from "@/components/admin/PriceSheetPanel";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 import { normalizeApiError } from "@/lib/errors";
 import { formatVnd } from "@/lib/format";
 import {
   addPayment,
+  bulkSetPrices,
+  downloadPriceTemplate,
+  uploadPriceFile,
   createStatement,
   downloadContract,
   getClinicBilling,
@@ -335,6 +339,16 @@ export default function ClinicBillingPage() {
 
             {tab === "prices" ? (
               <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+                {ctx && orgId ? (
+                  <PriceSheetPanel
+                    heading="Nhập nhanh nhiều giá bán cho phòng khám này"
+                    priceWord="giá bán"
+                    onPaste={(t, apply) => bulkSetPrices(ctx, orgId, t, apply)}
+                    onFile={(f, apply) => uploadPriceFile(ctx, orgId, f, apply)}
+                    onTemplate={() => downloadPriceTemplate(ctx, orgId)}
+                    onApplied={() => searchPrices()}
+                  />
+                ) : null}
                 <div className="flex flex-wrap items-center gap-2">
                   <input
                     value={pq}

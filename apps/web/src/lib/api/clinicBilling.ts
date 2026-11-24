@@ -108,6 +108,55 @@ export async function setClinicPrice(ctx: Ctx, orgId: string, testId: string, pr
   await apiRequest(`${BASE}/${encodeURIComponent(orgId)}/prices/${encodeURIComponent(testId)}`, opts(ctx, { method: "POST", body: { price } }));
 }
 
+export type BulkPriceResult = {
+  applied: boolean;
+  created: number;
+  updated: number;
+  removed: number;
+  errors: { line: number; code: string; error: string }[];
+};
+
+export async function bulkSetPrices(ctx: Ctx, orgId: string, text: string, apply: boolean): Promise<BulkPriceResult> {
+  const r = await apiRequest<{ data: BulkPriceResult }>(
+    `${BASE}/${encodeURIComponent(orgId)}/prices/bulk`,
+    opts(ctx, { method: "POST", body: { text, apply } }),
+  );
+  return r.data;
+}
+
+export async function downloadPriceTemplate(ctx: Ctx, orgId: string): Promise<void> {
+  await downloadFile(ctx, `${BASE}/${encodeURIComponent(orgId)}/prices/template`, "bang-gia.xlsx");
+}
+
+export async function uploadPriceFile(ctx: Ctx, orgId: string, file: File, apply: boolean): Promise<BulkPriceResult> {
+  return uploadSheet(ctx, `${BASE}/${encodeURIComponent(orgId)}/prices/upload`, file, apply);
+}
+
+export async function downloadFile(ctx: Ctx, path: string, fallbackName: string): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}${path}`, { headers: authHeaders(ctx) });
+  if (!res.ok) await failFrom(res);
+  const cd = res.headers.get("Content-Disposition") ?? "";
+  const m = /filename="?([^";]+)"?/.exec(cd);
+  const url = URL.createObjectURL(await res.blob());
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = m?.[1] ?? fallbackName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+export async function uploadSheet(ctx: Ctx, path: string, file: File, apply: boolean): Promise<BulkPriceResult> {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("apply", apply ? "1" : "0");
+  const res = await fetch(`${API_BASE_URL}${path}`, { method: "POST", headers: authHeaders(ctx), body: form });
+  if (!res.ok) await failFrom(res);
+  const j = (await res.json()) as { data: BulkPriceResult };
+  return j.data;
+}
+
 export async function previewStatement(ctx: Ctx, orgId: string, body: { period_start: string; period_end: string }) {
   const r = await apiRequest<{ data: { order_count: number; total_amount: number } }>(
     `${BASE}/${encodeURIComponent(orgId)}/statements/preview`,
@@ -137,13 +186,13 @@ export async function addPayment(
   await apiRequest(`${BASE}/${encodeURIComponent(orgId)}/payments`, opts(ctx, { method: "POST", body }));
 }
 
-function authHeaders(ctx: Ctx): Record<string, string> {
+export function authHeaders(ctx: Ctx): Record<string, string> {
   const h: Record<string, string> = { Authorization: `Bearer ${ctx.token}` };
   if (ctx.organizationId) h["X-Organization-ID"] = ctx.organizationId;
   return h;
 }
 
-async function failFrom(res: Response): Promise<never> {
+export async function failFrom(res: Response): Promise<never> {
   let message = `Request failed (${res.status})`;
   try {
     const j = (await res.json()) as { error?: unknown };
