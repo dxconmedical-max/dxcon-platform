@@ -21,11 +21,15 @@ export function ContactSection() {
           <div className="mt-8 space-y-4 text-sm text-slate-600">
             <p className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-teal-600" />
-              sales@dxcon.com.vn
+              <a href="mailto:support@dxcon.com.vn" className="hover:underline">
+                support@dxcon.com.vn
+              </a>
             </p>
             <p className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-teal-600" />
-              +84 (placeholder)
+              <a href="tel:+84888895151" className="hover:underline">
+                0888 895 151
+              </a>
             </p>
             <p className="flex items-center gap-2">
               <MapPin className="h-4 w-4 text-teal-600" />
