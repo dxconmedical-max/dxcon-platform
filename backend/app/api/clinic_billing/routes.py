@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import datetime
 
 from flask import Blueprint, Response, current_app, request
-from sqlalchemy import func
 
 from app.api.reception_workspace.routes import _actor, _client_ip, _dxcon_staff_error
 from app.clinic_billing.logic import (
@@ -13,8 +12,8 @@ from app.clinic_billing.logic import (
     allocate_payments,
     due_date_for,
     parse_date,
-    parse_price_lines,
 )
+from app.clinic_billing.bulk import MAX_UPLOAD_BYTES, apply_bulk, build_template_xlsx, sheet_to_text, template_rows
 from app.core.audit import write_audit
 from app.executive_platform.auth import executive_api_read, executive_api_write
 from app.extensions.db import db
@@ -265,6 +264,17 @@ def set_price(org_id: str, test_id: str):
     return {"success": True}, 200
 
 
+def _bulk_response(text: str, org_id: str, clinic, apply: bool):
+    result, msg = apply_bulk(text, org_id, ClinicPrice, "price", (_actor() or "")[:120] or None, apply)
+    if msg:
+        return {"success": False, "error": msg}, 400
+    if apply and result["changed"]:
+        write_audit("CLINIC_PRICE_BULK", "PartnerOrganization", clinic.organization_code, user_email=_actor() or "SYSTEM", ip_address=_client_ip())
+        db.session.commit()
+    result.pop("changed", None)
+    return {"success": True, "data": result}, 200
+
+
 @clinic_billing_bp.route("/<org_id>/prices/bulk", methods=["POST"])
 @executive_api_write
 def set_prices_bulk(org_id: str):
@@ -273,53 +283,41 @@ def set_prices_bulk(org_id: str):
     if err is not None:
         return err
     body = request.get_json(silent=True) or {}
-    rows = parse_price_lines(str(body.get("text") or ""))
-    if not rows:
-        return {"success": False, "error": "Chưa có dòng nào. Mỗi dòng gồm mã xét nghiệm và giá."}, 400
-    codes = {r["code"].upper() for r in rows if not r["error"]}
-    tests = {}
-    if codes:
-        for t in TestCatalog.query.filter(func.upper(TestCatalog.code).in_(list(codes))).all():
-            tests.setdefault(t.code.upper(), t)
-    existing = {p.test_catalog_id: p for p in ClinicPrice.query.filter_by(organization_id=org_id)}
-    apply = body.get("apply") is True
-    actor = (_actor() or "")[:120] or None
-    created = updated = removed = 0
-    errors = []
-    for r in rows:
-        if r["error"]:
-            errors.append({"line": r["line"], "code": r["code"], "error": r["error"]})
-            continue
-        test = tests.get(r["code"].upper())
-        if test is None:
-            errors.append({"line": r["line"], "code": r["code"], "error": "Không có mã này trong danh mục xét nghiệm."})
-            continue
-        row = existing.get(test.id)
-        if r["remove"]:
-            if row is not None:
-                removed += 1
-                if apply:
-                    db.session.delete(row)
-                    existing.pop(test.id, None)
-            continue
-        if row is None:
-            created += 1
-            if apply:
-                row = ClinicPrice(organization_id=org_id, test_catalog_id=test.id, price=r["price"], updated_by=actor)
-                db.session.add(row)
-                existing[test.id] = row
-        else:
-            updated += 1
-            if apply:
-                row.price = r["price"]
-                row.updated_by = actor
-    if apply and (created or updated or removed):
-        write_audit("CLINIC_PRICE_BULK", "PartnerOrganization", clinic.organization_code, user_email=_actor() or "SYSTEM", ip_address=_client_ip())
-        db.session.commit()
-    return {
-        "success": True,
-        "data": {"applied": apply, "created": created, "updated": updated, "removed": removed, "errors": errors},
-    }, 200
+    return _bulk_response(str(body.get("text") or ""), org_id, clinic, body.get("apply") is True)
+
+
+@clinic_billing_bp.route("/<org_id>/prices/template", methods=["GET"])
+@executive_api_read
+def prices_template(org_id: str):
+    clinic, err = _clinic_or_error(org_id)
+    if err is not None:
+        return err
+    current = {p.test_catalog_id: p.price for p in ClinicPrice.query.filter_by(organization_id=org_id)}
+    data = build_template_xlsx("Giá bán cho phòng khám (điền)", template_rows(current))
+    return Response(
+        data,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="bang-gia-{clinic.organization_code}.xlsx"'},
+    )
+
+
+@clinic_billing_bp.route("/<org_id>/prices/upload", methods=["POST"])
+@executive_api_write
+def prices_upload(org_id: str):
+    clinic, err = _clinic_or_error(org_id)
+    if err is not None:
+        return err
+    f = request.files.get("file")
+    if f is None or not f.filename:
+        return {"success": False, "error": "Chưa chọn file."}, 400
+    data = f.read(MAX_UPLOAD_BYTES + 1)
+    if len(data) > MAX_UPLOAD_BYTES:
+        return {"success": False, "error": "File quá lớn (tối đa 2MB)."}, 413
+    try:
+        text = sheet_to_text(f.filename, data)
+    except Exception:
+        return {"success": False, "error": "Không đọc được file. Hãy dùng file Excel (.xlsx) hoặc CSV theo biểu mẫu."}, 400
+    return _bulk_response(text, org_id, clinic, request.form.get("apply") == "1")
 
 
 # ------------------------------------------------------------- contracts

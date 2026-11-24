@@ -32,6 +32,8 @@ class ClinicBillingTests(unittest.TestCase):
             ("get", f"{b}/x/prices"),
             ("post", f"{b}/x/prices/y"),
             ("post", f"{b}/x/prices/bulk"),
+            ("get", f"{b}/x/prices/template"),
+            ("post", f"{b}/x/prices/upload"),
             ("post", f"{b}/x/contracts"),
             ("get", f"{b}/x/contracts/y/file"),
             ("post", f"{b}/x/statements/preview"),

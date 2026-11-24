@@ -10,7 +10,7 @@ from app.extensions.db import db
 log = logging.getLogger(__name__)
 
 
-def apply_clinic_prices(order_code: str | None, organization_id: str | None) -> bool:
+def _reprice(order_code: str | None, organization_id: str | None) -> bool:
     """Re-price the order's lines with the clinic's price list / default discount.
 
     Runs inside a savepoint: if the billing tables are not migrated yet (or anything fails) the order keeps its
@@ -50,3 +50,12 @@ def apply_clinic_prices(order_code: str | None, organization_id: str | None) -> 
     except Exception:  # pragma: no cover - defensive: pricing must never block an order
         log.exception("apply_clinic_prices failed for %s", order_code)
         return False
+
+
+def apply_clinic_prices(order_code: str | None, organization_id: str | None) -> bool:
+    """Re-price the order for its clinic, then assign it to its lab (giá nhập). Both steps are non-blocking."""
+    changed = _reprice(order_code, organization_id)
+    from app.lab_payables.cost import auto_assign_lab
+
+    auto_assign_lab(order_code, organization_id)
+    return changed

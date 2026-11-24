@@ -57,7 +57,7 @@ def aging_summary(allocated: list[dict], today: date) -> dict:
     return {k: round(v, 2) for k, v in buckets.items()}
 
 
-MAX_BULK_LINES = 500
+MAX_BULK_LINES = 3000
 
 
 def parse_price(raw: str) -> float | None:
