@@ -13,6 +13,7 @@ import {
   type ReceptionOrderCreate,
   type ReceptionOrderPricing,
 } from "@/lib/api/reception";
+import { getBookingRequest, setBookingStatus, type BookingRequestItem } from "@/lib/api/publicBooking";
 import { normalizeApiError } from "@/lib/errors";
 
 import { SectionHeader } from "../_components/ui";
@@ -29,6 +30,12 @@ import {
 } from "./Milestone1Steps";
 import { PaymentStep } from "./OrderSteps";
 
+const SLOT_WINDOWS: Record<string, string> = {
+  MORNING: "08:00–12:00",
+  AFTERNOON: "13:00–17:00",
+  ANYTIME: "08:00–17:00",
+};
+
 const STEPS = [
   "Bệnh nhân",
   "Xét nghiệm",
@@ -42,6 +49,7 @@ function ReceptionMilestone1Panel() {
   const searchParams = useSearchParams();
   const patientParam = searchParams.get("patient") ?? undefined;
   const orderParam = searchParams.get("order") ?? undefined;
+  const bookingParam = searchParams.get("booking") ?? undefined;
 
   /** UI steps: 0 Patient, 1 Tests, 2 Collection request, 3 Review (create), 4 Confirmation. */
   const [step, setStep] = useState(0);
@@ -55,6 +63,45 @@ function ReceptionMilestone1Panel() {
   const [confirmationTick, setConfirmationTick] = useState(0);
   const [reopenError, setReopenError] = useState<string | null>(null);
   const [reopening, setReopening] = useState(Boolean(orderParam));
+
+  // Website booking request being turned into a real order (patient + home-collection request prefilled).
+  const [booking, setBooking] = useState<BookingRequestItem | null>(null);
+  const [bookingLoading, setBookingLoading] = useState(Boolean(bookingParam));
+  const [bookingError, setBookingError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!bookingParam || !accessToken) return;
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      void getBookingRequest({ token: accessToken, organizationId: activeOrganizationId }, bookingParam)
+        .then((b) => {
+          if (cancelled) return;
+          setBooking(b);
+          setCollectionRequest({
+            mode: "HOME_COLLECTION",
+            specimen_type: "BLOOD",
+            pickup_address: b.address,
+            pickup_province: /h[ồo]\s*ch[íi]\s*minh/i.test(b.address) ? "Hồ Chí Minh" : "",
+            pickup_district: b.district ?? "",
+            contact_person: b.full_name,
+            contact_phone: b.phone,
+            requested_date: b.preferred_date ?? "",
+            requested_time_window: SLOT_WINDOWS[b.preferred_slot] ?? "",
+            notes: b.note ?? "",
+          });
+        })
+        .catch((err) => {
+          if (!cancelled) setBookingError(normalizeApiError(err));
+        })
+        .finally(() => {
+          if (!cancelled) setBookingLoading(false);
+        });
+    }, 0);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [bookingParam, accessToken, activeOrganizationId]);
 
   const onQueryChange = useCallback((q: string) => setSearchQuery(q), []);
 
@@ -115,6 +162,7 @@ function ReceptionMilestone1Panel() {
     setPricing(null);
     setOrder(null);
     setReopenError(null);
+    setBooking(null);
   }
 
   if (!accessToken) {
@@ -168,11 +216,21 @@ function ReceptionMilestone1Panel() {
         </div>
       ) : null}
 
-      {!reopening && step === 0 ? (
+      {booking ? (
+        <div className="rounded-xl border border-teal-200 bg-teal-50 p-3 text-sm text-teal-900">
+          Đang tạo đơn từ yêu cầu đặt lịch {booking.reference} của {booking.full_name} ({booking.phone}). Thông tin thu mẫu tại nhà đã điền sẵn, anh/chị chọn bệnh nhân, xét nghiệm rồi tạo đơn. Đơn sẽ hiện cho nhân viên thu mẫu.
+        </div>
+      ) : null}
+      {bookingError ? (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{bookingError}</div>
+      ) : null}
+
+      {!reopening && !bookingLoading && step === 0 ? (
         <PatientStep
           accessToken={accessToken}
           organizationId={activeOrganizationId}
-          initialQuery={patientParam}
+          initialQuery={patientParam ?? booking?.phone}
+          prefill={booking ? { full_name: booking.full_name, phone: booking.phone, address: booking.address, email: booking.email ?? undefined } : undefined}
           preservedQuery={searchQuery || undefined}
           onQueryChange={onQueryChange}
           onSelect={(selected) => {
@@ -233,6 +291,16 @@ function ReceptionMilestone1Panel() {
             setPricing(nextPricing);
             setOrder(nextOrder);
             setStep(4);
+            if (booking) {
+              // Link the website request to the new order; failure here must not disturb the order flow.
+              void setBookingStatus(
+                { token: accessToken, organizationId: activeOrganizationId },
+                booking.id,
+                "SCHEDULED",
+                undefined,
+                ref,
+              ).catch(() => undefined);
+            }
           }}
         />
       ) : null}

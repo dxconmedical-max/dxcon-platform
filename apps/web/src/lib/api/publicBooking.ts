@@ -74,11 +74,29 @@ export async function listBookingRequests(
   return response.data;
 }
 
+export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
+  NEW: "Mới",
+  CONTACTED: "Đã liên hệ",
+  SCHEDULED: "Đã hẹn lịch",
+  DONE: "Hoàn tất",
+  CANCELLED: "Đã hủy",
+  SPAM: "Spam",
+};
+
+export async function getBookingRequest(ctx: Ctx, id: string): Promise<BookingRequestItem> {
+  const response = await apiRequest<{ success: boolean; data: BookingRequestItem }>(
+    `/api/v1/reception/workspace/booking-requests/${encodeURIComponent(id)}`,
+    { token: ctx.token, organizationId: ctx.organizationId ?? null, timeoutMs: 30_000 },
+  );
+  return response.data;
+}
+
 export async function setBookingStatus(
   ctx: Ctx,
   id: string,
   status: BookingStatus,
   internalNote?: string,
+  orderCode?: string,
 ): Promise<BookingRequestItem> {
   const response = await apiRequest<{ success: boolean; data: BookingRequestItem }>(
     `/api/v1/reception/workspace/booking-requests/${encodeURIComponent(id)}/status`,
@@ -86,7 +104,7 @@ export async function setBookingStatus(
       method: "POST",
       token: ctx.token,
       organizationId: ctx.organizationId ?? null,
-      body: { status, internal_note: internalNote },
+      body: orderCode ? { status, internal_note: internalNote, order_code: orderCode } : { status, internal_note: internalNote },
       timeoutMs: 30_000,
     },
   );

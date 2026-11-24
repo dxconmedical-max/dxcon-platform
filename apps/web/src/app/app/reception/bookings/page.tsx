@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 import { AppShell } from "@/components/layout/AppShell";
@@ -8,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { normalizeApiError } from "@/lib/errors";
 import {
   BOOKING_STATUSES,
+  BOOKING_STATUS_LABELS,
   listBookingRequests,
   setBookingStatus,
   type BookingRequestItem,
@@ -86,14 +88,14 @@ export default function ReceptionBookingsPage() {
               variant={status === filter ? "primary" : "outline"}
               onClick={() => setFilter(status)}
             >
-              {status}
+              {BOOKING_STATUS_LABELS[status]}
             </Button>
           ))}
         </div>
         {error ? <p className="text-sm text-red-700">{error}</p> : null}
         {loading ? <p className="text-sm text-slate-500">Đang tải…</p> : null}
         {!loading && items.length === 0 ? (
-          <p className="text-sm text-slate-500">Không có yêu cầu nào ở trạng thái {filter}.</p>
+          <p className="text-sm text-slate-500">Không có yêu cầu nào ở trạng thái “{BOOKING_STATUS_LABELS[filter]}”.</p>
         ) : null}
         <ul className="space-y-3">
           {items.map((item) => (
@@ -114,6 +116,7 @@ export default function ReceptionBookingsPage() {
                   <p className="mt-1 text-xs text-slate-400">
                     {item.reference} · {item.created_at ?? ""}
                     {item.handled_by ? ` · xử lý bởi ${item.handled_by}` : ""}
+                    {item.internal_note ? ` · ${item.internal_note}` : ""}
                   </p>
                 </div>
                 {canWrite ? (
@@ -122,9 +125,17 @@ export default function ReceptionBookingsPage() {
                       .filter((s) => s !== item.status)
                       .map((s) => (
                         <Button key={s} size="sm" variant="outline" disabled={busyId === item.id} onClick={() => void update(item.id, s)}>
-                          {s}
+                          {BOOKING_STATUS_LABELS[s]}
                         </Button>
                       ))}
+                    {!["DONE", "CANCELLED", "SPAM"].includes(item.status) ? (
+                      <Link
+                        href={`/app/reception/workflow?booking=${encodeURIComponent(item.id)}`}
+                        className="inline-flex items-center rounded-lg bg-teal-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-teal-800"
+                      >
+                        Tạo đơn thu mẫu
+                      </Link>
+                    ) : null}
                   </div>
                 ) : null}
               </div>

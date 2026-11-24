@@ -150,6 +150,15 @@ def booking_requests_list():
     return {"success": True, "data": {"items": [r.to_dict() for r in rows], "new_count": new_count}}, 200
 
 
+@booking_requests_bp.route("/reception/workspace/booking-requests/<request_id>", methods=["GET"])
+@reception_api_read
+def booking_request_get(request_id: str):
+    row = db.session.get(BookingRequest, request_id)
+    if row is None:
+        return {"success": False, "error": "Không tìm thấy yêu cầu đặt lịch."}, 404
+    return {"success": True, "data": row.to_dict()}, 200
+
+
 @booking_requests_bp.route("/reception/workspace/booking-requests/<request_id>/status", methods=["POST"])
 @reception_api_write
 def booking_request_set_status(request_id: str):
@@ -165,6 +174,9 @@ def booking_request_set_status(request_id: str):
     row.handled_by = (actor or "")[:120] or None
     row.handled_at = datetime.utcnow()
     note = _clean(payload.get("internal_note"), 500)
+    order_code = _clean(payload.get("order_code"), 50)
+    if order_code:  # booking converted to a real order: keep the link in the internal note
+        note = f"Đã tạo đơn {order_code}"
     if note:
         row.internal_note = note
     write_audit("PUBLIC_BOOKING_STATUS", "BookingRequest", row.reference, user_email=actor or "SYSTEM", ip_address=_client_ip())

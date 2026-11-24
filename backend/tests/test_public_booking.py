@@ -116,6 +116,19 @@ class PublicBookingTests(unittest.TestCase):
         anon = self.app.test_client()
         self.assertIn(anon.get(LIST).status_code, (401, 403))
         self.assertIn(anon.post(LIST + "/x/status", json={"status": "DONE"}).status_code, (401, 403))
+        self.assertIn(anon.get(LIST + "/x").status_code, (401, 403))
+
+    def test_get_one_and_link_order(self):
+        ref = self._post(self._body(), self._ip()).get_json()["data"]["reference"]
+        staff = self._staff()
+        rid = [i for i in staff.get(LIST).get_json()["data"]["items"] if i["reference"] == ref][0]["id"]
+        one = staff.get(f"{LIST}/{rid}")
+        self.assertEqual(one.status_code, 200)
+        self.assertEqual(one.get_json()["data"]["reference"], ref)
+        self.assertEqual(staff.get(f"{LIST}/nope").status_code, 404)
+        done = staff.post(f"{LIST}/{rid}/status", json={"status": "SCHEDULED", "order_code": "ORD-123"})
+        self.assertEqual(done.get_json()["data"]["status"], "SCHEDULED")
+        self.assertIn("ORD-123", done.get_json()["data"]["internal_note"])
 
     def test_status_update(self):
         ref = self._post(self._body(), self._ip()).get_json()["data"]["reference"]
