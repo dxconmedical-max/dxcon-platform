@@ -18,7 +18,7 @@ export default function AppWorkspacePage() {
         actions={[
           { label: "Administration", href: "/app/admin", description: "Platform settings." },
           { label: "Laboratory", href: "/app/lab", description: "Lab operations." },
-          { label: "Reporting", href: "/app", description: "Analytics.", comingSoon: true },
+          { label: "Reporting", href: "/app/admin/reporting", description: "Báo cáo đơn hàng và doanh thu theo ngày." },
         ]}
       />
     </AppShell>

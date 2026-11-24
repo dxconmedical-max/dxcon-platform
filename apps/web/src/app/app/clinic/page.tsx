@@ -16,7 +16,7 @@ export default function ClinicPage() {
           { label: "Referrals", value: "—" },
         ]}
         actions={[
-          { label: "Reception desk", href: "/app/clinic", description: "Check-in and orders.", comingSoon: true },
+          { label: "Reception desk", href: "/app/clinic/reception", description: "Theo dõi đơn xét nghiệm của phòng khám." },
         ]}
       />
     </AppShell>

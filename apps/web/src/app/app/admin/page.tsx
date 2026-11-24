@@ -12,6 +12,7 @@ const ACTIONS = [
   { label: "Integrations", href: "/app/admin/integrations", description: "Connectors and webhooks." },
   { label: "Reference ranges", href: "/app/admin/reference-ranges", description: "Upload lab reference ranges as a draft, review, then activate." },
   { label: "Test catalog import", href: "/app/admin/test-catalog", description: "Upload the test list and prices (CSV), preview, apply." },
+  { label: "Reporting", href: "/app/admin/reporting", description: "Báo cáo đơn hàng và doanh thu theo ngày." },
   { label: "Operations", href: "/app/operations", description: "Production health and ops dashboard." },
 ];
 

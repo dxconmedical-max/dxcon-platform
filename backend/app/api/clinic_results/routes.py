@@ -128,3 +128,61 @@ def get_report(order_code: str):
         },
     }
     return payload, 200, {"Cache-Control": "no-store"}
+
+
+@clinic_results_bp.route("/orders", methods=["GET"])
+def list_orders():
+    """The clinic's own orders with a simple progress label. Never exposes unreleased result content."""
+    from datetime import datetime, timedelta
+
+    org_id, err = _org()
+    if err is not None:
+        return err
+    limit = _int_arg("limit", 50, 1, 100)
+    page = _int_arg("page", 1, 1, 100000)
+    base = BizOrder.query.filter(BizOrder.organization_id == org_id)
+    total = base.count()
+    rows = base.order_by(BizOrder.created_at.desc()).offset((page - 1) * limit).limit(limit).all()
+    released_ids = {
+        oid
+        for (oid,) in db.session.query(BizResult.order_id).filter(
+            BizResult.order_id.in_([o.id for o in rows] or [""]),
+            BizResult.patient_visible.is_(True),
+            BizResult.status == RESULT_RELEASED,
+        )
+    }
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    released_total = (
+        db.session.query(BizResult.order_id)
+        .join(BizOrder, BizOrder.id == BizResult.order_id)
+        .filter(
+            BizOrder.organization_id == org_id,
+            BizResult.patient_visible.is_(True),
+            BizResult.status == RESULT_RELEASED,
+        )
+        .distinct()
+        .count()
+    )
+    data = [
+        {
+            "order_code": o.order_code,
+            "patient_code": o.patient_code,
+            "patient_name": o.patient_name,
+            "created_at": o.created_at.isoformat() if o.created_at else None,
+            "progress": "released" if o.id in released_ids else "in_progress",
+        }
+        for o in rows
+    ]
+    summary = {
+        "total": total,
+        "today": base.filter(BizOrder.created_at >= today).count(),
+        "released": released_total,
+        "in_progress": max(total - released_total, 0),
+    }
+    _audit_access("CLINIC_ORDER_LIST", org_id, f"page={page}")
+    return {
+        "success": True,
+        "data": data,
+        "summary": summary,
+        "pagination": {"page": page, "per_page": limit, "total": total},
+    }, 200

@@ -16,7 +16,7 @@ export default function ExecutivePage() {
           { label: "Quality", value: "—" },
         ]}
         actions={[
-          { label: "KPI dashboard", href: "/app/executive", description: "Executive metrics.", comingSoon: true },
+          { label: "KPI dashboard", href: "/app/executive/kpi", description: "Doanh thu, đơn hàng, TAT và xét nghiệm nhiều nhất." },
         ]}
       />
     </AppShell>
