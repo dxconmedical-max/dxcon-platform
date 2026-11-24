@@ -11,6 +11,7 @@ const ACTIONS = [
   { label: "Đưa khách hàng mới vào hệ thống", href: "/app/admin/onboarding", description: "Hướng dẫn từng bước khi có khách hàng mới." },
   { label: "Phòng khám tự chỉ định", href: "/app/admin/clinic-settings", description: "Bật hoặc tắt quyền tự chỉ định cho từng phòng khám." },
   { label: "Gửi ngoài & thời hạn làm thêm", href: "/app/admin/test-flags", description: "Đánh dấu xét nghiệm gửi ngoài, số ngày trả dự kiến, thời hạn làm thêm." },
+  { label: "Hợp đồng & công nợ phòng khám", href: "/app/admin/clinic-billing", description: "Lưu hợp đồng, giá riêng từng phòng khám, kết toán theo kỳ và công nợ." },
   { label: "Yêu cầu demo", href: "/app/admin/demo-requests", description: "Yêu cầu demo gửi từ website: liên hệ lại và đổi trạng thái." },
   { label: "Tích hợp", href: "/app/admin/integrations", description: "Kết nối với hệ thống bên ngoài." },
   { label: "Khoảng tham chiếu", href: "/app/admin/reference-ranges", description: "Tải khoảng tham chiếu lên dạng nháp, kiểm tra rồi kích hoạt." },
