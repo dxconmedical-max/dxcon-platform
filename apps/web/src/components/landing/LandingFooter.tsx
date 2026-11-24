@@ -13,8 +13,8 @@ export function LandingFooter({ lang }: { lang: Lang }) {
         </div>
         <div className="flex flex-wrap gap-4 text-sm">
           <Link href="/login" className="hover:text-white">{t.nav.signIn}</Link>
-          <a href="#pricing" className="hover:text-white">{t.nav.pricing}</a>
-          <a href="#contact" className="hover:text-white">{t.nav.contact}</a>
+          <a href={`/${lang}#pricing`} className="hover:text-white">{t.nav.pricing}</a>
+          <a href={`/${lang}#contact`} className="hover:text-white">{t.nav.contact}</a>
         </div>
         <p className="text-xs">© {new Date().getFullYear()} {t.footer.company}</p>
       </div>
