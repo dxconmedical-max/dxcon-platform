@@ -17,11 +17,16 @@ export function InstallAppCard() {
   const [installed, setInstalled] = useState(true);
   const [platform, setPlatform] = useState<"ios" | "android" | "other">("other");
   const [deferred, setDeferred] = useState<InstallEvent | null>(null);
+  const [notSafari, setNotSafari] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setInstalled(isStandalone());
     const ua = navigator.userAgent;
-    if (/iPhone|iPad|iPod/i.test(ua)) setPlatform("ios");
+    if (/iPhone|iPad|iPod/i.test(ua)) {
+      setPlatform("ios");
+      setNotSafari(/CriOS|FxiOS|EdgiOS|OPiOS|Zalo|FBAN|FBAV|Instagram/i.test(ua));
+    }
     else if (/Android/i.test(ua)) setPlatform("android");
     const onPrompt = (e: Event) => {
       e.preventDefault();
@@ -37,6 +42,15 @@ export function InstallAppCard() {
   }, []);
 
   if (installed) return null;
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.origin + "/app/collector");
+      setCopied(true);
+    } catch {
+      window.prompt("Sao chép liên kết này rồi dán vào Safari:", window.location.origin + "/app/collector");
+    }
+  }
 
   async function install() {
     if (!deferred) return;
@@ -57,6 +71,21 @@ export function InstallAppCard() {
         >
           Cài ứng dụng
         </button>
+      ) : null}
+      {platform === "ios" && notSafari ? (
+        <div className="mt-3 rounded-lg bg-amber-50 p-3 text-amber-900">
+          <p>
+            iPhone chỉ cho cài ứng dụng bằng <strong>Safari</strong>, nên không có nút cài ở trình duyệt này.
+            Bấm nút dưới đây, mở Safari, dán liên kết vào ô địa chỉ.
+          </p>
+          <button
+            type="button"
+            onClick={() => void copyLink()}
+            className="mt-2 rounded-lg bg-amber-600 px-4 py-2 font-medium text-white"
+          >
+            {copied ? "Đã sao chép — mở Safari và dán" : "Sao chép liên kết cho Safari"}
+          </button>
+        </div>
       ) : null}
       {platform === "ios" ? (
         <ol className="mt-3 list-decimal space-y-1 pl-5">
