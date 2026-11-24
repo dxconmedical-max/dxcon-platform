@@ -28,3 +28,9 @@ class ClinicViewerWorkspaceTestCase(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_clinic_admin_is_an_assignable_platform_role():
+    from app.core.roles import ALL_ROLES
+
+    assert "CLINIC_ADMIN" in ALL_ROLES
