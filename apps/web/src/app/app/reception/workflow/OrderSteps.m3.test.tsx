@@ -38,7 +38,7 @@ describe("Reception Milestone 3 documents UI", () => {
       collection: null,
       queue_entry: null,
       queue_reference: null,
-      laboratory: { id: null, name: "Central Laboratory" },
+      laboratory: { id: null, name: "Phòng xét nghiệm trung tâm" },
       accepted_at: null,
       handed_off: false,
     });
@@ -80,9 +80,9 @@ describe("Reception Milestone 3 documents UI", () => {
     );
     expect(await screen.findByText("BC-ORD-1")).toBeInTheDocument();
     expect(screen.getByText("dxcon:patient:P1")).toBeInTheDocument();
-    expect(screen.getByText("QR format valid")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Print labels" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Open requisition" })).toBeInTheDocument();
+    expect(screen.getByText("Định dạng QR hợp lệ")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "In nhãn" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Mở phiếu chỉ định" })).toBeInTheDocument();
   });
 
   it("shows backend eligibility error", async () => {
@@ -150,7 +150,7 @@ describe("Reception Milestone 3 documents UI", () => {
       />,
     );
     await screen.findByText("BC-ORD-1");
-    await user.click(screen.getByRole("button", { name: "Reprint" }));
+    await user.click(screen.getByRole("button", { name: "In lại" }));
     await waitFor(() => expect(fetchReceptionBarcodes).toHaveBeenCalledTimes(2));
   });
 });

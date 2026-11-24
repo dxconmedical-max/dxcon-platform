@@ -13,17 +13,17 @@ export function IntegrationHub({ title, subtitle }: { title: string; subtitle: s
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {[
             ["/app/admin/integrations/connectors", "Connectors", "LIS, HIS, EMR, PACS and custom API connectors"],
-            ["/app/admin/integrations/messages", "Messages", "Inbound and outbound integration messages"],
-            ["/app/admin/integrations/exceptions", "Exceptions", "Failed and dead-letter queue"],
-            ["/app/admin/integrations/mappings", "Mappings", "Field and test code mapping rules"],
-            ["/app/admin/integrations/webhooks", "Webhooks", "Event subscriptions and deliveries"],
-            ["/app/admin/integrations/health", "Health", "Connector health and throughput metrics"],
+            ["/app/admin/integrations/messages", "Messages", "Tin nhắn tích hợp đến và đi"],
+            ["/app/admin/integrations/exceptions", "Exceptions", "Tin nhắn lỗi và hàng đợi lỗi"],
+            ["/app/admin/integrations/mappings", "Mappings", "Quy tắc ánh xạ trường và mã xét nghiệm"],
+            ["/app/admin/integrations/webhooks", "Webhooks", "Đăng ký sự kiện và lượt gửi"],
+            ["/app/admin/integrations/health", "Health", "Tình trạng kết nối và lưu lượng"],
           ].map(([href, label, desc]) => (
             <Card key={href}>
               <CardTitle>{label}</CardTitle>
               <CardDescription>{desc}</CardDescription>
               <Link href={href} className="mt-4 inline-block text-sm font-medium text-teal-700">
-                Open
+                Mở
               </Link>
             </Card>
           ))}

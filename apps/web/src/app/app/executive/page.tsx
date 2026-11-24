@@ -1,22 +1,22 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { WorkspaceHome } from "@/components/layout/WorkspaceHome";
 
-export const metadata = { title: "Executive" };
+export const metadata = { title: "Điều hành" };
 
 export default function ExecutivePage() {
   return (
-    <AppShell title="Executive" workspacePath="/app/executive">
+    <AppShell title="Điều hành" workspacePath="/app/executive">
       <WorkspaceHome
-        title="Executive workspace"
-        subtitle="Operational KPIs and strategic dashboards."
+        title="Không gian điều hành"
+        subtitle="Chỉ số vận hành và bảng điều khiển chiến lược."
         statusCards={[
-          { label: "Revenue", value: "—" },
-          { label: "Volume", value: "—" },
+          { label: "Doanh thu", value: "—" },
+          { label: "Số lượng", value: "—" },
           { label: "TAT", value: "—" },
-          { label: "Quality", value: "—" },
+          { label: "Chất lượng", value: "—" },
         ]}
         actions={[
-          { label: "KPI dashboard", href: "/app/executive/kpi", description: "Doanh thu, đơn hàng, TAT và xét nghiệm nhiều nhất." },
+          { label: "Bảng KPI", href: "/app/executive/kpi", description: "Doanh thu, đơn hàng, TAT và xét nghiệm nhiều nhất." },
         ]}
       />
     </AppShell>

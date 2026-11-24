@@ -65,7 +65,7 @@ export default function ReportingPage() {
   }
 
   return (
-    <AppShell title="Reporting" workspacePath="/app/admin">
+    <AppShell title="Báo cáo" workspacePath="/app/admin">
       <div className="space-y-6">
         <div>
           <h1 className="text-xl font-semibold">Báo cáo</h1>

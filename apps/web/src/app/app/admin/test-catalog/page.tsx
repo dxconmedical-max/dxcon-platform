@@ -55,7 +55,7 @@ export default function AdminTestCatalogImportPage() {
   }
 
   return (
-    <AppShell title="Test catalog import" workspacePath="/app/admin">
+    <AppShell title="Nhập danh mục xét nghiệm" workspacePath="/app/admin">
       <div className="max-w-3xl space-y-4">
         <div>
           <h1 className="text-xl font-semibold">Nhập danh mục xét nghiệm</h1>

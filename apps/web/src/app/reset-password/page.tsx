@@ -9,7 +9,7 @@ export default function ResetPasswordPage() {
           Self-service password reset is not yet enabled. Contact your administrator.
         </p>
         <Link href="/login" className="mt-6 inline-block text-teal-700 text-sm">
-          Return to sign in
+          Quay lại đăng nhập
         </Link>
       </div>
     </div>

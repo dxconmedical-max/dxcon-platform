@@ -48,7 +48,7 @@ const handoffSuccess = {
   collection: { status: "delivered", accession_number: "ACC-1" },
   queue_entry: null,
   queue_reference: "ACC-1",
-  laboratory: { id: null, name: "Central Laboratory" },
+  laboratory: { id: null, name: "Phòng xét nghiệm trung tâm" },
   accepted_at: "2026-07-24T02:00:00.000Z",
   handed_off: true,
   idempotent_replay: false,
@@ -87,7 +87,7 @@ describe("Reception Milestone 4 laboratory handoff UI", () => {
       collection: null,
       queue_entry: null,
       queue_reference: null,
-      laboratory: { id: null, name: "Central Laboratory" },
+      laboratory: { id: null, name: "Phòng xét nghiệm trung tâm" },
       accepted_at: null,
       handed_off: false,
       idempotent_replay: false,
@@ -104,15 +104,15 @@ describe("Reception Milestone 4 laboratory handoff UI", () => {
         collection: null,
         queue_entry: null,
         queue_reference: null,
-        laboratory: { id: null, name: "Central Laboratory" },
+        laboratory: { id: null, name: "Phòng xét nghiệm trung tâm" },
         accepted_at: null,
         handed_off: false,
       })
       .mockResolvedValueOnce(handoffSuccess);
 
     renderDocs();
-    expect(await screen.findByRole("button", { name: "Hand off to Laboratory" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Hand off to Laboratory" }));
+    expect(await screen.findByRole("button", { name: "Bàn giao cho phòng xét nghiệm" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Bàn giao cho phòng xét nghiệm" }));
 
     await waitFor(() => expect(handoffReceptionOrderToLab).toHaveBeenCalledTimes(1));
     expect(handoffReceptionOrderToLab).toHaveBeenCalledWith(
@@ -120,9 +120,9 @@ describe("Reception Milestone 4 laboratory handoff UI", () => {
       "ORD-1",
     );
     expect(await screen.findByText("ACC-1")).toBeInTheDocument();
-    expect(screen.getByText("Central Laboratory")).toBeInTheDocument();
+    expect(screen.getByText("Phòng xét nghiệm trung tâm")).toBeInTheDocument();
     expect(screen.getByText(/lab_received/i)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Hand off to Laboratory" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Bàn giao cho phòng xét nghiệm" })).not.toBeInTheDocument();
     expect(vi.mocked(fetchReceptionLabHandoff).mock.calls.length).toBeGreaterThanOrEqual(2);
   });
 
@@ -142,18 +142,18 @@ describe("Reception Milestone 4 laboratory handoff UI", () => {
         collection: null,
         queue_entry: null,
         queue_reference: null,
-        laboratory: { id: null, name: "Central Laboratory" },
+        laboratory: { id: null, name: "Phòng xét nghiệm trung tâm" },
         accepted_at: null,
         handed_off: false,
       })
       .mockResolvedValue(handoffSuccess);
 
     renderDocs();
-    await user.click(await screen.findByRole("button", { name: "Hand off to Laboratory" }));
+    await user.click(await screen.findByRole("button", { name: "Bàn giao cho phòng xét nghiệm" }));
     expect(
       await screen.findByText(/Order must be paid before laboratory handoff/i),
     ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Retry handoff" }));
+    await user.click(screen.getByRole("button", { name: "Thử bàn giao lại" }));
     expect(await screen.findByText("ACC-1")).toBeInTheDocument();
   });
 
@@ -168,10 +168,10 @@ describe("Reception Milestone 4 laboratory handoff UI", () => {
     );
 
     renderDocs();
-    const button = await screen.findByRole("button", { name: "Hand off to Laboratory" });
+    const button = await screen.findByRole("button", { name: "Bàn giao cho phòng xét nghiệm" });
     await user.click(button);
-    expect(await screen.findByRole("button", { name: "Handing off…" })).toBeDisabled();
-    await user.click(screen.getByRole("button", { name: "Handing off…" }));
+    expect(await screen.findByRole("button", { name: "Đang bàn giao…" })).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "Đang bàn giao…" }));
     expect(handoffReceptionOrderToLab).toHaveBeenCalledTimes(1);
     resolveHandoff(handoffSuccess);
     vi.mocked(fetchReceptionLabHandoff).mockResolvedValue(handoffSuccess);
@@ -184,8 +184,8 @@ describe("Reception Milestone 4 laboratory handoff UI", () => {
       new ApiError("Request timed out", 408, { error: "Request timed out", code: "TIMEOUT" }),
     );
     renderDocs();
-    await user.click(await screen.findByRole("button", { name: "Hand off to Laboratory" }));
+    await user.click(await screen.findByRole("button", { name: "Bàn giao cho phòng xét nghiệm" }));
     expect(await screen.findByText(/timed out/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Retry handoff" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Thử bàn giao lại" })).toBeInTheDocument();
   });
 });

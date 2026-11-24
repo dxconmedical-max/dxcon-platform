@@ -1,35 +1,35 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { WorkspaceHome } from "@/components/layout/WorkspaceHome";
 
-export const metadata = { title: "Customer Onboarding" };
+export const metadata = { title: "Đưa khách hàng mới vào hệ thống" };
 
 export default function AdminOnboardingPage() {
   return (
-    <AppShell title="Onboarding" workspacePath="/app/admin/onboarding">
+    <AppShell title="Khách hàng mới" workspacePath="/app/admin/onboarding">
       <WorkspaceHome
-        title="Customer onboarding wizard"
-        subtitle="Laboratory, clinic, hospital, doctor, collector company, and corporate onboarding."
+        title="Hướng dẫn đưa khách hàng mới vào hệ thống"
+        subtitle="Phòng xét nghiệm, phòng khám, bệnh viện, bác sĩ, đơn vị thu mẫu và doanh nghiệp."
         statusCards={[
-          { label: "Flow", value: "10 steps" },
+          { label: "Quy trình", value: "10 bước" },
           { label: "API", value: "/pilot-readiness/onboarding" },
-          { label: "Partner reg", value: "Admin review" },
-          { label: "Activation", value: "Server-side" },
+          { label: "Đối tác đăng ký", value: "Quản trị duyệt" },
+          { label: "Kích hoạt", value: "Phía máy chủ" },
         ]}
         actions={[
           {
-            label: "Start laboratory onboarding",
+            label: "Bắt đầu đưa phòng xét nghiệm vào hệ thống",
             href: "/onboarding/register",
-            description: "Self-service partner registration for clinics and labs.",
+            description: "Phòng khám và phòng xét nghiệm tự đăng ký.",
           },
           {
-            label: "Organization setup",
+            label: "Thiết lập tổ chức",
             href: "/app/admin/organizations",
-            description: "Logo, theme, departments, services wizard.",
+            description: "Logo, giao diện, phòng ban và dịch vụ.",
           },
           {
-            label: "Master data import",
+            label: "Nhập dữ liệu gốc",
             href: "/app/admin",
-            description: "CSV/Excel import via MDM (Flask admin).",
+            description: "Nhập CSV/Excel qua MDM (Flask admin).",
           },
         ]}
       />

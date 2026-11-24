@@ -90,29 +90,29 @@ export default function DoctorMedicalValidationPage() {
   }
 
   return (
-    <AppShell title="Medical validation" workspacePath="/app/doctor">
+    <AppShell title="Duyệt chuyên môn" workspacePath="/app/doctor">
       <div className="space-y-5">
         <SectionHeader
-          title="Medical validation inbox"
-          description="Approve, reject, or reopen results awaiting doctor sign-off. Actions write timeline and audit logs."
+          title="Hộp kết quả chờ duyệt chuyên môn"
+          description="Duyệt, từ chối hoặc mở lại kết quả đang chờ bác sĩ ký. Mọi thao tác được ghi vào nhật ký."
           actions={
             <div className="flex gap-2">
               <Link href="/app/lab/release" className="self-center text-sm text-sky-700 hover:underline">
-                Release board
+                Bảng trả kết quả
               </Link>
               <Button size="sm" variant="outline" onClick={() => void load()}>
-                Refresh
+                Làm mới
               </Button>
             </div>
           }
         />
         {!canMedical ? (
           <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-            Doctor or admin role required for medical validation actions.
+            Cần vai trò bác sĩ hoặc quản trị để duyệt chuyên môn.
           </p>
         ) : null}
         <div>
-          <Label htmlFor="doctor-note">Note (optional)</Label>
+          <Label htmlFor="doctor-note">Ghi chú (không bắt buộc)</Label>
           <Input id="doctor-note" value={note} onChange={(e) => setNote(e.target.value)} />
         </div>
         {message ? <p className="text-sm text-emerald-700">{message}</p> : null}
@@ -120,23 +120,23 @@ export default function DoctorMedicalValidationPage() {
           loading={loading}
           error={error}
           empty={!loading && items.length === 0}
-          emptyLabel="No results pending medical review."
+          emptyLabel="Không có kết quả nào chờ duyệt."
           onRetry={() => void load()}
         >
           <SimpleTable
             rows={items}
             rowKey={(row) => row.order_code}
             columns={[
-              { key: "order", label: "Order", render: (row) => row.order_code },
+              { key: "order", label: "Đơn", render: (row) => row.order_code },
               {
                 key: "patient",
-                label: "Patient",
+                label: "Bệnh nhân",
                 render: (row) => row.patient_name || row.patient || "—",
               },
-              { key: "status", label: "Status", render: (row) => row.status || "—" },
+              { key: "status", label: "Trạng thái", render: (row) => row.status || "—" },
               {
                 key: "actions",
-                label: "Actions",
+                label: "Thao tác",
                 render: (row) => (
                   <div className="flex flex-wrap gap-2">
                     <Button
@@ -144,7 +144,7 @@ export default function DoctorMedicalValidationPage() {
                       disabled={!canMedical || busy === row.order_code}
                       onClick={() => void run(row.order_code, "approve")}
                     >
-                      Approve
+                      Duyệt
                     </Button>
                     <Button
                       size="sm"
@@ -152,7 +152,7 @@ export default function DoctorMedicalValidationPage() {
                       disabled={!canMedical || busy === row.order_code}
                       onClick={() => void run(row.order_code, "reject")}
                     >
-                      Reject
+                      Từ chối
                     </Button>
                     <Button
                       size="sm"
@@ -160,7 +160,7 @@ export default function DoctorMedicalValidationPage() {
                       disabled={!canMedical || busy === row.order_code}
                       onClick={() => void run(row.order_code, "reopen")}
                     >
-                      Reopen
+                      Mở lại
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => void showAi(row.order_code)}>
                       Gợi ý AI
@@ -169,7 +169,7 @@ export default function DoctorMedicalValidationPage() {
                       href={`/app/lab/workflow?order=${encodeURIComponent(row.order_code)}`}
                       className="self-center text-xs text-sky-700 hover:underline"
                     >
-                      Open lab
+                      Mở phòng xét nghiệm
                     </Link>
                   </div>
                 ),

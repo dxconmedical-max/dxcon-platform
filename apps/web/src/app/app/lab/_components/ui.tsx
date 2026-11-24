@@ -38,14 +38,14 @@ export function DataState({
   onRetry?: () => void;
   children: React.ReactNode;
 }) {
-  if (loading) return <p className="text-sm text-slate-500">Loading…</p>;
+  if (loading) return <p className="text-sm text-slate-500">Đang tải…</p>;
   if (error) {
     return (
       <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
         <p>{error}</p>
         {onRetry ? (
           <Button className="mt-3" size="sm" variant="outline" onClick={onRetry}>
-            Retry
+            Thử lại
           </Button>
         ) : null}
       </div>
@@ -54,7 +54,7 @@ export function DataState({
   if (empty) {
     return (
       <p className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500">
-        {emptyLabel ?? "Nothing to show."}
+        {emptyLabel ?? "Không có gì để hiển thị."}
       </p>
     );
   }

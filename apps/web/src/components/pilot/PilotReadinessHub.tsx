@@ -54,15 +54,15 @@ export function PilotReadinessHub({
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-teal-50/40 p-6">
-        <Badge tone="info">Epic 8 — Production readiness</Badge>
+        <Badge tone="info">Sẵn sàng vận hành thật</Badge>
         <h2 className="mt-3 text-2xl font-semibold text-slate-900">{title}</h2>
         <p className="mt-2 text-slate-600">{subtitle}</p>
       </section>
 
-      {loading ? <p className="text-slate-500">Loading…</p> : null}
+      {loading ? <p className="text-slate-500">Đang tải…</p> : null}
       {error ? (
         <Card>
-          <CardTitle>Unable to load live data</CardTitle>
+          <CardTitle>Không tải được dữ liệu</CardTitle>
           <CardDescription>
             {error}. Sign in with an authorized role or verify API connectivity.
           </CardDescription>
@@ -93,7 +93,7 @@ export function PilotReadinessHub({
 
       {typeof data?.production_score === "number" ? (
         <Card>
-          <CardTitle>Production readiness score</CardTitle>
+          <CardTitle>Điểm sẵn sàng vận hành</CardTitle>
           <p className="mt-2 text-3xl font-semibold text-teal-700">
             {data.production_score}/100
           </p>

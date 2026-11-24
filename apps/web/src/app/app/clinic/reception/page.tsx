@@ -40,7 +40,7 @@ export default function ClinicReceptionDeskPage() {
     : items;
 
   return (
-    <AppShell title="Reception desk" workspacePath="/app/clinic">
+    <AppShell title="Bàn tiếp nhận" workspacePath="/app/clinic">
       <div className="space-y-5">
         <div>
           <h1 className="text-xl font-semibold">Đơn xét nghiệm của phòng khám</h1>

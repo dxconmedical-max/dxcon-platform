@@ -3,11 +3,11 @@ import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { PilotReadinessHub } from "@/components/pilot/PilotReadinessHub";
 
-export const metadata = { title: "Operations" };
+export const metadata = { title: "Vận hành" };
 
 export default function OperationsPage() {
   return (
-    <AppShell title="Operations" workspacePath="/app/operations">
+    <AppShell title="Vận hành" workspacePath="/app/operations">
       <div className="mb-4 flex flex-wrap gap-4 text-sm">
         <Link className="text-teal-700 underline" href="/app/operations/orders">
           Danh sách đơn &amp; báo cáo
@@ -26,8 +26,8 @@ export default function OperationsPage() {
         </Link>
       </div>
       <PilotReadinessHub
-        title="Operations dashboard"
-        subtitle="Today's orders, incidents, collectors, and SLA signals from the operations center."
+        title="Bảng điều khiển vận hành"
+        subtitle="Đơn hôm nay, sự cố, nhân viên thu mẫu và tín hiệu SLA từ trung tâm vận hành."
         endpoint="/api/v1/pilot-readiness/operations-dashboard"
       />
     </AppShell>

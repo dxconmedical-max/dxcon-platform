@@ -93,13 +93,13 @@ describe("Reception Milestone 1 steps", () => {
       });
 
     render(<PatientStep accessToken="t" organizationId="org" onSelect={vi.fn()} />);
-    await user.type(screen.getByRole("textbox", { name: "Patient search" }), "aa");
+    await user.type(screen.getByRole("textbox", { name: "Tìm bệnh nhân" }), "aa");
     await waitFor(() => expect(searchReceptionPatients).toHaveBeenCalled());
-    await user.type(screen.getByRole("textbox", { name: "Patient search" }), "bb");
+    await user.type(screen.getByRole("textbox", { name: "Tìm bệnh nhân" }), "bb");
     await waitFor(() => expect(searchReceptionPatients).toHaveBeenCalledTimes(2));
     resolveFirst?.({ items: [], total: 0 });
     expect(await screen.findByText("Bea")).toBeInTheDocument();
-    expect(screen.queryByText(/no patients found/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/không tìm thấy bệnh nhân/i)).not.toBeInTheDocument();
   });
 
   it("surfaces backend validation on patient create", async () => {
@@ -109,9 +109,9 @@ describe("Reception Milestone 1 steps", () => {
       new ApiError("Phone format invalid", 400, { error: "Phone format invalid" }),
     );
     render(<PatientStep accessToken="t" organizationId="org" onSelect={vi.fn()} />);
-    await user.type(screen.getByLabelText("Full name *"), "Bad Phone");
-    await user.type(screen.getByLabelText("Phone *"), "bad");
-    await user.click(screen.getByRole("button", { name: "Register & continue" }));
+    await user.type(screen.getByLabelText("Họ và tên *"), "Bad Phone");
+    await user.type(screen.getByLabelText("Số điện thoại *"), "bad");
+    await user.click(screen.getByRole("button", { name: "Đăng ký và tiếp tục" }));
     expect(await screen.findByText("Phone format invalid")).toBeInTheDocument();
   });
 
@@ -131,9 +131,9 @@ describe("Reception Milestone 1 steps", () => {
       phone: "0900111222",
     });
     render(<PatientStep accessToken="t" organizationId="org" onSelect={vi.fn()} />);
-    await user.type(screen.getByLabelText("Full name *"), "Slow");
-    await user.type(screen.getByLabelText("Phone *"), "0900111222");
-    const submit = screen.getByRole("button", { name: "Register & continue" });
+    await user.type(screen.getByLabelText("Họ và tên *"), "Slow");
+    await user.type(screen.getByLabelText("Số điện thoại *"), "0900111222");
+    const submit = screen.getByRole("button", { name: "Đăng ký và tiếp tục" });
     await user.click(submit);
     await user.click(submit);
     expect(registerWalkIn).toHaveBeenCalledTimes(1);
@@ -157,8 +157,8 @@ describe("Reception Milestone 1 steps", () => {
         onCreated={vi.fn()}
       />,
     );
-    await userEvent.click(screen.getByRole("button", { name: "Create laboratory order" }));
-    expect(await screen.findByText(/select at least one test/i)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Tạo đơn xét nghiệm" }));
+    expect(await screen.findByText(/chọn ít nhất một xét nghiệm/i)).toBeInTheDocument();
     expect(createReceptionOrder).not.toHaveBeenCalled();
   });
 
@@ -168,7 +168,7 @@ describe("Reception Milestone 1 steps", () => {
       new ApiError("Forbidden", 403, { error: "Forbidden" }),
     );
     render(<PatientStep accessToken="t" organizationId="org" onSelect={vi.fn()} />);
-    await user.type(screen.getByRole("textbox", { name: "Patient search" }), "x");
+    await user.type(screen.getByRole("textbox", { name: "Tìm bệnh nhân" }), "x");
     expect(await screen.findByText("Forbidden")).toBeInTheDocument();
   });
 
@@ -187,7 +187,7 @@ describe("Reception Milestone 1 steps", () => {
     await screen.findByText("CBC");
     expect(screen.getByText("Blood")).toBeInTheDocument();
     expect(screen.getByText("24")).toBeInTheDocument();
-    await user.type(screen.getByRole("textbox", { name: "Catalog search" }), "CBC");
+    await user.type(screen.getByRole("textbox", { name: "Tìm danh mục" }), "CBC");
     await waitFor(() =>
       expect(fetchReceptionTests).toHaveBeenCalledWith(
         expect.objectContaining({ token: "t" }),
@@ -207,7 +207,7 @@ describe("Reception Milestone 1 steps", () => {
         onContinue={vi.fn()}
       />,
     );
-    expect(await screen.findByText(/no tests found/i)).toBeInTheDocument();
+    expect(await screen.findByText(/không tìm thấy xét nghiệm/i)).toBeInTheDocument();
 
     vi.mocked(fetchReceptionTests).mockRejectedValueOnce(
       new ApiError("Catalog unavailable", 500, { error: "Catalog unavailable" }),
@@ -240,14 +240,14 @@ describe("Reception Milestone 1 steps", () => {
     await screen.findByText("CBC");
     const checkbox = within(screen.getByRole("table")).getByRole("checkbox");
     await user.click(checkbox);
-    expect(screen.getByText(/Selected 1/i)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Remove CBC" }));
-    expect(screen.getByText(/Selected 0/i)).toBeInTheDocument();
+    expect(screen.getByText(/Đã chọn 1/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Bỏ CBC" }));
+    expect(screen.getByText(/Đã chọn 0/i)).toBeInTheDocument();
     await user.click(checkbox);
     await user.click(checkbox);
-    expect(screen.getByText(/Selected 0/i)).toBeInTheDocument();
+    expect(screen.getByText(/Đã chọn 0/i)).toBeInTheDocument();
     await user.click(checkbox);
-    await user.click(screen.getByRole("button", { name: "Continue to collection request" }));
+    await user.click(screen.getByRole("button", { name: "Tiếp tục: yêu cầu thu mẫu" }));
     expect(onContinue).toHaveBeenCalledWith(
       expect.objectContaining({
         testIds: ["t1"],
@@ -269,8 +269,8 @@ describe("Reception Milestone 1 steps", () => {
         onCreated={onCreated}
       />,
     );
-    await userEvent.click(screen.getByRole("button", { name: "Create laboratory order" }));
-    expect(await screen.findByText(/select a patient/i)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Tạo đơn xét nghiệm" }));
+    expect(await screen.findByText(/chọn bệnh nhân/i)).toBeInTheDocument();
     expect(createReceptionOrder).not.toHaveBeenCalled();
     expect(onCreated).not.toHaveBeenCalled();
   });
@@ -294,7 +294,7 @@ describe("Reception Milestone 1 steps", () => {
         onCreated={onCreated}
       />,
     );
-    await user.click(screen.getByRole("button", { name: "Create laboratory order" }));
+    await user.click(screen.getByRole("button", { name: "Tạo đơn xét nghiệm" }));
     await waitFor(() =>
       expect(onCreated).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -324,10 +324,10 @@ describe("Reception Milestone 1 steps", () => {
         onCreated={onCreated}
       />,
     );
-    await user.click(screen.getByRole("button", { name: "Create laboratory order" }));
-    expect(await screen.findByText(/differs from estimate/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Tạo đơn xét nghiệm" }));
+    expect(await screen.findByText(/khác với ước tính/i)).toBeInTheDocument();
     expect(onCreated).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: "Confirm backend total" }));
+    await user.click(screen.getByRole("button", { name: "Xác nhận tổng tiền của hệ thống" }));
     expect(onCreated).toHaveBeenCalledWith(
       expect.objectContaining({
         orderRef: "ORD-DRIFT",
@@ -353,7 +353,7 @@ describe("Reception Milestone 1 steps", () => {
         onCreated={onCreated}
       />,
     );
-    await user.click(screen.getByRole("button", { name: "Create laboratory order" }));
+    await user.click(screen.getByRole("button", { name: "Tạo đơn xét nghiệm" }));
     expect(await screen.findByText("Price list unavailable")).toBeInTheDocument();
     expect(onCreated).not.toHaveBeenCalled();
   });
@@ -378,7 +378,7 @@ describe("Reception Milestone 1 steps", () => {
         onCreated={vi.fn()}
       />,
     );
-    const btn = screen.getByRole("button", { name: "Create laboratory order" });
+    const btn = screen.getByRole("button", { name: "Tạo đơn xét nghiệm" });
     await user.click(btn);
     await user.click(btn);
     expect(createReceptionOrder).toHaveBeenCalledTimes(1);
@@ -388,7 +388,7 @@ describe("Reception Milestone 1 steps", () => {
       pricing: { subtotal: 100_000, discount: 0, total: 100_000 },
     });
     await waitFor(() =>
-      expect(screen.queryByRole("button", { name: "Creating order…" })).not.toBeInTheDocument(),
+      expect(screen.queryByRole("button", { name: "Đang tạo đơn…" })).not.toBeInTheDocument(),
     );
   });
 
@@ -408,7 +408,7 @@ describe("Reception Milestone 1 steps", () => {
         onCreated={vi.fn()}
       />,
     );
-    await user.click(screen.getByRole("button", { name: "Create laboratory order" }));
+    await user.click(screen.getByRole("button", { name: "Tạo đơn xét nghiệm" }));
     expect(await screen.findByText("Forbidden")).toBeInTheDocument();
   });
 
@@ -442,10 +442,10 @@ describe("Reception Milestone 1 steps", () => {
     );
     expect(await screen.findByText("ORD-1")).toBeInTheDocument();
     await waitFor(() => expect(fetchReceptionOrder).toHaveBeenCalled());
-    expect(screen.getByText(/Authoritative total/i)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Refresh" }));
+    expect(screen.getByText(/Tổng tiền chính thức/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Làm mới" }));
     await waitFor(() => expect(fetchReceptionOrder).toHaveBeenCalledTimes(2));
-    expect(screen.getByRole("link", { name: "Open order" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Mở đơn" })).toHaveAttribute(
       "href",
       "/app/reception/workflow?order=ORD-1",
     );
@@ -474,7 +474,7 @@ describe("Reception Milestone 1 steps", () => {
     );
     await screen.findByText("CBC");
     await user.click(within(screen.getByRole("table")).getByRole("checkbox"));
-    await user.click(screen.getByRole("button", { name: "Continue to collection request" }));
+    await user.click(screen.getByRole("button", { name: "Tiếp tục: yêu cầu thu mẫu" }));
     expect(captured).not.toBeNull();
     rerender(
       <ReviewPricingStep
@@ -487,7 +487,7 @@ describe("Reception Milestone 1 steps", () => {
         onCreated={onCreated}
       />,
     );
-    await user.click(screen.getByRole("button", { name: "Create laboratory order" }));
+    await user.click(screen.getByRole("button", { name: "Tạo đơn xét nghiệm" }));
     await waitFor(() => expect(onCreated).toHaveBeenCalled());
     expect(vi.mocked(createReceptionOrder).mock.calls[0]?.[1]).toEqual(
       expect.objectContaining({

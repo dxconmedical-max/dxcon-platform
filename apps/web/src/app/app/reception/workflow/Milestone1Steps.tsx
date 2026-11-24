@@ -72,9 +72,9 @@ export type CollectionRequestDraft = {
 const CLINIC_MANUAL = "__manual__";
 
 export function collectionModeLabel(mode: CollectionRequestDraft["mode"]): string {
-  if (mode === "AT_RECEPTION") return "DESK (at reception)";
-  if (mode === "HOME_COLLECTION") return "HOME collection";
-  return "CLINIC collection";
+  if (mode === "AT_RECEPTION") return "Tại quầy tiếp nhận";
+  if (mode === "HOME_COLLECTION") return "Thu mẫu tại nhà";
+  return "Thu mẫu tại phòng khám";
 }
 
 export function CollectionRequestStep({
@@ -162,7 +162,7 @@ export function CollectionRequestStep({
   function submit() {
     setError(null);
     if (!specimenType.trim()) {
-      setError("Specimen type is required.");
+      setError("Cần nhập loại mẫu.");
       return;
     }
     if (mode === "HOME_COLLECTION") {
@@ -176,14 +176,14 @@ export function CollectionRequestStep({
         !timeWindow.trim()
       ) {
         setError(
-          "HOME collection requires address, province, district, contact person, phone, date, and time window.",
+          "Thu mẫu tại nhà cần địa chỉ, tỉnh/thành, quận/huyện, người liên hệ, số điện thoại, ngày và khung giờ.",
         );
         return;
       }
     }
     if (mode === "CLINIC_COLLECTION") {
       if (!clinicName.trim() || !requestedDate || !timeWindow.trim()) {
-        setError("CLINIC collection requires clinic, preferred date, and preferred time.");
+        setError("Thu mẫu tại phòng khám cần phòng khám, ngày và giờ mong muốn.");
         return;
       }
     }
@@ -210,99 +210,99 @@ export function CollectionRequestStep({
   return (
     <div className="space-y-5">
       <SectionHeader
-        title="Collection request"
-        description="Choose how the specimen will be collected before pricing and order creation."
+        title="Yêu cầu thu mẫu"
+        description="Chọn cách thu mẫu trước khi tính giá và tạo đơn."
         actions={
           <Button size="sm" variant="outline" onClick={onBack}>
-            Back
+            Quay lại
           </Button>
         }
       />
       <Card className="space-y-4">
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-          <p className="text-xs text-slate-500">Patient</p>
+          <p className="text-xs text-slate-500">Bệnh nhân</p>
           <p className="font-medium">{patient.patientName}</p>
           <p className="font-mono text-xs text-slate-500">{patient.patientCode}</p>
         </div>
 
         <div>
-          <Label htmlFor="collection-mode">Collection mode</Label>
+          <Label htmlFor="collection-mode">Hình thức thu mẫu</Label>
           <select
             id="collection-mode"
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
             value={mode}
             onChange={(e) => setMode(e.target.value as CollectionRequestDraft["mode"])}
           >
-            <option value="AT_RECEPTION">DESK (at reception)</option>
-            <option value="HOME_COLLECTION">HOME</option>
-            <option value="CLINIC_COLLECTION">CLINIC</option>
+            <option value="AT_RECEPTION">Tại quầy tiếp nhận</option>
+            <option value="HOME_COLLECTION">Tại nhà</option>
+            <option value="CLINIC_COLLECTION">Tại phòng khám</option>
           </select>
           <p className="mt-1 text-xs text-slate-500">
             {mode === "AT_RECEPTION"
-              ? "Creates a reception desk SampleCollection only — not a field collector job."
+              ? "Chỉ tạo việc thu mẫu tại quầy tiếp nhận — không tạo việc cho nhân viên thu mẫu."
               : mode === "HOME_COLLECTION"
-                ? "Creates a field collection request (PENDING_ASSIGNMENT) for the HOME collector queue."
-                : "Creates a CLINIC pickup request on Field Collection Requests (not the HOME collector queue)."}
+                ? "Tạo yêu cầu thu mẫu tại nhà (chờ phân công) vào hàng đợi của nhân viên thu mẫu."
+                : "Tạo yêu cầu thu mẫu tại phòng khám trong mục Yêu cầu thu mẫu (không vào hàng đợi thu mẫu tại nhà)."}
           </p>
         </div>
 
         <div>
-          <Label htmlFor="laboratory">Laboratory</Label>
+          <Label htmlFor="laboratory">Phòng xét nghiệm</Label>
           <select
             id="laboratory"
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
             defaultValue="central"
-            aria-label="Laboratory"
+            aria-label="Phòng xét nghiệm"
           >
-            <option value="central">DxCon Central Laboratory</option>
+            <option value="central">Phòng xét nghiệm trung tâm DxCon</option>
           </select>
           <p className="mt-1 text-xs text-slate-500">
-            Destination laboratory for this order (handoff target after collection).
+            Phòng xét nghiệm nhận mẫu của đơn này (nơi bàn giao sau khi thu mẫu).
           </p>
         </div>
 
         <div>
-          <Label htmlFor="specimen-type">Specimen type</Label>
+          <Label htmlFor="specimen-type">Loại mẫu</Label>
           <Input
             id="specimen-type"
             value={specimenType}
             onChange={(e) => setSpecimenType(e.target.value)}
-            placeholder="e.g. BLOOD"
+            placeholder="Ví dụ: BLOOD"
           />
         </div>
 
         {mode === "HOME_COLLECTION" ? (
           <div className="grid gap-3 md:grid-cols-2">
             <div className="md:col-span-2">
-              <Label htmlFor="pickup-address">Pickup address *</Label>
+              <Label htmlFor="pickup-address">Địa chỉ lấy mẫu *</Label>
               <Input id="pickup-address" value={pickupAddress} onChange={(e) => setPickupAddress(e.target.value)} />
             </div>
             <div>
-              <Label htmlFor="province">Province *</Label>
+              <Label htmlFor="province">Tỉnh/Thành *</Label>
               <Input id="province" value={province} onChange={(e) => setProvince(e.target.value)} />
             </div>
             <div>
-              <Label htmlFor="district">District *</Label>
+              <Label htmlFor="district">Quận/Huyện *</Label>
               <Input id="district" value={district} onChange={(e) => setDistrict(e.target.value)} />
             </div>
             <div>
-              <Label htmlFor="ward">Ward</Label>
+              <Label htmlFor="ward">Phường/Xã</Label>
               <Input id="ward" value={ward} onChange={(e) => setWard(e.target.value)} />
             </div>
             <div>
-              <Label htmlFor="contact-person">Contact person *</Label>
+              <Label htmlFor="contact-person">Người liên hệ *</Label>
               <Input id="contact-person" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} />
             </div>
             <div>
-              <Label htmlFor="contact-phone">Phone *</Label>
+              <Label htmlFor="contact-phone">Số điện thoại *</Label>
               <Input id="contact-phone" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
             </div>
             <div>
-              <Label htmlFor="req-date">Preferred date *</Label>
+              <Label htmlFor="req-date">Ngày mong muốn *</Label>
               <Input id="req-date" type="date" value={requestedDate} onChange={(e) => setRequestedDate(e.target.value)} />
             </div>
             <div>
-              <Label htmlFor="time-window">Preferred time window *</Label>
+              <Label htmlFor="time-window">Khung giờ mong muốn *</Label>
               <Input
                 id="time-window"
                 placeholder="e.g. 08:00–10:00"
@@ -311,20 +311,20 @@ export function CollectionRequestStep({
               />
             </div>
             <div>
-              <Label htmlFor="priority">Priority</Label>
+              <Label htmlFor="priority">Mức ưu tiên</Label>
               <select
                 id="priority"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
               >
-                <option value="ROUTINE">ROUTINE</option>
-                <option value="URGENT">URGENT</option>
-                <option value="STAT">STAT</option>
+                <option value="ROUTINE">Thường</option>
+                <option value="URGENT">Khẩn</option>
+                <option value="STAT">Cấp cứu</option>
               </select>
             </div>
             <div className="md:col-span-2">
-              <Label htmlFor="home-notes">Notes</Label>
+              <Label htmlFor="home-notes">Ghi chú</Label>
               <Input id="home-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
             </div>
           </div>
@@ -333,7 +333,7 @@ export function CollectionRequestStep({
         {mode === "CLINIC_COLLECTION" ? (
           <div className="grid gap-3 md:grid-cols-2">
             <div className="md:col-span-2">
-              <Label htmlFor="clinic-select">Clinic *</Label>
+              <Label htmlFor="clinic-select">Phòng khám *</Label>
               {showClinicSelect ? (
                 <select
                   id="clinic-select"
@@ -364,20 +364,20 @@ export function CollectionRequestStep({
               ) : null}
             </div>
             <div>
-              <Label htmlFor="clinic-date">Preferred date *</Label>
+              <Label htmlFor="clinic-date">Ngày mong muốn *</Label>
               <Input id="clinic-date" type="date" value={requestedDate} onChange={(e) => setRequestedDate(e.target.value)} />
             </div>
             <div>
-              <Label htmlFor="clinic-time">Preferred time *</Label>
+              <Label htmlFor="clinic-time">Giờ mong muốn *</Label>
               <Input
                 id="clinic-time"
-                placeholder="e.g. 09:00"
+                placeholder="Ví dụ: 09:00"
                 value={timeWindow}
                 onChange={(e) => setTimeWindow(e.target.value)}
               />
             </div>
             <div className="md:col-span-2">
-              <Label htmlFor="clinic-notes">Notes</Label>
+              <Label htmlFor="clinic-notes">Ghi chú</Label>
               <Input id="clinic-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
             </div>
           </div>
@@ -411,7 +411,7 @@ export function CollectionRequestStep({
         ) : null}
 
         {error ? <p className="text-sm text-rose-600">{error}</p> : null}
-        <Button onClick={submit}>Continue to pricing</Button>
+        <Button onClick={submit}>Tiếp tục tính giá</Button>
       </Card>
     </div>
   );
@@ -492,7 +492,7 @@ export function CatalogSelectStep({
 
   function continueNext() {
     if (selectedTests.length === 0) {
-      setError("Select at least one test.");
+      setError("Hãy chọn ít nhất một xét nghiệm.");
       return;
     }
     onContinue({
@@ -508,25 +508,25 @@ export function CatalogSelectStep({
   return (
     <div className="space-y-5">
       <SectionHeader
-        title="Select tests"
+        title="Chọn xét nghiệm"
         description={`${patient.patientName} · ${patient.patientCode}. Catalog prices are display estimates until order creation.`}
         actions={
           <Button size="sm" variant="outline" onClick={onBack}>
-            Back
+            Quay lại
           </Button>
         }
       />
       <Input
         value={catalogQuery}
         onChange={(event) => setCatalogQuery(event.target.value)}
-        placeholder="Search test catalog by code or name"
-        aria-label="Catalog search"
+        placeholder="Tìm trong danh mục theo mã hoặc tên"
+        aria-label="Tìm danh mục"
       />
       {/* Keep create-order controls visible when catalog is empty/erroring. */}
       <div className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <Label htmlFor="m1-discount">Discount (estimate)</Label>
+            <Label htmlFor="m1-discount">Giảm giá (ước tính)</Label>
             <Input
               id="m1-discount"
               value={discount}
@@ -534,7 +534,7 @@ export function CatalogSelectStep({
             />
           </div>
           <div>
-            <Label htmlFor="m1-note">Note</Label>
+            <Label htmlFor="m1-note">Ghi chú</Label>
             <Input id="m1-note" value={note} onChange={(event) => setNote(event.target.value)} />
           </div>
         </div>
@@ -542,7 +542,7 @@ export function CatalogSelectStep({
           loading={loading}
           error={error}
           empty={!loading && tests.length === 0}
-          emptyLabel="No tests found in master data."
+          emptyLabel="Không tìm thấy xét nghiệm trong danh mục."
           onRetry={() => void loadCatalog(catalogQuery)}
         >
           <SimpleTable<ReceptionTest>
@@ -557,26 +557,26 @@ export function CatalogSelectStep({
                     type="checkbox"
                     checked={selectedTestIds.includes(row.id)}
                     onChange={() => toggleTest(row)}
-                    aria-label={`Select ${row.code}`}
+                    aria-label={`Chọn ${row.code}`}
                   />
                 ),
               },
-              { key: "code", label: "Code", render: (row) => row.code },
-              { key: "name", label: "Test", render: (row) => row.name },
+              { key: "code", label: "Mã", render: (row) => row.code },
+              { key: "name", label: "Xét nghiệm", render: (row) => row.name },
               {
                 key: "specimen",
-                label: "Specimen",
+                label: "Mẫu",
                 render: (row) => row.sample_type ?? "—",
               },
               {
                 key: "tat",
-                label: "TAT (h)",
+                label: "TAT (giờ)",
                 render: (row) =>
                   row.turnaround_hours != null ? String(row.turnaround_hours) : "—",
               },
               {
                 key: "price",
-                label: "Catalog price",
+                label: "Giá niêm yết",
                 render: (row) => (row.price != null ? formatCurrency(row.price) : "—"),
               },
             ]}
@@ -590,7 +590,7 @@ export function CatalogSelectStep({
                 size="sm"
                 variant="outline"
                 onClick={() => toggleTest(test)}
-                aria-label={`Remove ${test.code}`}
+                aria-label={`Bỏ ${test.code}`}
               >
                 {test.code} ×
               </Button>
@@ -599,15 +599,15 @@ export function CatalogSelectStep({
         ) : null}
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
           <p>
-            Selected {selectedTests.length} · Estimate subtotal{" "}
-            {formatCurrency(estimateSubtotal)} · Estimate total {formatCurrency(estimateTotal)}
+            Đã chọn {selectedTests.length} · Tạm tính{" "}
+            {formatCurrency(estimateSubtotal)} · Ước tính tổng {formatCurrency(estimateTotal)}
           </p>
           <p className="mt-1 text-xs text-slate-500">
-            Estimate only — final totals come from the order create response.
+            Chỉ là ước tính — tổng tiền chính thức lấy từ hệ thống sau khi tạo đơn.
           </p>
         </div>
         <Button disabled={selectedTests.length === 0} onClick={continueNext}>
-          Continue to collection request
+          Tiếp tục: yêu cầu thu mẫu
         </Button>
       </div>
     </div>
@@ -661,11 +661,11 @@ export function ReviewPricingStep({
   async function submitOrder() {
     if (inFlight.current || pendingResult) return;
     if (!patient.patientCode) {
-      setError("Select a patient before creating an order.");
+      setError("Hãy chọn bệnh nhân trước khi tạo đơn.");
       return;
     }
     if (selection.testIds.length === 0) {
-      setError("Select at least one test.");
+      setError("Hãy chọn ít nhất một xét nghiệm.");
       return;
     }
     inFlight.current = true;
@@ -698,7 +698,7 @@ export function ReviewPricingStep({
       );
       const orderRef = getOrderCode(response.order);
       if (!orderRef) {
-        throw new Error("Order code not returned by the API.");
+        throw new Error("Hệ thống không trả về mã đơn.");
       }
       const result = {
         orderRef,
@@ -710,7 +710,7 @@ export function ReviewPricingStep({
       if (Math.abs(authoritative - selection.estimateTotal) > 0.01) {
         setPendingResult(result);
         setPriceDrift(
-          `Backend total ${formatCurrency(authoritative)} differs from estimate ${formatCurrency(selection.estimateTotal)}. Confirm to continue with the backend total.`,
+          `Tổng tiền của hệ thống ${formatCurrency(authoritative)} khác với ước tính ${formatCurrency(selection.estimateTotal)}. Hãy xác nhận để tiếp tục theo tổng tiền của hệ thống.`,
         );
         return;
       }
@@ -726,23 +726,23 @@ export function ReviewPricingStep({
   return (
     <div className="space-y-5">
       <SectionHeader
-        title="Review and pricing"
-        description="Confirm selection and collection route, then create the laboratory order. Backend pricing is authoritative."
+        title="Kiểm tra và tính giá"
+        description="Kiểm tra lựa chọn và cách thu mẫu, rồi tạo đơn xét nghiệm. Giá do hệ thống tính là giá chính thức."
         actions={
           <Button size="sm" variant="outline" disabled={creating} onClick={onBack}>
-            Back
+            Quay lại
           </Button>
         }
       />
       <Card className="space-y-4">
         <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs text-slate-500">Patient</p>
+            <p className="text-xs text-slate-500">Bệnh nhân</p>
             <p className="font-medium">{patient.patientName}</p>
             <p className="font-mono text-xs text-slate-500">{patient.patientCode}</p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs text-slate-500">Collection route</p>
+            <p className="text-xs text-slate-500">Cách thu mẫu</p>
             <p className="font-medium">{collectionModeLabel(collectionRequest.mode)}</p>
             <p className="text-xs text-slate-500">
               Specimen: {collectionRequest.specimen_type}
@@ -754,7 +754,7 @@ export function ReviewPricingStep({
             </p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs text-slate-500">Display estimate (not final)</p>
+            <p className="text-xs text-slate-500">Ước tính hiển thị (chưa chính thức)</p>
             <p className="font-semibold">{formatCurrency(selection.estimateTotal)}</p>
             <p className="text-xs text-slate-500">
               Subtotal {formatCurrency(selection.estimateSubtotal)} · Discount{" "}
@@ -766,11 +766,11 @@ export function ReviewPricingStep({
           rows={selection.tests}
           rowKey={(row) => row.id}
           columns={[
-            { key: "code", label: "Code", render: (row) => row.code },
-            { key: "name", label: "Test", render: (row) => row.name },
+            { key: "code", label: "Mã", render: (row) => row.code },
+            { key: "name", label: "Xét nghiệm", render: (row) => row.name },
             {
               key: "price",
-              label: "Catalog price",
+              label: "Giá niêm yết",
               render: (row) => (row.price != null ? formatCurrency(row.price) : "—"),
             },
           ]}
@@ -789,12 +789,12 @@ export function ReviewPricingStep({
               {formatCurrency(pendingResult.pricing.total)}
             </p>
             <Button onClick={() => acceptCreated(pendingResult)}>
-              Confirm backend total
+              Xác nhận tổng tiền của hệ thống
             </Button>
           </div>
         ) : null}
         <Button disabled={creating || Boolean(pendingResult)} onClick={() => void submitOrder()}>
-          {creating ? "Creating order…" : "Create laboratory order"}
+          {creating ? "Đang tạo đơn…" : "Tạo đơn xét nghiệm"}
         </Button>
       </Card>
     </div>
@@ -857,18 +857,18 @@ export function OrderConfirmationStep({
   return (
     <div className="space-y-5">
       <SectionHeader
-        title="Order confirmation"
-        description="Backend-issued order number and authoritative pricing. Collect payment below, then hand the sample over to the laboratory."
+        title="Xác nhận đơn"
+        description="Mã đơn và giá chính thức do hệ thống cấp. Thu tiền bên dưới, rồi bàn giao mẫu cho phòng xét nghiệm."
         actions={
           <Button size="sm" variant="outline" disabled={loading} onClick={() => void refresh()}>
-            {loading ? "Refreshing…" : "Refresh"}
+            {loading ? "Đang làm mới…" : "Làm mới"}
           </Button>
         }
       />
       <Card className="space-y-4">
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
           <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
-            Laboratory order number
+            Mã đơn xét nghiệm
           </p>
           <p className="mt-1 break-all font-mono text-lg font-semibold text-emerald-950">
             {orderRef}
@@ -878,22 +878,22 @@ export function OrderConfirmationStep({
           <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
             <p>{error}</p>
             <Button className="mt-2" size="sm" variant="outline" onClick={() => void refresh()}>
-              Retry
+              Thử lại
             </Button>
           </div>
         ) : null}
         <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs text-slate-500">Patient</p>
+            <p className="text-xs text-slate-500">Bệnh nhân</p>
             <p className="font-medium">{patient.patientName}</p>
             <p className="font-mono text-xs">{patient.patientCode}</p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs text-slate-500">Status</p>
+            <p className="text-xs text-slate-500">Trạng thái</p>
             <p className="font-medium uppercase">{status}</p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs text-slate-500">Authoritative total</p>
+            <p className="text-xs text-slate-500">Tổng tiền chính thức</p>
             <p className="font-semibold">{formatCurrency(authoritative.total)}</p>
             <p className="text-xs text-slate-500">
               Subtotal {formatCurrency(authoritative.subtotal)} · Discount{" "}
@@ -904,9 +904,9 @@ export function OrderConfirmationStep({
         </div>
         <div className="flex flex-wrap gap-3">
           <a href={`/app/reception/workflow?order=${encodeURIComponent(orderRef)}`}>
-            <Button variant="outline">Open order</Button>
+            <Button variant="outline">Mở đơn</Button>
           </a>
-          <Button onClick={onCreateAnother}>Create another order</Button>
+          <Button onClick={onCreateAnother}>Tạo đơn khác</Button>
         </div>
       </Card>
     </div>

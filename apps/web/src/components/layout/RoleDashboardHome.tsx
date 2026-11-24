@@ -47,12 +47,37 @@ export function RoleDashboardHome({
     [accessToken, activeOrganizationId, user],
   );
 
-  const vi = role === "collector";
+  const vi = true;
   const CARD_VI: Record<string, string> = {
     "Awaiting collection": "Chờ lấy mẫu",
     "In transit": "Đang vận chuyển",
     "Arrived at lab": "Đã đến phòng XN",
     "Rejected / alerts": "Từ chối / cảnh báo",
+    "Orders today": "Đơn hôm nay",
+    "Pending collection": "Chờ lấy mẫu",
+    "Pending payment": "Chờ thanh toán",
+    "Waiting queue": "Hàng chờ",
+    "Lab queue": "Hàng đợi xét nghiệm",
+    "Ops alerts": "Cảnh báo vận hành",
+    "Critical results": "Kết quả nguy kịch",
+    "Completed reports": "Báo cáo hoàn tất",
+    "Avg TAT (min)": "TAT trung bình (phút)",
+    "Overdue tests": "Xét nghiệm trễ hạn",
+    Overdue: "Trễ hạn",
+    Incoming: "Mẫu đến",
+    "Pending validation": "Chờ duyệt",
+    "Critical / abnormal": "Nguy kịch / bất thường",
+    "Released today": "Đã trả hôm nay",
+    Alerts: "Cảnh báo",
+    "Pending reviews": "Chờ duyệt kết quả",
+    "Critical flags": "Cờ nguy kịch",
+    Results: "Kết quả",
+    "Orders / visits": "Đơn / lượt khám",
+    "Home visits": "Lấy mẫu tại nhà",
+    Messages: "Tin nhắn",
+  };
+  const HINT_VI: Record<string, string> = {
+    "Critical + overdue + failed imports": "Nguy kịch + trễ hạn + nhập lỗi",
   };
   const [cards, setCards] = useState<RoleDashboardCard[]>(fallbackCards);
   const [loading, setLoading] = useState(true);
@@ -106,23 +131,23 @@ export function RoleDashboardHome({
 
       {loading ? (
         <p className="text-sm text-slate-500" role="status">
-          Loading live metrics…
+          Đang tải số liệu…
         </p>
       ) : null}
 
       {error ? (
         <Card className="border-rose-200 bg-rose-50">
-          <CardTitle>Unable to load dashboard metrics</CardTitle>
+          <CardTitle>Không tải được số liệu</CardTitle>
           <CardDescription className="text-rose-700">{error}</CardDescription>
           <Button className="mt-3" size="sm" variant="outline" onClick={() => void load()}>
-            Retry
+            Thử lại
           </Button>
         </Card>
       ) : null}
 
       {!loading && !error && empty ? (
         <p className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
-          No activity yet for this workspace. Metrics will appear after the first orders.
+          Chưa có hoạt động nào. Số liệu sẽ hiện sau đơn hàng đầu tiên.
         </p>
       ) : null}
 
@@ -133,7 +158,7 @@ export function RoleDashboardHome({
             <p className="mt-2 text-2xl font-semibold text-slate-900">
               {loading ? "…" : card.value}
             </p>
-            {card.hint ? <p className="mt-1 text-xs text-slate-500">{card.hint}</p> : null}
+            {card.hint ? <p className="mt-1 text-xs text-slate-500">{HINT_VI[card.hint] ?? card.hint}</p> : null}
           </Card>
         ))}
       </section>
@@ -146,7 +171,7 @@ export function RoleDashboardHome({
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <CardTitle>{action.label}</CardTitle>
-                  {action.comingSoon ? <Badge>Coming soon</Badge> : null}
+                  {action.comingSoon ? <Badge>Sắp có</Badge> : null}
                 </div>
                 {action.description ? (
                   <CardDescription>{action.description}</CardDescription>
@@ -154,7 +179,7 @@ export function RoleDashboardHome({
               </div>
               {action.comingSoon ? (
                 <span className="mt-4 inline-flex items-center gap-1 text-sm text-slate-400">
-                  Planned module
+                  Đang lên kế hoạch
                 </span>
               ) : (
                 <Link

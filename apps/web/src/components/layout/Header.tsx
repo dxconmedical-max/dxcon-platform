@@ -28,7 +28,7 @@ export function Header({ title }: { title: string }) {
             <button
               type="button"
               className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
-              aria-label="Open menu"
+              aria-label="Mở menu"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -51,7 +51,7 @@ export function Header({ title }: { title: string }) {
                   router.push(path),
                 );
               }}
-              aria-label="Switch organization"
+              aria-label="Đổi tổ chức"
             >
               {memberships.map((m) => (
                 <option key={m.organization_id} value={m.organization_id}>
@@ -65,7 +65,7 @@ export function Header({ title }: { title: string }) {
           <div className="relative hidden lg:block">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
-              placeholder="Search modules..."
+              placeholder="Tìm chức năng..."
               className="w-48 rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-teal-500"
             />
           </div>
@@ -76,7 +76,7 @@ export function Header({ title }: { title: string }) {
           <button
             type="button"
             className="relative rounded-lg p-2 text-slate-500 hover:bg-slate-100"
-            aria-label="Notifications"
+            aria-label="Thông báo"
           >
             <Bell className="h-5 w-5" />
           </button>
@@ -102,7 +102,7 @@ export function Header({ title }: { title: string }) {
                   }
                 >
                   <LogOut className="h-4 w-4" />
-                  Sign out
+                  Đăng xuất
                 </Button>
               </div>
             ) : null}

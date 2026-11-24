@@ -2,15 +2,15 @@ import { AppShell } from "@/components/layout/AppShell";
 import { OrganizationManager } from "@/components/pilot/OrganizationManager";
 import { PilotReadinessHub } from "@/components/pilot/PilotReadinessHub";
 
-export const metadata = { title: "Organizations" };
+export const metadata = { title: "Tổ chức" };
 
 export default function AdminOrganizationsPage() {
   return (
-    <AppShell title="Organizations" workspacePath="/app/admin/organizations">
+    <AppShell title="Tổ chức" workspacePath="/app/admin/organizations">
       <OrganizationManager />
       <PilotReadinessHub
-        title="Organization management"
-        subtitle="Tenant organizations, setup wizard, and partner foundation."
+        title="Quản lý tổ chức"
+        subtitle="Các tổ chức khách hàng, hướng dẫn thiết lập và đối tác."
         endpoint="/api/v1/pilot-readiness/health-dashboard"
       />
     </AppShell>

@@ -50,7 +50,7 @@ function RegisterPanel() {
   async function submit(force = false) {
     if (!accessToken || inFlight.current) return;
     if (!form.full_name.trim() || !form.phone.trim()) {
-      setError("Full name and phone are required.");
+      setError("Cần nhập họ tên và số điện thoại.");
       return;
     }
     inFlight.current = true;
@@ -76,7 +76,7 @@ function RegisterPanel() {
               message: `Existing patient ${p.full_name}`,
             })),
           );
-          setError("Possible duplicate patient. Use an existing match or register anyway.");
+          setError("Có thể trùng bệnh nhân đã có. Hãy dùng bệnh nhân đã có hoặc vẫn đăng ký mới.");
           return;
         }
       }
@@ -106,7 +106,7 @@ function RegisterPanel() {
       const warnings = getDuplicateWarnings(err);
       if (warnings.length > 0) {
         setDuplicates(warnings);
-        setError("Possible duplicate patient. Use an existing match or register anyway.");
+        setError("Có thể trùng bệnh nhân đã có. Hãy dùng bệnh nhân đã có hoặc vẫn đăng ký mới.");
       } else {
         setError(normalizeApiError(err));
       }
@@ -119,7 +119,7 @@ function RegisterPanel() {
   if (!canWrite) {
     return (
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-        Reception write permission is required to register patients.
+        Cần quyền ghi của tiếp nhận để đăng ký bệnh nhân.
       </div>
     );
   }
@@ -127,14 +127,14 @@ function RegisterPanel() {
   return (
     <div className="space-y-5">
       <SectionHeader
-        title="Register walk-in patient"
-        description="Creates a patient via the production reception workspace API with duplicate detection."
+        title="Đăng ký bệnh nhân đến trực tiếp"
+        description="Tạo bệnh nhân mới, có kiểm tra trùng."
         actions={
           <Link
             href={`/app/reception/search${returnQuery ? `?q=${encodeURIComponent(returnQuery)}` : ""}`}
           >
             <Button size="sm" variant="outline">
-              Back to search
+              Quay lại tìm kiếm
             </Button>
           </Link>
         }
@@ -142,7 +142,7 @@ function RegisterPanel() {
       <Card className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <Label htmlFor="full_name">Full name *</Label>
+            <Label htmlFor="full_name">Họ và tên *</Label>
             <Input
               id="full_name"
               value={form.full_name}
@@ -150,7 +150,7 @@ function RegisterPanel() {
             />
           </div>
           <div>
-            <Label htmlFor="phone">Phone *</Label>
+            <Label htmlFor="phone">Số điện thoại *</Label>
             <Input
               id="phone"
               value={form.phone}
@@ -158,7 +158,7 @@ function RegisterPanel() {
             />
           </div>
           <div>
-            <Label htmlFor="patient_code">Patient code (optional)</Label>
+            <Label htmlFor="patient_code">Mã bệnh nhân (không bắt buộc)</Label>
             <Input
               id="patient_code"
               value={form.patient_code}
@@ -168,7 +168,7 @@ function RegisterPanel() {
             />
           </div>
           <div>
-            <Label htmlFor="national_id">National ID</Label>
+            <Label htmlFor="national_id">CCCD/CMND</Label>
             <Input
               id="national_id"
               value={form.national_id}
@@ -178,7 +178,7 @@ function RegisterPanel() {
             />
           </div>
           <div>
-            <Label htmlFor="gender">Gender</Label>
+            <Label htmlFor="gender">Giới tính</Label>
             <select
               id="gender"
               className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
@@ -192,7 +192,7 @@ function RegisterPanel() {
             </select>
           </div>
           <div>
-            <Label htmlFor="dob">Date of birth</Label>
+            <Label htmlFor="dob">Ngày sinh</Label>
             <Input
               id="dob"
               type="date"
@@ -212,7 +212,7 @@ function RegisterPanel() {
             />
           </div>
           <div>
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="address">Địa chỉ</Label>
             <Input
               id="address"
               value={form.address}
@@ -223,7 +223,7 @@ function RegisterPanel() {
         {error ? <p className="text-sm text-rose-600">{error}</p> : null}
         {duplicates.length > 0 ? (
           <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
-            <p className="text-sm font-medium text-amber-900">Duplicate detection</p>
+            <p className="text-sm font-medium text-amber-900">Kiểm tra trùng</p>
             <ul className="space-y-2 text-sm text-amber-900">
               {duplicates.map((warning, index) => (
                 <li
@@ -231,7 +231,7 @@ function RegisterPanel() {
                   className="flex flex-wrap items-center justify-between gap-2"
                 >
                   <span>
-                    {String(warning.message ?? warning.reason ?? "Possible match")}
+                    {String(warning.message ?? warning.reason ?? "Có thể trùng")}
                     {warning.patient_code ? ` (${warning.patient_code})` : ""}
                   </span>
                   {warning.patient_code ? (
@@ -239,7 +239,7 @@ function RegisterPanel() {
                       href={`/app/reception/workflow?patient=${encodeURIComponent(String(warning.patient_code))}`}
                     >
                       <Button size="sm" variant="outline">
-                        Use existing
+                        Dùng bệnh nhân này
                       </Button>
                     </Link>
                   ) : null}
@@ -247,12 +247,12 @@ function RegisterPanel() {
               ))}
             </ul>
             <Button variant="secondary" disabled={creating} onClick={() => void submit(true)}>
-              {creating ? "Registering…" : "Register anyway"}
+              {creating ? "Đang đăng ký…" : "Vẫn đăng ký mới"}
             </Button>
           </div>
         ) : null}
         <Button disabled={creating || !accessToken} onClick={() => void submit(false)}>
-          {creating ? "Registering…" : "Register patient"}
+          {creating ? "Đang đăng ký…" : "Đăng ký bệnh nhân"}
         </Button>
       </Card>
     </div>
@@ -261,8 +261,8 @@ function RegisterPanel() {
 
 export default function ReceptionRegisterPage() {
   return (
-    <AppShell title="Register patient" workspacePath="/app/reception">
-      <Suspense fallback={<p className="text-sm text-slate-500">Loading…</p>}>
+    <AppShell title="Đăng ký bệnh nhân" workspacePath="/app/reception">
+      <Suspense fallback={<p className="text-sm text-slate-500">Đang tải…</p>}>
         <RegisterPanel />
       </Suspense>
     </AppShell>

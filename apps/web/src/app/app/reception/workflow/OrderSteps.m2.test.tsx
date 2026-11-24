@@ -86,12 +86,12 @@ describe("Reception Milestone 2 PaymentStep", () => {
   it("rejects overpayment client-side", async () => {
     const user = userEvent.setup();
     renderPayment();
-    expect(await screen.findByRole("button", { name: "Collect payment" })).toBeInTheDocument();
-    const amount = screen.getByLabelText("Amount due");
+    expect(await screen.findByRole("button", { name: "Thu tiền" })).toBeInTheDocument();
+    const amount = screen.getByLabelText("Số tiền phải trả");
     await user.clear(amount);
     await user.type(amount, "150000");
-    await user.click(screen.getByRole("button", { name: "Collect payment" }));
-    expect(await screen.findByText(/Overpayment not allowed/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Thu tiền" }));
+    expect(await screen.findByText(/Không được trả vượt quá/i)).toBeInTheDocument();
     expect(collectReceptionPayment).not.toHaveBeenCalled();
   });
 
@@ -118,11 +118,11 @@ describe("Reception Milestone 2 PaymentStep", () => {
       idempotent_replay: false,
     });
     renderPayment();
-    await screen.findByRole("button", { name: "Collect payment" });
-    const amount = screen.getByLabelText("Amount due");
+    await screen.findByRole("button", { name: "Thu tiền" });
+    const amount = screen.getByLabelText("Số tiền phải trả");
     await user.clear(amount);
     await user.type(amount, "50000");
-    await user.click(screen.getByRole("button", { name: "Collect payment" }));
+    await user.click(screen.getByRole("button", { name: "Thu tiền" }));
     await waitFor(() =>
       expect(collectReceptionPayment).toHaveBeenCalledWith(
         expect.objectContaining({ token: "t" }),
@@ -146,8 +146,8 @@ describe("Reception Milestone 2 PaymentStep", () => {
       .mockResolvedValue(paidDetail);
 
     renderPayment();
-    await screen.findByRole("button", { name: "Collect payment" });
-    await user.click(screen.getByRole("button", { name: "Collect payment" }));
+    await screen.findByRole("button", { name: "Thu tiền" });
+    await user.click(screen.getByRole("button", { name: "Thu tiền" }));
 
     await waitFor(() =>
       expect(collectReceptionPayment).toHaveBeenCalledWith(
@@ -160,10 +160,10 @@ describe("Reception Milestone 2 PaymentStep", () => {
         }),
       ),
     );
-    expect(await screen.findByText("Receipt")).toBeInTheDocument();
+    expect(await screen.findByText("Biên lai")).toBeInTheDocument();
     expect(screen.getByText("RCT-1")).toBeInTheDocument();
     expect(screen.getByText("cashier@dxcon.test")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Print receipt" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "In biên lai" })).toBeInTheDocument();
   });
 
   it("locks duplicate submit while payment is in flight", async () => {
@@ -175,10 +175,10 @@ describe("Reception Milestone 2 PaymentStep", () => {
     vi.mocked(collectReceptionPayment).mockImplementation(() => payPromise as never);
 
     renderPayment();
-    const button = await screen.findByRole("button", { name: "Collect payment" });
+    const button = await screen.findByRole("button", { name: "Thu tiền" });
     await user.click(button);
     await waitFor(() => expect(collectReceptionPayment).toHaveBeenCalledTimes(1));
-    await user.click(screen.getByRole("button", { name: /Recording payment/i }));
+    await user.click(screen.getByRole("button", { name: /Đang ghi nhận thanh toán/i }));
     expect(collectReceptionPayment).toHaveBeenCalledTimes(1);
 
     resolvePay({
@@ -189,7 +189,7 @@ describe("Reception Milestone 2 PaymentStep", () => {
       idempotent_replay: false,
     });
     vi.mocked(fetchReceptionOrder).mockResolvedValue(paidDetail);
-    await screen.findByText("Receipt");
+    await screen.findByText("Biên lai");
   });
 
   it("surfaces backend payment errors", async () => {
@@ -198,8 +198,8 @@ describe("Reception Milestone 2 PaymentStep", () => {
       new ApiError("Overpayment is not allowed", 400, { error: "Overpayment is not allowed" }),
     );
     renderPayment();
-    await screen.findByRole("button", { name: "Collect payment" });
-    await user.click(screen.getByRole("button", { name: "Collect payment" }));
+    await screen.findByRole("button", { name: "Thu tiền" });
+    await user.click(screen.getByRole("button", { name: "Thu tiền" }));
     expect(await screen.findByText(/Overpayment is not allowed/i)).toBeInTheDocument();
   });
 });

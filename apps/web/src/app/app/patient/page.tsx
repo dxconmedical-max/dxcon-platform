@@ -7,28 +7,28 @@ import { RoleDashboardHome } from "@/components/layout/RoleDashboardHome";
 
 const ACTIONS = [
   {
-    label: "My results",
+    label: "Kết quả của tôi",
     href: "/app/patient/results",
-    description: "Download released laboratory reports.",
+    description: "Tải các báo cáo xét nghiệm đã được trả.",
   },
 ];
 
 export default function PatientPage() {
   const fallbackCards = useMemo(
     () => [
-      { label: "Results", value: "—" },
-      { label: "Orders / visits", value: "—" },
-      { label: "Home visits", value: "—" },
-      { label: "Messages", value: "—" },
+      { label: "Kết quả", value: "—" },
+      { label: "Đơn / lượt khám", value: "—" },
+      { label: "Lấy mẫu tại nhà", value: "—" },
+      { label: "Tin nhắn", value: "—" },
     ],
     [],
   );
 
   return (
-    <AppShell title="Patient portal" workspacePath="/app/patient">
+    <AppShell title="Cổng bệnh nhân" workspacePath="/app/patient">
       <RoleDashboardHome
-        title="Patient portal"
-        subtitle="Your released results and visit activity (aggregates only — no shared PII)."
+        title="Cổng bệnh nhân"
+        subtitle="Kết quả đã trả và lịch sử khám của bạn (chỉ số tổng hợp, không chia sẻ thông tin cá nhân)."
         role="patient"
         fallbackCards={fallbackCards}
         actions={ACTIONS}
