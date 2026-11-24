@@ -31,6 +31,7 @@ class ClinicBillingTests(unittest.TestCase):
             ("post", f"{b}/x/settings"),
             ("get", f"{b}/x/prices"),
             ("post", f"{b}/x/prices/y"),
+            ("post", f"{b}/x/prices/bulk"),
             ("post", f"{b}/x/contracts"),
             ("get", f"{b}/x/contracts/y/file"),
             ("post", f"{b}/x/statements/preview"),
@@ -75,3 +76,16 @@ class ClinicBillingTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_bulk_price_parsing():
+    from app.clinic_billing.logic import parse_price, parse_price_lines
+
+    assert parse_price("1.200.000") == 1200000
+    assert parse_price("1,200,000") == 1200000
+    assert parse_price("350000đ") == 350000
+    assert parse_price("abc") is None
+    rows = parse_price_lines("CBC\t120000\nHBA1C;250.000\nTSH -\nBAD\nX abc")
+    assert [r["price"] for r in rows[:2]] == [120000.0, 250000.0]
+    assert rows[2]["remove"] is True
+    assert rows[3]["error"] and rows[4]["error"]

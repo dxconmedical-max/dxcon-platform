@@ -9,6 +9,7 @@ import { normalizeApiError } from "@/lib/errors";
 import { formatVnd } from "@/lib/format";
 import {
   addPayment,
+  bulkSetPrices,
   createStatement,
   downloadContract,
   getClinicBilling,
@@ -21,6 +22,7 @@ import {
   uploadContract,
   voidStatement,
   type Aging,
+  type BulkPriceResult,
   type ClinicBilling,
   type PriceRow,
   type ReceivableRow,
@@ -76,6 +78,8 @@ export default function ClinicBillingPage() {
   const [onlyCustom, setOnlyCustom] = useState(false);
   const [prices, setPrices] = useState<PriceRow[]>([]);
   const [priceEdit, setPriceEdit] = useState<Record<string, string>>({});
+  const [bulkText, setBulkText] = useState("");
+  const [bulkResult, setBulkResult] = useState<BulkPriceResult | null>(null);
   // statements
   const [ps, setPs] = useState("");
   const [pe, setPe] = useState("");
@@ -335,6 +339,60 @@ export default function ClinicBillingPage() {
 
             {tab === "prices" ? (
               <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+                <div className="space-y-2 rounded-lg bg-slate-50 p-3">
+                  <p className="text-sm font-medium">Nhập nhanh nhiều giá theo mã xét nghiệm</p>
+                  <p className="text-xs text-slate-500">
+                    Mỗi dòng một xét nghiệm: mã rồi giá, cách nhau bằng dấu cách, dấu ; hoặc dán thẳng hai cột từ Excel. Ví dụ: CBC 120000. Giá ghi “-” để xóa giá riêng.
+                  </p>
+                  <textarea
+                    value={bulkText}
+                    onChange={(e) => { setBulkText(e.target.value); setBulkResult(null); }}
+                    rows={6}
+                    placeholder={"CBC\t120000\nHBA1C\t250000"}
+                    aria-label="Danh sách mã và giá"
+                    className={`${INPUT} w-full font-mono`}
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={busy || !bulkText.trim()}
+                      onClick={() => ctx && orgId && void guard(async () => setBulkResult(await bulkSetPrices(ctx, orgId, bulkText, false)))}
+                    >
+                      Kiểm tra
+                    </Button>
+                    <Button
+                      size="sm"
+                      disabled={busy || !bulkText.trim()}
+                      onClick={() =>
+                        ctx && orgId &&
+                        void guard(async () => {
+                          const r = await bulkSetPrices(ctx, orgId, bulkText, true);
+                          setBulkResult(r);
+                          if (r.errors.length === 0) setBulkText("");
+                          await refresh();
+                        }, "Đã áp dụng bảng giá.")
+                      }
+                    >
+                      Áp dụng
+                    </Button>
+                  </div>
+                  {bulkResult ? (
+                    <div className="text-sm">
+                      <p>
+                        {bulkResult.applied ? "Đã áp dụng" : "Kiểm tra xong"}: thêm mới {bulkResult.created}, cập nhật {bulkResult.updated}, xóa {bulkResult.removed}
+                        {bulkResult.errors.length ? `, ${bulkResult.errors.length} dòng lỗi` : ""}.
+                      </p>
+                      {bulkResult.errors.length ? (
+                        <ul className="mt-1 list-disc pl-5 text-xs text-red-700">
+                          {bulkResult.errors.map((e) => (
+                            <li key={`${e.line}-${e.code}`}>Dòng {e.line} ({e.code}): {e.error}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <input
                     value={pq}

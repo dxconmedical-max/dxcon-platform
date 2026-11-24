@@ -55,3 +55,61 @@ def aging_summary(allocated: list[dict], today: date) -> dict:
         if due is not None:
             buckets[aging_bucket(due, today)] += s["outstanding"]
     return {k: round(v, 2) for k, v in buckets.items()}
+
+
+MAX_BULK_LINES = 500
+
+
+def parse_price(raw: str) -> float | None:
+    """'1.200.000', '1,200,000', '1200000', '350000đ' -> number; None when it is not a price."""
+    s = (raw or "").strip().lower().replace("đ", "").replace("vnd", "").replace("vnđ", "").replace(" ", "")
+    if not s:
+        return None
+    if s.count(".") + s.count(",") >= 1:
+        import re
+
+        if re.fullmatch(r"\d{1,3}([.,]\d{3})+", s):
+            s = re.sub(r"[.,]", "", s)
+        else:
+            s = s.replace(",", ".")
+    try:
+        value = float(s)
+    except ValueError:
+        return None
+    return value if value >= 0 else None
+
+
+def parse_price_lines(text: str) -> list[dict]:
+    """One line per test: '<code><tab|;|,|space><price>' (a '-' price means: remove the clinic price).
+
+    Returns [{"line": n, "code": "...", "price": float|None, "remove": bool, "error": str|None}].
+    """
+    import re
+
+    out = []
+    for n, line in enumerate((text or "").splitlines(), 1):
+        raw = line.strip()
+        if not raw:
+            continue
+        if len(out) >= MAX_BULK_LINES:
+            out.append({"line": n, "code": "", "price": None, "remove": False, "error": f"Tối đa {MAX_BULK_LINES} dòng mỗi lần."})
+            break
+        if "\t" in raw:
+            parts = [p.strip() for p in raw.split("\t") if p.strip()]
+        elif ";" in raw:
+            parts = [p.strip() for p in raw.split(";") if p.strip()]
+        else:
+            parts = [p for p in re.split(r"\s+", raw, maxsplit=1) if p]
+        if len(parts) < 2:
+            out.append({"line": n, "code": raw[:40], "price": None, "remove": False, "error": "Thiếu giá (mỗi dòng gồm mã và giá)."})
+            continue
+        code, price_raw = parts[0], parts[-1]
+        if price_raw in ("-", "xoa", "xóa"):
+            out.append({"line": n, "code": code, "price": None, "remove": True, "error": None})
+            continue
+        price = parse_price(price_raw)
+        if price is None:
+            out.append({"line": n, "code": code, "price": None, "remove": False, "error": f"Giá không hợp lệ: {price_raw[:20]}"})
+        else:
+            out.append({"line": n, "code": code, "price": round(price, 2), "remove": False, "error": None})
+    return out

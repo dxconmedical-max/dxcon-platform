@@ -108,6 +108,22 @@ export async function setClinicPrice(ctx: Ctx, orgId: string, testId: string, pr
   await apiRequest(`${BASE}/${encodeURIComponent(orgId)}/prices/${encodeURIComponent(testId)}`, opts(ctx, { method: "POST", body: { price } }));
 }
 
+export type BulkPriceResult = {
+  applied: boolean;
+  created: number;
+  updated: number;
+  removed: number;
+  errors: { line: number; code: string; error: string }[];
+};
+
+export async function bulkSetPrices(ctx: Ctx, orgId: string, text: string, apply: boolean): Promise<BulkPriceResult> {
+  const r = await apiRequest<{ data: BulkPriceResult }>(
+    `${BASE}/${encodeURIComponent(orgId)}/prices/bulk`,
+    opts(ctx, { method: "POST", body: { text, apply } }),
+  );
+  return r.data;
+}
+
 export async function previewStatement(ctx: Ctx, orgId: string, body: { period_start: string; period_end: string }) {
   const r = await apiRequest<{ data: { order_count: number; total_amount: number } }>(
     `${BASE}/${encodeURIComponent(orgId)}/statements/preview`,
