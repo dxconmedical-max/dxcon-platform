@@ -310,6 +310,9 @@ def staff_request_approve(request_id: str):
         return {"success": False, "error": str(exc)}, 400
     row.status = "APPROVED"
     row.order_code = (result.get("order") or {}).get("order_code")
+    from app.clinic_billing.pricing import apply_clinic_prices
+
+    apply_clinic_prices(row.order_code, clinic.id)
     row.handled_by = (actor or "")[:120] or None
     row.handled_at = datetime.utcnow()
     write_audit("CLINIC_ORDER_REQUEST_APPROVED", "ClinicOrderRequest", row.reference, user_email=actor or "SYSTEM", ip_address=_client_ip())
