@@ -99,19 +99,19 @@ export function ConsentPanel({ accessToken, organizationId, patientCode }: Props
   return (
     <section
       className="space-y-3 rounded-xl border border-slate-200 bg-white p-4"
-      aria-label="Patient consent"
+      aria-label="Đồng ý của bệnh nhân"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-slate-900">Patient consent</h3>
+        <h3 className="text-sm font-semibold text-slate-900">Đồng ý của bệnh nhân</h3>
         {loading ? (
-          <span className="text-xs text-slate-500">Loading…</span>
+          <span className="text-xs text-slate-500">Đang tải…</span>
         ) : labTestGranted ? (
           <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
-            Testing consent recorded
+            Đã ghi nhận đồng ý xét nghiệm
           </span>
         ) : (
           <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
-            Testing consent not recorded
+            Chưa ghi nhận đồng ý xét nghiệm
           </span>
         )}
       </div>
@@ -146,7 +146,7 @@ export function ConsentPanel({ accessToken, organizationId, patientCode }: Props
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <Label htmlFor="consent-method">How was consent given</Label>
+          <Label htmlFor="consent-method">Hình thức đồng ý</Label>
           <select
             id="consent-method"
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
@@ -159,7 +159,7 @@ export function ConsentPanel({ accessToken, organizationId, patientCode }: Props
           </select>
         </div>
         <div>
-          <Label htmlFor="consent-doc">Form reference (optional)</Label>
+          <Label htmlFor="consent-doc">Mã phiếu (không bắt buộc)</Label>
           <Input
             id="consent-doc"
             value={documentRef}
@@ -183,7 +183,7 @@ export function ConsentPanel({ accessToken, organizationId, patientCode }: Props
       {hasGuardian ? (
         <div className="grid gap-3 sm:grid-cols-3">
           <div>
-            <Label htmlFor="guardian-name">Full name</Label>
+            <Label htmlFor="guardian-name">Họ và tên</Label>
             <Input
               id="guardian-name"
               value={guardian.name}
@@ -191,7 +191,7 @@ export function ConsentPanel({ accessToken, organizationId, patientCode }: Props
             />
           </div>
           <div>
-            <Label htmlFor="guardian-rel">Relationship</Label>
+            <Label htmlFor="guardian-rel">Quan hệ</Label>
             <Input
               id="guardian-rel"
               value={guardian.relationship}
@@ -201,7 +201,7 @@ export function ConsentPanel({ accessToken, organizationId, patientCode }: Props
             />
           </div>
           <div>
-            <Label htmlFor="guardian-doc">Supporting document</Label>
+            <Label htmlFor="guardian-doc">Giấy tờ kèm theo</Label>
             <Input
               id="guardian-doc"
               value={guardian.document}
@@ -213,7 +213,7 @@ export function ConsentPanel({ accessToken, organizationId, patientCode }: Props
 
       <div className="flex justify-end">
         <Button size="sm" onClick={() => void save()} disabled={loading || saving}>
-          {saving ? "Saving…" : "Save consent"}
+          {saving ? "Đang lưu…" : "Lưu đồng ý"}
         </Button>
       </div>
     </section>

@@ -36,7 +36,7 @@ describe("ConsentPanel", () => {
   it("starts with every box empty and shows consent not recorded", async () => {
     vi.mocked(getPatientConsents).mockResolvedValue(none);
     render(<ConsentPanel accessToken="t" patientCode="P-1" />);
-    await waitFor(() => expect(screen.getByText("Testing consent not recorded")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("Chưa ghi nhận đồng ý xét nghiệm")).toBeTruthy());
     const boxes = screen.getAllByRole("checkbox") as HTMLInputElement[];
     expect(boxes.slice(0, 5).every((box) => !box.checked)).toBe(true);
   });
@@ -52,16 +52,16 @@ describe("ConsentPanel", () => {
     });
     const user = userEvent.setup();
     render(<ConsentPanel accessToken="t" patientCode="P-1" />);
-    await waitFor(() => expect(screen.getByText("Testing consent not recorded")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("Chưa ghi nhận đồng ý xét nghiệm")).toBeTruthy());
 
     await user.click(screen.getByLabelText(/Testing \(required\)/));
-    await user.click(screen.getByRole("button", { name: "Save consent" }));
+    await user.click(screen.getByRole("button", { name: "Lưu đồng ý" }));
 
     await waitFor(() => expect(recordPatientConsents).toHaveBeenCalledTimes(1));
     const body = vi.mocked(recordPatientConsents).mock.calls[0][2];
     expect(body.method).toBe("PAPER");
     expect(body.consents.find((c) => c.consent_type === "LAB_TEST")?.granted).toBe(true);
     expect(body.consents.find((c) => c.consent_type === "CLINIC_SHARE")?.granted).toBe(false);
-    await waitFor(() => expect(screen.getByText("Testing consent recorded")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("Đã ghi nhận đồng ý xét nghiệm")).toBeTruthy());
   });
 });

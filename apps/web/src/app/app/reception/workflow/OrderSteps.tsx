@@ -155,7 +155,7 @@ export function PatientStep({
   async function submitCreate(force = false) {
     if (createInFlight.current) return;
     if (!create.full_name.trim() || !create.phone.trim()) {
-      setCreateError("Full name and phone are required.");
+      setCreateError("Cần nhập họ tên và số điện thoại.");
       return;
     }
     createInFlight.current = true;
@@ -183,7 +183,7 @@ export function PatientStep({
               message: `Existing patient ${p.full_name}`,
             })),
           );
-          setCreateError("Possible duplicate patient. Review matches or register anyway.");
+          setCreateError("Có thể trùng bệnh nhân đã có. Hãy xem các kết quả hoặc vẫn đăng ký mới.");
           return;
         }
       }
@@ -217,7 +217,7 @@ export function PatientStep({
       const warnings = getDuplicateWarnings(err);
       if (warnings.length > 0) {
         setDuplicates(warnings);
-        setCreateError("Possible duplicate patient. Review matches below or register anyway.");
+        setCreateError("Có thể trùng bệnh nhân đã có. Hãy xem các kết quả bên dưới hoặc vẫn đăng ký mới.");
       } else {
         setCreateError(normalizeApiError(err));
       }
@@ -232,33 +232,33 @@ export function PatientStep({
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-4">
           <SectionHeader
-            title="Patient search"
-            description="Search by phone, patient code, national ID, or full name."
+            title="Tìm bệnh nhân"
+            description="Tìm theo số điện thoại, mã bệnh nhân, CCCD hoặc họ tên."
           />
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Phone, patient code, national ID, or name"
-            aria-label="Patient search"
+            placeholder="Số điện thoại, mã bệnh nhân, CCCD hoặc tên"
+            aria-label="Tìm bệnh nhân"
           />
-          <p className="text-xs text-slate-500">Results update as you type (debounced).</p>
+          <p className="text-xs text-slate-500">Kết quả cập nhật khi anh/chị gõ.</p>
 
           {searched ? (
             <DataState
               loading={loading}
               error={error}
               empty={!loading && patients.length === 0}
-              emptyLabel="No patients found. Register a new patient on the right."
+              emptyLabel="Không tìm thấy bệnh nhân. Hãy đăng ký bệnh nhân mới ở bên phải."
               onRetry={() => void runSearch(query)}
             >
               <SimpleTable<ReceptionPatient>
                 rows={patients}
                 rowKey={(row) => row.patient_code}
                 columns={[
-                  { key: "code", label: "Code", render: (row) => row.patient_code },
-                  { key: "name", label: "Name", render: (row) => row.full_name },
-                  { key: "phone", label: "Phone", render: (row) => row.phone ?? "—" },
-                  { key: "nid", label: "National ID", render: (row) => row.national_id ?? "—" },
+                  { key: "code", label: "Mã", render: (row) => row.patient_code },
+                  { key: "name", label: "Tên", render: (row) => row.full_name },
+                  { key: "phone", label: "Điện thoại", render: (row) => row.phone ?? "—" },
+                  { key: "nid", label: "CCCD/CMND", render: (row) => row.national_id ?? "—" },
                   {
                     key: "action",
                     label: "",
@@ -273,7 +273,7 @@ export function PatientStep({
                           })
                         }
                       >
-                        Select
+                        Chọn
                       </Button>
                     ),
                   },
@@ -282,19 +282,19 @@ export function PatientStep({
             </DataState>
           ) : (
             <p className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500">
-              Type to search an existing patient or register a walk-in.
+              Gõ để tìm bệnh nhân đã có hoặc đăng ký bệnh nhân đến trực tiếp.
             </p>
           )}
         </div>
 
         <Card className="space-y-4">
           <SectionHeader
-            title="Create new patient"
-            description="Walk-in registration with duplicate detection. Search results stay visible."
+            title="Tạo bệnh nhân mới"
+            description="Đăng ký bệnh nhân đến trực tiếp, có kiểm tra trùng. Kết quả tìm kiếm vẫn hiển thị."
           />
           <div className="grid gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
-              <Label htmlFor="full_name">Full name *</Label>
+              <Label htmlFor="full_name">Họ và tên *</Label>
               <Input
                 id="full_name"
                 value={create.full_name}
@@ -302,7 +302,7 @@ export function PatientStep({
               />
             </div>
             <div>
-              <Label htmlFor="phone">Phone *</Label>
+              <Label htmlFor="phone">Số điện thoại *</Label>
               <Input
                 id="phone"
                 value={create.phone}
@@ -310,7 +310,7 @@ export function PatientStep({
               />
             </div>
             <div>
-              <Label htmlFor="patient_code">Patient code (optional)</Label>
+              <Label htmlFor="patient_code">Mã bệnh nhân (không bắt buộc)</Label>
               <Input
                 id="patient_code"
                 value={create.patient_code}
@@ -320,7 +320,7 @@ export function PatientStep({
               />
             </div>
             <div>
-              <Label htmlFor="national_id">National ID</Label>
+              <Label htmlFor="national_id">CCCD/CMND</Label>
               <Input
                 id="national_id"
                 value={create.national_id}
@@ -330,7 +330,7 @@ export function PatientStep({
               />
             </div>
             <div>
-              <Label htmlFor="gender">Gender</Label>
+              <Label htmlFor="gender">Giới tính</Label>
               <select
                 id="gender"
                 className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
@@ -344,7 +344,7 @@ export function PatientStep({
               </select>
             </div>
             <div>
-              <Label htmlFor="dob">Date of birth</Label>
+              <Label htmlFor="dob">Ngày sinh</Label>
               <Input
                 id="dob"
                 type="date"
@@ -364,7 +364,7 @@ export function PatientStep({
               />
             </div>
             <div className="md:col-span-2">
-              <Label htmlFor="address">Address</Label>
+              <Label htmlFor="address">Địa chỉ</Label>
               <Input
                 id="address"
                 value={create.address}
@@ -375,7 +375,7 @@ export function PatientStep({
           {createError ? <p className="text-sm text-rose-600">{createError}</p> : null}
           {duplicates.length > 0 ? (
             <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
-              <p className="text-sm font-medium text-amber-900">Duplicate detection</p>
+              <p className="text-sm font-medium text-amber-900">Kiểm tra trùng</p>
               <ul className="space-y-2 text-sm text-amber-900">
                 {duplicates.map((warning, index) => (
                   <li
@@ -383,7 +383,7 @@ export function PatientStep({
                     className="flex flex-wrap items-center justify-between gap-2"
                   >
                     <span>
-                      {String(warning.message ?? warning.reason ?? "Possible match")}
+                      {String(warning.message ?? warning.reason ?? "Có thể trùng")}
                       {warning.patient_code ? ` (${warning.patient_code})` : ""}
                     </span>
                     {warning.patient_code ? (
@@ -397,7 +397,7 @@ export function PatientStep({
                           })
                         }
                       >
-                        Use existing
+                        Dùng bệnh nhân này
                       </Button>
                     ) : null}
                   </li>
@@ -408,12 +408,12 @@ export function PatientStep({
                 disabled={creating}
                 onClick={() => void submitCreate(true)}
               >
-                {creating ? "Registering…" : "Register anyway"}
+                {creating ? "Đang đăng ký…" : "Vẫn đăng ký mới"}
               </Button>
             </div>
           ) : null}
           <Button onClick={() => void submitCreate(false)} disabled={creating}>
-            {creating ? "Registering…" : "Register & continue"}
+            {creating ? "Đang đăng ký…" : "Đăng ký và tiếp tục"}
           </Button>
         </Card>
       </div>
@@ -539,7 +539,7 @@ export function TestsStep({
   async function submitOrder() {
     if (createInFlight.current) return;
     if (selectedTestIds.length === 0) {
-      setError("Select at least one test.");
+      setError("Hãy chọn ít nhất một xét nghiệm.");
       return;
     }
     if (collectionMode === "HOME_COLLECTION") {
@@ -552,13 +552,13 @@ export function TestsStep({
         !requestedDate ||
         !timeWindow.trim()
       ) {
-        setError("HOME collection requires address, province, district, contact, phone, date, and time window.");
+        setError("Thu mẫu tại nhà cần địa chỉ, tỉnh/thành, quận/huyện, người liên hệ, số điện thoại, ngày và khung giờ.");
         return;
       }
     }
     if (collectionMode === "CLINIC_COLLECTION") {
       if (!clinicName.trim() || !requestedDate || !timeWindow.trim()) {
-        setError("CLINIC collection requires clinic, preferred date, and preferred time.");
+        setError("Thu mẫu tại phòng khám cần phòng khám, ngày và giờ mong muốn.");
         return;
       }
     }
@@ -588,7 +588,7 @@ export function TestsStep({
         },
       );
       const orderRef = getOrderCode(response.order);
-      if (!orderRef) throw new Error("Order code not returned by the API.");
+      if (!orderRef) throw new Error("Hệ thống không trả về mã đơn.");
       onOrderCreated(orderRef, response.pricing, response.order);
     } catch (err) {
       setError(normalizeApiError(err));
@@ -601,31 +601,31 @@ export function TestsStep({
   return (
     <div className="space-y-5">
       <SectionHeader
-        title="Select tests & create order"
+        title="Chọn xét nghiệm và tạo đơn"
         description={`${patient.patientName} · ${patient.patientCode}`}
       />
       <Input
         value={catalogQuery}
         onChange={(event) => setCatalogQuery(event.target.value)}
-        placeholder="Search test catalog"
-        aria-label="Catalog search"
+        placeholder="Tìm danh mục xét nghiệm"
+        aria-label="Tìm danh mục"
       />
       {/* empty=false: catalog miss must not hide collection method / create order controls */}
       <DataState
         loading={loading}
         error={error}
         empty={false}
-        emptyLabel="No tests found in master data."
+        emptyLabel="Không tìm thấy xét nghiệm trong danh mục."
         onRetry={() => void loadCatalog(catalogQuery)}
       >
         <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
           <Card className="space-y-3">
-            <p className="text-sm font-medium text-slate-900">Packages (by category)</p>
+            <p className="text-sm font-medium text-slate-900">Gói xét nghiệm (theo nhóm)</p>
             <p className="text-xs text-slate-500">
-              Backend has no panel expansion — selecting a package adds its catalog tests.
+              Chọn một gói sẽ thêm các xét nghiệm của gói đó vào đơn.
             </p>
             {categories.length === 0 ? (
-              <p className="text-sm text-slate-500">No packages available.</p>
+              <p className="text-sm text-slate-500">Chưa có gói xét nghiệm nào.</p>
             ) : (
               categories.map((category) => (
                 <label
@@ -646,23 +646,23 @@ export function TestsStep({
           <div className="space-y-4">
             <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3">
               <div>
-                <p className="text-sm text-slate-600">Selected</p>
+                <p className="text-sm text-slate-600">Đã chọn</p>
                 <p className="text-lg font-semibold text-slate-900">
-                  {selectedTestIds.length} tests
+                  {selectedTestIds.length} xét nghiệm
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-slate-600">Preview (not final)</p>
+                <p className="text-sm text-slate-600">Xem trước (chưa chính thức)</p>
                 <p className="font-semibold text-slate-900">{formatCurrency(previewTotal)}</p>
                 <p className="text-xs text-slate-500">
-                  Authoritative totals come from the API after create.
+                  Tổng tiền chính thức do hệ thống tính sau khi tạo đơn.
                 </p>
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <Label htmlFor="discount">Discount</Label>
+                <Label htmlFor="discount">Giảm giá</Label>
                 <Input
                   id="discount"
                   value={discount}
@@ -670,13 +670,13 @@ export function TestsStep({
                 />
               </div>
               <div>
-                <Label htmlFor="note">Note</Label>
+                <Label htmlFor="note">Ghi chú</Label>
                 <Input id="note" value={note} onChange={(event) => setNote(event.target.value)} />
               </div>
             </div>
 
             <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-900">Collection method</p>
+              <p className="text-sm font-medium text-slate-900">Cách thu mẫu</p>
               <select
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                 value={collectionMode}
@@ -685,25 +685,25 @@ export function TestsStep({
                     e.target.value as "AT_RECEPTION" | "HOME_COLLECTION" | "CLINIC_COLLECTION",
                   )
                 }
-                aria-label="Collection method"
+                aria-label="Cách thu mẫu"
               >
-                <option value="AT_RECEPTION">DESK (at reception)</option>
-                <option value="HOME_COLLECTION">HOME</option>
-                <option value="CLINIC_COLLECTION">CLINIC</option>
+                <option value="AT_RECEPTION">Tại quầy tiếp nhận</option>
+                <option value="HOME_COLLECTION">Tại nhà</option>
+                <option value="CLINIC_COLLECTION">Tại phòng khám</option>
               </select>
               <div>
-                <Label htmlFor="laboratory-legacy">Laboratory</Label>
+                <Label htmlFor="laboratory-legacy">Phòng xét nghiệm</Label>
                 <select
                   id="laboratory-legacy"
                   className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                   defaultValue="central"
-                  aria-label="Laboratory"
+                  aria-label="Phòng xét nghiệm"
                 >
-                  <option value="central">DxCon Central Laboratory</option>
+                  <option value="central">Phòng xét nghiệm trung tâm DxCon</option>
                 </select>
               </div>
               <div>
-                <Label htmlFor="specimen-type-legacy">Specimen type</Label>
+                <Label htmlFor="specimen-type-legacy">Loại mẫu</Label>
                 <Input
                   id="specimen-type-legacy"
                   value={specimenType}
@@ -713,35 +713,35 @@ export function TestsStep({
               {collectionMode === "HOME_COLLECTION" ? (
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="md:col-span-2">
-                    <Label htmlFor="pickup-address">Pickup address *</Label>
+                    <Label htmlFor="pickup-address">Địa chỉ lấy mẫu *</Label>
                     <Input id="pickup-address" value={pickupAddress} onChange={(e) => setPickupAddress(e.target.value)} />
                   </div>
                   <div>
-                    <Label htmlFor="pickup-province">Province *</Label>
+                    <Label htmlFor="pickup-province">Tỉnh/Thành *</Label>
                     <Input id="pickup-province" value={pickupProvince} onChange={(e) => setPickupProvince(e.target.value)} />
                   </div>
                   <div>
-                    <Label htmlFor="pickup-district">District *</Label>
+                    <Label htmlFor="pickup-district">Quận/Huyện *</Label>
                     <Input id="pickup-district" value={pickupDistrict} onChange={(e) => setPickupDistrict(e.target.value)} />
                   </div>
                   <div>
-                    <Label htmlFor="pickup-ward">Ward</Label>
+                    <Label htmlFor="pickup-ward">Phường/Xã</Label>
                     <Input id="pickup-ward" value={pickupWard} onChange={(e) => setPickupWard(e.target.value)} />
                   </div>
                   <div>
-                    <Label htmlFor="contact-person">Contact person *</Label>
+                    <Label htmlFor="contact-person">Người liên hệ *</Label>
                     <Input id="contact-person" value={contactPerson} onChange={(e) => setContactPerson(e.target.value)} />
                   </div>
                   <div>
-                    <Label htmlFor="contact-phone">Phone *</Label>
+                    <Label htmlFor="contact-phone">Số điện thoại *</Label>
                     <Input id="contact-phone" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
                   </div>
                   <div>
-                    <Label htmlFor="req-date">Preferred date *</Label>
+                    <Label htmlFor="req-date">Ngày mong muốn *</Label>
                     <Input id="req-date" type="date" value={requestedDate} onChange={(e) => setRequestedDate(e.target.value)} />
                   </div>
                   <div>
-                    <Label htmlFor="time-window">Preferred time window *</Label>
+                    <Label htmlFor="time-window">Khung giờ mong muốn *</Label>
                     <Input id="time-window" value={timeWindow} onChange={(e) => setTimeWindow(e.target.value)} />
                   </div>
                 </div>
@@ -749,15 +749,15 @@ export function TestsStep({
               {collectionMode === "CLINIC_COLLECTION" ? (
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="md:col-span-2">
-                    <Label htmlFor="clinic-name">Clinic *</Label>
+                    <Label htmlFor="clinic-name">Phòng khám *</Label>
                     <Input id="clinic-name" value={clinicName} onChange={(e) => setClinicName(e.target.value)} />
                   </div>
                   <div>
-                    <Label htmlFor="clinic-date">Preferred date *</Label>
+                    <Label htmlFor="clinic-date">Ngày mong muốn *</Label>
                     <Input id="clinic-date" type="date" value={requestedDate} onChange={(e) => setRequestedDate(e.target.value)} />
                   </div>
                   <div>
-                    <Label htmlFor="clinic-time">Preferred time *</Label>
+                    <Label htmlFor="clinic-time">Giờ mong muốn *</Label>
                     <Input id="clinic-time" value={timeWindow} onChange={(e) => setTimeWindow(e.target.value)} />
                   </div>
                 </div>
@@ -766,7 +766,7 @@ export function TestsStep({
 
             {!loading && !error && tests.length === 0 ? (
               <p className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
-                No tests found in master data. Collection method below stays available; retry catalog search above.
+                Không tìm thấy xét nghiệm trong danh mục. Phần chọn cách thu mẫu bên dưới vẫn dùng được; hãy thử tìm lại ở trên.
               </p>
             ) : null}
             <SimpleTable<ReceptionTest>
@@ -784,23 +784,23 @@ export function TestsStep({
                     />
                   ),
                 },
-                { key: "code", label: "Code", render: (row) => row.code },
-                { key: "name", label: "Test", render: (row) => row.name },
+                { key: "code", label: "Mã", render: (row) => row.code },
+                { key: "name", label: "Xét nghiệm", render: (row) => row.name },
                 {
                   key: "specimen",
-                  label: "Specimen",
+                  label: "Mẫu",
                   render: (row) => row.sample_type ?? "—",
                 },
                 {
                   key: "tat",
-                  label: "TAT (h)",
+                  label: "TAT (giờ)",
                   render: (row) =>
                     row.turnaround_hours != null ? String(row.turnaround_hours) : "—",
                 },
-                { key: "category", label: "Package", render: (row) => row.category ?? "—" },
+                { key: "category", label: "Gói", render: (row) => row.category ?? "—" },
                 {
                   key: "price",
-                  label: "Catalog price",
+                  label: "Giá niêm yết",
                   render: (row) => (row.price != null ? formatCurrency(row.price) : "—"),
                 },
               ]}
@@ -825,7 +825,7 @@ export function TestsStep({
               disabled={creating || selectedTestIds.length === 0}
               onClick={() => void submitOrder()}
             >
-              {creating ? "Creating order…" : "Create order"}
+              {creating ? "Đang tạo đơn…" : "Tạo đơn"}
             </Button>
           </div>
         </div>
@@ -949,14 +949,14 @@ export function PaymentStep({
 
   function validateAmount(raw: string, outstanding: number, allowPartial: boolean): number {
     const value = Number(raw);
-    if (!Number.isFinite(value)) throw new Error("Enter a valid payment amount.");
-    if (value <= 0) throw new Error("Payment amount must be greater than zero.");
+    if (!Number.isFinite(value)) throw new Error("Hãy nhập số tiền thanh toán hợp lệ.");
+    if (value <= 0) throw new Error("Số tiền thanh toán phải lớn hơn 0.");
     if (value > outstanding + 0.0001) {
-      throw new Error(`Overpayment not allowed. Outstanding is ${formatCurrency(outstanding)}.`);
+      throw new Error(`Không được trả vượt quá. Số còn phải trả là ${formatCurrency(outstanding)}.`);
     }
     if (!allowPartial && value + 0.0001 < outstanding) {
       throw new Error(
-        "Partial payments are not supported. Amount must equal the outstanding balance.",
+        "Chưa hỗ trợ thanh toán một phần. Số tiền phải bằng số còn phải trả.",
       );
     }
     return value;
@@ -973,7 +973,7 @@ export function PaymentStep({
         Boolean(summary.partial_payments_supported),
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Invalid amount");
+      setError(err instanceof Error ? err.message : "Số tiền không hợp lệ");
       return;
     }
     submitLock.current = true;
@@ -1010,16 +1010,16 @@ export function PaymentStep({
     const cashier = cashierLabel || payment.created_by || "—";
     const html = `<!doctype html><html><head><title>Receipt ${escapeHtml(payment.receipt_number)}</title>
 <style>body{font-family:ui-monospace,Menlo,monospace;padding:24px}.row{display:flex;justify-content:space-between;margin:6px 0;font-size:13px}.hr{border-top:1px dashed #94a3b8;margin:12px 0}</style></head><body>
-<h1>DxCon Reception Receipt</h1>
-<div class="row"><span>Receipt</span><span>${escapeHtml(payment.receipt_number)}</span></div>
-<div class="row"><span>Order</span><span>${escapeHtml(orderRef)}</span></div>
-<div class="row"><span>Patient</span><span>${escapeHtml(patient.patientName)} (${escapeHtml(patient.patientCode)})</span></div>
+<h1>Biên lai tiếp nhận DxCon</h1>
+<div class="row"><span>Biên lai</span><span>${escapeHtml(payment.receipt_number)}</span></div>
+<div class="row"><span>Đơn</span><span>${escapeHtml(orderRef)}</span></div>
+<div class="row"><span>Bệnh nhân</span><span>${escapeHtml(patient.patientName)} (${escapeHtml(patient.patientCode)})</span></div>
 <div class="hr"></div>
-<div class="row"><span>Method</span><span>${escapeHtml(payment.payment_method)}</span></div>
-<div class="row"><span>Amount</span><span>${escapeHtml(formatCurrency(payment.amount))}</span></div>
-<div class="row"><span>Status</span><span>${escapeHtml(summary.status)}</span></div>
-<div class="row"><span>Paid at</span><span>${escapeHtml(paidAt)}</span></div>
-<div class="row"><span>Cashier</span><span>${escapeHtml(cashier)}</span></div>
+<div class="row"><span>Hình thức</span><span>${escapeHtml(payment.payment_method)}</span></div>
+<div class="row"><span>Số tiền</span><span>${escapeHtml(formatCurrency(payment.amount))}</span></div>
+<div class="row"><span>Trạng thái</span><span>${escapeHtml(summary.status)}</span></div>
+<div class="row"><span>Thanh toán lúc</span><span>${escapeHtml(paidAt)}</span></div>
+<div class="row"><span>Thu ngân</span><span>${escapeHtml(cashier)}</span></div>
 <script>window.onload=function(){window.print()}</script></body></html>`;
     openHtmlWindow(html, "width=480,height=720");
   }
@@ -1044,11 +1044,11 @@ export function PaymentStep({
     <div className="space-y-5">
       <Card className="space-y-4">
         <SectionHeader
-          title="Payment & receipt"
-          description="Collect payment against the authoritative backend total. Documents unlock after paid status."
+          title="Thanh toán và biên lai"
+          description="Thu tiền theo tổng tiền chính thức. Chứng từ được mở sau khi đã thanh toán."
           actions={
             <Button size="sm" variant="outline" disabled={loading} onClick={() => void refresh()}>
-              {loading ? "Refreshing…" : "Refresh"}
+              {loading ? "Đang làm mới…" : "Làm mới"}
             </Button>
           }
         />
@@ -1056,18 +1056,18 @@ export function PaymentStep({
           <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
             <p>{error}</p>
             <Button className="mt-2" size="sm" variant="outline" onClick={() => void refresh()}>
-              Retry
+              Thử lại
             </Button>
           </div>
         ) : null}
         <div className="grid gap-3 md:grid-cols-4">
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs text-slate-500">Patient</p>
+            <p className="text-xs text-slate-500">Bệnh nhân</p>
             <p className="font-medium text-slate-900">{patient.patientName}</p>
             <p className="text-xs text-slate-500">{patient.patientCode}</p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs text-slate-500">Order total</p>
+            <p className="text-xs text-slate-500">Tổng tiền đơn</p>
             <p className="font-semibold text-slate-900">{formatCurrency(summary.order_total)}</p>
             <p className="text-xs text-slate-500">
               Subtotal {formatCurrency(summary.subtotal ?? authoritative.subtotal)} · Discount{" "}
@@ -1075,12 +1075,12 @@ export function PaymentStep({
             </p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs text-slate-500">Paid / outstanding</p>
+            <p className="text-xs text-slate-500">Đã trả / còn phải trả</p>
             <p className="font-semibold text-slate-900">{formatCurrency(summary.paid_amount)}</p>
             <p className="text-xs text-slate-500">Due {formatCurrency(summary.outstanding_amount)}</p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs text-slate-500">Order · status</p>
+            <p className="text-xs text-slate-500">Đơn · trạng thái</p>
             <p className="break-all font-mono text-sm">{orderRef}</p>
             <p className="text-xs font-medium uppercase text-slate-600">{summary.status}</p>
           </div>
@@ -1090,11 +1090,11 @@ export function PaymentStep({
             rows={items}
             rowKey={(row, index) => String(row.id ?? row.test_code ?? index)}
             columns={[
-              { key: "code", label: "Code", render: (row) => String(row.test_code ?? "—") },
-              { key: "name", label: "Test", render: (row) => String(row.test_name ?? "—") },
+              { key: "code", label: "Mã", render: (row) => String(row.test_code ?? "—") },
+              { key: "name", label: "Xét nghiệm", render: (row) => String(row.test_name ?? "—") },
               {
                 key: "price",
-                label: "Unit price",
+                label: "Đơn giá",
                 render: (row) =>
                   row.unit_price != null ? formatCurrency(Number(row.unit_price)) : "—",
               },
@@ -1106,12 +1106,12 @@ export function PaymentStep({
       {!isPaid ? (
         <Card className="space-y-4">
           <SectionHeader
-            title="Settle outstanding balance"
-            description="Full settlement only. Amount must equal outstanding."
+            title="Thanh toán số còn lại"
+            description="Chỉ thanh toán đủ một lần. Số tiền phải bằng số còn phải trả."
           />
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <Label htmlFor="payment_method">Payment method</Label>
+              <Label htmlFor="payment_method">Hình thức thanh toán</Label>
               <select
                 id="payment_method"
                 className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
@@ -1127,7 +1127,7 @@ export function PaymentStep({
               </select>
             </div>
             <div>
-              <Label htmlFor="pay_amount">Amount due</Label>
+              <Label htmlFor="pay_amount">Số tiền phải trả</Label>
               <Input
                 id="pay_amount"
                 inputMode="decimal"
@@ -1138,7 +1138,7 @@ export function PaymentStep({
             </div>
           </div>
           <Button disabled={paying || loading} onClick={() => void submitPayment()}>
-            {paying ? "Recording payment…" : "Collect payment"}
+            {paying ? "Đang ghi nhận thanh toán…" : "Thu tiền"}
           </Button>
           <MomoPanel
             orderRef={orderRef}
@@ -1151,40 +1151,40 @@ export function PaymentStep({
         </Card>
       ) : (
         <Card className="space-y-4">
-          <SectionHeader title="Receipt" description="Payment persisted from the backend." />
+          <SectionHeader title="Biên lai" description="Thanh toán đã được hệ thống ghi nhận." />
           {payment ? (
             <div className="grid gap-3 md:grid-cols-2">
               <div className="rounded-lg border border-slate-200 p-3">
-                <p className="text-xs text-slate-500">Receipt / reference</p>
+                <p className="text-xs text-slate-500">Biên lai / mã tham chiếu</p>
                 <p className="font-mono text-sm">{payment.receipt_number}</p>
               </div>
               <div className="rounded-lg border border-slate-200 p-3">
-                <p className="text-xs text-slate-500">Date / time</p>
+                <p className="text-xs text-slate-500">Ngày / giờ</p>
                 <p className="text-sm">
                   {payment.paid_at ? new Date(payment.paid_at).toLocaleString() : "—"}
                 </p>
               </div>
               <div className="rounded-lg border border-slate-200 p-3">
-                <p className="text-xs text-slate-500">Method</p>
+                <p className="text-xs text-slate-500">Hình thức</p>
                 <p className="text-sm">{payment.payment_method}</p>
               </div>
               <div className="rounded-lg border border-slate-200 p-3">
-                <p className="text-xs text-slate-500">Amount</p>
+                <p className="text-xs text-slate-500">Số tiền</p>
                 <p className="text-sm font-semibold">{formatCurrency(payment.amount)}</p>
               </div>
               <div className="rounded-lg border border-slate-200 p-3">
-                <p className="text-xs text-slate-500">Cashier</p>
+                <p className="text-xs text-slate-500">Thu ngân</p>
                 <p className="text-sm">{cashierLabel || payment.created_by || "—"}</p>
               </div>
             </div>
           ) : null}
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" disabled={!payment} onClick={openPrintableReceipt}>
-              Print receipt
+              In biên lai
             </Button>
-            <Button onClick={() => setShowDocuments(true)}>Continue to barcodes & requisition</Button>
+            <Button onClick={() => setShowDocuments(true)}>Tiếp tục: mã vạch và phiếu chỉ định</Button>
             <Button variant="ghost" onClick={onReset}>
-              New order
+              Đơn mới
             </Button>
           </div>
         </Card>
@@ -1247,7 +1247,7 @@ export function DocumentsStep({
         ).catch(() => null),
       ]);
       if (!isValidPatientQr(codes.patient_qr)) {
-        throw new Error("Invalid patient QR payload from backend.");
+        throw new Error("Mã QR bệnh nhân từ hệ thống không hợp lệ.");
       }
       setBarcodes(codes);
       setRequisitionHtml(form.html);
@@ -1301,7 +1301,7 @@ export function DocumentsStep({
 <div>${escapeHtml(patient.patientName)} · ${escapeHtml(patient.patientCode)}</div>
 <div>${escapeHtml(orderRef)} · ${escapeHtml(s.test_code)}</div>
 <div>${escapeHtml(s.sample_type || s.test_name)}</div>
-<div>${escapeHtml(s.collection_requirement || "Standard collection")}</div>
+<div>${escapeHtml(s.collection_requirement || "Thu mẫu thông thường")}</div>
 <div>${escapeHtml(barcodes.generated_at || "")}</div></div>`,
       )
       .join("");
@@ -1329,11 +1329,11 @@ ${sampleRows}
     <div className="space-y-5">
       <Card className="space-y-4">
         <SectionHeader
-          title="Barcode, QR & requisition"
-          description="Backend-generated identifiers for the paid order. Reprint returns the same codes."
+          title="Mã vạch, QR và phiếu chỉ định"
+          description="Mã định danh do hệ thống tạo cho đơn đã thanh toán. In lại sẽ ra đúng các mã cũ."
           actions={
             <Button size="sm" variant="outline" disabled={loading} onClick={() => void loadDocuments()}>
-              {loading ? "Loading…" : barcodes?.reprint ? "Reprint / refresh" : "Generate / refresh"}
+              {loading ? "Đang tải…" : barcodes?.reprint ? "In lại / làm mới" : "Tạo / làm mới"}
             </Button>
           }
         />
@@ -1341,23 +1341,23 @@ ${sampleRows}
           <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
             <p>{error}</p>
             <Button className="mt-2" size="sm" variant="outline" onClick={() => void loadDocuments()}>
-              Retry
+              Thử lại
             </Button>
           </div>
         ) : null}
         <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs text-slate-500">Order</p>
+            <p className="text-xs text-slate-500">Đơn</p>
             <p className="font-mono text-sm">{orderRef}</p>
-            <p className="text-xs text-slate-500">Total {formatCurrency(pricing.total)}</p>
+            <p className="text-xs text-slate-500">Tổng {formatCurrency(pricing.total)}</p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs text-slate-500">Patient</p>
+            <p className="text-xs text-slate-500">Bệnh nhân</p>
             <p className="font-medium">{patient.patientName}</p>
             <p className="text-xs text-slate-500">{patient.patientCode}</p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <p className="text-xs text-slate-500">Receipt</p>
+            <p className="text-xs text-slate-500">Biên lai</p>
             <p className="font-mono text-sm">{payment?.receipt_number ?? "—"}</p>
             <p className="text-xs text-slate-500">{cashierLabel || payment?.created_by || "—"}</p>
           </div>
@@ -1367,31 +1367,31 @@ ${sampleRows}
       {barcodes ? (
         <Card className="space-y-4">
           <SectionHeader
-            title="Identifiers"
+            title="Mã định danh"
             description={
               barcodes.reprint
-                ? "Reprint — same backend identifiers (no new codes created)."
-                : "First generation — identifiers persisted for this order."
+                ? "In lại — giữ nguyên các mã đã tạo (không tạo mã mới)."
+                : "Lần tạo đầu tiên — mã định danh đã được lưu cho đơn này."
             }
           />
           <div className="grid gap-3 md:grid-cols-2">
             <div className="rounded-lg border border-slate-200 p-3">
-              <p className="text-xs text-slate-500">Order barcode</p>
+              <p className="text-xs text-slate-500">Mã vạch đơn</p>
               <p className="font-mono text-sm">{barcodes.order_barcode}</p>
             </div>
             <div className="rounded-lg border border-slate-200 p-3">
-              <p className="text-xs text-slate-500">Patient barcode</p>
+              <p className="text-xs text-slate-500">Mã vạch bệnh nhân</p>
               <p className="font-mono text-sm">{barcodes.patient_barcode}</p>
             </div>
             <div className="rounded-lg border border-slate-200 p-3 md:col-span-2">
-              <p className="text-xs text-slate-500">Patient QR payload</p>
+              <p className="text-xs text-slate-500">Nội dung QR bệnh nhân</p>
               <p className="break-all font-mono text-sm">{barcodes.patient_qr}</p>
               <p className="mt-1 text-xs text-emerald-700">
-                {isValidPatientQr(barcodes.patient_qr) ? "QR format valid" : "Invalid QR format"}
+                {isValidPatientQr(barcodes.patient_qr) ? "Định dạng QR hợp lệ" : "Định dạng QR không hợp lệ"}
               </p>
             </div>
             <div className="rounded-lg border border-slate-200 p-3">
-              <p className="text-xs text-slate-500">Generated at</p>
+              <p className="text-xs text-slate-500">Tạo lúc</p>
               <p className="text-sm">
                 {barcodes.generated_at
                   ? new Date(barcodes.generated_at).toLocaleString()
@@ -1404,34 +1404,34 @@ ${sampleRows}
               rows={barcodes.sample_barcodes}
               rowKey={(row, index) => `${row.barcode}-${index}`}
               columns={[
-                { key: "specimen", label: "Specimen", render: (row) => row.specimen_code ?? "—" },
-                { key: "barcode", label: "Barcode", render: (row) => row.barcode },
-                { key: "test", label: "Test", render: (row) => `${row.test_code} · ${row.test_name}` },
-                { key: "type", label: "Type", render: (row) => row.sample_type ?? "—" },
+                { key: "specimen", label: "Mẫu", render: (row) => row.specimen_code ?? "—" },
+                { key: "barcode", label: "Mã vạch", render: (row) => row.barcode },
+                { key: "test", label: "Xét nghiệm", render: (row) => `${row.test_code} · ${row.test_name}` },
+                { key: "type", label: "Loại", render: (row) => row.sample_type ?? "—" },
               ]}
             />
           ) : null}
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={openLabels}>
-              Print labels
+              In nhãn
             </Button>
             <Button variant="outline" disabled={!requisitionHtml} onClick={openRequisition}>
-              Open requisition
+              Mở phiếu chỉ định
             </Button>
             <Button variant="ghost" onClick={() => void loadDocuments()}>
-              Reprint
+              In lại
             </Button>
           </div>
         </Card>
       ) : loading ? (
-        <p className="text-sm text-slate-500">Generating identifiers…</p>
+        <p className="text-sm text-slate-500">Đang tạo mã định danh…</p>
       ) : null}
 
       {documentsReady ? (
         <Card className="space-y-4">
           <SectionHeader
-            title="Laboratory handoff"
-            description="Send this paid, documented order into the laboratory incoming queue once."
+            title="Bàn giao cho phòng xét nghiệm"
+            description="Chuyển đơn đã thanh toán và đủ chứng từ này vào hàng đợi của phòng xét nghiệm (một lần)."
           />
           {handoffError ? (
             <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
@@ -1443,20 +1443,20 @@ ${sampleRows}
                 disabled={handingOff || alreadyHandedOff}
                 onClick={() => void submitHandoff()}
               >
-                Retry handoff
+                Thử bàn giao lại
               </Button>
             </div>
           ) : null}
           {alreadyHandedOff ? (
             <div className="grid gap-3 md:grid-cols-2">
               <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-                <p className="text-xs text-emerald-700">Accepted at</p>
+                <p className="text-xs text-emerald-700">Tiếp nhận lúc</p>
                 <p className="text-sm text-emerald-900">
                   {handoff?.accepted_at ? new Date(handoff.accepted_at).toLocaleString() : "—"}
                 </p>
               </div>
               <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-                <p className="text-xs text-emerald-700">Order / sample status</p>
+                <p className="text-xs text-emerald-700">Trạng thái đơn / mẫu</p>
                 <p className="text-sm font-medium uppercase text-emerald-900">
                   {handoff?.order_status ?? "—"}
                   {handoff?.collection?.status
@@ -1465,13 +1465,13 @@ ${sampleRows}
                 </p>
               </div>
               <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-                <p className="text-xs text-emerald-700">Destination laboratory</p>
+                <p className="text-xs text-emerald-700">Phòng xét nghiệm nhận</p>
                 <p className="text-sm text-emerald-900">
-                  {handoff?.laboratory.name ?? "Central Laboratory"}
+                  {handoff?.laboratory.name ?? "Phòng xét nghiệm trung tâm"}
                 </p>
               </div>
               <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-                <p className="text-xs text-emerald-700">Queue reference</p>
+                <p className="text-xs text-emerald-700">Mã hàng đợi</p>
                 <p className="font-mono text-sm text-emerald-900">
                   {handoff?.queue_reference ?? "—"}
                 </p>
@@ -1482,12 +1482,12 @@ ${sampleRows}
               disabled={handingOff || !documentsReady}
               onClick={() => void submitHandoff()}
             >
-              {handingOff ? "Handing off…" : "Hand off to Laboratory"}
+              {handingOff ? "Đang bàn giao…" : "Bàn giao cho phòng xét nghiệm"}
             </Button>
           )}
           {alreadyHandedOff ? (
             <p className="text-xs text-slate-500">
-              Handoff is complete. Repeat submit is disabled; refresh reloads persisted status.
+              Đã bàn giao xong. Không thể bàn giao lại; bấm làm mới để tải lại trạng thái.
             </p>
           ) : null}
         </Card>
@@ -1496,12 +1496,12 @@ ${sampleRows}
       <div className="flex flex-wrap gap-3">
         {onBackToPayment ? (
           <Button variant="outline" onClick={onBackToPayment}>
-            Back to receipt
+            Quay lại biên lai
           </Button>
         ) : null}
-        <Button onClick={onReset}>New order</Button>
+        <Button onClick={onReset}>Đơn mới</Button>
         <a href={`/app/reception/workflow?order=${encodeURIComponent(orderRef)}`}>
-          <Button variant="ghost">Reopen order link</Button>
+          <Button variant="ghost">Mở lại liên kết đơn</Button>
         </a>
       </div>
     </div>

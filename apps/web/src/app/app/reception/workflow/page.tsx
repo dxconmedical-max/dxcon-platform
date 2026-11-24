@@ -30,11 +30,11 @@ import {
 import { PaymentStep } from "./OrderSteps";
 
 const STEPS = [
-  "Patient",
-  "Tests",
-  "Collection request",
-  "Review and pricing",
-  "Confirmation",
+  "Bệnh nhân",
+  "Xét nghiệm",
+  "Yêu cầu thu mẫu",
+  "Kiểm tra và tính giá",
+  "Xác nhận",
 ] as const;
 
 function ReceptionMilestone1Panel() {
@@ -118,13 +118,13 @@ function ReceptionMilestone1Panel() {
   }
 
   if (!accessToken) {
-    return <p className="text-sm text-slate-500">Waiting for session…</p>;
+    return <p className="text-sm text-slate-500">Đang chờ phiên đăng nhập…</p>;
   }
 
   if (!canWrite) {
     return (
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-        Reception write permission is required for patient and order workflows.
+        Cần quyền ghi của tiếp nhận để tạo bệnh nhân và đơn.
       </div>
     );
   }
@@ -132,24 +132,24 @@ function ReceptionMilestone1Panel() {
   return (
     <div className="space-y-5">
       <SectionHeader
-        title="Reception — Patient, tests, collection request & order"
-        description="Record the specimen collection request before pricing and order creation."
+        title="Tiếp nhận — Bệnh nhân, xét nghiệm, yêu cầu thu mẫu và đơn"
+        description="Ghi nhận yêu cầu thu mẫu trước khi tính giá và tạo đơn."
         actions={
           step > 0 ? (
             <Button size="sm" variant="outline" onClick={reset}>
-              Start over
+              Làm lại từ đầu
             </Button>
           ) : (
             <Link href="/app/reception">
               <Button size="sm" variant="ghost">
-                Dashboard
+                Trang chủ
               </Button>
             </Link>
           )
         }
       />
 
-      <div className="flex flex-wrap gap-2" aria-label="Reception order steps">
+      <div className="flex flex-wrap gap-2" aria-label="Các bước tạo đơn tiếp nhận">
         {STEPS.map((label, index) => {
           const active = index === badgeIndex;
           const done = index < badgeIndex;
@@ -161,7 +161,7 @@ function ReceptionMilestone1Panel() {
         })}
       </div>
 
-      {reopening ? <p className="text-sm text-slate-500">Reopening order…</p> : null}
+      {reopening ? <p className="text-sm text-slate-500">Đang mở lại đơn…</p> : null}
       {reopenError ? (
         <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
           {reopenError}
@@ -268,8 +268,8 @@ function ReceptionMilestone1Panel() {
 
 export default function ReceptionWorkflowPage() {
   return (
-    <AppShell title="Reception order" workspacePath="/app/reception">
-      <Suspense fallback={<p className="text-sm text-slate-500">Loading…</p>}>
+    <AppShell title="Đơn tiếp nhận" workspacePath="/app/reception">
+      <Suspense fallback={<p className="text-sm text-slate-500">Đang tải…</p>}>
         <ReceptionMilestone1Panel />
       </Suspense>
     </AppShell>

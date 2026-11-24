@@ -51,9 +51,9 @@ describe("Reception Milestone 1 UI integration", () => {
     });
     const onSelect = vi.fn();
     render(<PatientStep accessToken="t" organizationId="org" onSelect={onSelect} />);
-    await user.type(screen.getByRole("textbox", { name: "Patient search" }), "Ada");
+    await user.type(screen.getByRole("textbox", { name: "Tìm bệnh nhân" }), "Ada");
     await waitFor(() => expect(searchReceptionPatients).toHaveBeenCalled(), { timeout: 2000 });
-    await user.click(await screen.findByRole("button", { name: "Select" }));
+    await user.click(await screen.findByRole("button", { name: "Chọn" }));
     expect(onSelect).toHaveBeenCalledWith({ patientCode: "P-1", patientName: "Ada" });
   });
 
@@ -61,8 +61,8 @@ describe("Reception Milestone 1 UI integration", () => {
     const user = userEvent.setup();
     vi.mocked(searchReceptionPatients).mockResolvedValue({ items: [], total: 0 });
     render(<PatientStep accessToken="t" organizationId="org" onSelect={vi.fn()} />);
-    await user.type(screen.getByRole("textbox", { name: "Patient search" }), "nobody");
-    expect(await screen.findByText(/no patients found/i)).toBeInTheDocument();
+    await user.type(screen.getByRole("textbox", { name: "Tìm bệnh nhân" }), "nobody");
+    expect(await screen.findByText(/không tìm thấy bệnh nhân/i)).toBeInTheDocument();
   });
 
   it("shows search failure with retry", async () => {
@@ -71,7 +71,7 @@ describe("Reception Milestone 1 UI integration", () => {
       new ApiError("Forbidden", 403, { error: "Forbidden" }),
     );
     render(<PatientStep accessToken="t" organizationId="org" onSelect={vi.fn()} />);
-    await user.type(screen.getByRole("textbox", { name: "Patient search" }), "x");
+    await user.type(screen.getByRole("textbox", { name: "Tìm bệnh nhân" }), "x");
     expect(await screen.findByText("Forbidden")).toBeInTheDocument();
   });
 
@@ -91,9 +91,9 @@ describe("Reception Milestone 1 UI integration", () => {
     });
     const onSelect = vi.fn();
     render(<PatientStep accessToken="t" organizationId="org" onSelect={onSelect} />);
-    await user.type(screen.getByLabelText("Full name *"), "New");
-    await user.type(screen.getByLabelText("Phone *"), "0900111222");
-    await user.click(screen.getByRole("button", { name: "Register & continue" }));
+    await user.type(screen.getByLabelText("Họ và tên *"), "New");
+    await user.type(screen.getByLabelText("Số điện thoại *"), "0900111222");
+    await user.click(screen.getByRole("button", { name: "Đăng ký và tiếp tục" }));
     await waitFor(() =>
       expect(onSelect).toHaveBeenCalledWith({
         patientCode: "P-NEW",
@@ -106,8 +106,8 @@ describe("Reception Milestone 1 UI integration", () => {
   it("shows client validation failure when name/phone missing", async () => {
     const user = userEvent.setup();
     render(<PatientStep accessToken="t" organizationId="org" onSelect={vi.fn()} />);
-    await user.click(screen.getByRole("button", { name: "Register & continue" }));
-    expect(await screen.findByText(/full name and phone are required/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Đăng ký và tiếp tục" }));
+    expect(await screen.findByText(/cần nhập họ tên và số điện thoại/i)).toBeInTheDocument();
     expect(registerWalkIn).not.toHaveBeenCalled();
   });
 
@@ -119,11 +119,11 @@ describe("Reception Milestone 1 UI integration", () => {
     });
     const onSelect = vi.fn();
     render(<PatientStep accessToken="t" organizationId="org" onSelect={onSelect} />);
-    await user.type(screen.getByLabelText("Full name *"), "Dup");
-    await user.type(screen.getByLabelText("Phone *"), "0900999888");
-    await user.click(screen.getByRole("button", { name: "Register & continue" }));
-    expect(await screen.findByText(/possible duplicate patient/i)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Use existing" }));
+    await user.type(screen.getByLabelText("Họ và tên *"), "Dup");
+    await user.type(screen.getByLabelText("Số điện thoại *"), "0900999888");
+    await user.click(screen.getByRole("button", { name: "Đăng ký và tiếp tục" }));
+    expect(await screen.findByText(/có thể trùng bệnh nhân/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Dùng bệnh nhân này" }));
     expect(onSelect).toHaveBeenCalledWith({ patientCode: "P-DUP", patientName: "Dup" });
     expect(registerWalkIn).not.toHaveBeenCalled();
   });
@@ -166,10 +166,10 @@ describe("Reception Milestone 1 UI integration", () => {
         onOrderCreated={onOrderCreated}
       />,
     );
-    await screen.findByText("Packages (by category)");
+    await screen.findByText("Gói xét nghiệm (theo nhóm)");
     const packageCheckbox = screen.getAllByRole("checkbox")[0];
     await user.click(packageCheckbox);
-    await user.click(screen.getByRole("button", { name: "Create order" }));
+    await user.click(screen.getByRole("button", { name: "Tạo đơn" }));
     await waitFor(() => expect(createReceptionOrder).toHaveBeenCalledTimes(1));
     const payload = vi.mocked(createReceptionOrder).mock.calls[0]?.[1];
     expect(payload?.test_catalog_ids).toEqual(expect.arrayContaining(["t1", "t2"]));
@@ -208,10 +208,10 @@ describe("Reception Milestone 1 UI integration", () => {
     const table = screen.getByRole("table");
     const testCheckbox = within(table).getByRole("checkbox");
     await user.click(testCheckbox);
-    expect(screen.getByText(/1 tests/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 xét nghiệm/i)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /CBC ×/i }));
-    expect(screen.getByText(/0 tests/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Create order" })).toBeDisabled();
+    expect(screen.getByText(/0 xét nghiệm/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tạo đơn" })).toBeDisabled();
   });
 
   it("prevents duplicate order submit while in flight", async () => {
@@ -237,7 +237,7 @@ describe("Reception Milestone 1 UI integration", () => {
     );
     await screen.findAllByText("CBC");
     await user.click(within(screen.getByRole("table")).getByRole("checkbox"));
-    const createBtn = screen.getByRole("button", { name: "Create order" });
+    const createBtn = screen.getByRole("button", { name: "Tạo đơn" });
     await user.click(createBtn);
     await user.click(createBtn);
     expect(createReceptionOrder).toHaveBeenCalledTimes(1);
@@ -246,7 +246,7 @@ describe("Reception Milestone 1 UI integration", () => {
       invoice: {},
       pricing: { subtotal: 100, discount: 0, total: 100 },
     });
-    await waitFor(() => expect(screen.getByRole("button", { name: "Create order" })).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Tạo đơn" })).toBeEnabled());
   });
 
   it("shows partial failure from order create without advancing", async () => {
@@ -269,7 +269,7 @@ describe("Reception Milestone 1 UI integration", () => {
     );
     await screen.findAllByText("CBC");
     await user.click(within(screen.getByRole("table")).getByRole("checkbox"));
-    await user.click(screen.getByRole("button", { name: "Create order" }));
+    await user.click(screen.getByRole("button", { name: "Tạo đơn" }));
     expect(await screen.findByText("Patient not found")).toBeInTheDocument();
     expect(onOrderCreated).not.toHaveBeenCalled();
   });
@@ -307,7 +307,7 @@ describe("Reception Milestone 1 UI integration", () => {
     const table = screen.getByRole("table");
     const testCheckbox = within(table).getByRole("checkbox");
     await user.click(testCheckbox);
-    await user.click(screen.getByRole("button", { name: "Create order" }));
+    await user.click(screen.getByRole("button", { name: "Tạo đơn" }));
     await waitFor(() => expect(createReceptionOrder).toHaveBeenCalled());
     const payload = vi.mocked(createReceptionOrder).mock.calls[0]?.[1];
     expect(payload?.test_catalog_ids).toEqual(["t1"]);
@@ -349,7 +349,7 @@ describe("Reception Milestone 1 UI integration", () => {
         onReset={vi.fn()}
       />,
     );
-    expect(await screen.findByText("Payment & receipt")).toBeInTheDocument();
+    expect(await screen.findByText("Thanh toán và biên lai")).toBeInTheDocument();
     await waitFor(() =>
       expect(fetchReceptionOrder).toHaveBeenCalledWith(
         expect.objectContaining({ token: "t" }),
