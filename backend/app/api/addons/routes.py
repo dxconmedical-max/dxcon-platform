@@ -212,6 +212,9 @@ def addon_create(order_code: str):
     new_order = BizOrder.query.filter_by(order_code=new_code).first()
     if new_order is not None:
         new_order.external_ref = order.order_code[:100]
+    from app.clinic_billing.pricing import apply_clinic_prices
+
+    apply_clinic_prices(new_code, order.organization_id)
     db.session.add(
         OrderAddon(
             original_order_code=order.order_code,

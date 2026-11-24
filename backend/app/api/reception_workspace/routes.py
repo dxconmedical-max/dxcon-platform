@@ -288,6 +288,10 @@ def orders_create():
                 "longitude": payload.get("longitude") or payload.get("pickup_longitude"),
             },
         )
+        if referring:
+            from app.clinic_billing.pricing import apply_clinic_prices
+
+            apply_clinic_prices((result.get("order") or {}).get("order_code"), organization_id)
         db.session.commit()
         return {"success": True, "data": result}, 201
     except (ReceptionWorkspaceError, BusinessEngineError) as exc:
