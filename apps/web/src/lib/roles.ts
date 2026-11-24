@@ -51,20 +51,20 @@ export function workspacePathForRole(role: string | null | undefined): string {
 
 export function roleLabel(role: string | null | undefined): string {
   const labels: Record<string, string> = {
-    SUPER_ADMIN: "Super Admin",
-    DXCON_ADMIN: "DxCon Admin",
-    ADMIN: "Administrator",
-    EXECUTIVE: "Executive",
-    RECEPTION: "Reception",
-    DOCTOR: "Doctor",
-    PARTNER_DOCTOR: "Partner Doctor",
-    LAB_MANAGER: "Lab Manager",
-    LAB_TECHNICIAN: "Lab Technician",
-    COLLECTOR: "Collector",
-    CLINIC_OWNER: "Clinic Owner",
-    PATIENT: "Patient",
+    SUPER_ADMIN: "Quản trị tối cao",
+    DXCON_ADMIN: "Quản trị DxCon",
+    ADMIN: "Quản trị viên",
+    EXECUTIVE: "Điều hành",
+    RECEPTION: "Tiếp nhận",
+    DOCTOR: "Bác sĩ",
+    PARTNER_DOCTOR: "Bác sĩ đối tác",
+    LAB_MANAGER: "Trưởng phòng xét nghiệm",
+    LAB_TECHNICIAN: "Kỹ thuật viên xét nghiệm",
+    COLLECTOR: "Nhân viên thu mẫu",
+    CLINIC_OWNER: "Chủ phòng khám",
+    PATIENT: "Bệnh nhân",
   };
-  return labels[(role ?? "").toUpperCase()] ?? role ?? "User";
+  return labels[(role ?? "").toUpperCase()] ?? role ?? "Người dùng";
 }
 
 export function isWorkspacePath(path: string): boolean {

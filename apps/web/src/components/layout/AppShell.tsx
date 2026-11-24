@@ -47,7 +47,7 @@ function BootstrapDiagnostic({
             Retry
           </Button>
           <Button type="button" variant="outline" onClick={onSignOut}>
-            Sign out
+            Đăng xuất
           </Button>
           <Link href="/login" className="self-center text-sm text-teal-700">
             Back to login

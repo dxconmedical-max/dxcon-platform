@@ -4,15 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const LABELS: Record<string, string> = {
-  app: "Workspace",
-  admin: "Administration",
-  executive: "Executive",
-  reception: "Reception",
-  doctor: "Doctor",
-  patient: "Patient",
-  lab: "Laboratory",
+  app: "Trang làm việc",
+  admin: "Quản trị",
+  executive: "Điều hành",
+  reception: "Tiếp nhận",
+  doctor: "Bác sĩ",
+  patient: "Bệnh nhân",
+  lab: "Phòng xét nghiệm",
   collector: "Thu mẫu",
-  clinic: "Clinic",
+  clinic: "Phòng khám",
 };
 
 export function Breadcrumb() {

@@ -6,35 +6,35 @@ import { AppShell } from "@/components/layout/AppShell";
 import { RoleDashboardHome } from "@/components/layout/RoleDashboardHome";
 
 const ACTIONS = [
-  { label: "Organizations", href: "/app/admin/organizations", description: "Tenant onboarding and setup." },
-  { label: "Staff accounts", href: "/app/admin/users", description: "Create and disable staff logins." },
-  { label: "Customer onboarding", href: "/app/admin/onboarding", description: "Wizard for new customers." },
-  { label: "Clinic self-ordering", href: "/app/admin/clinic-settings", description: "Bật hoặc tắt quyền tự chỉ định cho từng phòng khám." },
+  { label: "Tổ chức", href: "/app/admin/organizations", description: "Tạo và cấu hình tổ chức, phòng khám đối tác." },
+  { label: "Tài khoản nhân viên", href: "/app/admin/users", description: "Tạo và khóa tài khoản đăng nhập của nhân viên." },
+  { label: "Đưa khách hàng mới vào hệ thống", href: "/app/admin/onboarding", description: "Hướng dẫn từng bước khi có khách hàng mới." },
+  { label: "Phòng khám tự chỉ định", href: "/app/admin/clinic-settings", description: "Bật hoặc tắt quyền tự chỉ định cho từng phòng khám." },
   { label: "Gửi ngoài & thời hạn làm thêm", href: "/app/admin/test-flags", description: "Đánh dấu xét nghiệm gửi ngoài, số ngày trả dự kiến, thời hạn làm thêm." },
-  { label: "Demo requests", href: "/app/admin/demo-requests", description: "Yêu cầu demo gửi từ website: liên hệ lại và đổi trạng thái." },
-  { label: "Integrations", href: "/app/admin/integrations", description: "Connectors and webhooks." },
-  { label: "Reference ranges", href: "/app/admin/reference-ranges", description: "Upload lab reference ranges as a draft, review, then activate." },
-  { label: "Test catalog import", href: "/app/admin/test-catalog", description: "Upload the test list and prices (CSV), preview, apply." },
-  { label: "Reporting", href: "/app/admin/reporting", description: "Báo cáo đơn hàng và doanh thu theo ngày." },
-  { label: "Operations", href: "/app/operations", description: "Production health and ops dashboard." },
+  { label: "Yêu cầu demo", href: "/app/admin/demo-requests", description: "Yêu cầu demo gửi từ website: liên hệ lại và đổi trạng thái." },
+  { label: "Tích hợp", href: "/app/admin/integrations", description: "Kết nối với hệ thống bên ngoài." },
+  { label: "Khoảng tham chiếu", href: "/app/admin/reference-ranges", description: "Tải khoảng tham chiếu lên dạng nháp, kiểm tra rồi kích hoạt." },
+  { label: "Nhập danh mục xét nghiệm", href: "/app/admin/test-catalog", description: "Tải danh sách xét nghiệm và giá (CSV), xem trước rồi áp dụng." },
+  { label: "Báo cáo", href: "/app/admin/reporting", description: "Báo cáo đơn hàng và doanh thu theo ngày." },
+  { label: "Vận hành", href: "/app/operations", description: "Tình trạng hệ thống và bảng điều khiển vận hành." },
 ];
 
 export default function AdminPage() {
   const fallbackCards = useMemo(
     () => [
-      { label: "Orders today", value: "—" },
-      { label: "Pending collection", value: "—" },
-      { label: "Lab queue", value: "—" },
-      { label: "Ops alerts", value: "—" },
+      { label: "Đơn hôm nay", value: "—" },
+      { label: "Chờ lấy mẫu", value: "—" },
+      { label: "Hàng đợi xét nghiệm", value: "—" },
+      { label: "Cảnh báo vận hành", value: "—" },
     ],
     [],
   );
 
   return (
-    <AppShell title="Administration" workspacePath="/app/admin">
+    <AppShell title="Quản trị" workspacePath="/app/admin">
       <RoleDashboardHome
-        title="Admin workspace"
-        subtitle="Operational KPIs across orders, collection, lab queue, TAT, and alerts."
+        title="Không gian quản trị"
+        subtitle="Chỉ số vận hành: đơn hàng, thu mẫu, hàng đợi xét nghiệm, TAT và cảnh báo."
         role="admin"
         fallbackCards={fallbackCards}
         actions={ACTIONS}

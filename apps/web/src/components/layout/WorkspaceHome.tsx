@@ -51,14 +51,14 @@ export function WorkspaceHome({
       </section>
 
       <section>
-        <h3 className="mb-4 text-lg font-semibold text-slate-900">Key actions</h3>
+        <h3 className="mb-4 text-lg font-semibold text-slate-900">Thao tác chính</h3>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {actions.map((action) => (
             <Card key={action.label} className="flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <CardTitle>{action.label}</CardTitle>
-                  {action.comingSoon ? <Badge>Coming soon</Badge> : null}
+                  {action.comingSoon ? <Badge>Sắp có</Badge> : null}
                 </div>
                 {action.description ? (
                   <CardDescription>{action.description}</CardDescription>
@@ -66,14 +66,14 @@ export function WorkspaceHome({
               </div>
               {action.comingSoon ? (
                 <span className="mt-4 inline-flex items-center gap-1 text-sm text-slate-400">
-                  Planned module
+                  Đang lên kế hoạch
                 </span>
               ) : (
                 <Link
                   href={action.href}
                   className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-teal-700 hover:text-teal-800"
                 >
-                  Open module
+                  Mở
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               )}

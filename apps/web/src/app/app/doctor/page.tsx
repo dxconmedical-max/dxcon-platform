@@ -7,33 +7,33 @@ import { RoleDashboardHome } from "@/components/layout/RoleDashboardHome";
 
 const ACTIONS = [
   {
-    label: "Result inbox",
+    label: "Hộp kết quả chờ duyệt",
     href: "/app/doctor/review",
-    description: "Medical validation: approve, reject, or reopen.",
+    description: "Duyệt chuyên môn: duyệt, từ chối hoặc mở lại.",
   },
   {
-    label: "Release board",
+    label: "Bảng trả kết quả",
     href: "/app/lab/release",
-    description: "Release approved results for patient download.",
+    description: "Phát hành kết quả đã duyệt để bệnh nhân tải về.",
   },
 ];
 
 export default function DoctorPage() {
   const fallbackCards = useMemo(
     () => [
-      { label: "Pending reviews", value: "—" },
-      { label: "Critical flags", value: "—" },
-      { label: "Completed reports", value: "—" },
-      { label: "Overdue", value: "—" },
+      { label: "Chờ duyệt kết quả", value: "—" },
+      { label: "Cờ nguy kịch", value: "—" },
+      { label: "Báo cáo hoàn tất", value: "—" },
+      { label: "Trễ hạn", value: "—" },
     ],
     [],
   );
 
   return (
-    <AppShell title="Doctor workspace" workspacePath="/app/doctor">
+    <AppShell title="Không gian bác sĩ" workspacePath="/app/doctor">
       <RoleDashboardHome
-        title="Doctor workspace"
-        subtitle="Review pending results, critical flags, and completed reports."
+        title="Không gian bác sĩ"
+        subtitle="Duyệt kết quả chờ, cờ nguy kịch và báo cáo đã hoàn tất."
         role="doctor"
         fallbackCards={fallbackCards}
         actions={ACTIONS}
