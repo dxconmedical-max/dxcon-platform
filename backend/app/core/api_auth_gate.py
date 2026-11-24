@@ -36,6 +36,9 @@ PUBLIC_EXACT = frozenset(
     }
 )
 
+# Intentionally public anonymous POSTs (method-specific): partner self-registration form.
+PUBLIC_POST_EXACT = frozenset({"/api/v1/pilot-readiness/partner-registration"})
+
 # Prefixes that remain public (verification QR, catalogs, service ingest gaps).
 PUBLIC_PREFIXES = (
     "/api/v1/reporting/verify/",
@@ -184,6 +187,8 @@ def init_api_auth_gate(app):
         if not path.startswith("/api/"):
             return None
         if _is_public(path):
+            return None
+        if request.method == "POST" and path.rstrip("/") in PUBLIC_POST_EXACT:
             return None
         if not _is_protected(path):
             return None
