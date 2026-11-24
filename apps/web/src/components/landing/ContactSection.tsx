@@ -21,8 +21,8 @@ export function ContactSection({ lang }: { lang: Lang }) {
           <div className="mt-8 space-y-4 text-sm text-slate-600">
             <p className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-teal-600" />
-              <a href="mailto:support@dxcon.com.vn" className="hover:text-teal-700">
-                support@dxcon.com.vn
+              <a href="mailto:admin@dxcon.com.vn" className="hover:text-teal-700">
+                admin@dxcon.com.vn
               </a>
             </p>
             <p className="flex items-center gap-2">

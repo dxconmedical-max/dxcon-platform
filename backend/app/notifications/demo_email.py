@@ -1,7 +1,7 @@
 """Internal notification for a new landing-page demo request (best effort, background thread).
 
 Sent through the same Resend setup as booking emails. Recipient: DEMO_NOTIFY_EMAIL,
-default support@dxcon.com.vn. The reply-to is the visitor, so staff can just hit Reply.
+default admin@dxcon.com.vn. The reply-to is the visitor, so staff can just hit Reply.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ import urllib.request
 from app.notifications.booking_email import RESEND_URL, is_configured
 
 log = logging.getLogger(__name__)
-DEFAULT_RECIPIENT = "support@dxcon.com.vn"
+DEFAULT_RECIPIENT = "admin@dxcon.com.vn"
 
 
 def send_demo_notification(*, reference: str, full_name: str, organization: str | None,
