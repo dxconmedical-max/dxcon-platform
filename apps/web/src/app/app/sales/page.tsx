@@ -24,6 +24,10 @@ import {
   type CrmDetail,
   type CrmList,
   type SaleRow,
+  downloadAccountsExcel,
+  downloadImportTemplate,
+  importAccounts,
+  type ImportResult,
 } from "@/lib/api/crm";
 import { searchOrganizations, type OrgHit } from "@/lib/api/labPayables";
 
@@ -53,6 +57,8 @@ export default function SalesCrmPage() {
   const [actKind, setActKind] = useState("CALL");
   const [actText, setActText] = useState("");
   const [actNext, setActNext] = useState("");
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [orgQ, setOrgQ] = useState("");
   const [orgHits, setOrgHits] = useState<OrgHit[]>([]);
   const [targets, setTargets] = useState<Record<string, { cases: string; revenue: string }>>({});
@@ -130,6 +136,9 @@ export default function SalesCrmPage() {
             Tháng
             <input type="month" value={month} onChange={(e) => setMonth(e.target.value)} className={`${INPUT} block`} />
           </label>
+          <Button size="sm" variant="outline" disabled={busy || !ctx} onClick={() => ctx && void guard(async () => downloadAccountsExcel(ctx, month))}>
+            Xuất Excel
+          </Button>
           {isAdmin ? (
             <div className="flex gap-2">
               {(["accounts", "team"] as const).map((v) => (
@@ -230,6 +239,59 @@ export default function SalesCrmPage() {
               >
                 Thêm
               </Button>
+            </section>
+
+            <section className="space-y-2 rounded-xl border border-slate-200 bg-white p-4">
+              <h2 className="font-medium">Nhập nhiều khách hàng từ Excel</h2>
+              <p className="text-xs text-slate-600">
+                Tải biểu mẫu, điền mỗi dòng một khách hàng, rồi chọn file để kiểm tra trước. Khách trùng tên sẽ được bỏ qua.
+                {isAdmin ? " Cột cuối là email Sale phụ trách (để trống nếu chưa giao)." : " Khách nhập vào sẽ thuộc về bạn."}
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button size="sm" variant="outline" disabled={busy || !ctx} onClick={() => ctx && void guard(async () => downloadImportTemplate(ctx))}>
+                  Tải biểu mẫu
+                </Button>
+                <input
+                  type="file"
+                  accept=".xlsx,.csv,.tsv"
+                  aria-label="Chọn file khách hàng"
+                  onChange={(e) => {
+                    setImportFile(e.target.files?.[0] ?? null);
+                    setImportResult(null);
+                  }}
+                  className="text-sm"
+                />
+                <Button size="sm" disabled={busy || !ctx || !importFile} onClick={() => ctx && importFile && void guard(async () => setImportResult(await importAccounts(ctx, importFile, false)))}>
+                  Kiểm tra file
+                </Button>
+              </div>
+              {importResult ? (
+                <div className="space-y-1 text-sm">
+                  <p>
+                    {importResult.applied ? "Đã thêm" : "Sẽ thêm"} <b>{importResult.created}</b> khách · bỏ qua {importResult.skipped_count} trùng · {importResult.error_count} dòng lỗi.
+                  </p>
+                  {importResult.errors.map((e) => (
+                    <p key={`e${e.row}`} className="text-xs text-red-700">Dòng {e.row}: {e.error}</p>
+                  ))}
+                  {importResult.skipped.map((k) => (
+                    <p key={`s${k.row}`} className="text-xs text-slate-500">Dòng {k.row} ({k.name}): {k.reason}</p>
+                  ))}
+                  {!importResult.applied && importResult.created > 0 && ctx && importFile ? (
+                    <Button
+                      size="sm"
+                      disabled={busy}
+                      onClick={() =>
+                        void guard(async () => {
+                          setImportResult(await importAccounts(ctx, importFile, true));
+                          await load();
+                        })
+                      }
+                    >
+                      Nhập {importResult.created} khách hợp lệ
+                    </Button>
+                  ) : null}
+                </div>
+              ) : null}
             </section>
 
             <section className="space-y-2 rounded-xl border border-slate-200 bg-white p-4">

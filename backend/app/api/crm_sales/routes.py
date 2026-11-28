@@ -11,7 +11,9 @@ from flask import Blueprint, request, session
 
 from app.api.reception_workspace.routes import _actor, _client_ip
 from app.clinic_billing.logic import parse_date
+from app.clinic_billing.bulk import MAX_UPLOAD_BYTES
 from app.core.audit import write_audit
+from app.core.xlsx_export import build_xlsx, xlsx_response
 from app.core.authenticated_identity import get_authenticated_identity
 from app.executive_platform.auth import _dual
 from app.extensions.db import db
@@ -394,3 +396,173 @@ def sale_target_set(user_id: str):
     write_audit("CRM_SALE_TARGET_SET", "User", user.email[:50], user_email=_actor() or "SYSTEM", ip_address=_client_ip())
     db.session.commit()
     return {"success": True}, 200
+
+
+# ------------------------------------------------------------- Excel export / import
+
+TYPE_VI = {"CLINIC": "Phòng khám", "HOSPITAL": "Bệnh viện", "OTHER": "Khác"}
+STAGE_VI = {
+    "LEAD": "Tiềm năng",
+    "MET": "Đã gặp",
+    "QUOTED": "Đã báo giá",
+    "CONTRACTED": "Đã ký hợp đồng",
+    "ACTIVE": "Đang gửi mẫu",
+    "LOST": "Ngừng / mất",
+}
+MAX_IMPORT_ROWS = 1000
+IMPORT_HEADER = [
+    "Tên khách hàng (bắt buộc)",
+    "Loại (Phòng khám / Bệnh viện / Khác)",
+    "Người liên hệ",
+    "Điện thoại",
+    "Địa chỉ",
+    "Quận / khu vực",
+    "Ước tính ca / tháng",
+    "Giai đoạn",
+    "Ngày hẹn chăm sóc (YYYY-MM-DD)",
+    "Ghi chú",
+    "Sale phụ trách (email, chỉ Admin)",
+]
+_IMPORT_FIELDS = ["name", "account_type", "contact_person", "phone", "address", "district", "est_monthly_cases", "stage", "next_followup_date", "notes", "owner_email"]
+
+
+def _fold(text: str) -> str:
+    import unicodedata
+
+    t = unicodedata.normalize("NFKD", str(text or "")).replace("đ", "d").replace("Đ", "D")
+    return " ".join("".join(c for c in t if not unicodedata.combining(c)).lower().split())
+
+
+_TYPE_LOOKUP = {_fold(v): k for k, v in TYPE_VI.items()} | {k.lower(): k for k in TYPE_VI}
+_STAGE_LOOKUP = {_fold(v): k for k, v in STAGE_VI.items()} | {k.lower(): k for k in STAGE_VI}
+
+
+@crm_sales_bp.route("/accounts/export", methods=["GET"])
+@crm_access
+def accounts_export():
+    _, is_admin = _who()
+    month, start, end = _month_range(request.args.get("month"))
+    accounts = _visible(CrmAccount.query).order_by(CrmAccount.name).limit(5000).all()
+    org_ids = [a.organization_id for a in accounts if a.organization_id]
+    acts = _actuals(org_ids, start, end, is_admin)
+    lasts = _last_orders(org_ids)
+    head = ["Tên khách hàng", "Loại", "Giai đoạn", "Sale phụ trách", "Người liên hệ", "Điện thoại", "Địa chỉ", "Quận / khu vực",
+            "Ước tính ca / tháng", f"Số ca thực nhận {month}", "Thị phần %", f"Doanh thu {month}"]
+    if is_admin:
+        head.append(f"Lãi {month}")
+    head += ["Ngày hẹn chăm sóc", "Ngày chưa có đơn", "Ghi chú"]
+    rows = []
+    for a in accounts:
+        r = _row(a, acts.get(a.organization_id, {}), lasts.get(a.organization_id), is_admin)
+        line = [r["name"], TYPE_VI.get(r["account_type"], r["account_type"]), STAGE_VI.get(r["stage"], r["stage"]), r["owner_name"] or "",
+                r["contact_person"] or "", r["phone"] or "", r["address"] or "", r["district"] or "", r["est_monthly_cases"],
+                r["cases"], r["share_pct"] if r["share_pct"] is not None else "", r["revenue"]]
+        if is_admin:
+            line.append(r.get("margin", 0))
+        line += [r["next_followup_date"] or "", r["days_quiet"] if r["days_quiet"] is not None else "", r["notes"] or ""]
+        rows.append(line)
+    money = {11, 12} if is_admin else {11}
+    return xlsx_response(build_xlsx([("Khách hàng", head, rows)], {"Khách hàng": money}), f"khach-hang-{month}")
+
+
+@crm_sales_bp.route("/accounts/import/template", methods=["GET"])
+@crm_access
+def accounts_import_template():
+    example = ["Phòng khám Ví dụ", "Phòng khám", "BS. Nguyễn Văn A", "0901234567", "12 Đường ABC", "Quận 1", 120, "Tiềm năng", "", "Gặp lần đầu qua giới thiệu", ""]
+    return xlsx_response(build_xlsx([("Khách hàng", IMPORT_HEADER, [example])]), "mau-nhap-khach-hang")
+
+
+def _read_import_rows(filename: str, data: bytes) -> list[list[str]]:
+    import csv
+    import io
+
+    from app.clinic_billing.bulk import _cell_text
+
+    name = (filename or "").lower()
+    if name.endswith((".xlsx", ".xlsm")):
+        from openpyxl import load_workbook
+
+        wb = load_workbook(io.BytesIO(data), read_only=True, data_only=True)
+        return [[_cell_text(c) for c in r] for r in wb.worksheets[0].iter_rows(values_only=True)]
+    text = data.decode("utf-8-sig", errors="replace")
+    delim = "\t" if "\t" in text.splitlines()[0] else (";" if text.splitlines()[0].count(";") > text.splitlines()[0].count(",") else ",")
+    return [[c.strip() for c in row] for row in csv.reader(io.StringIO(text), delimiter=delim)]
+
+
+@crm_sales_bp.route("/accounts/import", methods=["POST"])
+@crm_access
+def accounts_import():
+    """Bulk-add customers from an Excel/CSV form. apply=0 only checks; apply=1 saves valid rows. Duplicates (same name) are skipped."""
+    user_id, is_admin = _who()
+    f = request.files.get("file")
+    if f is None or not f.filename:
+        return {"success": False, "error": "Chưa chọn file."}, 400
+    data = f.read(MAX_UPLOAD_BYTES + 1)
+    if len(data) > MAX_UPLOAD_BYTES:
+        return {"success": False, "error": "File quá lớn (tối đa 2MB)."}, 413
+    try:
+        grid = _read_import_rows(f.filename, data)
+    except Exception:
+        return {"success": False, "error": "Không đọc được file. Hãy dùng file Excel (.xlsx) hoặc CSV theo biểu mẫu."}, 400
+    body_rows = [(i + 2, r) for i, r in enumerate(grid[1:]) if any(str(c).strip() for c in r)]
+    if not body_rows:
+        return {"success": False, "error": "File không có dòng dữ liệu nào."}, 400
+    if len(body_rows) > MAX_IMPORT_ROWS:
+        return {"success": False, "error": f"Tối đa {MAX_IMPORT_ROWS} dòng mỗi lần nhập."}, 400
+    apply = request.form.get("apply") == "1"
+
+    existing = {_fold(n) for (n,) in db.session.query(CrmAccount.name).all()}
+    sale_by_email = {}
+    if is_admin:
+        sale_by_email = {str(u.email).lower(): u for u in User.query.filter(User.role == "SALE").all()}
+    owner = db.session.get(User, user_id) if not is_admin else None
+    created, errors, skipped = 0, [], []
+    seen: set[str] = set()
+    for line_no, cells in body_rows:
+        cells = list(cells) + [""] * (len(_IMPORT_FIELDS) - len(cells))
+        raw = dict(zip(_IMPORT_FIELDS, cells))
+        key = _fold(_clean(raw["name"], 200))
+        if not key:
+            errors.append({"row": line_no, "error": "Thiếu tên khách hàng."})
+            continue
+        if key in existing or key in seen:
+            skipped.append({"row": line_no, "name": raw["name"], "reason": "Đã có khách hàng trùng tên."})
+            continue
+        body = {k: raw[k] for k in ("name", "contact_person", "phone", "address", "district", "notes", "next_followup_date")}
+        body["est_monthly_cases"] = raw["est_monthly_cases"] or 0
+        body["next_followup_date"] = str(raw["next_followup_date"])[:10]  # Excel date cells arrive as "YYYY-MM-DD 00:00:00"
+        t = _fold(raw["account_type"]) or "phong kham"
+        body["account_type"] = _TYPE_LOOKUP.get(t, "")
+        s_ = _fold(raw["stage"]) or "tiem nang"
+        body["stage"] = _STAGE_LOOKUP.get(s_, "")
+        row = CrmAccount(name="", created_by=(_actor() or "")[:120] or None)
+        if not is_admin:
+            row.owner_user_id, row.owner_name = user_id, getattr(owner, "email", None)
+        else:
+            email = _clean(raw["owner_email"], 120).lower()
+            if email:
+                sale = sale_by_email.get(email)
+                if sale is None:
+                    errors.append({"row": line_no, "error": f"Không có tài khoản Sale “{email}”."})
+                    continue
+                body["owner_user_id"] = sale.id
+        if not body["account_type"]:
+            errors.append({"row": line_no, "error": "Loại khách hàng không hợp lệ (Phòng khám / Bệnh viện / Khác)."})
+            continue
+        if not body["stage"]:
+            errors.append({"row": line_no, "error": "Giai đoạn không hợp lệ."})
+            continue
+        err = _apply_fields(row, body, is_admin)
+        if err:
+            errors.append({"row": line_no, "error": err})
+            continue
+        seen.add(key)
+        created += 1
+        if apply:
+            db.session.add(row)
+    if apply and created:
+        write_audit("CRM_ACCOUNTS_IMPORTED", "CrmAccount", str(created), user_email=_actor() or "SYSTEM", ip_address=_client_ip())
+        db.session.commit()
+    elif apply:
+        db.session.rollback()
+    return {"success": True, "data": {"applied": apply, "created": created, "skipped": skipped[:50], "skipped_count": len(skipped), "errors": errors[:50], "error_count": len(errors)}}, 200
