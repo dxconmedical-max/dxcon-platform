@@ -181,6 +181,29 @@ def download_result_file(file_id):
 
 
 
+PORTAL_STAFF_ROLES = frozenset({"SUPER_ADMIN", "ADMIN", "SYSTEM_ADMIN", "DOCTOR", "LAB_TECHNICIAN"})
+
+
+def _may_download_result_file(item) -> bool:
+    """Staff may download any result file; a patient only files of their own orders."""
+    role = str(session.get("role") or "").upper()
+    if role in PORTAL_STAFF_ROLES:
+        return True
+    try:
+        from app.core.authenticated_identity import get_authenticated_identity
+
+        identity = get_authenticated_identity()
+        if identity is not None and str(getattr(identity, "platform_role", "") or "").upper() in PORTAL_STAFF_ROLES:
+            return True
+    except Exception:
+        pass
+    patient_id = session.get("patient_id")
+    if not patient_id:
+        return False
+    order = Order.query.get(item.order_id)
+    return bool(order and str(order.patient_id) == str(patient_id))
+
+
 @result_upload_web_bp.route("/portal/result-files/download/<file_id>")
 def portal_download_result_file(file_id):
 
@@ -188,6 +211,9 @@ def portal_download_result_file(file_id):
 
     if not item:
         return "File not found", 404
+
+    if not _may_download_result_file(item):
+        return "Forbidden", 403
 
     return send_file(
         item.file_path,
