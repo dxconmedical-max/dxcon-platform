@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/Card";
 import { Input, Label } from "@/components/ui/Input";
 import { fetchBoard, type BoardResponse } from "@/lib/api/opsBoard";
-import { createResultLink, type ResultLink } from "@/lib/api/resultLinks";
+import { createResultLink, emailResultLink, type ResultLink } from "@/lib/api/resultLinks";
 import { normalizeApiError } from "@/lib/errors";
 import { useAuthStore } from "@/stores/authStore";
 
@@ -50,11 +50,30 @@ export function OperationsBoard() {
   const [link, setLink] = useState<{ code: string; data: ResultLink } | null>(null);
   const [linkBusy, setLinkBusy] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [mailTo, setMailTo] = useState("");
+  const [mailBusy, setMailBusy] = useState(false);
+  const [mailNote, setMailNote] = useState<string | null>(null);
+
+  async function sendMail(code: string) {
+    setMailBusy(true);
+    setMailNote(null);
+    setError(null);
+    try {
+      const r = await emailResultLink({ token, organizationId }, code, mailTo.trim());
+      setMailNote(`Đã gửi email tới ${r.sent_to}.`);
+    } catch (err) {
+      setError(normalizeApiError(err));
+    } finally {
+      setMailBusy(false);
+    }
+  }
 
   async function makeLink(code: string) {
     setLinkBusy(code);
     setError(null);
     setCopied(false);
+    setMailNote(null);
+    setMailTo("");
     try {
       setLink({ code, data: await createResultLink({ token, organizationId }, code) });
     } catch (err) {
@@ -248,6 +267,23 @@ export function OperationsBoard() {
             <p className="mt-2 text-xs text-slate-600">
               Hết hạn sau {link.data.expires_days} ngày. Ai có link hoặc QR này đều xem được kết quả, nên chỉ đưa cho
               chính bệnh nhân.
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2 print:hidden">
+              <Input
+                aria-label="Email bệnh nhân"
+                type="email"
+                placeholder="Email bệnh nhân (để trống = dùng email trong hồ sơ)"
+                value={mailTo}
+                onChange={(e) => setMailTo(e.target.value)}
+                className="w-72"
+              />
+              <Button size="sm" disabled={mailBusy} onClick={() => void sendMail(link.code)}>
+                {mailBusy ? "Đang gửi..." : "Gửi email cho bệnh nhân"}
+              </Button>
+            </div>
+            {mailNote ? <p className="mt-2 text-xs text-teal-800">{mailNote}</p> : null}
+            <p className="mt-1 text-xs text-slate-600 print:hidden">
+              Email chỉ báo kết quả đã sẵn sàng kèm link, không ghi giá trị xét nghiệm. Chỉ gửi khi bệnh nhân đồng ý nhận qua email.
             </p>
             <div className="mt-3 flex gap-2 print:hidden">
               <Button size="sm" onClick={() => void copyLink()}>

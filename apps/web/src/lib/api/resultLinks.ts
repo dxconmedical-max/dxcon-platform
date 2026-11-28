@@ -32,3 +32,15 @@ export async function createResultLink(
   );
   return res.data ?? res;
 }
+
+export async function emailResultLink(
+  ctx: { token: string | null; organizationId: string | null },
+  orderCode: string,
+  email: string,
+): Promise<{ sent_to: string }> {
+  const res = await apiRequest<{ sent_to: string; data?: { sent_to: string } }>(
+    `/api/v1/result-links/${encodeURIComponent(orderCode)}/email`,
+    { method: "POST", token: ctx.token, organizationId: ctx.organizationId, body: { email } },
+  );
+  return res.data ?? res;
+}
