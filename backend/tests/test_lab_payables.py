@@ -31,6 +31,7 @@ class LabPayablesTests(unittest.TestCase):
             ("post", f"{b}/labs"),
             ("get", f"{b}/organizations"),
             ("get", f"{b}/routing"),
+            ("get", f"{b}/profit"),
             ("post", f"{b}/routing"),
             ("get", f"{b}/unassigned"),
             ("post", f"{b}/orders/assign"),

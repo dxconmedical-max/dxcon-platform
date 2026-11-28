@@ -250,6 +250,80 @@ def orders_assign():
     return {"success": True, "data": {"assigned": done, "locked": frozen}}, 200
 
 
+# --------------------------------------------------------------------- profit report
+
+
+@lab_payables_bp.route("/profit", methods=["GET"])
+@executive_api_read
+def profit_report():
+    """Margin = sell - cost over orders assigned to a lab. Orders missing a cost price are counted apart."""
+    denied = _dxcon_staff_error()
+    if denied is not None:
+        return denied
+    today = datetime.utcnow().date()
+    start = parse_date(_clean(request.args.get("start"), 10)) or today.replace(day=1)
+    end = parse_date(_clean(request.args.get("end"), 10)) or today
+    if end < start:
+        return {"success": False, "error": "Khoảng ngày không hợp lệ."}, 400
+    rows = (
+        db.session.query(OrderLabCost, BizOrder)
+        .join(BizOrder, BizOrder.order_code == OrderLabCost.order_code)
+        .filter(
+            BizOrder.status != "cancelled",
+            BizOrder.created_at >= datetime.combine(start, datetime.min.time()),
+            BizOrder.created_at < datetime.combine(end, datetime.min.time()).replace(hour=23, minute=59, second=59),
+        )
+        .all()
+    )
+    ids = {o.organization_id for _, o in rows if o.organization_id} | {c.lab_organization_id for c, _ in rows}
+    names = {o.id: o.organization_name for o in PartnerOrganization.query.filter(PartnerOrganization.id.in_(list(ids) or [""])).all()}
+
+    def blank(label: str) -> dict:
+        return {"label": label, "orders": 0, "sell": 0.0, "cost": 0.0, "margin": 0.0, "margin_pct": 0.0, "missing_cost_orders": 0}
+
+    def add(bucket: dict, cost_row, order) -> None:
+        if cost_row.missing_count > 0:
+            bucket["missing_cost_orders"] += 1
+            return
+        bucket["orders"] += 1
+        bucket["sell"] += cost_row.sell_total
+        bucket["cost"] += cost_row.cost_total
+
+    total = blank("Tổng")
+    groups: dict[str, dict[str, dict]] = {"clinic": {}, "lab": {}, "month": {}}
+    for c, o in rows:
+        add(total, c, o)
+        keys = {
+            "clinic": names.get(o.organization_id) or "Khách vãng lai",
+            "lab": names.get(c.lab_organization_id) or c.lab_organization_id,
+            "month": o.created_at.strftime("%Y-%m") if o.created_at else "—",
+        }
+        for kind, label in keys.items():
+            add(groups[kind].setdefault(label, blank(label)), c, o)
+
+    def finish(b: dict) -> dict:
+        b["sell"], b["cost"] = _money(b["sell"]), _money(b["cost"])
+        b["margin"] = _money(b["sell"] - b["cost"])
+        b["margin_pct"] = round(b["margin"] / b["sell"] * 100, 1) if b["sell"] else 0.0
+        return b
+
+    def listing(kind: str) -> list[dict]:
+        out = [finish(b) for b in groups[kind].values()]
+        return sorted(out, key=(lambda b: b["label"]) if kind == "month" else (lambda b: -b["margin"]))
+
+    return {
+        "success": True,
+        "data": {
+            "start": start.isoformat(),
+            "end": end.isoformat(),
+            "total": finish(total),
+            "by_clinic": listing("clinic"),
+            "by_lab": listing("lab"),
+            "by_month": listing("month"),
+        },
+    }, 200
+
+
 # --------------------------------------------------------------------- one lab
 
 

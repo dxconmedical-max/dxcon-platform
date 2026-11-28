@@ -167,3 +167,30 @@ export async function addLabPayment(
 ) {
   await apiRequest(`${BASE}/${encodeURIComponent(labId)}/payments`, opts(ctx, { method: "POST", body }));
 }
+
+export type ProfitRow = {
+  label: string;
+  orders: number;
+  sell: number;
+  cost: number;
+  margin: number;
+  margin_pct: number;
+  missing_cost_orders: number;
+};
+
+export type ProfitReport = {
+  start: string;
+  end: string;
+  total: ProfitRow;
+  by_clinic: ProfitRow[];
+  by_lab: ProfitRow[];
+  by_month: ProfitRow[];
+};
+
+export async function getProfit(ctx: Ctx, start: string, end: string) {
+  const qs = new URLSearchParams();
+  if (start) qs.set("start", start);
+  if (end) qs.set("end", end);
+  const r = await apiRequest<{ data: ProfitReport }>(`${BASE}/profit?${qs.toString()}`, opts(ctx));
+  return r.data;
+}

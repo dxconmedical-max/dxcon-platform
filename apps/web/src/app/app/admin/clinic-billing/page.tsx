@@ -11,6 +11,8 @@ import { formatVnd } from "@/lib/format";
 import {
   addPayment,
   bulkSetPrices,
+  markupPrices,
+  type MarkupResult,
   downloadPriceTemplate,
   uploadPriceFile,
   createStatement,
@@ -60,6 +62,20 @@ function AgingRow({ aging }: { aging: Aging }) {
   );
 }
 
+function effectivePrice(p: PriceRow): number {
+  return p.clinic_price ?? p.list_price;
+}
+
+function marginPct(p: PriceRow): string {
+  const price = effectivePrice(p);
+  if (!price || p.lab_cost === null) return "0";
+  return (((price - p.lab_cost) / price) * 100).toFixed(1);
+}
+
+function priceBelowCost(p: PriceRow): boolean {
+  return p.lab_cost !== null && effectivePrice(p) < p.lab_cost;
+}
+
 export default function ClinicBillingPage() {
   const { accessToken, activeOrganizationId } = useAuth();
   const ctx = accessToken ? { token: accessToken, organizationId: activeOrganizationId } : null;
@@ -80,6 +96,9 @@ export default function ClinicBillingPage() {
   const [onlyCustom, setOnlyCustom] = useState(false);
   const [prices, setPrices] = useState<PriceRow[]>([]);
   const [priceEdit, setPriceEdit] = useState<Record<string, string>>({});
+  const [markupPct, setMarkupPct] = useState("");
+  const [markupOverwrite, setMarkupOverwrite] = useState(false);
+  const [markupResult, setMarkupResult] = useState<MarkupResult | null>(null);
   // statements
   const [ps, setPs] = useState("");
   const [pe, setPe] = useState("");
@@ -349,6 +368,57 @@ export default function ClinicBillingPage() {
                     onApplied={() => searchPrices()}
                   />
                 ) : null}
+                <div className="space-y-2 rounded-lg bg-slate-50 p-3">
+                  <p className="text-sm font-medium">Tính giá bán từ giá nhập</p>
+                  <p className="text-xs text-slate-500">
+                    Giá bán = giá nhập của phòng xét nghiệm thực hiện cho phòng khám này, cộng thêm % (làm tròn lên 1.000đ). Nhập 0 để bán đúng giá nhập. Cần chọn phòng xét nghiệm cho phòng khám ở màn Giá nhập & công nợ phải trả.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label className="text-sm">
+                      Cộng thêm{" "}
+                      <input
+                        type="number"
+                        min={0}
+                        max={500}
+                        value={markupPct}
+                        onChange={(e) => { setMarkupPct(e.target.value); setMarkupResult(null); }}
+                        aria-label="Phần trăm cộng thêm"
+                        className={`${INPUT} w-20`}
+                      />{" "}
+                      %
+                    </label>
+                    <label className="flex items-center gap-1 text-sm">
+                      <input type="checkbox" checked={markupOverwrite} onChange={(e) => { setMarkupOverwrite(e.target.checked); setMarkupResult(null); }} /> Ghi đè cả giá riêng đã có
+                    </label>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={busy || markupPct === ""}
+                      onClick={() => ctx && orgId && void guard(async () => setMarkupResult(await markupPrices(ctx, orgId, Number(markupPct), markupOverwrite, false)))}
+                    >
+                      Kiểm tra
+                    </Button>
+                    <Button
+                      size="sm"
+                      disabled={busy || markupPct === ""}
+                      onClick={() =>
+                        ctx && orgId &&
+                        void guard(async () => {
+                          setMarkupResult(await markupPrices(ctx, orgId, Number(markupPct), markupOverwrite, true));
+                          await searchPrices();
+                          await refresh();
+                        }, "Đã áp dụng giá bán.")
+                      }
+                    >
+                      Áp dụng
+                    </Button>
+                  </div>
+                  {markupResult ? (
+                    <p className="text-sm">
+                      {markupResult.applied ? "Đã áp dụng" : "Kiểm tra xong (chưa lưu)"}: thêm mới {markupResult.created}, cập nhật {markupResult.updated}, giữ nguyên giá riêng đã có {markupResult.skipped}.
+                    </p>
+                  ) : null}
+                </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <input
                     value={pq}
@@ -366,7 +436,14 @@ export default function ClinicBillingPage() {
                 <ul className="space-y-2">
                   {prices.map((p) => (
                     <li key={p.id} className="flex flex-wrap items-center gap-2 text-sm">
-                      <span className="min-w-48 flex-1">{p.name} ({p.code}) · giá niêm yết {formatVnd(p.list_price)}</span>
+                      <span className="min-w-48 flex-1">
+                        {p.name} ({p.code}) · giá niêm yết {formatVnd(p.list_price)}
+                        {p.lab_cost !== null ? (
+                          <span className={priceBelowCost(p) ? "block text-xs text-red-700" : "block text-xs text-slate-500"}>
+                            Giá nhập {formatVnd(p.lab_cost)} · lãi {marginPct(p)}%{priceBelowCost(p) ? " (bán thấp hơn giá nhập)" : ""}
+                          </span>
+                        ) : null}
+                      </span>
                       <input
                         type="number"
                         min={0}

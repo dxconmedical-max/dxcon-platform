@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from datetime import datetime
 
 from flask import Blueprint, Response, current_app, request
@@ -15,6 +16,8 @@ from app.clinic_billing.logic import (
 )
 from app.clinic_billing.bulk import MAX_UPLOAD_BYTES, apply_bulk, build_template_xlsx, sheet_to_text, template_rows
 from app.core.audit import write_audit
+from app.lab_payables.cost import routed_lab
+from app.models.lab_payables import LabCostPrice
 from app.executive_platform.auth import executive_api_read, executive_api_write
 from app.extensions.db import db
 from app.models.biz_order import BizOrder
@@ -223,13 +226,67 @@ def list_prices(org_id: str):
     if only_custom:
         query = query.filter(TestCatalog.id.in_(list(prices) or [""]))
     rows = query.order_by(TestCatalog.name).limit(40).all()
+    lab_id = routed_lab(org_id)
+    costs = {c.test_catalog_id: c.cost for c in LabCostPrice.query.filter_by(organization_id=lab_id)} if lab_id else {}
     return {
         "success": True,
         "data": [
-            {"id": t.id, "code": t.code, "name": t.name, "list_price": t.price or 0, "clinic_price": prices.get(t.id)}
+            {
+                "id": t.id,
+                "code": t.code,
+                "name": t.name,
+                "list_price": t.price or 0,
+                "clinic_price": prices.get(t.id),
+                "lab_cost": costs.get(t.id),
+            }
             for t in rows
         ],
     }, 200
+
+
+@clinic_billing_bp.route("/<org_id>/prices/markup", methods=["POST"])
+@executive_api_write
+def prices_markup(org_id: str):
+    """Set clinic selling prices = lab cost + percent (rounded up to 1.000đ). apply=false is a dry run."""
+    clinic, err = _clinic_or_error(org_id)
+    if err is not None:
+        return err
+    body = request.get_json(silent=True) or {}
+    try:
+        percent = float(body.get("percent"))
+    except (TypeError, ValueError):
+        return {"success": False, "error": "Nhập % cộng thêm (ví dụ 0 hoặc 15)."}, 400
+    if percent < 0 or percent > 500:
+        return {"success": False, "error": "% cộng thêm phải từ 0 đến 500."}, 400
+    lab_id = routed_lab(org_id)
+    if not lab_id:
+        return {"success": False, "error": "Phòng khám này chưa chọn phòng xét nghiệm. Cài ở màn Giá nhập & công nợ phải trả."}, 409
+    costs = {c.test_catalog_id: c.cost for c in LabCostPrice.query.filter_by(organization_id=lab_id)}
+    if not costs:
+        return {"success": False, "error": "Phòng xét nghiệm này chưa có giá nhập."}, 409
+    overwrite = body.get("overwrite") is True
+    apply = body.get("apply") is True
+    actor = (_actor() or "")[:120] or None
+    existing = {p.test_catalog_id: p for p in ClinicPrice.query.filter_by(organization_id=org_id)}
+    created = updated = skipped = 0
+    for test_id, cost in costs.items():
+        price = float(math.ceil(cost * (1 + percent / 100.0) / 1000.0) * 1000)
+        row = existing.get(test_id)
+        if row is None:
+            created += 1
+            if apply:
+                db.session.add(ClinicPrice(organization_id=org_id, test_catalog_id=test_id, price=price, updated_by=actor))
+        elif overwrite:
+            updated += 1
+            if apply:
+                row.price = price
+                row.updated_by = actor
+        else:
+            skipped += 1
+    if apply and (created or updated):
+        write_audit("CLINIC_PRICE_MARKUP", "PartnerOrganization", clinic.organization_code, user_email=_actor() or "SYSTEM", ip_address=_client_ip())
+        db.session.commit()
+    return {"success": True, "data": {"applied": apply, "created": created, "updated": updated, "skipped": skipped}}, 200
 
 
 @clinic_billing_bp.route("/<org_id>/prices/<test_id>", methods=["POST"])
