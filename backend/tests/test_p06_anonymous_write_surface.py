@@ -407,12 +407,13 @@ class P06ProductionGateTests(unittest.TestCase):
         resp = self.client.post("/api/v1/payments/create", json={})
         self.assertEqual(resp.status_code, 401)
 
-    def test_payment_webhook_public_in_production(self):
+    def test_payment_webhook_closed_in_production(self):
+        # No provider signature verification exists yet, so anonymous callers must not reach it.
         resp = self.client.post(
             "/api/v1/payments/webhook",
             json={"provider": "STRIPE", "event_type": "payment.updated"},
         )
-        self.assertNotEqual(resp.status_code, 401)
+        self.assertEqual(resp.status_code, 401)
 
     def test_marketplace_search_public_in_production(self):
         resp = self.client.get("/api/v1/marketplace/search")
