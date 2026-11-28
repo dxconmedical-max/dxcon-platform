@@ -129,8 +129,8 @@ export default function PublicBookingPage() {
           <label className="flex items-start gap-2 text-sm text-slate-700">
             <input type="checkbox" className="mt-1" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
             <span>
-              Tôi đồng ý để DxCon liên hệ lại với tôi qua điện thoại, tin nhắn hoặc email về yêu cầu
-              đặt lịch này, và đã đọc{" "}
+              Tôi đồng ý để DxCon xử lý thông tin cá nhân (kể cả thông tin về tình trạng sức khỏe, là dữ liệu cá nhân
+              nhạy cảm) và liên hệ lại với tôi qua điện thoại, tin nhắn hoặc email về yêu cầu đặt lịch này. Tôi đã đọc{" "}
               <a href="/vi/privacy" target="_blank" rel="noreferrer" className="text-teal-700 underline">Chính sách bảo mật</a>{" "}
               và{" "}
               <a href="/vi/terms" target="_blank" rel="noreferrer" className="text-teal-700 underline">Điều khoản sử dụng</a>.

@@ -6,7 +6,7 @@ import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Chính sách bảo mật",
-  description: "Cách DxCon thu thập, sử dụng và bảo vệ dữ liệu cá nhân theo Nghị định 13/2023/NĐ-CP.",
+  description: "Cách DxCon thu thập, sử dụng và bảo vệ dữ liệu cá nhân theo Luật Bảo vệ dữ liệu cá nhân và Nghị định 356/2025/NĐ-CP.",
   alternates: { canonical: "/vi/privacy" },
 };
 
@@ -16,16 +16,16 @@ export default function PrivacyPage() {
       <p>
         Chính sách này mô tả cách <Fill value={SITE.legalName} /> (“DxCon”, “chúng tôi”), mã số thuế{" "}
         <Fill value={SITE.taxId} />, địa chỉ <Fill value={SITE.address} />, xử lý dữ liệu cá nhân của người
-        dùng website và nền tảng dxcon.com.vn, phù hợp với Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân
-        và các quy định pháp luật liên quan.
+        dùng website và nền tảng dxcon.com.vn, phù hợp với Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15 (có hiệu lực từ ngày 01/01/2026),
+        Nghị định 356/2025/NĐ-CP hướng dẫn thi hành Luật và các quy định pháp luật liên quan.
       </p>
 
       <h2>1. Dữ liệu chúng tôi thu thập</h2>
       <ul>
         <li>Dữ liệu cá nhân cơ bản: họ tên, số điện thoại, email, địa chỉ lấy mẫu, ngày sinh, giới tính.</li>
         <li>
-          Dữ liệu cá nhân nhạy cảm về sức khỏe: chỉ định xét nghiệm, mẫu bệnh phẩm, kết quả xét nghiệm, ghi chú
-          lâm sàng do phòng khám hoặc phòng xét nghiệm cung cấp.
+          Dữ liệu cá nhân nhạy cảm về tình trạng sức khỏe: chỉ định xét nghiệm, mẫu bệnh phẩm, kết quả xét nghiệm,
+          ghi chú lâm sàng do phòng khám hoặc phòng xét nghiệm cung cấp.
         </li>
         <li>Dữ liệu tài khoản và kỹ thuật: tên đăng nhập, vai trò, nhật ký truy cập, địa chỉ IP, loại thiết bị.</li>
         <li>Dữ liệu thanh toán: số tiền, trạng thái thanh toán. Chúng tôi không lưu số thẻ ngân hàng.</li>
@@ -42,10 +42,11 @@ export default function PrivacyPage() {
 
       <h2>3. Cơ sở xử lý và sự đồng ý</h2>
       <p>
-        Chúng tôi xử lý dữ liệu dựa trên sự đồng ý của chủ thể dữ liệu (ví dụ tích chọn đồng ý khi đặt lịch), để
-        thực hiện hợp đồng/dịch vụ bạn yêu cầu, hoặc theo quy định pháp luật. Với dữ liệu nhạy cảm về sức khỏe,
-        chúng tôi chỉ xử lý khi có sự đồng ý rõ ràng. Bạn có thể rút lại sự đồng ý bất cứ lúc nào bằng cách liên
-        hệ chúng tôi; việc rút đồng ý không ảnh hưởng đến xử lý đã thực hiện trước đó.
+        Chúng tôi xử lý dữ liệu dựa trên sự đồng ý của chủ thể dữ liệu, để thực hiện dịch vụ bạn yêu cầu, hoặc
+        theo quy định pháp luật. Sự đồng ý do bạn chủ động thể hiện (ví dụ tích chọn khi đặt lịch), không đặt
+        mặc định; chúng tôi lưu lại việc đồng ý để có thể chứng minh khi cần. Khi xin đồng ý xử lý dữ liệu về
+        tình trạng sức khỏe, chúng tôi nêu rõ đây là dữ liệu cá nhân nhạy cảm. Bạn có thể rút lại sự đồng ý
+        bất cứ lúc nào bằng cách liên hệ chúng tôi; việc rút đồng ý không ảnh hưởng đến xử lý đã thực hiện trước đó.
       </p>
 
       <h2>4. Chia sẻ dữ liệu</h2>
@@ -71,29 +72,38 @@ export default function PrivacyPage() {
       </p>
 
       <h2>7. Quyền của chủ thể dữ liệu</h2>
-      <p>Theo Nghị định 13/2023/NĐ-CP, bạn có quyền:</p>
+      <p>Theo Luật Bảo vệ dữ liệu cá nhân, bạn có quyền:</p>
       <ul>
         <li>Được biết về việc xử lý dữ liệu của mình;</li>
         <li>Đồng ý hoặc không đồng ý, rút lại sự đồng ý;</li>
-        <li>Truy cập, xem, chỉnh sửa hoặc yêu cầu chỉnh sửa dữ liệu;</li>
-        <li>Yêu cầu cung cấp, xóa, hạn chế xử lý dữ liệu; phản đối xử lý;</li>
+        <li>Xem, chỉnh sửa hoặc yêu cầu chỉnh sửa dữ liệu; yêu cầu cung cấp dữ liệu;</li>
+        <li>Yêu cầu xóa dữ liệu, hạn chế xử lý hoặc phản đối xử lý;</li>
+        <li>Yêu cầu áp dụng biện pháp bảo vệ dữ liệu;</li>
         <li>Khiếu nại, tố cáo, khởi kiện và yêu cầu bồi thường theo quy định pháp luật.</li>
       </ul>
       <p>
         Để thực hiện quyền, gửi yêu cầu đến <Fill value={SITE.privacyEmail} /> hoặc theo trang{" "}
-        <Link href="/vi/contact">Liên hệ</Link>. Chúng tôi phản hồi trong thời hạn theo quy định pháp luật.
+        <Link href="/vi/contact">Liên hệ</Link>. Chúng tôi phản hồi yêu cầu trong 02 ngày làm việc và hoàn thành trong thời hạn theo quy định của pháp luật
+        (tùy loại yêu cầu: xem, chỉnh sửa, cung cấp, xóa, hạn chế hoặc phản đối xử lý).
       </p>
 
-      <h2>8. Cookie</h2>
+      <h2>8. Công cụ gợi ý tự động (AI)</h2>
+      <p>
+        Nếu hệ thống có hiển thị gợi ý do công cụ tự động/AI, các gợi ý này chỉ để nhân sự chuyên môn tham khảo,
+        không tự động đưa ra quyết định có ảnh hưởng đến bạn. Kết quả và kết luận chuyên môn do người có thẩm quyền
+        xác nhận.
+      </p>
+
+      <h2>9. Cookie</h2>
       <p>
         Website dùng cookie cần thiết cho đăng nhập và bảo mật phiên làm việc. Bạn có thể tắt cookie trong trình
         duyệt, nhưng một số chức năng đăng nhập có thể không hoạt động.
       </p>
 
-      <h2>9. Thay đổi chính sách</h2>
+      <h2>10. Thay đổi chính sách</h2>
       <p>Chúng tôi có thể cập nhật chính sách này; phiên bản mới được đăng tại trang này kèm ngày cập nhật.</p>
 
-      <h2>10. Liên hệ</h2>
+      <h2>11. Liên hệ</h2>
       <p>
         <Fill value={SITE.legalName} /> — {" "}
         <Fill value={SITE.address} /> — Email: <Fill value={SITE.privacyEmail} /> — Điện thoại:{" "}
