@@ -11,6 +11,7 @@ import {
   Stethoscope,
   Truck,
   UserCircle,
+  Users,
 } from "lucide-react";
 
 import { can } from "@/lib/permissions";
@@ -103,6 +104,12 @@ const ALL_NAV: NavItem[] = [
     icon: Truck,
     permission: "collections.read",
     workspaces: ["/app/collector"],
+  },
+  {
+    href: "/app/sales",
+    label: "Khách hàng (CRM)",
+    icon: Users,
+    workspaces: ["/app/sales"],
   },
   {
     href: "/app/clinic",

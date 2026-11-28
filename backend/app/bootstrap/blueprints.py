@@ -18,6 +18,7 @@ from app.api.clinic_orders.routes import clinic_orders_bp, clinic_requests_staff
 from app.api.addons.routes import addons_bp
 from app.api.clinic_billing.routes import clinic_billing_bp
 from app.api.lab_payables.routes import lab_payables_bp
+from app.api.crm_sales.routes import crm_sales_bp
 from app.api.admin_test_catalog.routes import admin_test_catalog_bp
 from app.api.lab_workspace.routes import lab_workspace_bp
 from app.api.role_dashboards.routes import role_dashboards_bp
@@ -502,6 +503,7 @@ def register_blueprints(app):
     app.register_blueprint(addons_bp)
     app.register_blueprint(clinic_billing_bp)
     app.register_blueprint(lab_payables_bp)
+    app.register_blueprint(crm_sales_bp)
     app.register_blueprint(admin_test_catalog_bp)
     app.register_blueprint(lab_workspace_web_bp)
     app.register_blueprint(lab_workspace_bp)
