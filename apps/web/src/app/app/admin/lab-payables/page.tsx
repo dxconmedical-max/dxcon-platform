@@ -16,6 +16,7 @@ import {
   createLabStatement,
   downloadCostTemplate,
   getLab,
+  downloadStatementExcel,
   getLabStatement,
   getLabs,
   getRouting,
@@ -451,6 +452,9 @@ export default function LabPayablesPage() {
                         <div className="mt-2 flex gap-2">
                           <Button size="sm" variant="outline" disabled={busy} onClick={() => ctx && labId && void guard(async () => setDetail(await getLabStatement(ctx, labId, s.id)))}>
                             Xem chi tiết
+                          </Button>
+                          <Button size="sm" variant="outline" disabled={busy} onClick={() => ctx && labId && void guard(async () => downloadStatementExcel(ctx, labId, s.id))}>
+                            Xuất Excel
                           </Button>
                           <Button size="sm" variant="outline" disabled={busy} onClick={() => ctx && labId && void guard(async () => { await voidLabStatement(ctx, labId, s.id); setDetail(null); await refresh(); }, "Đã hủy bảng đối soát.")}>
                             Hủy

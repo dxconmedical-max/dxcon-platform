@@ -1,3 +1,5 @@
+import { API_BASE_URL } from "@/lib/constants";
+import { authHeaders, downloadFile, failFrom } from "@/lib/api/clinicBilling";
 import { apiRequest } from "@/services/api";
 
 type Ctx = { token: string; organizationId?: string | null };
@@ -114,4 +116,30 @@ export async function listSales(ctx: Ctx, month: string) {
 
 export async function setSaleTarget(ctx: Ctx, userId: string, body: { month: string; target_cases: number; target_revenue: number }) {
   await apiRequest(`${BASE}/sales/${encodeURIComponent(userId)}/target`, opts(ctx, { method: "POST", body }));
+}
+
+export type ImportResult = {
+  applied: boolean;
+  created: number;
+  skipped_count: number;
+  skipped: { row: number; name: string; reason: string }[];
+  error_count: number;
+  errors: { row: number; error: string }[];
+};
+
+export async function downloadAccountsExcel(ctx: Ctx, month: string) {
+  await downloadFile(ctx, `${BASE}/accounts/export?month=${encodeURIComponent(month)}`, "khach-hang.xlsx");
+}
+
+export async function downloadImportTemplate(ctx: Ctx) {
+  await downloadFile(ctx, `${BASE}/accounts/import/template`, "mau-nhap-khach-hang.xlsx");
+}
+
+export async function importAccounts(ctx: Ctx, file: File, apply: boolean): Promise<ImportResult> {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("apply", apply ? "1" : "0");
+  const res = await fetch(`${API_BASE_URL}${BASE}/accounts/import`, { method: "POST", headers: authHeaders(ctx), body: form });
+  if (!res.ok) await failFrom(res);
+  return ((await res.json()) as { data: ImportResult }).data;
 }

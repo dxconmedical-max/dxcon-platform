@@ -118,6 +118,77 @@ class CrmSalesTests(unittest.TestCase):
         self.assertIn("SALE", ALL_ROLES)
         self.assertEqual(workspace_path_for_role("SALE"), "/app/sales")
 
+    def _csv(self, text):
+        import io
+
+        return {"file": (io.BytesIO(text.encode("utf-8")), "khach.csv"), "apply": "0"}
+
+    def test_import_dry_run_then_apply_skips_duplicates_and_reports_errors(self):
+        a = self._as("sale_a")
+        head = "Tên,Loại,Liên hệ,Điện thoại,Địa chỉ,Quận,Ca,Giai đoạn,Hẹn,Ghi chú,Sale\n"
+        body = (
+            "PK Import Một,Phòng khám,BS A,0901,1 ABC,Quận 1,30,Đã gặp,2026-12-01 00:00:00,ghi chú,\n"
+            "PK Import Hai,Bệnh viện,,,,,,,,,\n"
+            ",Phòng khám,,,,,,,,,\n"
+            "PK Import Ba,Loại lạ,,,,,,,,,\n"
+            "pk import một,Phòng khám,,,,,,,,,\n"
+        )
+        data = self._csv(head + body)
+        r = a.post(f"{B}/accounts/import", data=data, content_type="multipart/form-data")
+        self.assertEqual(r.status_code, 200)
+        j = r.get_json()["data"]
+        self.assertEqual((j["applied"], j["created"], j["error_count"], j["skipped_count"]), (False, 2, 2, 1))
+        self.assertEqual(a.get(f"{B}/accounts?q=PK Import").get_json()["data"]["accounts"], [])  # dry run saved nothing
+        data = self._csv(head + body)
+        data["apply"] = "1"
+        r = a.post(f"{B}/accounts/import", data=data, content_type="multipart/form-data")
+        self.assertEqual(r.get_json()["data"]["created"], 2)
+        mine = a.get(f"{B}/accounts?q=PK Import").get_json()["data"]["accounts"]
+        self.assertEqual(sorted(x["name"] for x in mine), ["PK Import Hai", "PK Import Một"])
+        one = [x for x in mine if x["name"] == "PK Import Một"][0]
+        self.assertEqual((one["stage"], one["est_monthly_cases"], one["next_followup_date"], one["owner_user_id"]), ("MET", 30, "2026-12-01", self.users["sale_a"][0]))
+        # another sale cannot see them; re-import is all duplicates
+        self.assertEqual(self._as("sale_b").get(f"{B}/accounts?q=PK Import").get_json()["data"]["accounts"], [])
+        again = self._csv(head + body)
+        again["apply"] = "1"
+        self.assertEqual(a.post(f"{B}/accounts/import", data=again, content_type="multipart/form-data").get_json()["data"]["created"], 0)
+
+    def test_import_admin_assigns_owner_by_email_and_sale_cannot(self):
+        admin, sale_b = self._as("admin"), self._as("sale_b")
+        head = "Tên,Loại,Liên hệ,Điện thoại,Địa chỉ,Quận,Ca,Giai đoạn,Hẹn,Ghi chú,Sale\n"
+        line = f"PK Giao Sale,Phòng khám,,,,,,,,,{self.users['sale_b'][1]}\nPK Sale Sai,Phòng khám,,,,,,,,,nobody@x.test\n"
+        d = self._csv(head + line)
+        d["apply"] = "1"
+        j = admin.post(f"{B}/accounts/import", data=d, content_type="multipart/form-data").get_json()["data"]
+        self.assertEqual((j["created"], j["error_count"]), (1, 1))
+        self.assertEqual([x["name"] for x in sale_b.get(f"{B}/accounts?q=PK Giao").get_json()["data"]["accounts"]], ["PK Giao Sale"])
+        # a sale's owner column is ignored: they own what they import
+        d2 = self._csv(head + f"PK Sale Tu Nhap,Phòng khám,,,,,,,,,{self.users['sale_b'][1]}\n")
+        d2["apply"] = "1"
+        self._as("sale_a").post(f"{B}/accounts/import", data=d2, content_type="multipart/form-data")
+        mine = self._as("sale_a").get(f"{B}/accounts?q=Tu Nhap").get_json()["data"]["accounts"]
+        self.assertEqual(mine[0]["owner_user_id"], self.users["sale_a"][0])
+
+    def test_exports_are_excel_and_sale_export_has_no_margin(self):
+        from io import BytesIO
+
+        from openpyxl import load_workbook
+
+        self._as("sale_a").post(f"{B}/accounts", json={"name": "=HYPERLINK(1)"})
+        r = self._as("sale_a").get(f"{B}/accounts/export")
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r.data.startswith(b"PK"))
+        ws = load_workbook(BytesIO(r.data)).active
+        header = [c.value for c in ws[1]]
+        self.assertFalse(any(str(h).startswith("Lãi") for h in header))
+        self.assertTrue(any(str(c.value).startswith("'=") for row in ws.iter_rows(min_row=2) for c in row))  # formula neutralised
+        admin_ws = load_workbook(BytesIO(self._as("admin").get(f"{B}/accounts/export").data)).active
+        self.assertTrue(any(str(c.value).startswith("Lãi") for c in admin_ws[1]))
+        t = self._as("sale_a").get(f"{B}/accounts/import/template")
+        self.assertEqual(t.status_code, 200)
+        self.assertIn(self._as("reception").get(f"{B}/accounts/export").status_code, (401, 403))
+        self.assertIn(self.app.test_client().post(f"{B}/accounts/import").status_code, (401, 403))
+
 
 if __name__ == "__main__":
     unittest.main()

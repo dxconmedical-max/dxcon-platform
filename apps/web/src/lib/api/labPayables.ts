@@ -194,3 +194,12 @@ export async function getProfit(ctx: Ctx, start: string, end: string) {
   const r = await apiRequest<{ data: ProfitReport }>(`${BASE}/profit?${qs.toString()}`, opts(ctx));
   return r.data;
 }
+
+export async function downloadProfitExcel(ctx: Ctx, start: string, end: string) {
+  const qs = new URLSearchParams({ start, end }).toString();
+  await downloadFile(ctx, `${BASE}/profit/export?${qs}`, "bao-cao-lai.xlsx");
+}
+
+export async function downloadStatementExcel(ctx: Ctx, labId: string, statementId: string) {
+  await downloadFile(ctx, `${BASE}/${encodeURIComponent(labId)}/statements/${encodeURIComponent(statementId)}/export`, "doi-soat.xlsx");
+}

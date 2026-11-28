@@ -8,6 +8,7 @@ from flask import Blueprint, Response, request
 from sqlalchemy import select
 
 from app.api.reception_workspace.routes import _actor, _client_ip, _dxcon_staff_error
+from app.core.xlsx_export import build_xlsx, xlsx_response
 from app.clinic_billing.bulk import MAX_UPLOAD_BYTES, apply_bulk, build_template_xlsx, sheet_to_text, template_rows
 from app.clinic_billing.logic import parse_date
 from app.core.audit import write_audit
@@ -253,18 +254,14 @@ def orders_assign():
 # --------------------------------------------------------------------- profit report
 
 
-@lab_payables_bp.route("/profit", methods=["GET"])
-@executive_api_read
-def profit_report():
-    """Margin = sell - cost over orders assigned to a lab. Orders missing a cost price are counted apart."""
-    denied = _dxcon_staff_error()
-    if denied is not None:
-        return denied
+def _profit_range():
     today = datetime.utcnow().date()
     start = parse_date(_clean(request.args.get("start"), 10)) or today.replace(day=1)
     end = parse_date(_clean(request.args.get("end"), 10)) or today
-    if end < start:
-        return {"success": False, "error": "Khoảng ngày không hợp lệ."}, 400
+    return start, end
+
+
+def _profit_data(start, end) -> dict:
     rows = (
         db.session.query(OrderLabCost, BizOrder)
         .join(BizOrder, BizOrder.order_code == OrderLabCost.order_code)
@@ -312,16 +309,51 @@ def profit_report():
         return sorted(out, key=(lambda b: b["label"]) if kind == "month" else (lambda b: -b["margin"]))
 
     return {
-        "success": True,
-        "data": {
-            "start": start.isoformat(),
-            "end": end.isoformat(),
-            "total": finish(total),
-            "by_clinic": listing("clinic"),
-            "by_lab": listing("lab"),
-            "by_month": listing("month"),
-        },
-    }, 200
+        "start": start.isoformat(),
+        "end": end.isoformat(),
+        "total": finish(total),
+        "by_clinic": listing("clinic"),
+        "by_lab": listing("lab"),
+        "by_month": listing("month"),
+    }
+
+
+@lab_payables_bp.route("/profit", methods=["GET"])
+@executive_api_read
+def profit_report():
+    """Margin = sell - cost over orders assigned to a lab. Orders missing a cost price are counted apart."""
+    denied = _dxcon_staff_error()
+    if denied is not None:
+        return denied
+    start, end = _profit_range()
+    if end < start:
+        return {"success": False, "error": "Khoảng ngày không hợp lệ."}, 400
+    return {"success": True, "data": _profit_data(start, end)}, 200
+
+
+@lab_payables_bp.route("/profit/export", methods=["GET"])
+@executive_api_read
+def profit_export():
+    denied = _dxcon_staff_error()
+    if denied is not None:
+        return denied
+    start, end = _profit_range()
+    if end < start:
+        return {"success": False, "error": "Khoảng ngày không hợp lệ."}, 400
+    d = _profit_data(start, end)
+    head = ["Nhóm", "Số đơn", "Doanh thu", "Giá vốn", "Lãi", "Lãi %", "Đơn thiếu giá nhập"]
+
+    def line(b: dict) -> list:
+        return [b["label"], b["orders"], b["sell"], b["cost"], b["margin"], b["margin_pct"], b["missing_cost_orders"]]
+
+    sheets = [
+        ("Tổng", head, [line(d["total"])]),
+        ("Theo phòng khám", head, [line(b) for b in d["by_clinic"]]),
+        ("Theo phòng xét nghiệm", head, [line(b) for b in d["by_lab"]]),
+        ("Theo tháng", head, [line(b) for b in d["by_month"]]),
+    ]
+    money = {t: {2, 3, 4} for t, _, _ in sheets}
+    return xlsx_response(build_xlsx(sheets, money), f"bao-cao-lai-{d['start']}-{d['end']}")
 
 
 # --------------------------------------------------------------------- one lab
@@ -552,6 +584,25 @@ def statement_detail(lab_id: str, statement_id: str):
             ],
         },
     }, 200
+
+
+@lab_payables_bp.route("/<lab_id>/statements/<statement_id>/export", methods=["GET"])
+@executive_api_read
+def statement_export(lab_id: str, statement_id: str):
+    lab, err = _lab_or_error(lab_id)
+    if err is not None:
+        return err
+    stmt = LabPayableStatement.query.filter_by(id=statement_id, organization_id=lab_id).first()
+    if stmt is None:
+        return {"success": False, "error": "Không tìm thấy bảng đối soát."}, 404
+    lines = LabPayableLine.query.filter_by(statement_id=stmt.id).all()
+    orders = {o.order_code: o for o in BizOrder.query.filter(BizOrder.order_code.in_([l.order_code for l in lines] or [""])).all()}
+    rows = [[l.order_code, orders[l.order_code].patient_name if l.order_code in orders else "", l.amount] for l in lines]
+    rows.append(["", "TỔNG CỘNG", stmt.total_amount])
+    head = ["Mã đơn", "Bệnh nhân", "Phải trả phòng xét nghiệm"]
+    title = f"{lab.organization_name} · {stmt.period_start} → {stmt.period_end} · {stmt.status}"
+    data = build_xlsx([("Đối soát", head, rows), ("Thông tin", ["Mục", "Giá trị"], [["Số bảng", stmt.statement_no], ["Phòng xét nghiệm", title]])], {"Đối soát": {2}})
+    return xlsx_response(data, f"doi-soat-{stmt.statement_no}")
 
 
 @lab_payables_bp.route("/<lab_id>/statements/<statement_id>/void", methods=["POST"])

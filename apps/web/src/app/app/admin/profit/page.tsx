@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 import { normalizeApiError } from "@/lib/errors";
 import { formatVnd } from "@/lib/format";
-import { getProfit, type ProfitReport, type ProfitRow } from "@/lib/api/labPayables";
+import { downloadProfitExcel, getProfit, type ProfitReport, type ProfitRow } from "@/lib/api/labPayables";
 
 const INPUT = "rounded-lg border border-slate-300 px-3 py-1.5 text-sm";
 
@@ -104,6 +104,17 @@ export default function ProfitReportPage() {
           </label>
           <Button size="sm" disabled={loading} onClick={() => void load(start, end)}>
             Xem
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={loading || !accessToken}
+            onClick={() =>
+              accessToken &&
+              void downloadProfitExcel({ token: accessToken, organizationId: activeOrganizationId }, start, end).catch((err) => setError(normalizeApiError(err)))
+            }
+          >
+            Xuất Excel
           </Button>
         </div>
         {error ? <p role="alert" className="text-sm text-red-700">{error}</p> : null}
