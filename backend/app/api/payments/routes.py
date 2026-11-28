@@ -57,6 +57,14 @@ def create_payment():
 
 @payments_bp.route("/webhook", methods=["POST"])
 def payment_webhook():
+    from flask import current_app
+
+    from app.infrastructure.production_readiness import is_strict_env
+
+    # No provider signature verification is implemented yet, so this endpoint would let any caller mark an
+    # invoice as paid. It stays closed in staging/production until a real verifier exists.
+    if is_strict_env(current_app):
+        return {"error": "Payment webhook verification is not configured"}, 403
     data = request.get_json(silent=True) or {}
     provider = data.get("provider") or request.headers.get("X-Payment-Provider", "VNPAY")
     try:

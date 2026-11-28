@@ -1,7 +1,9 @@
-"""Production API auth gate — deny anonymous access to high-risk prefixes.
+"""Production API auth gate — deny anonymous access to every /api/ path except an explicit public list.
 
+Default-deny: a new module is protected from day one without anyone having to remember to list it.
 Does not modify frozen web auth. Enforced in strict environments (staging/production)
-unless TESTING is set. Accepts JWT Bearer or Flask session user_id (dual-auth workspaces).
+unless TESTING is set (tests can opt in with API_AUTH_GATE_IN_TESTS). Accepts JWT Bearer or Flask
+session user_id (dual-auth workspaces).
 """
 
 from __future__ import annotations
@@ -26,28 +28,81 @@ PUBLIC_EXACT = frozenset(
         "/api/v1/system/version",
         "/api/v1/system/build",
         "/api/v1/api-platform/health",
+        "/api/v1/auth/forgot-password",
+        "/api/v1/auth/reset-password",
+        "/api/v1/auth/logout",
         "/live",
         "/ready",
-        # P0-6: intentionally public writes / catalog
-        "/api/v1/payments/webhook",
+        # Public catalog / health. Payment and marketplace webhooks are NOT public: they have no
+        # provider signature verification yet, so they stay closed until one is implemented.
         "/api/v1/marketplace/search",
         "/api/v1/marketplace/v2/health",
-        "/api/v1/marketplace/v2/payments/webhook",
     }
 )
 
 # Intentionally public anonymous POSTs (method-specific): partner self-registration form.
-PUBLIC_POST_EXACT = frozenset({"/api/v1/pilot-readiness/partner-registration"})
+PUBLIC_POST_EXACT = frozenset(
+    {
+        "/api/v1/pilot-readiness/partner-registration",
+        # Cold-chain devices post with their own device secret (checked by the handler).
+        "/api/v1/iot-logistics/ingest",
+        "/api/v1/iot-logistics/offline-buffer/sync",
+        "/api/v1/iot-logistics/temperature-breach",
+    }
+)
+PUBLIC_POST_PREFIXES = ("/api/v1/iot/readings/",)
+
+# Platform / back-office modules no web page uses: only DxCon administrators may call them,
+# even when logged in. (Staff pages live under /api/v1/reception, /lab, /sample-collections, ... which
+# have their own role checks.)
+ADMIN_ONLY_PREFIXES = (
+    "/api/v1/ai-copilot",
+    "/api/v1/ai-operations",
+    "/api/v1/api-platform",
+    "/api/v1/backup-recovery",
+    "/api/v1/data-warehouse",
+    "/api/v1/developer-portal",
+    "/api/v1/device-gateway",
+    "/api/v1/enterprise-analytics",
+    "/api/v1/executive-metrics",
+    "/api/v1/healthcare-ecosystem",
+    "/api/v1/infrastructure",
+    "/api/v1/intelligent-healthcare",
+    "/api/v1/iot",
+    "/api/v1/iot-logistics",
+    "/api/v1/metrics",
+    "/api/v1/monitoring-center",
+    "/api/v1/multi-tenant",
+    "/api/v1/ops",
+    "/api/v1/pilot-status",
+    "/api/v1/population-health",
+    "/api/v1/production-deployment",
+    "/api/v1/readiness-pack",
+    "/api/v1/regional-cloud",
+    "/api/v1/release-control",
+    "/api/v1/release-management",
+    "/api/v1/result-files",
+    "/api/v1/sandbox",
+    "/api/v1/standards",
+    "/api/v1/standards-advanced",
+    "/api/v1/system",
+    "/api/v1/tenant-isolation",
+    "/api/v1/user-guides",
+    "/api/v1/users",
+    "/api/v1/voice-platform",
+    "/api/v1/white-label",
+    "/api/v1/openapi",
+)
+ADMIN_ROLES = frozenset({"SUPER_ADMIN", "ADMIN", "SYSTEM_ADMIN"})
 
 # Prefixes that remain public (verification QR, catalogs, service ingest gaps).
 PUBLIC_PREFIXES = (
+    "/api/v1/public/",  # booking form, demo requests, result link by token, MoMo IPN (verifies its own signature)
     "/api/v1/reporting/verify/",
     "/results/verify/",
     "/api/v1/marketplace/catalog/",
-    # SERVICE_AUTH_REQUIRED — no inbound service-credential verifier exists yet.
-    # Left public rather than inventing an insecure substitute; see P0-6 report.
-    "/api/v1/integrations/lis/",
-    "/api/v1/integrations/his/",
+    # LIS/HIS inbound ingest (/api/v1/integrations/lis|his/) is intentionally NOT public: there is no
+    # service-credential verifier yet, so it needs a logged-in caller until one exists.
 )
 
 # High-risk API prefixes that must not be anonymous in strict env.
@@ -160,6 +215,22 @@ def _is_protected(path: str) -> bool:
     return False
 
 
+def _admin_only(path: str) -> bool:
+    return any(path == p or path.startswith(p + "/") or path.startswith(p + ".") for p in ADMIN_ONLY_PREFIXES)
+
+
+def _role() -> str:
+    role = session.get("role")
+    if role:
+        return str(role).upper()
+    try:
+        from flask_jwt_extended import get_jwt
+
+        return str(get_jwt().get("role") or "").upper()
+    except Exception:
+        return ""
+
+
 def _authenticated() -> bool:
     if session.get("user_id"):
         return True
@@ -173,7 +244,7 @@ def _authenticated() -> bool:
 def init_api_auth_gate(app):
     @app.before_request
     def enforce_api_auth_gate():
-        if app.config.get("TESTING"):
+        if app.config.get("TESTING") and not app.config.get("API_AUTH_GATE_IN_TESTS"):
             return None
         if not app.config.get("API_AUTH_GATE_ENABLED", True):
             return None
@@ -188,11 +259,12 @@ def init_api_auth_gate(app):
             return None
         if _is_public(path):
             return None
-        if request.method == "POST" and path.rstrip("/") in PUBLIC_POST_EXACT:
+        if request.method == "POST" and (path.rstrip("/") in PUBLIC_POST_EXACT or path.startswith(PUBLIC_POST_PREFIXES)):
             return None
-        if not _is_protected(path):
-            return None
+        # Default-deny: everything under /api/ that is not explicitly public needs a login.
         if _authenticated():
+            if _admin_only(path) and _role() not in ADMIN_ROLES:
+                return build_error_response("FORBIDDEN", "This area is for DxCon administrators", 403)
             return None
 
         return build_error_response(

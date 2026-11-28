@@ -43,6 +43,22 @@ def _actor_email():
     )
 
 
+def _ingest_blocked():
+    """LIS/HIS ingest has no service credential yet: in staging/production only a logged-in DxCon admin may call it."""
+    from flask import current_app
+
+    from app.core.authenticated_identity import get_authenticated_identity
+    from app.infrastructure.production_readiness import is_strict_env
+
+    if not is_strict_env(current_app):
+        return None
+    ident = get_authenticated_identity()
+    role = str(getattr(ident, "platform_role", "") or "").upper()
+    if role in {"SUPER_ADMIN", "ADMIN", "SYSTEM_ADMIN"}:
+        return None
+    return {"error": "LIS/HIS ingest requires a DxCon administrator or a service credential"}, 403
+
+
 def _connection_id(data):
     return data.get("connection_id") or request.args.get("connection_id")
 
@@ -68,6 +84,9 @@ def create_connection():
 
 @integrations_bp.route("/lis/orders", methods=["POST"])
 def lis_orders():
+    blocked = _ingest_blocked()
+    if blocked:
+        return blocked
     data = request.get_json(silent=True) or {}
     connection_id = _connection_id(data)
     if not connection_id:
@@ -81,6 +100,9 @@ def lis_orders():
 
 @integrations_bp.route("/lis/results", methods=["POST"])
 def lis_results():
+    blocked = _ingest_blocked()
+    if blocked:
+        return blocked
     data = request.get_json(silent=True) or {}
     connection_id = _connection_id(data)
     if not connection_id:
@@ -94,6 +116,9 @@ def lis_results():
 
 @integrations_bp.route("/his/patients", methods=["POST"])
 def his_patients():
+    blocked = _ingest_blocked()
+    if blocked:
+        return blocked
     data = request.get_json(silent=True) or {}
     connection_id = _connection_id(data)
     if not connection_id:

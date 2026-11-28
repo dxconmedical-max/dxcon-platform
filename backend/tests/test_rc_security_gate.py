@@ -125,12 +125,12 @@ class RcApiAuthGateStrictTests(unittest.TestCase):
         resp = self.client.post("/api/v1/marketplace/bookings", json={})
         self.assertEqual(resp.status_code, 401)
 
-    def test_payment_webhook_remains_public_in_production(self):
+    def test_unverified_payment_webhook_is_closed_in_production(self):
         resp = self.client.post(
             "/api/v1/payments/webhook",
             json={"provider": "STRIPE", "event_type": "payment.updated"},
         )
-        self.assertNotEqual(resp.status_code, 401)
+        self.assertEqual(resp.status_code, 403)
 
 
 if __name__ == "__main__":

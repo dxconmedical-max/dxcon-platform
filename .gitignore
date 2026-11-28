@@ -61,3 +61,10 @@ backend/generated_reports/
 backend/generated_reports/JOB-*.*
 backend/generated_reports/DxCon_Report_*.pdf
 backend/uploads/receipts/
+
+# Uploaded result files and local DB backups must never be committed
+backend/uploads/*
+!backend/uploads/results/
+backend/uploads/results/*
+!backend/uploads/results/.gitkeep
+backend/backups/

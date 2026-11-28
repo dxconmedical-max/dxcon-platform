@@ -181,7 +181,15 @@ def payment_status(payment_reference):
 def payment_webhook():
     data = request.get_json(silent=True) or {}
     signature = request.headers.get("X-Payment-Signature", "")
-    secret = os.environ.get("MARKETPLACE_PAYMENT_WEBHOOK_SECRET", "dxcon-marketplace-webhook-dev")
+    from flask import current_app
+
+    from app.infrastructure.production_readiness import is_strict_env
+
+    secret = os.environ.get("MARKETPLACE_PAYMENT_WEBHOOK_SECRET", "")
+    if not secret:
+        if is_strict_env(current_app):  # never fall back to a secret that is public in the repo
+            return {"error": "Webhook secret is not configured"}, 503
+        secret = "dxcon-marketplace-webhook-dev"
     try:
         return PaymentService.handle_webhook(data, signature, secret)
     except MarketplaceError as exc:
