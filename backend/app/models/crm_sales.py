@@ -14,7 +14,7 @@ ACTIVITY_KINDS = ("CALL", "VISIT", "MESSAGE", "NOTE")
 
 
 class CrmAccount(db.Model):
-    __tablename__ = "crm_accounts"
+    __tablename__ = "sales_accounts"
 
     id = db.Column(db.String(36), primary_key=True, default=_id)
     name = db.Column(db.String(200), nullable=False)
@@ -37,7 +37,7 @@ class CrmAccount(db.Model):
 
 
 class CrmActivity(db.Model):
-    __tablename__ = "crm_activities"
+    __tablename__ = "sales_account_activities"
 
     id = db.Column(db.String(36), primary_key=True, default=_id)
     account_id = db.Column(db.String(36), nullable=False, index=True)
@@ -49,8 +49,8 @@ class CrmActivity(db.Model):
 
 
 class CrmSaleTarget(db.Model):
-    __tablename__ = "crm_sale_targets"
-    __table_args__ = (db.UniqueConstraint("user_id", "month", name="uq_crm_sale_targets_user_month"),)
+    __tablename__ = "sales_targets"
+    __table_args__ = (db.UniqueConstraint("user_id", "month", name="uq_sales_targets_user_month"),)
 
     id = db.Column(db.String(36), primary_key=True, default=_id)
     user_id = db.Column(db.String(36), nullable=False)
