@@ -189,6 +189,22 @@ class CrmSalesTests(unittest.TestCase):
         self.assertIn(self._as("reception").get(f"{B}/accounts/export").status_code, (401, 403))
         self.assertIn(self.app.test_client().post(f"{B}/accounts/import").status_code, (401, 403))
 
+    def test_market_by_district_groups_and_hides_margin_from_sale(self):
+        a, b, admin = self._as("sale_a"), self._as("sale_b"), self._as("admin")
+        a.post(f"{B}/accounts", json={"name": "PK Quận Một A", "district": "Quận 77", "est_monthly_cases": 30, "stage": "ACTIVE"})
+        a.post(f"{B}/accounts", json={"name": "PK Quận Một B", "district": "Quận 77", "est_monthly_cases": 20})
+        a.post(f"{B}/accounts", json={"name": "PK Không Quận", "est_monthly_cases": 5})
+        mine = {r["district"]: r for r in a.get(f"{B}/market").get_json()["data"]["districts"]}
+        self.assertEqual((mine["Quận 77"]["accounts"], mine["Quận 77"]["est_monthly_cases"], mine["Quận 77"]["active_accounts"]), (2, 50, 1))
+        self.assertIn("Chưa rõ khu vực", mine)
+        self.assertIsNone(mine["Quận 77"]["share_pct"])  # nothing linked to an organization yet
+        self.assertNotIn("margin", mine["Quận 77"])
+        self.assertNotIn("Quận 77", [r["district"] for r in b.get(f"{B}/market").get_json()["data"]["districts"]])
+        adm = {r["district"]: r for r in admin.get(f"{B}/market").get_json()["data"]["districts"]}
+        self.assertIn("margin", adm["Quận 77"])
+        self.assertIn(self._as("reception").get(f"{B}/market").status_code, (401, 403))
+        self.assertIn(self.app.test_client().get(f"{B}/market").status_code, (401, 403))
+
 
 if __name__ == "__main__":
     unittest.main()

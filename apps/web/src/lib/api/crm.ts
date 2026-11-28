@@ -143,3 +143,20 @@ export async function importAccounts(ctx: Ctx, file: File, apply: boolean): Prom
   if (!res.ok) await failFrom(res);
   return ((await res.json()) as { data: ImportResult }).data;
 }
+
+export type DistrictShare = {
+  district: string;
+  accounts: number;
+  active_accounts: number;
+  linked_accounts: number;
+  est_monthly_cases: number;
+  cases: number;
+  share_pct: number | null;
+  revenue: number;
+  margin?: number;
+};
+
+export async function getMarket(ctx: Ctx, month: string) {
+  const r = await apiRequest<{ data: { districts: DistrictShare[] } }>(`${BASE}/market?month=${encodeURIComponent(month)}`, opts(ctx));
+  return r.data.districts;
+}

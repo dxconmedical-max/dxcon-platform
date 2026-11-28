@@ -178,6 +178,53 @@ def accounts_list():
     return {"success": True, "data": {"month": month, "is_admin": is_admin, "stage_counts": counts, "totals": totals, "accounts": rows}}, 200
 
 
+@crm_sales_bp.route("/market", methods=["GET"])
+@crm_access
+def market_by_district():
+    """Market share per district: actual cases DxCon receives vs the customers' estimated monthly cases.
+
+    Share compares only customers linked to an organization (the only ones with real orders). A sale sees their own accounts only.
+    """
+    _, is_admin = _who()
+    month, start, end = _month_range(request.args.get("month"))
+    accounts = _visible(CrmAccount.query).limit(5000).all()
+    org_ids = [a.organization_id for a in accounts if a.organization_id]
+    acts = _actuals(org_ids, start, end, is_admin)
+    groups: dict[str, dict] = {}
+    for a in accounts:
+        label = (a.district or "").strip() or "Chưa rõ khu vực"
+        g = groups.setdefault(label, {"district": label, "accounts": 0, "active_accounts": 0, "linked_accounts": 0, "est_monthly_cases": 0, "est_linked_cases": 0, "cases": 0, "revenue": 0.0, "margin": 0.0})
+        g["accounts"] += 1
+        g["est_monthly_cases"] += a.est_monthly_cases or 0
+        if a.stage == "ACTIVE":
+            g["active_accounts"] += 1
+        if a.organization_id:
+            act = acts.get(a.organization_id, {})
+            g["linked_accounts"] += 1
+            g["est_linked_cases"] += a.est_monthly_cases or 0
+            g["cases"] += act.get("cases", 0)
+            g["revenue"] += act.get("revenue", 0.0)
+            g["margin"] += act.get("margin", 0.0)
+    rows = []
+    for g in groups.values():
+        est = g["est_linked_cases"]
+        row = {
+            "district": g["district"],
+            "accounts": g["accounts"],
+            "active_accounts": g["active_accounts"],
+            "linked_accounts": g["linked_accounts"],
+            "est_monthly_cases": g["est_monthly_cases"],
+            "cases": g["cases"],
+            "share_pct": round(g["cases"] / est * 100, 1) if est else None,
+            "revenue": round(g["revenue"], 2),
+        }
+        if is_admin:
+            row["margin"] = round(g["margin"], 2)
+        rows.append(row)
+    rows.sort(key=lambda r: (-r["est_monthly_cases"], r["district"]))
+    return {"success": True, "data": {"month": month, "districts": rows}}, 200
+
+
 def _apply_fields(row: CrmAccount, body: dict, is_admin: bool) -> str | None:
     if "name" in body:
         name = _clean(body.get("name"), 200)
