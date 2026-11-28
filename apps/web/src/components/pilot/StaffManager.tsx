@@ -28,6 +28,7 @@ const ROLES: Array<[string, string, string]> = [
   ["DOCTOR", "Bác sĩ", "DOCTOR"],
   ["ACCOUNTING", "Kế toán", "FINANCE"],
   ["ADMIN", "Quản trị", "ORG_OWNER"],
+  ["SALE", "Sale (kinh doanh)", "VIEWER"],
   ["CLINIC_ADMIN", "Phòng khám (gửi phiếu chỉ định)", "CLINIC_ADMIN"],
 ];
 

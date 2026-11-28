@@ -7,6 +7,7 @@ ACCOUNTING = "ACCOUNTING"
 PATIENT = "PATIENT"
 
 RECEPTION = "RECEPTION"
+SALE = "SALE"  # sales staff: sees only the customer accounts they own
 CLINIC_ADMIN = "CLINIC_ADMIN"  # clinic-side account that submits order slips for its own clinic
 
 ALL_ROLES = [
@@ -19,4 +20,5 @@ ALL_ROLES = [
     PATIENT,
     RECEPTION,
     CLINIC_ADMIN,
+    SALE,
 ]

@@ -25,6 +25,7 @@ export const ROLE_WORKSPACE_ROUTES: Record<string, string> = {
   PARTNER_OWNER: "/app/clinic",
   PARTNER_CLINIC_OWNER: "/app/clinic",
   PATIENT: "/app/patient",
+  SALE: "/app/sales",
   CLINIC_VIEWER: "/app/clinic-results",
 };
 
@@ -40,6 +41,7 @@ export const WORKSPACE_ROUTES = [
   "/app/collector",
   "/app/clinic",
   "/app/patient",
+  "/app/sales",
   "/app/clinic-results",
 ] as const;
 
@@ -63,6 +65,7 @@ export function roleLabel(role: string | null | undefined): string {
     COLLECTOR: "Nhân viên thu mẫu",
     CLINIC_OWNER: "Chủ phòng khám",
     PATIENT: "Bệnh nhân",
+    SALE: "Sale (kinh doanh)",
   };
   return labels[(role ?? "").toUpperCase()] ?? role ?? "Người dùng";
 }

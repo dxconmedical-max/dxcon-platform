@@ -214,6 +214,7 @@ from app.models.clinic_billing import (  # noqa: F401
     ClinicStatement,
     ClinicStatementLine,
 )
+from app.models.crm_sales import CrmAccount, CrmActivity, CrmSaleTarget  # noqa: F401
 from app.models.lab_payables import (  # noqa: F401
     LabCostPrice,
     LabPartner,
