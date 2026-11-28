@@ -12,6 +12,7 @@ const ACTIONS = [
   { label: "Phòng khám tự chỉ định", href: "/app/admin/clinic-settings", description: "Bật hoặc tắt quyền tự chỉ định cho từng phòng khám." },
   { label: "Gửi ngoài & thời hạn làm thêm", href: "/app/admin/test-flags", description: "Đánh dấu xét nghiệm gửi ngoài, số ngày trả dự kiến, thời hạn làm thêm." },
   { label: "Hợp đồng & công nợ phòng khám", href: "/app/admin/clinic-billing", description: "Lưu hợp đồng, giá riêng từng phòng khám, kết toán theo kỳ và công nợ." },
+  { label: "Báo cáo lãi", href: "/app/admin/profit", description: "Lãi của DxCon theo phòng khám, phòng xét nghiệm và tháng." },
   { label: "Giá nhập & công nợ phải trả phòng xét nghiệm", href: "/app/admin/lab-payables", description: "Giá nhập từ phòng xét nghiệm, gán ca, lãi của DxCon và số tiền phải trả." },
   { label: "Yêu cầu demo", href: "/app/admin/demo-requests", description: "Yêu cầu demo gửi từ website: liên hệ lại và đổi trạng thái." },
   { label: "Tích hợp", href: "/app/admin/integrations", description: "Kết nối với hệ thống bên ngoài." },

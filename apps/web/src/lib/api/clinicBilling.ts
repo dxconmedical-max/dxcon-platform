@@ -67,7 +67,7 @@ export type ClinicBilling = {
   payments: Payment[];
 };
 
-export type PriceRow = { id: string; code: string; name: string; list_price: number; clinic_price: number | null };
+export type PriceRow = { id: string; code: string; name: string; list_price: number; clinic_price: number | null; lab_cost: number | null };
 
 export type StatementDetail = {
   statement_no: string;
@@ -120,6 +120,16 @@ export async function bulkSetPrices(ctx: Ctx, orgId: string, text: string, apply
   const r = await apiRequest<{ data: BulkPriceResult }>(
     `${BASE}/${encodeURIComponent(orgId)}/prices/bulk`,
     opts(ctx, { method: "POST", body: { text, apply } }),
+  );
+  return r.data;
+}
+
+export type MarkupResult = { applied: boolean; created: number; updated: number; skipped: number };
+
+export async function markupPrices(ctx: Ctx, orgId: string, percent: number, overwrite: boolean, apply: boolean): Promise<MarkupResult> {
+  const r = await apiRequest<{ data: MarkupResult }>(
+    `${BASE}/${encodeURIComponent(orgId)}/prices/markup`,
+    opts(ctx, { method: "POST", body: { percent, overwrite, apply } }),
   );
   return r.data;
 }
