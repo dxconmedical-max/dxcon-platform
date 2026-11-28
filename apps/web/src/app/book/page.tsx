@@ -130,7 +130,10 @@ export default function PublicBookingPage() {
             <input type="checkbox" className="mt-1" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
             <span>
               Tôi đồng ý để DxCon liên hệ lại với tôi qua điện thoại, tin nhắn hoặc email về yêu cầu
-              đặt lịch này.
+              đặt lịch này, và đã đọc{" "}
+              <a href="/vi/privacy" target="_blank" rel="noreferrer" className="text-teal-700 underline">Chính sách bảo mật</a>{" "}
+              và{" "}
+              <a href="/vi/terms" target="_blank" rel="noreferrer" className="text-teal-700 underline">Điều khoản sử dụng</a>.
             </span>
           </label>
           {error ? <p className="text-sm text-red-700">{error}</p> : null}
