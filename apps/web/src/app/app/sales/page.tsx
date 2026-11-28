@@ -25,6 +25,8 @@ import {
   type CrmList,
   type SaleRow,
   downloadAccountsExcel,
+  getMarket,
+  type DistrictShare,
   downloadImportTemplate,
   importAccounts,
   type ImportResult,
@@ -57,6 +59,7 @@ export default function SalesCrmPage() {
   const [actKind, setActKind] = useState("CALL");
   const [actText, setActText] = useState("");
   const [actNext, setActNext] = useState("");
+  const [districts, setDistricts] = useState<DistrictShare[]>([]);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [orgQ, setOrgQ] = useState("");
@@ -86,6 +89,7 @@ export default function SalesCrmPage() {
       const d = await listAccounts(c, month, stage, q.trim());
       setData(d);
       if (d.is_admin) setSales((await listSales(c, month)).sales);
+      setDistricts(await getMarket(c, month));
     } catch (err) {
       setError(normalizeApiError(err));
     }
@@ -168,6 +172,29 @@ export default function SalesCrmPage() {
               </div>
             ))}
           </div>
+        ) : null}
+
+        {!(view === "team" && isAdmin) && districts.length > 0 ? (
+          <section className="space-y-2 rounded-xl border border-slate-200 bg-white p-4">
+            <h2 className="font-medium">Thị phần theo khu vực · tháng {month}</h2>
+            <p className="text-xs text-slate-600">Thị phần = số ca DxCon thực nhận / số ca ước tính của các khách đã liên kết đơn vị. Khách chưa liên kết chưa có số ca thực nhận.</p>
+            <ul className="space-y-2">
+              {districts.map((d) => (
+                <li key={d.district} className="text-sm">
+                  <div className="flex flex-wrap justify-between gap-2">
+                    <span className="font-medium">{d.district}</span>
+                    <span className="text-xs text-slate-600">
+                      {d.accounts} khách ({d.active_accounts} đang gửi mẫu) · ước tính {d.est_monthly_cases} ca · thực nhận {d.cases} ca
+                      {d.share_pct !== null ? ` (${d.share_pct}%)` : " (chưa có khách liên kết)"}
+                    </span>
+                  </div>
+                  <div className="mt-1 h-2 rounded bg-slate-100">
+                    <div className="h-2 rounded bg-teal-600" style={{ width: `${Math.min(100, d.share_pct ?? 0)}%` }} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
         ) : null}
 
         {view === "team" && isAdmin ? (
