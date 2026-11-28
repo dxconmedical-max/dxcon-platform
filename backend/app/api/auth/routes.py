@@ -112,6 +112,18 @@ def register():
     }, 201
 
 
+LOGIN_MAX_FAILURES = 10
+LOGIN_FAILURE_WINDOW_SECONDS = 15 * 60
+
+
+def _login_throttle_active() -> bool:
+    from flask import current_app
+
+    if current_app.config.get("TESTING") and not current_app.config.get("LOGIN_THROTTLE_IN_TESTS"):
+        return False
+    return bool(current_app.config.get("RATE_LIMIT_ENABLED", True))
+
+
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = get_json_body()
@@ -120,11 +132,22 @@ def login():
     email = validate_email(data.get("email"))
     password = validate_password(data.get("password"))
 
+    from app.core.rate_limit import rate_limiter
+
+    throttle_key = f"login-fail:{email.lower()}"
+    throttled = _login_throttle_active()
+    if throttled and rate_limiter.count(throttle_key, LOGIN_FAILURE_WINDOW_SECONDS) >= LOGIN_MAX_FAILURES:
+        return {
+            "error": "Too many failed attempts. Try again in 15 minutes.",
+        }, 429
+
     user = User.query.filter_by(
         email=email,
     ).first()
 
     if not user:
+        if throttled:
+            rate_limiter.record(throttle_key, LOGIN_FAILURE_WINDOW_SECONDS)
         return {
             "error": "Invalid credentials",
         }, 401
@@ -138,10 +161,14 @@ def login():
         user.password_hash,
         password,
     ):
+        if throttled:
+            rate_limiter.record(throttle_key, LOGIN_FAILURE_WINDOW_SECONDS)
         return {
             "error": "Invalid credentials",
         }, 401
 
+    if throttled:
+        rate_limiter.clear(throttle_key)
     access_token, refresh_token = _issue_tokens(user)
     db.session.commit()
 
