@@ -15,6 +15,14 @@ export function LandingFooter({ lang }: { lang: Lang }) {
           <Link href="/login" className="hover:text-white">{t.nav.signIn}</Link>
           <a href={`/${lang}#pricing`} className="hover:text-white">{t.nav.pricing}</a>
           <a href={`/${lang}#contact`} className="hover:text-white">{t.nav.contact}</a>
+          {lang === "vi" ? (
+            <>
+              <Link href="/vi/faq" className="hover:text-white">Câu hỏi thường gặp</Link>
+              <Link href="/vi/contact" className="hover:text-white">Liên hệ</Link>
+              <Link href="/vi/privacy" className="hover:text-white">Chính sách bảo mật</Link>
+              <Link href="/vi/terms" className="hover:text-white">Điều khoản sử dụng</Link>
+            </>
+          ) : null}
         </div>
         <p className="text-xs">© {new Date().getFullYear()} {t.footer.company}</p>
       </div>

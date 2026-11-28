@@ -25,6 +25,17 @@ export const metadata: Metadata = {
   applicationName: "DxCon",
   appleWebApp: { capable: true, title: "DxCon", statusBarStyle: "default" },
   icons: { apple: "/icon-192.png" },
+  openGraph: {
+    type: "website",
+    siteName: "DxCon",
+    locale: "vi_VN",
+    url: "https://dxcon.com.vn",
+    title: "DxCon — Nền tảng xét nghiệm y khoa kết nối",
+    description:
+      "DxCon kết nối phòng xét nghiệm, phòng khám, bác sĩ và bệnh nhân với quy trình xét nghiệm an toàn.",
+    images: [{ url: "/icon-512.png", width: 512, height: 512, alt: "DxCon" }],
+  },
+  twitter: { card: "summary", title: "DxCon", images: ["/icon-512.png"] },
 };
 
 export const viewport: Viewport = {
