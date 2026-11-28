@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { MonthlyTrend, RankBars, moneyCaption } from "@/components/charts/ProfitCharts";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/hooks/useAuth";
@@ -126,6 +127,20 @@ export default function ProfitReportPage() {
                 {data.total.missing_cost_orders} ca thiếu giá nhập nên chưa tính vào lãi. Nhập giá nhập ở màn Giá nhập & công nợ phải trả rồi bấm “Tính lại giá nhập các ca”.
               </p>
             ) : null}
+            <section className="space-y-2 rounded-xl border border-slate-200 bg-white p-4">
+              <h2 className="font-medium">Doanh thu và lãi theo tháng</h2>
+              <MonthlyTrend rows={data.by_month} />
+            </section>
+            <div className="grid gap-4 md:grid-cols-2">
+              <section className="space-y-2 rounded-xl border border-slate-200 bg-white p-4">
+                <h2 className="font-medium">Phòng khám mang lại nhiều lãi nhất</h2>
+                <RankBars rows={data.by_clinic} valueOf={(r) => r.margin} caption={moneyCaption} />
+              </section>
+              <section className="space-y-2 rounded-xl border border-slate-200 bg-white p-4">
+                <h2 className="font-medium">Phòng xét nghiệm theo % lãi</h2>
+                <RankBars rows={data.by_lab} valueOf={(r) => r.margin_pct} caption={(r) => `${r.margin_pct}% · ${formatVnd(r.margin)}`} />
+              </section>
+            </div>
             <Table title="Theo phòng khám / khách" rows={data.by_clinic} />
             <Table title="Theo phòng xét nghiệm" rows={data.by_lab} />
             <Table title="Theo tháng" rows={data.by_month} />
