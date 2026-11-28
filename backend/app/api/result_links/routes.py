@@ -98,6 +98,53 @@ def create_link(order_code):
     }
 
 
+@result_links_bp.route("/result-links/<order_code>/email", methods=["POST"])
+@roles_required(*_ANY_ORG, *_INTERNAL)
+def email_link(order_code):
+    """Email the patient a secure result link (no result values in the email). Staff confirm the address."""
+    from app.models.patient import Patient
+    from app.notifications.result_email import mask_email, send_result_email
+
+    identity = get_authenticated_identity()
+    if identity.platform_role not in _ANY_ORG and not is_internal_org(identity.organization_id):
+        return {"success": False, "error": "DxCon staff only"}, 403
+    order, result = _released_result(order_code)
+    if not order:
+        return {"success": False, "error": "order not found"}, 404
+    if not result:
+        return {"success": False, "error": "Kết quả chưa được duyệt và phát hành, chưa thể gửi email."}, 409
+    body = request.get_json(silent=True) or {}
+    to = " ".join(str(body.get("email") or "").split()).lower()
+    if not to:
+        patient = Patient.query.filter_by(patient_code=order.patient_code).first()
+        to = (getattr(patient, "email", "") or "").strip().lower()
+    if not to or "@" not in to or len(to) > 254 or " " in to:
+        return {"success": False, "error": "Chưa có email hợp lệ của bệnh nhân. Hãy nhập email vào ô gửi."}, 400
+
+    token = result_links.make_token(order.order_code, result.released_at)
+    base = (current_app.config.get("PUBLIC_SITE_URL") or "https://dxcon.com.vn").rstrip("/")
+    ok, reason = send_result_email(
+        to=to,
+        full_name=order.patient_name or "bạn",
+        order_code=order.order_code,
+        url=f"{base}/r/{token}",
+        expires_days=result_links.MAX_AGE_SECONDS // 86400,
+    )
+    write_audit(
+        action="RESULT_LINK_EMAILED" if ok else "RESULT_LINK_EMAIL_FAILED",
+        object_type="ORDER",
+        object_id=order.order_code,
+        user_email=authenticated_actor_email(),
+        ip_address=_client_ip(),
+    )
+    db.session.commit()
+    if ok:
+        return {"success": True, "sent_to": mask_email(to)}
+    if reason == "not_configured":
+        return {"success": False, "error": "Hệ thống chưa cấu hình gửi email (RESEND_API_KEY, MAIL_FROM)."}, 503
+    return {"success": False, "error": "Không gửi được email, vui lòng thử lại hoặc gửi link thủ công."}, 502
+
+
 @result_links_bp.route("/public/results/<token>", methods=["GET"])
 def public_result(token):
     if _rate_limited(_client_ip()):

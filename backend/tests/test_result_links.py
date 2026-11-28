@@ -137,6 +137,56 @@ class ResultLinksTestCase(unittest.TestCase):
         res = self.client.post("/api/v1/result-links/NOPE", headers=self.admin)
         self.assertEqual(res.status_code, 404)
 
+    def test_email_link_needs_config_valid_address_and_never_contains_values(self):
+        from unittest import mock
+
+        from app.models.patient import Patient
+        from app.notifications import result_email
+
+        url = "/api/v1/result-links/ORD-RL-1/email"
+        for role in ("DOCTOR", "COLLECTOR", "LAB"):
+            self.assertEqual(self.client.post(url, headers=_headers(role), json={}).status_code, 403, role)
+        self.assertEqual(self.client.post("/api/v1/result-links/NOPE/email", headers=self.admin, json={}).status_code, 404)
+        # no address anywhere -> 400
+        self.assertEqual(self.client.post(url, headers=self.admin, json={}).status_code, 400)
+        self.assertEqual(self.client.post(url, headers=self.admin, json={"email": "not-an-email"}).status_code, 400)
+        # address given but mail provider not configured -> 503, nothing sent
+        with mock.patch.dict(os.environ, {"RESEND_API_KEY": "", "MAIL_FROM": ""}):
+            self.assertEqual(self.client.post(url, headers=self.admin, json={"email": "bn@example.com"}).status_code, 503)
+        # configured: falls back to the patient's email on file and sends the secure link only
+        db.session.add(Patient(patient_code="P-RL-1", full_name="Nguyen Van A", email="Hoa.Nguyen@example.com"))
+        db.session.commit()
+        sent = {}
+
+        class _Resp:
+            status = 200
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+        def fake_urlopen(req, timeout=0):
+            import json as _json
+
+            sent.update(_json.loads(req.data.decode("utf-8")))
+            return _Resp()
+
+        with mock.patch.dict(os.environ, {"RESEND_API_KEY": "k", "MAIL_FROM": "DxCon <no-reply@dxcon.com.vn>"}):
+            with mock.patch.object(result_email.urllib.request, "urlopen", fake_urlopen):
+                res = self.client.post(url, headers=self.admin, json={})
+        self.assertEqual(res.status_code, 200, res.get_json())
+        self.assertEqual(res.get_json()["sent_to"], "ho********@example.com")
+        self.assertEqual(sent["to"], ["hoa.nguyen@example.com"])
+        self.assertIn("/r/", sent["text"])
+        for secret in ("Glucose", "5.2", "mmol"):
+            self.assertNotIn(secret, sent["text"] + sent["html"])
+        # unreleased result cannot be emailed
+        self.result.status = "approved"
+        db.session.commit()
+        self.assertEqual(self.client.post(url, headers=self.admin, json={"email": "bn@example.com"}).status_code, 409)
+
 
 if __name__ == "__main__":
     unittest.main()
