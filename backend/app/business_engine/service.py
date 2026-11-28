@@ -895,15 +895,17 @@ def render_report_html(result: BizResult, order: BizOrder) -> str:
 
 
 def render_request_form_html(order: BizOrder) -> str:
+    from html import escape as _e
+
     tests = "".join(
-        f"<li>{item.test_name} ({item.test_code}) — ${item.line_total:,.0f}</li>"
+        f"<li>{_e(str(item.test_name))} ({_e(str(item.test_code))}) — ${item.line_total:,.0f}</li>"
         for item in order.items
     )
-    barcode = order.barcode_value or "—"
+    barcode = _e(str(order.barcode_value or "—"))
     return (
         f"<html><body><h1>Lab Request Form</h1>"
-        f"<p>Order: {order.order_code}</p>"
-        f"<p>Patient: {order.patient_name} ({order.patient_code})</p>"
+        f"<p>Order: {_e(str(order.order_code))}</p>"
+        f"<p>Patient: {_e(str(order.patient_name))} ({_e(str(order.patient_code))})</p>"
         f"<p>Barcode: {barcode}</p>"
         f"<ul>{tests}</ul>"
         f"<p>Total: ${order.total_amount:,.0f}</p>"

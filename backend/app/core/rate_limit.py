@@ -25,6 +25,25 @@ class RateLimiter:
             self._requests[key] = timestamps
             return True
 
+    def count(self, key, window_seconds):
+        """Number of events recorded for key inside the window (does not record a new one)."""
+        window_start = time.time() - window_seconds
+        with self._lock:
+            return sum(1 for ts in self._requests.get(key, []) if ts >= window_start)
+
+    def record(self, key, window_seconds):
+        """Record one event for key (used for failed logins)."""
+        now = time.time()
+        window_start = now - window_seconds
+        with self._lock:
+            timestamps = [ts for ts in self._requests.get(key, []) if ts >= window_start]
+            timestamps.append(now)
+            self._requests[key] = timestamps
+
+    def clear(self, key):
+        with self._lock:
+            self._requests.pop(key, None)
+
     def reset(self):
         with self._lock:
             self._requests = {}
