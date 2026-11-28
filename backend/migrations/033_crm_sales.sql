@@ -1,7 +1,7 @@
 -- CRM: customer accounts owned by sales staff, contact log, monthly sales targets — additive, idempotent. PostgreSQL.
 -- organization_id links an account to a real partner organization so actual orders can be compared with the estimate.
 
-CREATE TABLE IF NOT EXISTS crm_accounts (
+CREATE TABLE IF NOT EXISTS sales_accounts (
     id VARCHAR(36) PRIMARY KEY,
     name VARCHAR(200) NOT NULL,
     account_type VARCHAR(20) NOT NULL DEFAULT 'CLINIC',
@@ -21,10 +21,10 @@ CREATE TABLE IF NOT EXISTS crm_accounts (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS ix_crm_accounts_owner ON crm_accounts (owner_user_id);
-CREATE INDEX IF NOT EXISTS ix_crm_accounts_stage ON crm_accounts (stage);
+CREATE INDEX IF NOT EXISTS ix_sales_accounts_owner ON sales_accounts (owner_user_id);
+CREATE INDEX IF NOT EXISTS ix_sales_accounts_stage ON sales_accounts (stage);
 
-CREATE TABLE IF NOT EXISTS crm_activities (
+CREATE TABLE IF NOT EXISTS sales_account_activities (
     id VARCHAR(36) PRIMARY KEY,
     account_id VARCHAR(36) NOT NULL,
     kind VARCHAR(20) NOT NULL DEFAULT 'NOTE',
@@ -33,9 +33,9 @@ CREATE TABLE IF NOT EXISTS crm_activities (
     created_by_name VARCHAR(120),
     created_at TIMESTAMP DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS ix_crm_activities_account ON crm_activities (account_id);
+CREATE INDEX IF NOT EXISTS ix_sales_account_activities_account ON sales_account_activities (account_id);
 
-CREATE TABLE IF NOT EXISTS crm_sale_targets (
+CREATE TABLE IF NOT EXISTS sales_targets (
     id VARCHAR(36) PRIMARY KEY,
     user_id VARCHAR(36) NOT NULL,
     month VARCHAR(7) NOT NULL,
@@ -43,5 +43,5 @@ CREATE TABLE IF NOT EXISTS crm_sale_targets (
     target_revenue DOUBLE PRECISION NOT NULL DEFAULT 0,
     updated_by VARCHAR(120),
     updated_at TIMESTAMP DEFAULT NOW(),
-    CONSTRAINT uq_crm_sale_targets_user_month UNIQUE (user_id, month)
+    CONSTRAINT uq_sales_targets_user_month UNIQUE (user_id, month)
 );
